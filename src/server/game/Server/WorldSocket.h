@@ -40,7 +40,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "Common.h"
-#include "AuthCrypt.h"
+#include "WorldPacketCrypt.h"
 
 class ACE_Message_Block;
 class WorldPacket;
@@ -163,7 +163,7 @@ class WorldSocket : public WorldHandler
         int HandlePing(WorldPacket& recvPacket);
 
         /// Called by MSG_VERIFY_CONNECTIVITY_RESPONSE
-        int HandleSendAuthSession();
+        void HandleSendAuthSession();
 
     private:
         void SendAuthResponseError(uint8);
@@ -177,7 +177,7 @@ class WorldSocket : public WorldHandler
         std::string m_Address;
 
         /// Class used for managing encryption of the headers
-        AuthCrypt m_Crypt;
+        WorldPacketCrypt m_Crypt;
 
         /// Mutex lock to protect m_Session
         LockType m_SessionLock;
@@ -210,6 +210,9 @@ class WorldSocket : public WorldHandler
         bool m_OutActive;
 
         uint32 m_Seed;
+        uint32 _authSeed;
+
+        bool _initialized;
 
 };
 

@@ -24,6 +24,7 @@ namespace AuthHelper
 {
     static RealmBuildInfo const PostBcAcceptedClientBuilds[] =
     {
+        {18764, 6, 0, 2, ' '},        // 6.0.2 WoD
         {18414, 5, 4, 8, ' '},        // Last version MoP
         {18291, 5, 4, 8, ' '},
         {18019, 5, 4, 7, ' '},
@@ -94,5 +95,10 @@ namespace AuthHelper
                 return &PreBcAcceptedClientBuilds[i];
 
         return NULL;
+    }
+
+    bool IsBuildSupportingBattlenet(int build)
+    {
+        return build >= 15595;
     }
 };

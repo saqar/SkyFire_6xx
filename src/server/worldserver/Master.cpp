@@ -41,7 +41,7 @@
 #include "TCSoap.h"
 #include "Timer.h"
 #include "Util.h"
-#include "AuthSocket.h"
+#include "AuthSession.h"
 #include "RealmList.h"
 
 #include "BigNumber.h"

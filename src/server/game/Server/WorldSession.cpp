@@ -98,7 +98,7 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter):
+WorldSession::WorldSession(uint32 id, uint32 battlenetAccountId, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter) :
     m_muteTime(mute_time),
     m_timeOutTime(0),
     AntiDOS(this),
@@ -106,6 +106,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_Socket(sock),
     _security(sec),
     _accountId(id),
+    _battlenetAccountId(battlenetAccountId),
     m_expansion(expansion),
     _warden(NULL),
     _logoutTime(0),
@@ -710,11 +711,11 @@ void WorldSession::SendAuthWaitQue(uint32 position)
     else
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 6);
-        packet.WriteBit(0); // has account info
         packet.WriteBit(1); // has queue info
         packet.WriteBit(0); // unk queue bool
-        packet << uint8(AUTH_WAIT_QUEUE);
+        packet.WriteBit(0); // has account info
         packet.FlushBits();
+        packet << uint8(AUTH_WAIT_QUEUE);
         packet << uint32(position);
         SendPacket(&packet);
     }

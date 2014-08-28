@@ -22,6 +22,51 @@
 #include "WorldPacket.h"
 #include "Config.h"
 
+/*
+void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
+{
+    std::map<uint32, std::string> realmNamesToSend;
+
+    QueryResult classResult = LoginDatabase.PQuery("SELECT class FROM realm_classes, gameaccount_classes WHERE realmId = %u", realmID);
+    QueryResult raceResult = LoginDatabase.PQuery("SELECT race FROM realm_races, gameaccount_races WHERE realmId = %u", realmID);
+
+    if (!classResult || !raceResult)
+    {
+        TC_LOG_ERROR("network", "Unable to retrieve class or race data.");
+        return;
+    }
+
+    RealmNameMap::const_iterator iter = realmNameStore.find(realmID);
+    if (iter != realmNameStore.end()) // Add local realm
+        realmNamesToSend[realmID] = iter->second;
+
+    TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
+
+    packet.WriteBit(code == AUTH_OK);
+
+    if (code == AUTH_OK)
+    {
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint8(5);             // Account Exp. level
+        packet << uint8(5);             // Active  Exp. level
+        packet << uint32(0);
+    }
+}*/
+
+
+void WorldSession::SendClientCacheVersion(uint32 version)
+{
+    WorldPacket data(SMSG_CLIENTCACHE_VERSION, 4);
+    data << uint32(version);
+    SendPacket(&data);
+}
+
+
 void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 {
     std::map<uint32, std::string> realmNamesToSend;
@@ -90,8 +135,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
             packet << fields[1].GetUInt8();
             packet << fields[0].GetUInt8();
-        }
-        while (raceResult->NextRow());
+        } while (raceResult->NextRow());
 
         do
         {
@@ -99,8 +143,7 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
             packet << fields[1].GetUInt8();
             packet << fields[0].GetUInt8();
-        }
-        while (classResult->NextRow());
+        } while (classResult->NextRow());
 
         packet << uint32(0);
         packet << uint8(Expansion());
@@ -115,11 +158,4 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     packet << uint8(code);                             // Auth response ?
 
     SendPacket(&packet);
-}
-
-void WorldSession::SendClientCacheVersion(uint32 version)
-{
-    WorldPacket data(SMSG_CLIENTCACHE_VERSION, 4);
-    data << uint32(version);
-    SendPacket(&data);
 }

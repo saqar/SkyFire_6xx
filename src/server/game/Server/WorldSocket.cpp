@@ -29,6 +29,7 @@
 #include <ace/Auto_Ptr.h>
 
 #include "WorldSocket.h"
+#include "BattlenetAccountMgr.h"
 #include "Common.h"
 #include "Player.h"
 #include "Util.h"
@@ -55,7 +56,7 @@
 
 struct ServerPktHeader
 {
-    ServerPktHeader(uint32 size, uint32 cmd, AuthCrypt* _authCrypt) : size(size)
+    ServerPktHeader(uint32 size, uint32 cmd, WorldPacketCrypt* _authCrypt) : size(size)
     {
         if (_authCrypt->IsInitialized())
         {
@@ -787,7 +788,6 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     TC_LOG_ERROR("network", "WorldSocket::ProcessIncoming: received duplicate CMSG_AUTH_SESSION from %s", m_Session->GetPlayerInfo().c_str());
                     return -1;
                 }
-
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return HandleAuthSession(*new_pct);
             //case CMSG_KEEP_ALIVE:
@@ -806,7 +806,6 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 *new_pct >> str;
                 if (str != "D OF WARCRAFT CONNECTION - CLIENT TO SERVER")
                     return -1;
-                return HandleSendAuthSession();
             }
             /*case CMSG_ENABLE_NAGLE:
             {
@@ -858,86 +857,84 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     ACE_NOTREACHED (return 0);
 }
 
-int WorldSocket::HandleSendAuthSession()
+void WorldSocket::HandleSendAuthSession()
 {
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
-    packet << uint16(0);
+    BigNumber seed1;
+    seed1.SetRand(16 * 8);
+    packet.append(seed1.AsByteArray(16).get(), 16);               // new encryption seeds
 
-    for (int i = 0; i < 8; i++)
-        packet << uint32(0);
+    BigNumber seed2;
+    seed2.SetRand(16 * 8);
+    packet.append(seed2.AsByteArray(16).get(), 16);               // new encryption seeds
 
+    packet << uint32(_authSeed);
     packet << uint8(1);
-    packet << uint32(m_Seed);
-
-    return SendPacket(packet);
-
+    SendPacket(packet);
 }
+
+//int WorldSocket::HandleSendAuthSession()
+//{
+//    WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
+//    packet << uint16(0);
+//
+//    for (int i = 0; i < 8; i++)
+//        packet << uint32(0);
+//
+//    packet << uint8(1);
+//
+//    return SendPacket(packet);
+//
+//}
 
 int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {
-    uint8 digest[20];
-    uint32 clientSeed;
-    uint8 security;
-    uint16 clientBuild;
-    uint32 id;
-    uint32 addonSize;
+#define SHA_DIGEST_SIZE 20
+
+    // Handling CMSG_AUTH_SESSION
+    // Define our variables
+    uint8 security, buildType;
+    uint16 clientBuild, loginServerType;
+    uint32 loginServerId, addonSize, clientSeed, realmIndex, regionId, siteId, localChallenge, accountNameLength;
+    uint64 dosResponse;
     LocaleConstant locale;
     std::string account;
     SHA1Hash sha;
     BigNumber k;
+    bool wardenActive = sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED), useIPv6;
     WorldPacket addonsData;
 
-    recvPacket.read_skip<uint32>();
-    recvPacket.read_skip<uint32>();
-    recvPacket >> digest[18];
-    recvPacket >> digest[14];
-    recvPacket >> digest[3];
-    recvPacket >> digest[4];
-    recvPacket >> digest[0];
-    recvPacket.read_skip<uint32>();
-    recvPacket >> digest[11];
-    recvPacket >> clientSeed;
-    recvPacket >> digest[19];
-    recvPacket.read_skip<uint8>();
-    recvPacket.read_skip<uint8>();
-    recvPacket >> digest[2];
-    recvPacket >> digest[9];
-    recvPacket >> digest[12];
-    recvPacket.read_skip<uint64>();
-    recvPacket.read_skip<uint32>();
-    recvPacket >> digest[16];
-    recvPacket >> digest[5];
-    recvPacket >> digest[6];
-    recvPacket >> digest[8];
-    recvPacket >> clientBuild;
-    recvPacket >> digest[17];
-    recvPacket >> digest[7];
-    recvPacket >> digest[13];
-    recvPacket >> digest[15];
-    recvPacket >> digest[1];
-    recvPacket >> digest[10];
-    recvPacket >> addonSize;
+    recvPacket >> uint32(loginServerId);
+    recvPacket >> uint16(clientBuild);
+    recvPacket >> uint32(regionId);
+    recvPacket >> uint32(siteId);
+    recvPacket >> uint32(realmID);
+    recvPacket >> uint16(loginServerType);
+    recvPacket >> uint8(buildType);
+    recvPacket >> uint32(localChallenge);
+    recvPacket >> uint64(dosResponse);
 
-    addonsData.resize(addonSize);
-    recvPacket.read((uint8*)addonsData.contents(), addonSize);
+    uint8 digest[SHA_DIGEST_SIZE];
+    for (uint8 i = 0; i < SHA_DIGEST_SIZE; i++)
+    {
+        recvPacket >> digest[i];
+    }
+  
+    recvPacket.FlushBits();
 
-    recvPacket.ReadBit();
-    uint32 accountNameLength = recvPacket.ReadBits(11);
-
+    recvPacket.ReadBit();           // UseIPv6
+    accountNameLength = recvPacket.ReadBits(11);
     account = recvPacket.ReadString(accountNameLength);
 
-    if (sWorld->IsClosed())
+    if (addonSize)
     {
-        SendAuthResponseError(AUTH_REJECT);
-        TC_LOG_ERROR("network", "WorldSocket::HandleAuthSession: World closed, denying client (%s).", GetRemoteAddress().c_str());
-        return -1;
+        addonsData.resize(addonSize);
+        recvPacket.read((uint8*)addonsData.contents(), addonSize);
     }
 
-    // Get the account information from the realmd database
-    //         0           1        2       3          4         5       6          7   8
-    // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os FROM account WHERE username = ?
+    //         0           1        2       3          4         5       6          7   8                  9
+    // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os, battlenet_account FROM account WHERE username = ?
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
-
     stmt->setString(0, account);
 
     PreparedQueryResult result = LoginDatabase.Query(stmt);
@@ -968,7 +965,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         }
     }
 
-    id = fields[0].GetUInt32();
+    loginServerId = fields[0].GetUInt32();
 
     k.SetHexStr(fields[1].GetCString());
 
@@ -981,7 +978,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME_LOGIN);
 
         stmt->setInt64(0, mutetime);
-        stmt->setUInt32(1, id);
+        stmt->setUInt32(1, loginServerId);
 
         LoginDatabase.Execute(stmt);
     }
@@ -991,6 +988,10 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         locale = LOCALE_enUS;
 
     uint32 recruiter = fields[7].GetUInt32();
+
+    uint32 battlenetAccountId = 0;
+    if (loginServerType == 1)
+            battlenetAccountId = fields[9].GetUInt32();
     std::string os = fields[8].GetString();
 
     // Must be done before WorldSession is created
@@ -1004,8 +1005,8 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // Checks gmlevel per Realm
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
 
-    stmt->setUInt32(0, id);
-    stmt->setInt32(1, int32(realmID));
+    stmt->setUInt32(0, loginServerId);
+    stmt->setInt32(1, realmID);
 
     result = LoginDatabase.Query(stmt);
 
@@ -1020,7 +1021,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // Re-check account ban (same check as in realmd)
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BANS);
 
-    stmt->setUInt32(0, id);
+    stmt->setUInt32(0, loginServerId);
     stmt->setString(1, GetRemoteAddress());
 
     PreparedQueryResult banresult = LoginDatabase.Query(stmt);
@@ -1058,7 +1059,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     if (memcmp(sha.GetDigest(), digest, 20))
     {
         SendAuthResponseError(AUTH_FAILED);
-        TC_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", id, account.c_str(), address.c_str());
+        TC_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", loginServerId, account.c_str(), address.c_str());
         return -1;
     }
 
@@ -1069,7 +1070,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // Check if this user is by any chance a recruiter
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_RECRUITER);
 
-    stmt->setUInt32(0, id);
+    stmt->setUInt32(0, loginServerId);
 
     result = LoginDatabase.Query(stmt);
 
@@ -1087,7 +1088,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     LoginDatabase.Execute(stmt);
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN(m_Session, WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter), -1);
+    ACE_NEW_RETURN(m_Session, WorldSession(loginServerId, battlenetAccountId, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter), -1);
 
     m_Crypt.Init(&k);
 

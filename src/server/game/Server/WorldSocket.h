@@ -163,7 +163,7 @@ class WorldSocket : public WorldHandler
         int HandlePing(WorldPacket& recvPacket);
 
         /// Called by MSG_VERIFY_CONNECTIVITY_RESPONSE
-        void HandleSendAuthSession();
+        int HandleSendAuthSession();
 
     private:
         void SendAuthResponseError(uint8);

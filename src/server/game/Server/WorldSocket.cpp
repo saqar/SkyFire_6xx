@@ -857,7 +857,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     ACE_NOTREACHED (return 0);
 }
 
-void WorldSocket::HandleSendAuthSession()
+/*void WorldSocket::HandleSendAuthSession()
 {
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
     BigNumber seed1;
@@ -871,21 +871,22 @@ void WorldSocket::HandleSendAuthSession()
     packet << uint32(_authSeed);
     packet << uint8(1);
     SendPacket(packet);
-}
+}*/
 
-//int WorldSocket::HandleSendAuthSession()
-//{
-//    WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
-//    packet << uint16(0);
-//
-//    for (int i = 0; i < 8; i++)
-//        packet << uint32(0);
-//
-//    packet << uint8(1);
-//
-//    return SendPacket(packet);
-//
-//}
+int WorldSocket::HandleSendAuthSession()
+{
+    WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
+    packet << uint16(0);
+    packet << uint32(0);
+
+    for (int i = 0; i < 8; i++)
+        packet << uint32(0);
+
+    packet << uint8(1);
+
+    return SendPacket(packet);
+
+}
 
 int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {

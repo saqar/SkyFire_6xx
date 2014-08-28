@@ -22,7 +22,7 @@
 #include "WorldPacket.h"
 #include "Config.h"
 
-/*
+
 void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 {
     std::map<uint32, std::string> realmNamesToSend;
@@ -55,8 +55,32 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
         packet << uint8(5);             // Account Exp. level
         packet << uint8(5);             // Active  Exp. level
         packet << uint32(0);
+
+        uint8 availibleRaces[13];
+        for (uint8 i = 0; i < 13; i++)
+        {
+            packet << availibleRaces[i];
+        }
+
+        uint8 avalibleClasses[11];
+        for (uint8 i = 0; i < 11; i++)
+        {
+            packet << avalibleClasses[i];
+        }
+
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint32(0);
+
+        packet.FlushBits();
     }
-}*/
+
+    packet << uint8(code);                             // Auth response ?
+
+    SendPacket(&packet);
+}
 
 
 void WorldSession::SendClientCacheVersion(uint32 version)
@@ -66,7 +90,7 @@ void WorldSession::SendClientCacheVersion(uint32 version)
     SendPacket(&data);
 }
 
-
+/*
 void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 {
     std::map<uint32, std::string> realmNamesToSend;
@@ -158,4 +182,4 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     packet << uint8(code);                             // Auth response ?
 
     SendPacket(&packet);
-}
+}*/

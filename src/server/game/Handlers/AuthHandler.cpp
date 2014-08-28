@@ -73,8 +73,12 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
         packet << uint32(0);
         packet << uint32(0);
         packet << uint32(0);
-
         packet.FlushBits();
+
+        uint16 getNumPlayersA, getNumPlayersH;
+
+        packet << getNumPlayersH;
+        packet << getNumPlayersA;
     }
 
     packet << uint8(code);                             // Auth response ?

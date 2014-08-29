@@ -877,7 +877,6 @@ int WorldSocket::HandleSendAuthSession()
 {
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 37);
     packet << uint16(0);
-    packet << uint32(0);
 
     for (int i = 0; i < 8; i++)
         packet << uint32(0);

@@ -25,6 +25,8 @@
 
 void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 {
+
+    /*  Maybe this stuff is still used? I don't know for sure.   */
     std::map<uint32, std::string> realmNamesToSend;
 
     QueryResult classResult = LoginDatabase.PQuery("SELECT class FROM realm_classes, gameaccount_classes WHERE realmId = %u", realmID);
@@ -40,11 +42,15 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     if (iter != realmNameStore.end()) // Add local realm
         realmNamesToSend[realmID] = iter->second;
 
+
+    /*   Now sending the packets for ClientAuthResponse   */
     TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
-
+    
+    // Result
     packet.WriteBit(code == AUTH_OK);
 
+    // If the auth is okay, send this
     if (code == AUTH_OK)
     {
         packet << uint32(0);
@@ -80,7 +86,8 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
         packet << getNumPlayersH;
         packet << getNumPlayersA;
     }
-
+    
+    // If auth isnt okay? No else stmt, so hard to say.
     packet << uint8(code);                             // Auth response ?
 
     SendPacket(&packet);

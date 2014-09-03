@@ -28,7 +28,7 @@ class LoginDatabaseConnection : public MySQLConnection
     public:
         //- Constructors for sync and async connections
         LoginDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-        LoginDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+        LoginDatabaseConnection(ProducerConsumerQueue<SQLOperation*>* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
 
         //- Loads database type specific prepared statements
         void DoPrepareStatements();
@@ -93,6 +93,7 @@ enum LoginDatabaseStatements
     LOGIN_UPD_MUTE_TIME,
     LOGIN_UPD_MUTE_TIME_LOGIN,
     LOGIN_UPD_LAST_IP,
+    LOGIN_UPD_LAST_ATTEMPT_IP,
     LOGIN_UPD_ACCOUNT_ONLINE,
     LOGIN_UPD_UPTIME_PLAYERS,
     LOGIN_DEL_OLD_LOGS,

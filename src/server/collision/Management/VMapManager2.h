@@ -23,7 +23,7 @@
 #include "IVMapManager.h"
 #include "Dynamic/UnorderedMap.h"
 #include "Define.h"
-#include <ace/Thread_Mutex.h>
+#include <mutex>
 
 //===========================================================
 
@@ -64,8 +64,8 @@ namespace VMAP
             int iRefCount;
     };
 
-    typedef UNORDERED_MAP<uint32, StaticMapTree*> InstanceTreeMap;
-    typedef UNORDERED_MAP<std::string, ManagedModel> ModelFileMap;
+    typedef std::unordered_map<uint32, StaticMapTree*> InstanceTreeMap;
+    typedef std::unordered_map<std::string, ManagedModel> ModelFileMap;
 
     class VMapManager2 : public IVMapManager
     {
@@ -74,7 +74,7 @@ namespace VMAP
             ModelFileMap iLoadedModelFiles;
             InstanceTreeMap iInstanceMapTrees;
             // Mutex for iLoadedModelFiles
-            ACE_Thread_Mutex LoadedModelFilesLock;
+            std::mutex LoadedModelFilesLock;
 
             bool _loadMap(uint32 mapId, const std::string& basePath, uint32 tileX, uint32 tileY);
             /* void _unloadMap(uint32 pMapId, uint32 x, uint32 y); */

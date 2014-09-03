@@ -1662,7 +1662,7 @@ void Player::Update(uint32 p_time)
 
             if (isAttackReady(BASE_ATTACK))
             {
-                if (!(IsWithinMeleeRange(victim) || (m_overrideAutoattackSpellInfo && IsWithinDistInMap(victim, m_overrideAutoattackRange))))
+                if (!(IsWithinMeleeRange(victim) || (m_OverrideAutoattackSpellInfo && IsWithinDistInMap(victim, m_OverrideAutoattackRange))))
                 {
                     setAttackTimer(BASE_ATTACK, 100);
                     if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
@@ -1698,7 +1698,7 @@ void Player::Update(uint32 p_time)
 
             if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
-                if (!(IsWithinMeleeRange(victim) || (m_overrideAutoattackSpellInfo && IsWithinDistInMap(victim, m_overrideAutoattackRange))))
+                if (!(IsWithinMeleeRange(victim) || (m_OverrideAutoattackSpellInfo && IsWithinDistInMap(victim, m_OverrideAutoattackRange))))
                     setAttackTimer(OFF_ATTACK, 100);
                 else if (!HasInArc(2*M_PI/3, victim))
                     setAttackTimer(OFF_ATTACK, 100);
@@ -20364,7 +20364,7 @@ void Player::_SaveMail(SQLTransaction& trans)
 
 void Player::_SaveQuestStatus(SQLTransaction& trans)
 {
-    bool isTransaction = !trans.null();
+    bool isTransaction = bool(trans);
     if (!isTransaction)
         trans = CharacterDatabase.BeginTransaction();
 
@@ -22859,7 +22859,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
             if (categoryEntry->Flags & SPELL_CATEGORY_FLAG_COOLDOWN_EXPIRES_AT_MIDNIGHT)
             {
                 tm date;
-                ACE_OS::localtime_r(&curTime, &date);
+                localtime_r(&curTime, &date);
                 catrec = catrec * DAY - (date.tm_hour * HOUR + date.tm_min * MINUTE + date.tm_sec) * IN_MILLISECONDS;
             }
         }

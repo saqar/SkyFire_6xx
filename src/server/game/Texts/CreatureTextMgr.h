@@ -71,23 +71,28 @@ struct CreatureTextId
 };
 
 typedef std::vector<CreatureTextEntry> CreatureTextGroup;              //texts in a group
-typedef UNORDERED_MAP<uint8, CreatureTextGroup> CreatureTextHolder;    //groups for a creature by groupid
-typedef UNORDERED_MAP<uint32, CreatureTextHolder> CreatureTextMap;     //all creatures by entry
+typedef std::unordered_map<uint8, CreatureTextGroup> CreatureTextHolder;    //groups for a creature by groupid
+typedef std::unordered_map<uint32, CreatureTextHolder> CreatureTextMap;     //all creatures by entry
 
 typedef std::map<CreatureTextId, CreatureTextLocale> LocaleCreatureTextMap;
 
 //used for handling non-repeatable random texts
 typedef std::vector<uint8> CreatureTextRepeatIds;
-typedef UNORDERED_MAP<uint8, CreatureTextRepeatIds> CreatureTextRepeatGroup;
-typedef UNORDERED_MAP<uint64, CreatureTextRepeatGroup> CreatureTextRepeatMap;//guid based
+typedef std::unordered_map<uint8, CreatureTextRepeatIds> CreatureTextRepeatGroup;
+typedef std::unordered_map<uint64, CreatureTextRepeatGroup> CreatureTextRepeatMap;//guid based
 
 class CreatureTextMgr
 {
-    friend class ACE_Singleton<CreatureTextMgr, ACE_Null_Mutex>;
-    CreatureTextMgr() { };
-
     public:
+        CreatureTextMgr() { };
         ~CreatureTextMgr() { };
+
+        static CreatureTextMgr* instance()
+        {
+            static CreatureTextMgr* instance = new CreatureTextMgr();
+            return instance;
+        }
+
         void LoadCreatureTexts();
         void LoadCreatureTextLocales();
         CreatureTextMap  const& GetTextMap() const { return mTextMap; }
@@ -103,6 +108,7 @@ class CreatureTextMgr
         template<class Builder>
         void SendChatPacket(WorldObject* source, Builder const& builder, ChatMsg msgType, WorldObject const* whisperTarget = NULL, CreatureTextRange range = TEXT_RANGE_NORMAL, Team team = TEAM_OTHER, bool gmOnly = false) const;
     private:
+
         CreatureTextRepeatIds GetRepeatGroup(Creature* source, uint8 textGroup);
         void SetRepeatId(Creature* source, uint8 textGroup, uint8 id);
 
@@ -114,7 +120,7 @@ class CreatureTextMgr
         LocaleCreatureTextMap mLocaleTextMap;
 };
 
-#define sCreatureTextMgr ACE_Singleton<CreatureTextMgr, ACE_Null_Mutex>::instance()
+#define sCreatureTextMgr CreatureTextMgr::instance()
 
 template<class Builder>
 class CreatureTextLocalizer

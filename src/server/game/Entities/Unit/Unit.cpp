@@ -202,7 +202,7 @@ Unit::Unit(bool isWorldObject) :
     for (uint8 i = 0; i < MAX_GAMEOBJECT_SLOT; ++i)
         m_ObjectSlot[i] = 0;
 
-    m_overrideAutoattackSpellInfo = 0;
+    m_OverrideAutoattackSpellInfo = 0;
     m_auraUpdateIterator = m_ownedAuras.end();
 
     m_interruptMask = 0;
@@ -1827,8 +1827,8 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
     // melee attack spell casted at main hand attack only - no normal melee dmg dealt
     if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra)
         m_currentSpells[CURRENT_MELEE_SPELL]->cast();
-    else if (m_overrideAutoattackSpellInfo)
-        CastSpell(victim, m_overrideAutoattackSpellInfo, false);
+    else if (m_OverrideAutoattackSpellInfo)
+        CastSpell(victim, m_OverrideAutoattackSpellInfo, false);
     else
     {
         // attack can be redirected to another target
@@ -9875,7 +9875,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
     // done scripted mod (take it from owner)
     // Unit* owner = GetOwner() ? GetOwner() : this;
-    // AuraEffectList const& mOverrideClassScript = owner->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+    // AuraEffectList const& mOverrideClassScript = owner->GetAuraEffectsByType(SPELL_AURA_Override_CLASS_SCRIPTS);
 
     float tmpDamage = float(int32(pdamage) + DoneFlatBenefit) * DoneTotalMod;
 
@@ -9967,7 +9967,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
     }
 
     // .. taken pct: class scripts
-    //*AuraEffectList const& mclassScritAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+    //*AuraEffectList const& mclassScritAuras = GetAuraEffectsByType(SPELL_AURA_Override_CLASS_SCRIPTS);
     //for (AuraEffectList::const_iterator i = mclassScritAuras.begin(); i != mclassScritAuras.end(); ++i)
     //{
     //    switch ((*i)->GetMiscValue())
@@ -14399,7 +14399,7 @@ void Unit::RemoveCharmedBy(Unit* charmer)
 
     if (!charmer)
         charmer = GetCharmer();
-    if (charmer != GetCharmer()) // one aura overrides another?
+    if (charmer != GetCharmer()) // one aura Overrides another?
     {
 //        TC_LOG_FATAL("entities.unit", "Unit::RemoveCharmedBy: this: " UI64FMTD " true charmer: " UI64FMTD " false charmer: " UI64FMTD,
 //            GetGUID(), GetCharmerGUID(), charmer->GetGUID());

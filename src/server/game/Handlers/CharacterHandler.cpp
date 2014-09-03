@@ -1025,7 +1025,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         pCurrChar->SetGuildLevel(0);
     }
 
-    SendTimezoneInformation();
+    //SendTimezoneInformation();
 
     HotfixData const& hotfix = sObjectMgr->GetHotfixData();
 

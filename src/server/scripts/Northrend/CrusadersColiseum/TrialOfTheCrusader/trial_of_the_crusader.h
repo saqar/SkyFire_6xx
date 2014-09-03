@@ -119,16 +119,16 @@ const Position FactionChampionLoc[]=
     {625.845f, 112.914f, 421.575f, 0},               //  8 - Ally Initial Pos 3
     {615.566f, 109.653f, 418.234f, 0},               //  9 - Ally Initial Pos 4
 
-    {535.469f, 113.012f, 394.66f, 0},                // 10 - Horde Final Pos 0
-    {526.417f, 137.465f, 394.749f, 0},               // 11 - Horde Final Pos 1
-    {528.108f, 111.057f, 395.289f, 0},               // 12 - Horde Final Pos 2
-    {519.92f, 134.285f, 395.289f, 0},                // 13 - Horde Final Pos 3
-    {533.648f, 119.148f, 394.646f, 0},               // 14 - Horde Final Pos 4
-    {531.399f, 125.63f, 394.708f, 0},                // 15 - Horde Final Pos 5
-    {528.958f, 131.47f, 394.73f, 0},                 // 16 - Horde Final Pos 6
-    {526.309f, 116.667f, 394.833f, 0},               // 17 - Horde Final Pos 7
-    {524.238f, 122.411f, 394.819f, 0},               // 18 - Horde Final Pos 8
-    {521.901f, 128.488f, 394.832f, 0}                // 19 - Horde Final Pos 9
+    {535.469f, 113.012f, 394.66f, 0},                // 10 - Horde final Pos 0
+    {526.417f, 137.465f, 394.749f, 0},               // 11 - Horde final Pos 1
+    {528.108f, 111.057f, 395.289f, 0},               // 12 - Horde final Pos 2
+    {519.92f, 134.285f, 395.289f, 0},                // 13 - Horde final Pos 3
+    {533.648f, 119.148f, 394.646f, 0},               // 14 - Horde final Pos 4
+    {531.399f, 125.63f, 394.708f, 0},                // 15 - Horde final Pos 5
+    {528.958f, 131.47f, 394.73f, 0},                 // 16 - Horde final Pos 6
+    {526.309f, 116.667f, 394.833f, 0},               // 17 - Horde final Pos 7
+    {524.238f, 122.411f, 394.819f, 0},               // 18 - Horde final Pos 8
+    {521.901f, 128.488f, 394.832f, 0}                // 19 - Horde final Pos 9
 };
 
 const Position TwinValkyrsLoc[]=

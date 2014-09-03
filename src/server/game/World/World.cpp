@@ -21,6 +21,7 @@
     \ingroup world
 */
 
+#include <atomic>
 #include "Common.h"
 #include "Memory.h"
 #include "DatabaseEnv.h"
@@ -85,9 +86,9 @@
 #include "TransportMgr.h"
 #include "BattlePetMgr.h"
 
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
+std::atomic<bool> World::m_stopEvent = false; 
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
-ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
+std::atomic_uint32_t World::m_worldLoopCounter = 0;
 
 float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
 float World::m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
@@ -284,7 +285,7 @@ void World::AddSession_(WorldSession* s)
     s->SendAddonsInfo();
     s->SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
     s->SendTutorialsData();
-    s->SendTimezoneInformation();
+    //s->SendTimezoneInformation();
 
     UpdateMaxSessionCounters();
 
@@ -382,7 +383,7 @@ bool World::RemoveQueuedPlayer(WorldSession* sess)
         pop_sess->SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
         pop_sess->SendAccountDataTimes(GLOBAL_CACHE_MASK);
         pop_sess->SendTutorialsData();
-        pop_sess->SendTimezoneInformation();
+        //pop_sess->SendTimezoneInformation();
 
         m_QueuedPlayer.pop_front();
 
@@ -1833,7 +1834,7 @@ void World::SetInitialWorldSettings()
     //one second is 1000 -(tested on win system)
     /// @todo Get rid of magic numbers
     tm localTm;
-    ACE_OS::localtime_r(&m_gameTime, &localTm);
+    localtime_r(&m_gameTime, &localTm);
     mail_timer = ((((localTm.tm_hour + 20) % 24)* HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
                                                             //1440
     mail_timer_expires = ((DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
@@ -2652,7 +2653,7 @@ void World::ShutdownMsg(bool show, Player* player)
 void World::ShutdownCancel()
 {
     // nothing cancel or too later
-    if (!m_ShutdownTimer || m_stopEvent.value())
+    if (!m_ShutdownTimer || m_stopEvent)
         return;
 
     ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_CANCELLED : SERVER_MSG_SHUTDOWN_CANCELLED;
@@ -2794,8 +2795,7 @@ void World::UpdateRealmCharCount(uint32 accountId)
 {
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_COUNT);
     stmt->setUInt32(0, accountId);
-    PreparedQueryResultFuture result = CharacterDatabase.AsyncQuery(stmt);
-    m_realmCharCallbacks.insert(result);
+    m_realmCharCallbacks.push_back(CharacterDatabase.AsyncQuery(stmt));
 }
 
 void World::_UpdateRealmCharCount(PreparedQueryResult resultCharCount)
@@ -2843,7 +2843,7 @@ void World::InitDailyQuestResetTime()
     // FIX ME: client not show day start time
     time_t curTime = time(NULL);
     tm localTm;
-    ACE_OS::localtime_r(&curTime, &localTm);
+    localtime_r(&m_gameTime, &localTm); (&curTime, &localTm);
     localTm.tm_hour = 6;
     localTm.tm_min  = 0;
     localTm.tm_sec  = 0;
@@ -2877,7 +2877,7 @@ void World::InitRandomBGResetTime()
     // generate time by config
     time_t curTime = time(NULL);
     tm localTm;
-    ACE_OS::localtime_r(&curTime, &localTm);
+    localtime_r(&curTime, &localTm);
     localTm.tm_hour = getIntConfig(CONFIG_RANDOM_BG_RESET_HOUR);
     localTm.tm_min = 0;
     localTm.tm_sec = 0;
@@ -2905,7 +2905,7 @@ void World::InitGuildResetTime()
     // generate time by config
     time_t curTime = time(NULL);
     tm localTm;
-    ACE_OS::localtime_r(&curTime, &localTm);
+    localtime_r(&curTime, &localTm);
     localTm.tm_hour = getIntConfig(CONFIG_GUILD_RESET_HOUR);
     localTm.tm_min = 0;
     localTm.tm_sec = 0;
@@ -3031,7 +3031,7 @@ void World::ResetMonthlyQuests()
     // generate time
     time_t curTime = time(NULL);
     tm localTm;
-    ACE_OS::localtime_r(&curTime, &localTm);
+    localtime_r(&curTime, &localTm);
 
     int month   = localTm.tm_mon;
     int year    = localTm.tm_year;
@@ -3204,19 +3204,17 @@ void World::ProcessQueryCallbacks()
 {
     PreparedQueryResult result;
 
-    while (!m_realmCharCallbacks.is_empty())
+    for (std::deque<std::future<PreparedQueryResult>>::iterator itr = m_realmCharCallbacks.begin(); itr != m_realmCharCallbacks.end();)
     {
-        ACE_Future<PreparedQueryResult> lResult;
-        ACE_Time_Value timeout = ACE_Time_Value::zero;
-        if (m_realmCharCallbacks.next_readable(lResult, &timeout) != 1)
-            break;
-
-        if (lResult.ready())
+        if ((*itr).wait_for(std::chrono::seconds(0)) != std::future_status::ready)
         {
-            lResult.get(result);
-            _UpdateRealmCharCount(result);
-            lResult.cancel();
+            ++itr;
+            continue;
         }
+
+        result = (*itr).get();
+        _UpdateRealmCharCount(result);
+        itr = m_realmCharCallbacks.erase(itr);
     }
 }
 

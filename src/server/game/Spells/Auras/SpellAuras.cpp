@@ -120,7 +120,7 @@ void AuraApplication::_InitFlags(Unit* caster, uint32 effMask)
 
     // aura is casted by self or an enemy
     // one negative effect and we know aura is negative
-    if (IsSelfcasted() || !caster || !caster->IsFriendlyTo(GetTarget()))
+    if (IsSelfcast() || !caster || !caster->IsFriendlyTo(GetTarget()))
     {
         bool negativeFound = false;
         for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)

@@ -98,13 +98,13 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         case CONDITION_CLASS:
         {
             if (Unit* unit = object->ToUnit())
-                condMeets = unit->getClassMask() & ConditionValue1;
+                condMeets = unit->getClassMask() & ConditionValue1 != 0;
             break;
         }
         case CONDITION_RACE:
         {
             if (Unit* unit = object->ToUnit())
-                condMeets = unit->getRaceMask() & ConditionValue1;
+                condMeets = unit->getRaceMask() & ConditionValue1 != 0;
             break;
         }
         case CONDITION_GENDER:
@@ -263,7 +263,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
                 Unit* toUnit = toObject->ToUnit();
                 Unit* unit = object->ToUnit();
                 if (toUnit && unit)
-                    condMeets = (1 << unit->GetReactionTo(toUnit)) & ConditionValue2;
+                    condMeets = (1 << unit->GetReactionTo(toUnit)) & ConditionValue2 != 0;
             }
             break;
         }
@@ -298,7 +298,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         }
         case CONDITION_PHASEMASK:
         {
-            condMeets = object->GetPhaseMask() & ConditionValue1;
+            condMeets = object->GetPhaseMask() & ConditionValue1 != 0;
             break;
         }
         case CONDITION_TITLE:
@@ -309,7 +309,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         }
         case CONDITION_SPAWNMASK:
         {
-            condMeets = ((1 << object->GetMap()->GetSpawnMode()) & ConditionValue1);
+            condMeets = ((1 << object->GetMap()->GetSpawnMode()) & ConditionValue1) != 0;
             break;
         }
         case CONDITION_UNIT_STATE:

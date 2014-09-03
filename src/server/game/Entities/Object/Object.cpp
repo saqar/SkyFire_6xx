@@ -384,12 +384,12 @@ uint32 Object::GetDynamicUInt32Value(uint32 tab, uint16 index) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
-    bool hasLiving = flags & UPDATEFLAG_LIVING;
-    bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION;
-    bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION;
-    bool hasTransportPosition = flags & UPDATEFLAG_GO_TRANSPORT_POSITION;
-    bool hasTarget = flags & UPDATEFLAG_HAS_TARGET;
-    bool hasTransport = flags & UPDATEFLAG_TRANSPORT;
+    bool hasLiving = flags & UPDATEFLAG_LIVING != 0;
+    bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION != 0;
+    bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION != 0;
+    bool hasTransportPosition = flags & UPDATEFLAG_GO_TRANSPORT_POSITION != 0;
+    bool hasTarget = flags & UPDATEFLAG_HAS_TARGET != 0;
+    bool hasTransport = flags & UPDATEFLAG_TRANSPORT != 0;
     bool hasVehicle = false; //flags & UPDATEFLAG_VEHICLE;
     bool hasAnimKits = false; //flags & UPDATEFLAG_ANIMKITS;
 

@@ -21,7 +21,6 @@
 #define BATTLEFIELD_MGR_H_
 
 #include "Battlefield.h"
-#include "ace/Singleton.h"
 
 class Player;
 class GameObject;
@@ -32,7 +31,13 @@ struct GossipMenuItems;
 // class to handle player enter / leave / areatrigger / GO use events
 class BattlefieldMgr
 {
-  public:
+public:
+    static BattlefieldMgr* instance()
+    {
+        static BattlefieldMgr instance;
+        return &instance;
+    }
+
     // ctor
     BattlefieldMgr();
     // dtor
@@ -76,6 +81,6 @@ class BattlefieldMgr
     uint32 m_UpdateTimer;
 };
 
-#define sBattlefieldMgr ACE_Singleton<BattlefieldMgr, ACE_Null_Mutex>::instance()
+#define sBattlefieldMgr BattlefieldMgr::instance()
 
 #endif

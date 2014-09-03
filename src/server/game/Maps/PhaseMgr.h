@@ -56,13 +56,13 @@ struct PhaseDefinition
     uint32 worldMapArea;
     uint8 flags;
 
-    bool IsOverwritingExistingPhases() const { return flags & PHASE_FLAG_OVERWRITE_EXISTING; }
-    bool IsLastDefinition() const { return flags & PHASE_FLAG_NO_MORE_PHASES; }
-    bool IsNegatingPhasemask() const { return flags & PHASE_FLAG_NEGATE_PHASE; }
+    bool IsOverwritingExistingPhases() const { return (flags & PHASE_FLAG_OVERWRITE_EXISTING) != 0; }
+    bool IsLastDefinition() const { return (flags & PHASE_FLAG_NO_MORE_PHASES) != 0; }
+    bool IsNegatingPhasemask() const { return (flags & PHASE_FLAG_NEGATE_PHASE) != 0; }
 };
 
 typedef std::list<PhaseDefinition> PhaseDefinitionContainer;
-typedef UNORDERED_MAP<uint32 /*zoneId*/, PhaseDefinitionContainer> PhaseDefinitionStore;
+typedef std::unordered_map<uint32 /*zoneId*/, PhaseDefinitionContainer> PhaseDefinitionStore;
 
 struct SpellPhaseInfo
 {
@@ -72,7 +72,7 @@ struct SpellPhaseInfo
     uint32 worldMapArea;
 };
 
-typedef UNORDERED_MAP<uint32 /*spellId*/, SpellPhaseInfo> SpellPhaseStore;
+typedef std::unordered_map<uint32 /*spellId*/, SpellPhaseInfo> SpellPhaseStore;
 
 struct PhaseInfo
 {
@@ -83,11 +83,11 @@ struct PhaseInfo
     uint32 phaseId;
     uint32 worldMapArea;
 
-    bool NeedsServerSideUpdate() const { return phasemask; }
-    bool NeedsClientSideUpdate() const { return terrainswapmap || phaseId || worldMapArea; }
+    bool NeedsServerSideUpdate() const { return (phasemask) != 0; }
+    bool NeedsClientSideUpdate() const { return (terrainswapmap || phaseId || worldMapArea) != 0; }
 };
 
-typedef UNORDERED_MAP<uint32 /*spellId*/, PhaseInfo> PhaseInfoContainer;
+typedef std::unordered_map<uint32 /*spellId*/, PhaseInfo> PhaseInfoContainer;
 
 struct PhaseData
 {

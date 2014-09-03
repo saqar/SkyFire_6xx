@@ -24,7 +24,6 @@
 #include <string>
 
 #include "Common.h"
-#include <ace/Singleton.h>
 #include "DatabaseEnv.h"
 #include "DBCEnums.h"
 #include "DBCStores.h"
@@ -38,11 +37,11 @@ typedef std::vector<AchievementEntry const*>         AchievementEntryList;
 typedef std::vector<CriteriaTreeEntry const*>        AchievementCriteriaTreeList;
 typedef std::vector<ModifierTreeEntry const*>        ModifierTreeEntryList;
 
-typedef UNORDERED_MAP<uint32, AchievementEntryList>         AchievementListByReferencedId;
-typedef UNORDERED_MAP<uint32, AchievementCriteriaTreeList>  AchievementCriteriaTreeByCriteriaId;
-typedef UNORDERED_MAP<uint32, AchievementEntry const*>      AchievementEntryByCriteriaTree;
-typedef UNORDERED_MAP<uint32, ModifierTreeEntryList>        ModifierTreeEntryByTreeId;
-typedef UNORDERED_MAP<uint32, AchievementCriteriaTreeList>  SubCriteriaTreeListById;
+typedef std::unordered_map<uint32, AchievementEntryList>         AchievementListByReferencedId;
+typedef std::unordered_map<uint32, AchievementCriteriaTreeList>  AchievementCriteriaTreeByCriteriaId;
+typedef std::unordered_map<uint32, AchievementEntry const*>      AchievementEntryByCriteriaTree;
+typedef std::unordered_map<uint32, ModifierTreeEntryList>        ModifierTreeEntryByTreeId;
+typedef std::unordered_map<uint32, AchievementCriteriaTreeList>  SubCriteriaTreeListById;
 
 struct CriteriaProgress
 {
@@ -207,7 +206,7 @@ struct AchievementReward
     std::string text;
 };
 
-typedef UNORDERED_MAP<uint32, AchievementReward> AchievementRewards;
+typedef std::unordered_map<uint32, AchievementReward> AchievementRewards;
 
 struct AchievementRewardLocale
 {
@@ -215,7 +214,7 @@ struct AchievementRewardLocale
     std::vector<std::string> text;
 };
 
-typedef UNORDERED_MAP<uint32, AchievementRewardLocale> AchievementRewardLocales;
+typedef std::unordered_map<uint32, AchievementRewardLocale> AchievementRewardLocales;
 
 struct CompletedAchievementData
 {
@@ -224,8 +223,8 @@ struct CompletedAchievementData
     bool changed;
 };
 
-typedef UNORDERED_MAP<uint32, CriteriaProgress> CriteriaProgressMap;
-typedef UNORDERED_MAP<uint32, CompletedAchievementData> CompletedAchievementMap;
+typedef std::unordered_map<uint32, CriteriaProgress> CriteriaProgressMap;
+typedef std::unordered_map<uint32, CompletedAchievementData> CompletedAchievementMap;
 
 enum ProgressType
 {
@@ -238,6 +237,7 @@ template<class T>
 class AchievementMgr
 {
     public:
+
         AchievementMgr(T* owner);
         ~AchievementMgr();
 
@@ -286,11 +286,16 @@ class AchievementMgr
 
 class AchievementGlobalMgr
 {
-        friend class ACE_Singleton<AchievementGlobalMgr, ACE_Null_Mutex>;
         AchievementGlobalMgr() { }
         ~AchievementGlobalMgr() { }
 
     public:
+        static AchievementGlobalMgr* instance()
+        {
+            static AchievementGlobalMgr instance;
+            return &instance;
+        }
+
         static char const* GetCriteriaTypeString(AchievementCriteriaTypes type);
         static char const* GetCriteriaTypeString(uint32 type);
 
@@ -417,6 +422,6 @@ class AchievementGlobalMgr
         AchievementRewardLocales m_achievementRewardLocales;
 };
 
-#define sAchievementMgr ACE_Singleton<AchievementGlobalMgr, ACE_Null_Mutex>::instance()
+#define sAchievementMgr AchievementGlobalMgr::instance()
 
 #endif

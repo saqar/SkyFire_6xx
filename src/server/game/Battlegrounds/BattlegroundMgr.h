@@ -24,12 +24,11 @@
 #include "DBCEnums.h"
 #include "Battleground.h"
 #include "BattlegroundQueue.h"
-#include <ace/Singleton.h>
 
 typedef std::map<uint32, Battleground*> BattlegroundContainer;
 typedef std::set<uint32> BattlegroundClientIdsContainer;
 
-typedef UNORDERED_MAP<uint32, BattlegroundTypeId> BattleMastersMap;
+typedef std::unordered_map<uint32, BattlegroundTypeId> BattleMastersMap;
 
 #define WS_CURRENCY_RESET_TIME 20001                    // Custom worldstate
 
@@ -64,13 +63,16 @@ struct BattlegroundData
 
 class BattlegroundMgr
 {
-    friend class ACE_Singleton<BattlegroundMgr, ACE_Null_Mutex>;
-
     private:
         BattlegroundMgr();
         ~BattlegroundMgr();
 
     public:
+        static BattlegroundMgr* instance()
+        {
+            static BattlegroundMgr instance;
+            return &instance;
+        }
         void Update(uint32 diff);
 
         /* Packet Building */
@@ -154,5 +156,5 @@ class BattlegroundMgr
         BattleMastersMap mBattleMastersMap;
 };
 
-#define sBattlegroundMgr ACE_Singleton<BattlegroundMgr, ACE_Null_Mutex>::instance()
+#define sBattlegroundMgr BattlegroundMgr::instance()
 #endif

@@ -5249,12 +5249,12 @@ void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 m
     if (!target || !target->IsInWorld())
         return;
 
-    uint32 overrideId = uint32(GetMiscValue());
+    uint32 OverrideId = uint32(GetMiscValue());
 
     if (apply)
     {
         //target->SetUInt16Value(PLAYER_FIELD_LIFETIME_MAX_RANK2, 0, overrideId);
-        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
+        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(OverrideId))
             for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
                 if (uint32 spellId = overrideSpells->spellId[i])
                     target->AddTemporarySpell(spellId);
@@ -5262,7 +5262,7 @@ void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 m
     else
     {
         //target->SetUInt16Value(PLAYER_FIELD_LIFETIME_MAX_RANK2, 0, 0);
-        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
+        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(OverrideId))
             for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
                 if (uint32 spellId = overrideSpells->spellId[i])
                     target->RemoveTemporarySpell(spellId);

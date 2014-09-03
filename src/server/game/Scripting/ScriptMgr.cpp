@@ -176,8 +176,10 @@ struct TSpellSummary
     uint8 Effects;                                          // set of enum SelectEffect
 } *SpellSummary;
 
-ScriptMgr::ScriptMgr()
-    : _scriptCount(0), _scheduledScripts(0) { }
+ScriptMgr::ScriptMgr() : _scriptCount(0)
+{
+    _scheduledScripts = 0;
+}
 
 ScriptMgr::~ScriptMgr() { }
 
@@ -398,25 +400,27 @@ void ScriptMgr::OnNetworkStop()
     FOREACH_SCRIPT(ServerScript)->OnNetworkStop();
 }
 
-void ScriptMgr::OnSocketOpen(WorldSocket* socket)
+void ScriptMgr::OnSocketOpen(std::shared_ptr<WorldSocket> socket)
 {
     ASSERT(socket);
 
     FOREACH_SCRIPT(ServerScript)->OnSocketOpen(socket);
 }
 
-void ScriptMgr::OnSocketClose(WorldSocket* socket, bool wasNew)
+void ScriptMgr::OnSocketClose(std::shared_ptr<WorldSocket> socket)
 {
     ASSERT(socket);
 
-    FOREACH_SCRIPT(ServerScript)->OnSocketClose(socket, wasNew);
+    FOREACH_SCRIPT(ServerScript)->OnSocketClose(socket);
 }
 
-void ScriptMgr::OnPacketReceive(WorldSocket* socket, WorldPacket packet)
+void ScriptMgr::OnPacketReceive(WorldSession* session, WorldPacket const& packet)
 {
-    ASSERT(socket);
+    if (SCR_REG_LST(ServerScript).empty())
+        return;
 
-    FOREACH_SCRIPT(ServerScript)->OnPacketReceive(socket, packet);
+    WorldPacket copy(packet);
+    FOREACH_SCRIPT(ServerScript)->OnPacketReceive(session, copy);
 }
 
 void ScriptMgr::OnPacketSend(WorldSocket* socket, WorldPacket packet)
@@ -1270,6 +1274,38 @@ void ScriptMgr::OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newAre
 {
     FOREACH_SCRIPT(PlayerScript)->OnUpdateZone(player, newZone, newArea);
 }
+
+// Account
+void ScriptMgr::OnAccountLogin(uint32 accountId)
+{
+    FOREACH_SCRIPT(AccountScript)->OnAccountLogin(accountId);
+}
+
+void ScriptMgr::OnFailedAccountLogin(uint32 accountId)
+{
+    FOREACH_SCRIPT(AccountScript)->OnFailedAccountLogin(accountId);
+}
+
+void ScriptMgr::OnEmailChange(uint32 accountId)
+{
+    FOREACH_SCRIPT(AccountScript)->OnEmailChange(accountId);
+}
+
+void ScriptMgr::OnFailedEmailChange(uint32 accountId)
+{
+    FOREACH_SCRIPT(AccountScript)->OnFailedEmailChange(accountId);
+}
+
+void ScriptMgr::OnPasswordChange(uint32 accountId)
+{
+    FOREACH_SCRIPT(AccountScript)->OnPasswordChange(accountId);
+}
+
+void ScriptMgr::OnFailedPasswordChange(uint32 accountId)
+{
+    FOREACH_SCRIPT(AccountScript)->OnFailedPasswordChange(accountId);
+}
+
 
 // Guild
 void ScriptMgr::OnGuildAddMember(Guild* guild, Player* player, uint8& plRank)

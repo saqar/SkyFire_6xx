@@ -21,6 +21,7 @@
 #include "QueryHolder.h"
 #include "PreparedStatement.h"
 #include "Log.h"
+#include "Errors.h"
 
 bool SQLQueryHolder::SetQuery(size_t index, const char *sql)
 {
@@ -172,7 +173,7 @@ void SQLQueryHolder::SetSize(size_t size)
 bool SQLQueryHolderTask::Execute()
 {
     //the result can't be ready as we are processing it right now
-    ASSERT(!m_result.ready());
+    m_executed = true;
 
     if (!m_holder)
         return false;
@@ -205,6 +206,6 @@ bool SQLQueryHolderTask::Execute()
         }
     }
 
-    m_result.set(m_holder);
+    m_result.set_value(m_holder);
     return true;
 }

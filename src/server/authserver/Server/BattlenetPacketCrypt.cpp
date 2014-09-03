@@ -1,4 +1,5 @@
 /*
+* Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
 * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
 *
 * This program is free software; you can redistribute it and/or modify it
@@ -16,7 +17,7 @@
 */
 
 #include "BattlenetPacketCrypt.h"
-#include "Cryptography/HmacHash.h"
+#include "HmachHash.h"
 #include "Cryptography/BigNumber.h"
 
 Battlenet::PacketCrypt::PacketCrypt() : ::PacketCrypt(SHA256_DIGEST_LENGTH)

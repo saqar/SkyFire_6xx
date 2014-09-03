@@ -387,7 +387,7 @@ void Map::DeleteFromWorld(Player* player)
 
 void Map::EnsureGridCreated(const GridCoord &p)
 {
-    TRINITY_GUARD(ACE_Thread_Mutex, GridLock);
+    std::lock_guard<std::mutex> lock(GridLock);
     EnsureGridCreated_i(p);
 }
 
@@ -2495,7 +2495,7 @@ uint32 Map::GetPlayersCountExceptGMs() const
     return count;
 }
 
-void Map::SendToPlayers(WorldPacket const* data) const
+void Map::SendToPlayers(WorldPacket* data) const
 {
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
         itr->GetSource()->GetSession()->SendPacket(data);
@@ -2715,7 +2715,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
     // Is it needed?
 
     {
-        TRINITY_GUARD(ACE_Thread_Mutex, Lock);
+        std::lock_guard<std::mutex> lock(Lock);
         // Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
         //if (!CanEnter(player))
             //return false;
@@ -3063,7 +3063,7 @@ bool BattlegroundMap::CanEnter(Player* player)
 bool BattlegroundMap::AddPlayerToMap(Player* player)
 {
     {
-        TRINITY_GUARD(ACE_Thread_Mutex, Lock);
+        std::lock_guard<std::mutex> lock(Lock);
         //Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
         //if (!CanEnter(player))
             //return false;

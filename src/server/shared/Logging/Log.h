@@ -24,24 +24,28 @@
 #include "Appender.h"
 #include "LogWorker.h"
 #include "Logger.h"
-#include "Dynamic/UnorderedMap.h"
 
+#include <unordered_map>
+#include <stdarg.h>
 #include <string>
-#include <ace/Singleton.h>
 
 #define LOGGER_ROOT "root"
 
 class Log
 {
-    friend class ACE_Singleton<Log, ACE_Thread_Mutex>;
-
-    typedef UNORDERED_MAP<std::string, Logger> LoggerMap;
-
+    typedef std::unordered_map<std::string, Logger> LoggerMap;
+    typedef std::unordered_map<std::string, Logger const*> CachedLoggerContainer;
     private:
         Log();
         ~Log();
 
     public:
+        static Log* instance()
+        {
+            static Log* instance = new Log();
+            return instance;
+        }
+
         void LoadFromConfig();
         void Close();
         bool ShouldLog(std::string const& type, LogLevel level) const;
@@ -113,7 +117,7 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
     return logLevel != LOG_LEVEL_DISABLED && logLevel <= level;
 }
 
-#define sLog ACE_Singleton<Log, ACE_Thread_Mutex>::instance()
+#define sLog Log::instance()
 
 #if COMPILER != COMPILER_MICROSOFT
 #define TC_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \

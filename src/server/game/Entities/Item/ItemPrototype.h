@@ -738,7 +738,7 @@ struct ItemTemplate
         return false;
     }
 
-    bool IsCurrencyToken() const { return BagFamily & BAG_FAMILY_MASK_CURRENCY_TOKENS; }
+    bool IsCurrencyToken() const { return (BagFamily & BAG_FAMILY_MASK_CURRENCY_TOKENS) != 0; }
 
     uint32 GetMaxStackSize() const
     {
@@ -782,7 +782,7 @@ struct ItemTemplate
 };
 
 // Benchmarked: Faster than std::map (insert/find)
-typedef UNORDERED_MAP<uint32, ItemTemplate> ItemTemplateContainer;
+typedef std::unordered_map<uint32, ItemTemplate> ItemTemplateContainer;
 
 struct ItemLocale
 {

@@ -174,7 +174,7 @@ struct CreatureTemplate
 };
 
 // Benchmarked: Faster than std::map (insert/find)
-typedef UNORDERED_MAP<uint32, CreatureTemplate> CreatureTemplateContainer;
+typedef std::unordered_map<uint32, CreatureTemplate> CreatureTemplateContainer;
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform
 #if defined(__GNUC__)
@@ -214,7 +214,7 @@ struct CreatureBaseStats
     static CreatureBaseStats const* GetBaseStats(uint8 level, uint8 unitClass);
 };
 
-typedef UNORDERED_MAP<uint16, CreatureBaseStats> CreatureBaseStatsContainer;
+typedef std::unordered_map<uint16, CreatureBaseStats> CreatureBaseStatsContainer;
 
 struct CreatureLocale
 {
@@ -239,8 +239,8 @@ struct EquipmentInfo
 };
 
 // Benchmarked: Faster than std::map (insert/find)
-typedef UNORDERED_MAP<uint8, EquipmentInfo> EquipmentInfoContainerInternal;
-typedef UNORDERED_MAP<uint32, EquipmentInfoContainerInternal> EquipmentInfoContainer;
+typedef std::unordered_map<uint8, EquipmentInfo> EquipmentInfoContainerInternal;
+typedef std::unordered_map<uint32, EquipmentInfoContainerInternal> EquipmentInfoContainer;
 
 // from `creature` table
 struct CreatureData
@@ -277,7 +277,7 @@ struct CreatureModelInfo
 };
 
 // Benchmarked: Faster than std::map (insert/find)
-typedef UNORDERED_MAP<uint16, CreatureModelInfo> CreatureModelContainer;
+typedef std::unordered_map<uint16, CreatureModelInfo> CreatureModelContainer;
 
 enum InhabitTypeValues
 {
@@ -318,7 +318,7 @@ struct CreatureAddon
     std::vector<uint32> auras;
 };
 
-typedef UNORDERED_MAP<uint32, CreatureAddon> CreatureAddonContainer;
+typedef std::unordered_map<uint32, CreatureAddon> CreatureAddonContainer;
 
 // Vendors
 struct VendorItem
@@ -395,7 +395,7 @@ struct TrainerSpell
     bool IsCastable() const { return learnedSpell[0] != spell; }
 };
 
-typedef UNORDERED_MAP<uint32 /*spellid*/, TrainerSpell> TrainerSpellMap;
+typedef std::unordered_map<uint32 /*spellid*/, TrainerSpell> TrainerSpellMap;
 
 struct TrainerSpellData
 {
@@ -443,12 +443,12 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureTemplate()->RacialLeader; }
-        bool IsCivilian() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
-        bool IsTrigger() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
-        bool IsGuard() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
-        bool CanWalk() const { return GetCreatureTemplate()->InhabitType & INHABIT_GROUND; }
-        bool CanSwim() const { return GetCreatureTemplate()->InhabitType & INHABIT_WATER || IsPet(); }
-        bool CanFly()  const { return GetCreatureTemplate()->InhabitType & INHABIT_AIR; }
+        bool IsCivilian() const { return (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN) != 0; }
+        bool IsTrigger() const { return (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER) != 0; }
+        bool IsGuard() const { return (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_GUARD) != 0; }
+        bool CanWalk() const { return (GetCreatureTemplate()->InhabitType & INHABIT_GROUND) != 0; }
+        bool CanSwim() const { return (GetCreatureTemplate()->InhabitType & INHABIT_WATER) != 0 || IsPet(); }
+        bool CanFly()  const override { return (GetCreatureTemplate()->InhabitType & INHABIT_AIR) != 0; }
 
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() { return m_reactState; }
@@ -545,7 +545,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapObject
         void AllLootRemovedFromCorpse();
 
         uint16 GetLootMode() { return m_LootMode; }
-        bool HasLootMode(uint16 lootMode) { return m_LootMode & lootMode; }
+        bool HasLootMode(uint16 lootMode) { return (m_LootMode & lootMode) != 0; }
         void SetLootMode(uint16 lootMode) { m_LootMode = lootMode; }
         void AddLootMode(uint16 lootMode) { m_LootMode |= lootMode; }
         void RemoveLootMode(uint16 lootMode) { m_LootMode &= ~lootMode; }

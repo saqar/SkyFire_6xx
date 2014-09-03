@@ -18,41 +18,57 @@
 #ifndef __BATTLENETBITSTREAM_H__
 #define __BATTLENETBITSTREAM_H__
 
+#include "Common.h"
 #include "ByteConverter.h"
+#include "Networking/MessageBuffer.h"
 #include <exception>
-#include <string>
 #include <vector>
 #include <type_traits>
-#include <ace/Auto_Ptr.h>
-#include <ace/Stack_Trace.h>
+#include <memory>
 
 namespace Battlenet
 {
     class BitStreamPositionException : public std::exception
     {
-    public:
-        BitStreamPositionException() : st(1) { }
+        static uint32 const MessageSize = 128;
 
-        char const* what() const
+    public:
+        BitStreamPositionException(bool read, uint32 operationSize, uint32 position, uint32 streamSize)
         {
-            return st.c_str();
+            memset(_message, 0, MessageSize);
+            snprintf(_message, MessageSize, "Attempted to %s more bits (%u) %s stream than %s (%u)\n",
+                (read ? "read" : "write"),
+                operationSize + position,
+                (read ? "from" : "to"),
+                (read ? "exist" : "allowed"),
+                streamSize);
         }
 
-        ACE_Stack_Trace st;
+        char const* what() const throw()
+        {
+            return _message;
+        }
+
+    private:
+        char _message[MessageSize];
     };
 
     class BitStream
     {
     public:
-        static uint32 const MaxSize = 0x1000;
+        static uint32 const MaxSize = 0x4000;
 
         // length : The maximum number of bytes to read
-        BitStream(uint32 length) : _numBits(length * 8), _readPos(0), _writePos(0)
+        BitStream(uint32 length) : _writePos(length * 8), _readPos(0)
         {
             _buffer.resize(length, 0);
         }
 
-        BitStream() : _numBits(0), _readPos(0), _writePos(0)
+        BitStream(MessageBuffer&& buffer) : _writePos(buffer.GetReadyDataSize() * 8), _readPos(0), _buffer(buffer.Move())
+        {
+        }
+
+        BitStream() : _writePos(0), _readPos(0)
         {
             _buffer.reserve(0x1000);
         }
@@ -72,13 +88,13 @@ namespace Battlenet
             return str;
         }
 
-        ACE_Auto_Array_Ptr<uint8> ReadBytes(uint32 count)
+        std::unique_ptr<uint8[]> ReadBytes(uint32 count)
         {
             AlignToNextByte();
-            if (_readPos + count * 8 > _numBits)
-                throw BitStreamPositionException();
+            if (_readPos + count * 8 > _writePos)
+                throw BitStreamPositionException(true, count * 8, _readPos, _writePos);
 
-            ACE_Auto_Array_Ptr<uint8> buf(new uint8[count]);
+            std::unique_ptr<uint8[]> buf(new uint8[count]);
             memcpy(buf.get(), &_buffer[_readPos >> 3], count);
             _readPos += count * 8;
             return buf;
@@ -108,6 +124,9 @@ namespace Battlenet
         T Read(uint32 bitCount)
         {
             static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "T must be an integer type");
+
+            if (_readPos + bitCount >= _writePos)
+                throw BitStreamPositionException(true, bitCount, _readPos, _writePos);
 
             uint64 ret = 0;
             while (bitCount != 0)
@@ -139,7 +158,7 @@ namespace Battlenet
                 return;
 
             if ((_writePos >> 3) + count > MaxSize)
-                throw BitStreamPositionException();
+                throw BitStreamPositionException(false, count * 8, _writePos, MaxSize * 8);
 
             _buffer.resize(_buffer.size() + count);
             memcpy(&_buffer[_writePos >> 3], data, count);
@@ -170,7 +189,7 @@ namespace Battlenet
             static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "T must be an integer type");
 
             if (_writePos + bitCount >= 8 * MaxSize)
-                throw BitStreamPositionException();
+                throw BitStreamPositionException(false, bitCount, _writePos, MaxSize * 8);
 
             while (bitCount != 0)
             {
@@ -185,7 +204,7 @@ namespace Battlenet
                 uint8 secondHalf = (uint8)((((uint8)(1 << bitsLeftInByte) - 1) & (uint8)(value >> bitCount)) << bitPos);
 
                 if (_buffer.size() > (_writePos >> 3))
-                    _buffer[_writePos >> 3] = (uint8)(_buffer[_writePos >> 3] & firstHalf | secondHalf);
+                    _buffer[_writePos >> 3] = (uint8)((_buffer[_writePos >> 3] & firstHalf) | secondHalf);
                 else
                     _buffer.push_back(secondHalf);
 
@@ -195,26 +214,27 @@ namespace Battlenet
 
         void SetReadPos(uint32 bits)
         {
-            if (bits >= _numBits)
-                throw BitStreamPositionException();
+            if (bits >= _writePos)
+                throw BitStreamPositionException(true, bits, 0, _writePos);
 
             _readPos = bits;
         }
 
-        bool IsRead() const { return _readPos >= _numBits; }
+        bool IsRead() const { return _readPos >= _writePos; }
 
         uint8* GetBuffer() { return _buffer.data(); }
+        uint8 const* GetBuffer() const { return _buffer.data(); }
 
-        size_t GetSize() const { return _buffer.size(); }
-
-        void FinishReading() { _readPos = _numBits; }
+        size_t GetSize() const { return ((_writePos + 7) & ~7) / 8; }
 
     private:
-        std::vector<uint8> _buffer;
-        uint32 _numBits;
-        uint32 _readPos;
         uint32 _writePos;
+        uint32 _readPos;
+        std::vector<uint8> _buffer;
     };
+
+    template<>
+    bool BitStream::Read<bool>(uint32 bitCount);
 }
 
 #endif // __BATTLENETBITSTREAM_H__

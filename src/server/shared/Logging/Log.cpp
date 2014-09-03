@@ -272,7 +272,7 @@ void Log::write(LogMessage* msg) const
     msg->text.append("\n");
 
     if (worker)
-        worker->enqueue(new LogOperation(logger, msg));
+        worker->Enqueue(new LogOperation(logger, msg));
     else
     {
         logger->write(*msg);
@@ -282,9 +282,10 @@ void Log::write(LogMessage* msg) const
 
 std::string Log::GetTimestampStr()
 {
-    time_t t = time(NULL);
-    tm aTm;
-    ACE_OS::localtime_r(&t, &aTm);
+    time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    std::tm aTm;
+    localtime_r(&tt, &aTm);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)

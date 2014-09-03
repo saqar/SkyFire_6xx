@@ -45,9 +45,9 @@ Location MoveSpline::ComputePosition() const
 
     if (splineflags.done && splineflags.isFacing())
     {
-        if (splineflags.final_angle)
+        if (splineflags.Final_angle)
             c.orientation = facing.angle;
-        else if (splineflags.final_point)
+        else if (splineflags.Final_point)
             c.orientation = atan2(facing.f.y - c.y, facing.f.x - c.x);
         //nothing to do for MoveSplineFlag::Final_Target flag
     }
@@ -287,11 +287,11 @@ std::string MoveSpline::ToString() const
     str << "MoveSpline" << std::endl;
     str << "spline Id: " << GetId() << std::endl;
     str << "flags: " << splineflags.ToString() << std::endl;
-    if (splineflags.final_angle)
+    if (splineflags.Final_angle)
         str << "facing  angle: " << facing.angle;
-    else if (splineflags.final_target)
+    else if (splineflags.Final_target)
         str << "facing target: " << facing.target;
-    else if (splineflags.final_point)
+    else if (splineflags.Final_point)
         str << "facing  point: " << facing.f.x << " " << facing.f.y << " " << facing.f.z;
     str << std::endl;
     str << "time passed: " << time_passed << std::endl;

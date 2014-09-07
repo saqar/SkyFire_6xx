@@ -22,21 +22,25 @@
 #include <boost/array.hpp>
 #include "RASession.h"
 #include "AccountMgr.h"
+#include "Log.h"
+#include "DatabaseEnv.h"
+#include "World.h"
+#include "Config.h"
 
 using boost::asio::ip::tcp;
 
 void RASession::Start()
 {
-    boost::asio::socket_base::bytes_readable command(true);
-    _socket.io_control(command);
-    std::size_t bytes_readable = command.get();
+    // wait 1 second for active connections to send negotiation request
+    for (int counter = 0; counter < 10 && _socket.available() == 0; counter++)
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // Check if there are bytes available, if they are, then the client is requesting the negotiation
-    if (bytes_readable > 0)
+    if (_socket.available() > 0)
     {
         // Handle subnegotiation
         boost::array<char, 1024> buf;
-        std::size_t length = _socket.read_some(boost::asio::buffer(buf));
+        _socket.read_some(boost::asio::buffer(buf));
 
         // Send the end-of-negotiation packet
         uint8 const reply[2] = { 0xFF, 0xF0 };
@@ -72,7 +76,7 @@ void RASession::Start()
     Send(std::string(std::string(sWorld->GetMotd()) + "\r\n").c_str());
 
     // Read commands
-    while (true)
+    for (;;)
     {
         Send("TC>");
         std::string command = ReadString();
@@ -117,7 +121,7 @@ bool RASession::CheckAccessLevel(const std::string& user)
 {
     std::string safeUser = user;
 
-    AccountMgr::normalizeString(safeUser);
+    Utf8ToUpperOnlyLatin(safeUser);
 
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ACCESS);
     stmt->setString(0, safeUser);
@@ -148,12 +152,10 @@ bool RASession::CheckAccessLevel(const std::string& user)
 bool RASession::CheckPassword(const std::string& user, const std::string& pass)
 {
     std::string safe_user = user;
-    std::transform(safe_user.begin(), safe_user.end(), safe_user.begin(), ::toupper);
-    AccountMgr::normalizeString(safe_user);
+    Utf8ToUpperOnlyLatin(safe_user);
 
     std::string safe_pass = pass;
-    AccountMgr::normalizeString(safe_pass);
-    std::transform(safe_pass.begin(), safe_pass.end(), safe_pass.begin(), ::toupper);
+    Utf8ToUpperOnlyLatin(safe_pass);
 
     std::string hash = AccountMgr::CalculateShaPassHash(safe_user, safe_pass);
 
@@ -211,7 +213,7 @@ void RASession::CommandPrint(void* callbackArg, const char* text)
     session->Send(text);
 }
 
-void RASession::CommandFinished(void* callbackArg, bool success)
+void RASession::CommandFinished(void* callbackArg, bool /*success*/)
 {
     RASession* session = static_cast<RASession*>(callbackArg);
     session->_commandExecuting->set_value();

@@ -162,6 +162,8 @@ class InstanceSaveManager
             return &instance;
         }
 
+        void Unload();
+
         typedef std::unordered_map<uint32 /*InstanceId*/, InstanceSave*> InstanceSaveHashMap;
 
         /* resetTime is a global propery of each (raid/heroic) map

@@ -20,7 +20,7 @@
 #include "BattlenetBitStream.h"
 #include "BattlenetSessionManager.h"
 #include "Database/DatabaseEnv.h"
-#include "HmachHash.h"
+#include "HmacHash.h"
 #include "Log.h"
 #include "RealmList.h"
 #include "SHA256.h"
@@ -31,7 +31,7 @@ std::map<Battlenet::PacketHeader, Battlenet::Session::PacketHandler> InitHandler
 {
     std::map<Battlenet::PacketHeader, Battlenet::Session::PacketHandler> handlers;
 
-    handlers[Battlenet::PacketHeader(Battlenet::CMSG_AUTH_CHALLENGE, Battlenet::AUTHENTICATION)] = &Battlenet::Session::HandleAuthChallenge;
+    handlers[Battlenet::PacketHeader(Battlenet::CMSG_INFORMATION_REQUEST, Battlenet::AUTHENTICATION)] = &Battlenet::Session::HandleAuthChallenge;
     handlers[Battlenet::PacketHeader(Battlenet::CMSG_AUTH_RECONNECT, Battlenet::AUTHENTICATION)] = &Battlenet::Session::HandleAuthReconnect;
     handlers[Battlenet::PacketHeader(Battlenet::CMSG_AUTH_PROOF_RESPONSE, Battlenet::AUTHENTICATION)] = &Battlenet::Session::HandleAuthProofResponse;
 

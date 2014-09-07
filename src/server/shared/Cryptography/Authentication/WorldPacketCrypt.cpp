@@ -17,7 +17,7 @@
 */
 
 #include "WorldPacketCrypt.h"
-#include "HmachHash.h"
+#include "HmacHash.h"
 #include "Cryptography/BigNumber.h"
 
 WorldPacketCrypt::WorldPacketCrypt() : PacketCrypt(SHA_DIGEST_LENGTH)

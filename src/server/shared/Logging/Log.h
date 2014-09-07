@@ -1,21 +1,21 @@
 /*
- * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef TRINITYCORE_LOG_H
 #define TRINITYCORE_LOG_H
@@ -35,55 +35,55 @@ class Log
 {
     typedef std::unordered_map<std::string, Logger> LoggerMap;
     typedef std::unordered_map<std::string, Logger const*> CachedLoggerContainer;
-    private:
-        Log();
-        ~Log();
+private:
+    Log();
+    ~Log();
 
-    public:
-        static Log* instance()
-        {
-            static Log* instance = new Log();
-            return instance;
-        }
+public:
+    static Log* instance()
+    {
+        static Log* instance = new Log();
+        return instance;
+    }
 
-        void LoadFromConfig();
-        void Close();
-        bool ShouldLog(std::string const& type, LogLevel level) const;
-        bool SetLogLevel(std::string const& name, char const* level, bool isLogger = true);
+    void LoadFromConfig();
+    void Close();
+    bool ShouldLog(std::string const& type, LogLevel level) const;
+    bool SetLogLevel(std::string const& name, char const* level, bool isLogger = true);
 
-        void outTrace(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outDebug(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outInfo(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outWarn(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outError(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outFatal(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+    void outTrace(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+    void outDebug(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+    void outInfo(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+    void outWarn(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+    void outError(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+    void outFatal(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
 
-        void outCommand(uint32 account, const char * str, ...) ATTR_PRINTF(3, 4);
-        void outCharDump(char const* str, uint32 account_id, uint32 guid, char const* name);
-        static std::string GetTimestampStr();
+    void outCommand(uint32 account, const char * str, ...) ATTR_PRINTF(3, 4);
+    void outCharDump(char const* str, uint32 account_id, uint32 guid, char const* name);
+    static std::string GetTimestampStr();
 
-        void SetRealmId(uint32 id);
+    void SetRealmId(uint32 id);
 
-    private:
-        void vlog(std::string const& f, LogLevel level, char const* str, va_list argptr);
-        void write(LogMessage* msg) const;
+private:
+    void vlog(std::string const& f, LogLevel level, char const* str, va_list argptr);
+    void write(LogMessage* msg) const;
 
-        Logger const* GetLoggerByType(std::string const& type) const;
-        Appender* GetAppenderByName(std::string const& name);
-        uint8 NextAppenderId();
-        void CreateAppenderFromConfig(std::string const& name);
-        void CreateLoggerFromConfig(std::string const& name);
-        void ReadAppendersFromConfig();
-        void ReadLoggersFromConfig();
+    Logger const* GetLoggerByType(std::string const& type) const;
+    Appender* GetAppenderByName(std::string const& name);
+    uint8 NextAppenderId();
+    void CreateAppenderFromConfig(std::string const& name);
+    void CreateLoggerFromConfig(std::string const& name);
+    void ReadAppendersFromConfig();
+    void ReadLoggersFromConfig();
 
-        AppenderMap appenders;
-        LoggerMap loggers;
-        uint8 AppenderId;
+    AppenderMap appenders;
+    LoggerMap loggers;
+    uint8 AppenderId;
 
-        std::string m_logsDir;
-        std::string m_logsTimestamp;
+    std::string m_logsDir;
+    std::string m_logsTimestamp;
 
-        LogWorker* worker;
+    LogWorker* worker;
 };
 
 inline Logger const* Log::GetLoggerByType(std::string const& type) const
@@ -98,7 +98,7 @@ inline Logger const* Log::GetLoggerByType(std::string const& type) const
     std::string parentLogger = LOGGER_ROOT;
     size_t found = type.find_last_of(".");
     if (found != std::string::npos)
-        parentLogger = type.substr(0,found);
+        parentLogger = type.substr(0, found);
 
     return GetLoggerByType(parentLogger);
 }
@@ -124,7 +124,7 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
         do {                                                        \
             if (sLog->ShouldLog(filterType__, level__))             \
                 sLog->call__(filterType__, __VA_ARGS__);            \
-        } while (0)
+                } while (0)
 #else
 #define TC_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
         __pragma(warning(push))                                     \
@@ -132,7 +132,7 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
         do {                                                        \
             if (sLog->ShouldLog(filterType__, level__))             \
                 sLog->call__(filterType__, __VA_ARGS__);            \
-        } while (0)                                                 \
+                } while (0)                                                 \
         __pragma(warning(pop))
 #endif
 

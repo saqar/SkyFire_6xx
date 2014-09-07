@@ -1,21 +1,21 @@
 /*
- * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "Log.h"
 #include "Common.h"
@@ -101,58 +101,58 @@ void Log::CreateAppenderFromConfig(std::string const& appenderName)
 
     switch (type)
     {
-        case APPENDER_CONSOLE:
+    case APPENDER_CONSOLE:
+    {
+        AppenderConsole* appender = new AppenderConsole(NextAppenderId(), name, level, flags);
+        appenders[appender->getId()] = appender;
+        if (size > 3)
+            appender->InitColors(*(++iter));
+        //fprintf(stdout, "Log::CreateAppenderFromConfig: Created Appender %s (%u), Type CONSOLE, Mask %u\n", appender->getName().c_str(), appender->getId(), appender->getLogLevel());
+        break;
+    }
+    case APPENDER_FILE:
+    {
+        std::string filename;
+        std::string mode = "a";
+
+        if (size < 4)
         {
-            AppenderConsole* appender = new AppenderConsole(NextAppenderId(), name, level, flags);
-            appenders[appender->getId()] = appender;
-            if (size > 3)
-                appender->InitColors(*(++iter));
-            //fprintf(stdout, "Log::CreateAppenderFromConfig: Created Appender %s (%u), Type CONSOLE, Mask %u\n", appender->getName().c_str(), appender->getId(), appender->getLogLevel());
-            break;
+            fprintf(stderr, "Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name.c_str());
+            return;
         }
-        case APPENDER_FILE:
+
+        filename = *(++iter);
+
+        if (size > 4)
+            mode = *(++iter);
+
+        if (flags & APPENDER_FLAGS_USE_TIMESTAMP)
         {
-            std::string filename;
-            std::string mode = "a";
-
-            if (size < 4)
-            {
-                fprintf(stderr, "Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name.c_str());
-                return;
-            }
-
-            filename = *(++iter);
-
-            if (size > 4)
-                mode = *(++iter);
-
-            if (flags & APPENDER_FLAGS_USE_TIMESTAMP)
-            {
-                size_t dot_pos = filename.find_last_of(".");
-                if (dot_pos != filename.npos)
-                    filename.insert(dot_pos, m_logsTimestamp);
-                else
-                    filename += m_logsTimestamp;
-            }
-
-            uint64 maxFileSize = 0;
-            if (size > 5)
-                maxFileSize = atoi(*(++iter));
-
-            uint8 id = NextAppenderId();
-            appenders[id] = new AppenderFile(id, name, level, filename.c_str(), m_logsDir.c_str(), mode.c_str(), flags, maxFileSize);
-            //fprintf(stdout, "Log::CreateAppenderFromConfig: Created Appender %s (%u), Type FILE, Mask %u, File %s, Mode %s\n", name.c_str(), id, level, filename.c_str(), mode.c_str());
-            break;
+            size_t dot_pos = filename.find_last_of(".");
+            if (dot_pos != filename.npos)
+                filename.insert(dot_pos, m_logsTimestamp);
+            else
+                filename += m_logsTimestamp;
         }
-        case APPENDER_DB:
-        {
-            uint8 id = NextAppenderId();
-            appenders[id] = new AppenderDB(id, name, level);
-            break;
-        }
-        default:
-            fprintf(stderr, "Log::CreateAppenderFromConfig: Unknown type %d for appender %s\n", type, name.c_str());
-            break;
+
+        uint64 maxFileSize = 0;
+        if (size > 5)
+            maxFileSize = atoi(*(++iter));
+
+        uint8 id = NextAppenderId();
+        appenders[id] = new AppenderFile(id, name, level, filename.c_str(), m_logsDir.c_str(), mode.c_str(), flags, maxFileSize);
+        //fprintf(stdout, "Log::CreateAppenderFromConfig: Created Appender %s (%u), Type FILE, Mask %u, File %s, Mode %s\n", name.c_str(), id, level, filename.c_str(), mode.c_str());
+        break;
+    }
+    case APPENDER_DB:
+    {
+        uint8 id = NextAppenderId();
+        appenders[id] = new AppenderDB(id, name, level);
+        break;
+    }
+    default:
+        fprintf(stderr, "Log::CreateAppenderFromConfig: Unknown type %d for appender %s\n", type, name.c_str());
+        break;
     }
 }
 
@@ -242,7 +242,7 @@ void Log::ReadLoggersFromConfig()
     if (loggers.find(LOGGER_ROOT) == loggers.end())
     {
         fprintf(stderr, "Wrong Loggers configuration. Review your Logger config section.\n"
-                        "Creating default loggers [root (Error), server (Info)] to console\n");
+            "Creating default loggers [root (Error), server (Info)] to console\n");
 
         Close(); // Clean any Logger or Appender created
 
@@ -293,7 +293,7 @@ std::string Log::GetTimestampStr()
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
     char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm.tm_year+1900, aTm.tm_mon+1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
+    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
     return std::string(buf);
 }
 
@@ -392,7 +392,7 @@ void Log::outCharDump(char const* str, uint32 accountId, uint32 guid, char const
 
     std::ostringstream ss;
     ss << "== START DUMP == (account: " << accountId << " guid: " << guid << " name: " << name
-       << ")\n" << str << "\n== END DUMP ==\n";
+        << ")\n" << str << "\n== END DUMP ==\n";
 
     LogMessage* msg = new LogMessage(LOG_LEVEL_INFO, "entities.player.dump", ss.str());
     std::ostringstream param;

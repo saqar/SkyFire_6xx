@@ -35,13 +35,13 @@ const size_t bufferSize = 4096;
 class RASession : public std::enable_shared_from_this <RASession>
 {
 public:
-    RASession(tcp::socket socket) : _socket(std::move(socket)), _commandExecuting(nullptr)
+    RASession(tcp::socket&& socket) : _socket(std::move(socket)), _commandExecuting(nullptr)
     {
     }
 
     void Start();
 
-    const std::string GetRemoteIpAddress() const { return _socket.remote_endpoint().address().to_string(); };
+    const std::string GetRemoteIpAddress() const { return _socket.remote_endpoint().address().to_string(); }
     unsigned short GetRemotePort() const { return _socket.remote_endpoint().port(); }
 
 private:
@@ -52,7 +52,7 @@ private:
     bool ProcessCommand(std::string& command);
 
     static void CommandPrint(void* callbackArg, const char* text);
-    static void CommandFinished(void* callbackArg, bool success);
+    static void CommandFinished(void* callbackArg, bool);
 
     tcp::socket _socket;
     boost::asio::streambuf _readBuffer;

@@ -17,7 +17,7 @@
 */
 
 #include "BattlenetPacketCrypt.h"
-#include "HmachHash.h"
+#include "HmacHash.h"
 #include "Cryptography/BigNumber.h"
 
 Battlenet::PacketCrypt::PacketCrypt() : ::PacketCrypt(SHA256_DIGEST_LENGTH)

@@ -30,12 +30,12 @@ namespace Battlenet
     namespace AccountMgr
     {
         AccountOpResult CreateBattlenetAccount(std::string email, std::string password);
-        AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword);
         AccountOpResult ChangePassword(uint32 accountId, std::string newPassword);
         bool CheckPassword(uint32 accountId, std::string password);
 
         uint32 GetId(std::string const& username);
         bool GetName(uint32 accountId, std::string& name);
+        uint32 GetIdByGameAccount(uint32 gameAccountId);
 
         std::string CalculateShaPassHash(std::string const& name, std::string const& password);
     }

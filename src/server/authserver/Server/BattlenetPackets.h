@@ -35,49 +35,63 @@ namespace Battlenet
 
     enum Channel
     {
-        AUTHENTICATION = 0,
-        CONNECTION = 1,
-        WOW = 2,
-        FRIEND = 3,
-        PRESENCE = 4,
-        CHAT = 5,
-        SUPPORT = 7,
-        ACHIEVEMENT = 8,
-        CACHE = 11,
-        PROFILE = 14
+        AUTHENTICATION                      = 0,
+        CONNECTION                          = 1,
+        WOW                                 = 2,
+        FRIEND                              = 3,
+        PRESENCE                            = 4,
+        CHAT                                = 5,
+        SUPPORT                             = 7,
+        ACHIEVEMENT                         = 8,
+        CACHE                               = 11,
+        PROFILE                             = 14
     };
 
     enum AuthOpcode
     {
-        CMSG_AUTH_CHALLENGE = 0x9,
-        CMSG_AUTH_RECONNECT = 0x1,
-        CMSG_AUTH_PROOF_RESPONSE = 0x2,
+        CMSG_INFORMATION_REQUEST_OLD        = 0x00,
+        CMSG_AUTH_RECONNECT                 = 0x01,
+        CMSG_AUTH_PROOF_RESPONSE            = 0x02,
+        CMSG_INFORMATION_REQUEST            = 0x09,
+        CMSG_SINGLE_SIGN_ON                 = 0x0A,
 
-        SMSG_AUTH_COMPLETE = 0x0,
-        SMSG_AUTH_RESUME = 0x1,
-        SMSG_AUTH_PROOF_REQUEST = 0x2
+        SMSG_AUTH_COMPLETE                  = 0x00, // ServerAuthComplete
+        SMSG_AUTH_RESUME                    = 0x01, 
+        SMSG_AUTH_PROOF_REQUEST             = 0x02  // ProofRequest
     };
 
     enum ConnectionOpcodes
     {
-        CMSG_PING = 0x0,
-        CMSG_ENABLE_ENCRYPTION = 0x5,
-        CMSG_DISCONNECT = 0x6,
-        //CMSG_INVALID_PACKET = 0x9,
+        CMSG_PING                           = 0x00,
+        CMSG_ENABLE_ENCRYPTION              = 0x05,
+        CMSG_DISCONNECT                     = 0x06,
+        CMSG_INVALID_PACKET                 = 0x09,
 
-        SMSG_PONG = 0x0
+        SMSG_PONG                           = 0x00
     };
 
     enum WoWOpcodes
     {
-        CMSG_REALM_UPDATE_SUBSCRIBE = 0x0,
-        CMSG_REALM_UPDATE_UNSUBSCRIBE = 0x1,
-        CMSG_JOIN_REQUEST = 0x8,
+        CMSG_REALM_UPDATE_SUBSCRIBE         = 0x00,
+        CMSG_REALM_UPDATE_UNSUBSCRIBE       = 0x01,
+        CMSG_JOIN_REQUEST                   = 0x08,
 
-        SMSG_CHARACTER_COUNTS = 0x0,
-        SMSG_REALM_UPDATE = 0x2,
-        SMSG_REALM_UPDATE_END = 0x3,
-        SMSG_JOIN_RESULT = 0x8
+        SMSG_REALM_UPDATE_BEGIN             = 0x00, // RealmComplete
+        SMSG_REALM_UPDATE                   = 0x02, // RealmUpdate
+        SMSG_REALM_UPDATE_END               = 0x03, 
+        SMSG_JOIN_RESULT                    = 0x08  // JoinResponse
+    };
+
+    enum Friend
+    {
+        CMSG_FRIEND_INVITE                  = 0x16,
+
+        SMSG_FRIEND_INVITE_RESULT           = 0x01,
+    };
+
+    enum Chache
+    {
+        CMSG_CACHE                          = 0x09
     };
 
     struct PacketHeader
@@ -154,7 +168,7 @@ namespace Battlenet
     public:
         AuthChallenge(PacketHeader const& header, BitStream& stream) : ClientPacket(header, stream)
         {
-            ASSERT(header == PacketHeader(CMSG_AUTH_CHALLENGE, AUTHENTICATION) && "Invalid packet header for AuthChallenge");
+            ASSERT(header == PacketHeader(CMSG_INFORMATION_REQUEST, AUTHENTICATION) && "Invalid packet header for AuthChallenge");
         }
 
         void Read() override;
@@ -283,7 +297,7 @@ namespace Battlenet
     class RealmCharacterCounts final : public ServerPacket
     {
     public:
-        RealmCharacterCounts() : ServerPacket(PacketHeader(SMSG_CHARACTER_COUNTS, WOW))
+        RealmCharacterCounts() : ServerPacket(PacketHeader(SMSG_REALM_UPDATE_BEGIN, WOW))
         {
         }
         ~RealmCharacterCounts();

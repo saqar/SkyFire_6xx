@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,8 +18,8 @@
 #ifndef _PREPAREDSTATEMENT_H
 #define _PREPAREDSTATEMENT_H
 
-#include "SQLOperation.h"
 #include <future>
+#include "SQLOperation.h"
 
 #ifdef __APPLE__
 #undef TYPE_BOOL
@@ -103,6 +101,9 @@ class PreparedStatement
         MySQLPreparedStatement* m_stmt;
         uint32 m_index;
         std::vector<PreparedStatementData> statement_data;    //- Buffer of parameters, not tied to MySQL in any way yet
+
+        PreparedStatement(PreparedStatement const& right) = delete;
+        PreparedStatement& operator=(PreparedStatement const& right) = delete;
 };
 
 //- Class of which the instances are unique per MySQLConnection
@@ -147,6 +148,9 @@ class MySQLPreparedStatement
         uint32 m_paramCount;
         std::vector<bool> m_paramsSet;
         MYSQL_BIND* m_bind;
+
+        MySQLPreparedStatement(MySQLPreparedStatement const& right) = delete;
+        MySQLPreparedStatement& operator=(MySQLPreparedStatement const& right) = delete;
 };
 
 typedef std::future<PreparedQueryResult> PreparedQueryResultFuture;
@@ -155,16 +159,16 @@ typedef std::promise<PreparedQueryResult> PreparedQueryResultPromise;
 //- Lower-level class, enqueuable operation
 class PreparedStatementTask : public SQLOperation
 {
-public:
-    PreparedStatementTask(PreparedStatement* stmt, bool async = false);
-    ~PreparedStatementTask();
+    public:
+        PreparedStatementTask(PreparedStatement* stmt, bool async = false);
+        ~PreparedStatementTask();
 
-    bool Execute() override;
-    PreparedQueryResultFuture GetFuture() { return m_result->get_future(); }
+        bool Execute() override;
+        PreparedQueryResultFuture GetFuture() { return m_result->get_future(); }
 
-protected:
-    PreparedStatement* m_stmt;
-    bool m_has_result;
-    PreparedQueryResultPromise* m_result;
+    protected:
+        PreparedStatement* m_stmt;
+        bool m_has_result;
+        PreparedQueryResultPromise* m_result;
 };
 #endif

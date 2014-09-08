@@ -45,7 +45,7 @@ class boss_rage_winterchill : public CreatureScript
 public:
     boss_rage_winterchill() : CreatureScript("boss_rage_winterchill") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_rage_winterchillAI(creature);
     }
@@ -64,7 +64,7 @@ public:
         uint32 IceboltTimer;
         bool go;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             damageTaken = 0;
             FrostArmorTimer = 37000;
@@ -76,19 +76,19 @@ public:
                 instance->SetData(DATA_RAGEWINTERCHILLEVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance && IsEvent)
                 instance->SetData(DATA_RAGEWINTERCHILLEVENT, IN_PROGRESS);
             Talk(SAY_ONAGGRO);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_ONSLAY);
         }
 
-        void WaypointReached(uint32 waypointId) override
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             if (waypointId == 7 && instance)
             {
@@ -98,7 +98,7 @@ public:
             }
         }
 
-        void JustDied(Unit* killer) override
+        void JustDied(Unit* killer) OVERRIDE
         {
             hyjal_trashAI::JustDied(killer);
             if (instance && IsEvent)
@@ -106,7 +106,7 @@ public:
             Talk(SAY_ONDEATH);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (IsEvent)
             {

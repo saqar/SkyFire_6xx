@@ -64,7 +64,7 @@ class boss_koralon : public CreatureScript
             {
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 DoCast(me, SPELL_BURNING_FURY);
 
@@ -76,7 +76,7 @@ class boss_koralon : public CreatureScript
                 _EnterCombat();
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -115,7 +115,7 @@ class boss_koralon : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_koralonAI(creature);
         }
@@ -135,12 +135,12 @@ class npc_flame_warder : public CreatureScript
             {
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 events.Reset();
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 DoZoneInCombat();
 
@@ -148,7 +148,7 @@ class npc_flame_warder : public CreatureScript
                 events.ScheduleEvent(EVENT_FW_METEOR_FISTS, 10000);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -179,7 +179,7 @@ class npc_flame_warder : public CreatureScript
             EventMap events;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_flame_warderAI(creature);
         }
@@ -194,7 +194,7 @@ class spell_koralon_meteor_fists : public SpellScriptLoader
         {
             PrepareAuraScript(spell_koralon_meteor_fists_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_METEOR_FISTS_DAMAGE))
                     return false;
@@ -207,13 +207,13 @@ class spell_koralon_meteor_fists : public SpellScriptLoader
                 GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_METEOR_FISTS_DAMAGE, true, NULL, aurEff);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectProc += AuraEffectProcFn(spell_koralon_meteor_fists_AuraScript::TriggerFists, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_koralon_meteor_fists_AuraScript();
         }
@@ -228,7 +228,7 @@ class spell_koralon_meteor_fists_damage : public SpellScriptLoader
         {
             PrepareSpellScript(spell_koralon_meteor_fists_damage_SpellScript);
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 _chainTargets = 0;
                 return true;
@@ -245,7 +245,7 @@ class spell_koralon_meteor_fists_damage : public SpellScriptLoader
                     SetHitDamage(GetHitDamage() / (_chainTargets + 1));
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_koralon_meteor_fists_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_TARGET_ENEMY);
                 OnHit += SpellHitFn(spell_koralon_meteor_fists_damage_SpellScript::CalculateSplitDamage);
@@ -255,7 +255,7 @@ class spell_koralon_meteor_fists_damage : public SpellScriptLoader
             uint8 _chainTargets;
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_koralon_meteor_fists_damage_SpellScript();
         }
@@ -270,7 +270,7 @@ class spell_flame_warder_meteor_fists : public SpellScriptLoader
         {
             PrepareAuraScript(spell_flame_warder_meteor_fists_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_FW_METEOR_FISTS_DAMAGE))
                     return false;
@@ -283,13 +283,13 @@ class spell_flame_warder_meteor_fists : public SpellScriptLoader
                 GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_FW_METEOR_FISTS_DAMAGE, true, NULL, aurEff);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectProc += AuraEffectProcFn(spell_flame_warder_meteor_fists_AuraScript::TriggerFists, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_flame_warder_meteor_fists_AuraScript();
         }

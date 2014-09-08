@@ -53,7 +53,7 @@ class boss_falric : public CreatureScript
 public:
     boss_falric() : CreatureScript("boss_falric") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_falricAI(creature);
     }
@@ -64,7 +64,7 @@ public:
 
         uint8 uiHopelessnessCount;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             boss_horAI::Reset();
 
@@ -74,7 +74,7 @@ public:
                 instance->SetBossState(DATA_FALRIC_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
             if (instance)
@@ -85,7 +85,7 @@ public:
             events.ScheduleEvent(EVENT_DEFILING_HORROR, urand(25000, 45000)); /// @todo adjust timer.
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -93,12 +93,12 @@ public:
                 instance->SetBossState(DATA_FALRIC_EVENT, DONE);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             // Return since we have no target
             if (!UpdateVictim())

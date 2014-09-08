@@ -57,7 +57,7 @@ class boss_herod : public CreatureScript
 public:
     boss_herod() : CreatureScript("boss_herod") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_herodAI(creature);
     }
@@ -71,31 +71,31 @@ public:
         uint32 Cleave_Timer;
         uint32 Whirlwind_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Enrage = false;
             Cleave_Timer = 12000;
             Whirlwind_Timer = 60000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
             DoCast(me, SPELL_RUSHINGCHARGE);
         }
 
-         void KilledUnit(Unit* /*victim*/) override
+         void KilledUnit(Unit* /*victim*/) OVERRIDE
          {
              Talk(SAY_KILL);
          }
 
-         void JustDied(Unit* /*killer*/) override
+         void JustDied(Unit* /*killer*/) OVERRIDE
          {
              for (uint8 i = 0; i < 20; ++i)
                  me->SummonCreature(ENTRY_SCARLET_TRAINEE, 1939.18f, -431.58f, 17.09f, 6.22f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000);
          }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -136,7 +136,7 @@ class npc_scarlet_trainee : public CreatureScript
 public:
     npc_scarlet_trainee() : CreatureScript("npc_scarlet_trainee") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_scarlet_traineeAI(creature);
     }
@@ -150,11 +150,11 @@ public:
 
         uint32 Start_Timer;
 
-        void Reset() override { }
-        void WaypointReached(uint32 /*waypointId*/) override { }
-        void EnterCombat(Unit* /*who*/) override { }
+        void Reset() OVERRIDE { }
+        void WaypointReached(uint32 /*waypointId*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (Start_Timer)
             {

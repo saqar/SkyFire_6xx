@@ -1,20 +1,21 @@
 /*
-* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
-* Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef _TILEASSEMBLER_H_
 #define _TILEASSEMBLER_H_
@@ -37,19 +38,19 @@ namespace VMAP
 
     class ModelPosition
     {
-    private:
-        G3D::Matrix3 iRotation;
-    public:
-        ModelPosition() : iScale(0.0f) { }
-        G3D::Vector3 iPos;
-        G3D::Vector3 iDir;
-        float iScale;
-        void init()
-        {
-            iRotation = G3D::Matrix3::fromEulerAnglesZYX(G3D::pif()*iDir.y / 180.f, G3D::pif()*iDir.x / 180.f, G3D::pif()*iDir.z / 180.f);
-        }
-        G3D::Vector3 transform(const G3D::Vector3& pIn) const;
-        void moveToBasePos(const G3D::Vector3& pBasePos) { iPos -= pBasePos; }
+        private:
+            G3D::Matrix3 iRotation;
+        public:
+            ModelPosition(): iScale(0.0f) { }
+            G3D::Vector3 iPos;
+            G3D::Vector3 iDir;
+            float iScale;
+            void init()
+            {
+                iRotation = G3D::Matrix3::fromEulerAnglesZYX(G3D::pi()*iDir.y/180.f, G3D::pi()*iDir.x/180.f, G3D::pi()*iDir.z/180.f);
+            }
+            G3D::Vector3 transform(const G3D::Vector3& pIn) const;
+            void moveToBasePos(const G3D::Vector3& pBasePos) { iPos -= pBasePos; }
     };
 
     typedef std::map<uint32, ModelSpawn> UniqueEntryMap;
@@ -92,27 +93,27 @@ namespace VMAP
 
     class TileAssembler
     {
-    private:
-        std::string iDestDir;
-        std::string iSrcDir;
-        bool(*iFilterMethod)(char *pName);
-        G3D::Table<std::string, unsigned int > iUniqueNameIds;
-        unsigned int iCurrentUniqueNameId;
-        MapData mapData;
-        std::set<std::string> spawnedModelFiles;
+        private:
+            std::string iDestDir;
+            std::string iSrcDir;
+            bool (*iFilterMethod)(char *pName);
+            G3D::Table<std::string, unsigned int > iUniqueNameIds;
+            unsigned int iCurrentUniqueNameId;
+            MapData mapData;
+            std::set<std::string> spawnedModelFiles;
 
-    public:
-        TileAssembler(const std::string& pSrcDirName, const std::string& pDestDirName);
-        virtual ~TileAssembler();
+        public:
+            TileAssembler(const std::string& pSrcDirName, const std::string& pDestDirName);
+            virtual ~TileAssembler();
 
-        bool convertWorld2();
-        bool readMapSpawns();
-        bool calculateTransformedBound(ModelSpawn &spawn);
-        void exportGameobjectModels();
+            bool convertWorld2();
+            bool readMapSpawns();
+            bool calculateTransformedBound(ModelSpawn &spawn);
+            void exportGameobjectModels();
 
-        bool convertRawFile(const std::string& pModelFilename);
-        void setModelNameFilterMethod(bool(*pFilterMethod)(char *pName)) { iFilterMethod = pFilterMethod; }
-        std::string getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName);
+            bool convertRawFile(const std::string& pModelFilename);
+            void setModelNameFilterMethod(bool (*pFilterMethod)(char *pName)) { iFilterMethod = pFilterMethod; }
+            std::string getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName);
     };
 
 }                                                           // VMAP

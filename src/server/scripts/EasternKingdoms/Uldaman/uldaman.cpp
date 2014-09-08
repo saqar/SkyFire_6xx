@@ -60,16 +60,16 @@ class npc_jadespine_basilisk : public CreatureScript
 
             uint32 uiCslumberTimer;
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 uiCslumberTimer = 2000;
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
             }
 
-            void UpdateAI(uint32 uiDiff) override
+            void UpdateAI(uint32 uiDiff) OVERRIDE
             {
                 //Return since we have no target
                 if (!UpdateVictim())
@@ -98,7 +98,7 @@ class npc_jadespine_basilisk : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_jadespine_basiliskAI(creature);
         }
@@ -113,7 +113,7 @@ class go_keystone_chamber : public GameObjectScript
 public:
     go_keystone_chamber() : GameObjectScript("go_keystone_chamber") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) override
+    bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
     {
         if (InstanceScript* instance = go->GetInstanceScript())
             instance->SetData(DATA_IRONAYA_SEAL, IN_PROGRESS); //door animation and save state.
@@ -137,7 +137,7 @@ class AreaTrigger_at_map_chamber : public AreaTriggerScript
         {
         }
 
-        bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) override
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
         {
             if (player->GetQuestStatus(QUEST_HIDDEN_CHAMBER) == QUEST_STATUS_INCOMPLETE)
                 player->AreaExploredOrEventHappens(QUEST_HIDDEN_CHAMBER);

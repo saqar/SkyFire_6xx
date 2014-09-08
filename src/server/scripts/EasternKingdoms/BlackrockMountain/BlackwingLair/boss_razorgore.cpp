@@ -72,7 +72,7 @@ public:
     {
         boss_razorgoreAI(Creature* creature) : BossAI(creature, BOSS_RAZORGORE) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _Reset();
 
@@ -81,7 +81,7 @@ public:
                 instance->SetData(DATA_EGG_EVENT, NOT_STARTED);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             _JustDied();
             Talk(SAY_DEATH);
@@ -102,19 +102,19 @@ public:
             me->SetHealth(me->GetMaxHealth());
         }
 
-        void DoAction(int32 action) override
+        void DoAction(int32 action) OVERRIDE
         {
             if (action == ACTION_PHASE_TWO)
                 DoChangePhase();
         }
 
-        void DamageTaken(Unit* /*who*/, uint32& damage) override
+        void DamageTaken(Unit* /*who*/, uint32& damage) OVERRIDE
         {
             if (!secondPhase)
                 damage = 0;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -156,7 +156,7 @@ public:
         bool secondPhase;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_razorgoreAI(creature);
     }
@@ -167,7 +167,7 @@ class go_orb_of_domination : public GameObjectScript
 public:
     go_orb_of_domination() : GameObjectScript("go_orb_of_domination") { }
 
-    bool OnGossipHello(Player* player, GameObject* go) override
+    bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
     {
         if (InstanceScript* instance = go->GetInstanceScript())
             if (instance->GetData(DATA_EGG_EVENT) != DONE)
@@ -195,13 +195,13 @@ class spell_egg_event : public SpellScriptLoader
                     instance->SetData(DATA_EGG_EVENT, SPECIAL);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnHit += SpellHitFn(spell_egg_eventSpellScript::HandleOnHit);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_egg_eventSpellScript();
         }

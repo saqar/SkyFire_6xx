@@ -52,7 +52,7 @@ public:
         uint32 MortalStrikeTimer;
         uint32 ResetTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             CleaveTimer                     = urand(1 * IN_MILLISECONDS, 9 * IN_MILLISECONDS);
             FrighteningShoutTimer           = urand(2 * IN_MILLISECONDS, 19 * IN_MILLISECONDS);
@@ -62,17 +62,17 @@ public:
             ResetTimer                      = 5 * IN_MILLISECONDS;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(YELL_AGGRO);
         }
 
-        void JustRespawned() override
+        void JustRespawned() OVERRIDE
         {
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -122,7 +122,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_galvangarAI(creature);
     }

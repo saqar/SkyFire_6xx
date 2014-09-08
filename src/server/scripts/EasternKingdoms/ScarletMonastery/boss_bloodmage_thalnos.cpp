@@ -48,7 +48,7 @@ class boss_bloodmage_thalnos : public CreatureScript
 public:
     boss_bloodmage_thalnos() : CreatureScript("boss_bloodmage_thalnos") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_bloodmage_thalnosAI(creature);
     }
@@ -63,7 +63,7 @@ public:
         uint32 FlameSpike_Timer;
         uint32 FireNova_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             HpYell = false;
             FlameShock_Timer = 10000;
@@ -72,17 +72,17 @@ public:
             FireNova_Timer = 40000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void KilledUnit(Unit* /*Victim*/) override
+        void KilledUnit(Unit* /*Victim*/) OVERRIDE
         {
             Talk(SAY_KILL);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

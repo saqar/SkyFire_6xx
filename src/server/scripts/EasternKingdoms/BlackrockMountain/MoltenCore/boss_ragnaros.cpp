@@ -89,7 +89,7 @@ class boss_ragnaros : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 BossAI::Reset();
                 _emergeTimer = 90000;
@@ -99,7 +99,7 @@ class boss_ragnaros : public CreatureScript
                 me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0);
             }
 
-            void EnterCombat(Unit* victim) override
+            void EnterCombat(Unit* victim) OVERRIDE
             {
                 BossAI::EnterCombat(victim);
                 events.ScheduleEvent(EVENT_ERUPTION, 15000);
@@ -111,13 +111,13 @@ class boss_ragnaros : public CreatureScript
                 events.ScheduleEvent(EVENT_SUBMERGE, 180000);
             }
 
-            void KilledUnit(Unit* /*victim*/) override
+            void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
                 if (urand(0, 99) < 25)
                     Talk(SAY_KILL);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (_introState != 2)
                 {
@@ -306,7 +306,7 @@ class boss_ragnaros : public CreatureScript
             bool _isBanished;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_ragnarosAI(creature);
         }
@@ -324,13 +324,13 @@ class npc_son_of_flame : public CreatureScript
                 instance = me->GetInstanceScript();
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 if (instance)
                     instance->SetData(DATA_RAGNAROS_ADDS, 1);
             }
 
-            void UpdateAI(uint32 /*diff*/) override
+            void UpdateAI(uint32 /*diff*/) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -342,7 +342,7 @@ class npc_son_of_flame : public CreatureScript
             InstanceScript* instance;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_son_of_flameAI(creature);
         }

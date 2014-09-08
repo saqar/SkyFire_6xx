@@ -85,7 +85,7 @@ public:
     {
         boss_novosAI(Creature* creature) : BossAI(creature, DATA_NOVOS) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _Reset();
 
@@ -96,7 +96,7 @@ public:
             SetBubbled(false);
         }
 
-        void EnterCombat(Unit* /* victim */) override
+        void EnterCombat(Unit* /* victim */) OVERRIDE
         {
             _EnterCombat();
             Talk(SAY_AGGRO);
@@ -106,7 +106,7 @@ public:
             SetBubbled(true);
         }
 
-        void AttackStart(Unit* target) override
+        void AttackStart(Unit* target) OVERRIDE
         {
             if (!target)
                 return;
@@ -115,19 +115,19 @@ public:
                 DoStartNoMovement(target);
         }
 
-        void KilledUnit(Unit* who) override
+        void KilledUnit(Unit* who) OVERRIDE
         {
             if (who->GetTypeId() == TYPEID_PLAYER)
                 Talk(SAY_KILL);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             _JustDied();
             Talk(SAY_DEATH);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim() || _bubbled)
                 return;
@@ -156,13 +156,13 @@ public:
             }
         }
 
-        void DoAction(int32 action) override
+        void DoAction(int32 action) OVERRIDE
         {
             if (action == ACTION_CRYSTAL_HANDLER_DIED)
                 CrystalHandlerDied();
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) OVERRIDE
         {
             BossAI::MoveInLineOfSight(who);
 
@@ -174,12 +174,12 @@ public:
                 _ohNovos = false;
         }
 
-        uint32 GetData(uint32 type) const override
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             return type == DATA_NOVOS_ACHIEV && _ohNovos ? 1 : 0;
         }
 
-        void JustSummoned(Creature* summon) override
+        void JustSummoned(Creature* summon) OVERRIDE
         {
             summons.Summon(summon);
         }
@@ -270,7 +270,7 @@ public:
         bool _bubbled;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return GetDrakTharonKeepAI<boss_novosAI>(creature);
     }
@@ -285,14 +285,14 @@ public:
     {
         npc_crystal_channel_targetAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _spell = 0;
             _timer = 0;
             _temp = 0;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (_spell)
             {
@@ -306,14 +306,14 @@ public:
             }
         }
 
-        void SetData(uint32 id, uint32 value) override
+        void SetData(uint32 id, uint32 value) OVERRIDE
         {
             _spell = id;
             _timer = value;
             _temp = value;
         }
 
-        void JustSummoned(Creature* summon) override
+        void JustSummoned(Creature* summon) OVERRIDE
         {
             if (InstanceScript* instance = me->GetInstanceScript())
                 if (uint64 guid = instance->GetData64(DATA_NOVOS))
@@ -333,7 +333,7 @@ public:
         uint32 _temp;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return GetDrakTharonKeepAI<npc_crystal_channel_targetAI>(creature);
     }
@@ -344,7 +344,7 @@ class achievement_oh_novos : public AchievementCriteriaScript
 public:
     achievement_oh_novos() : AchievementCriteriaScript("achievement_oh_novos") { }
 
-    bool OnCheck(Player* /*player*/, Unit* target) override
+    bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
     {
         return target && target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->AI()->GetData(DATA_NOVOS_ACHIEV);
     }
@@ -359,7 +359,7 @@ class spell_novos_summon_minions : public SpellScriptLoader
         {
             PrepareSpellScript(spell_novos_summon_minions_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_COPY_OF_MINIONS))
                     return false;
@@ -372,13 +372,13 @@ class spell_novos_summon_minions : public SpellScriptLoader
                     GetCaster()->CastSpell((Unit*)NULL, SPELL_SUMMON_COPY_OF_MINIONS, true);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_novos_summon_minions_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_novos_summon_minions_SpellScript();
         }

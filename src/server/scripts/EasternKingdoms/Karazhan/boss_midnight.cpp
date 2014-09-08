@@ -55,7 +55,7 @@ class boss_attumen : public CreatureScript
 public:
     boss_attumen() : CreatureScript("boss_attumen") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_attumenAI(creature);
     }
@@ -81,34 +81,34 @@ public:
         uint32 ChargeTimer;                                     //only when mounted
         uint32 ResetTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             ResetTimer = 0;
         }
 
-        void EnterEvadeMode() override
+        void EnterEvadeMode() OVERRIDE
         {
             ScriptedAI::EnterEvadeMode();
             ResetTimer = 2000;
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_KILL);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
             if (Unit* midnight = Unit::GetUnit(*me, Midnight))
                 midnight->Kill(midnight);
         }
 
-        void UpdateAI(uint32 diff) override;
+        void UpdateAI(uint32 diff) OVERRIDE;
 
-        void SpellHit(Unit* /*source*/, const SpellInfo* spell) override
+        void SpellHit(Unit* /*source*/, const SpellInfo* spell) OVERRIDE
         {
             if (spell->Mechanic == MECHANIC_DISARM)
                 Talk(SAY_DISARMED);
@@ -121,7 +121,7 @@ class boss_midnight : public CreatureScript
 public:
     boss_midnight() : CreatureScript("boss_midnight") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_midnightAI(creature);
     }
@@ -134,7 +134,7 @@ public:
         uint8 Phase;
         uint32 Mount_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Phase = 1;
             Attumen = 0;
@@ -144,9 +144,9 @@ public:
             me->SetVisible(true);
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             if (Phase == 2)
             {
@@ -155,7 +155,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

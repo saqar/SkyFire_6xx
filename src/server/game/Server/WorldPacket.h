@@ -42,19 +42,6 @@ class WorldPacket : public ByteBuffer
         {
         }
 
-        WorldPacket& operator=(WorldPacket const& right)
-        {
-            if (this != &right)
-            {
-                m_opcode = right.m_opcode;
-                ByteBuffer::operator =(right);
-            }
-
-            return *this;
-        }
-
-        WorldPacket(Opcodes opcode, MessageBuffer&& buffer) : ByteBuffer(std::move(buffer)), m_opcode(opcode) { }
-
         void Initialize(Opcodes opcode, size_t newres = 200)
         {
             clear();
@@ -64,7 +51,6 @@ class WorldPacket : public ByteBuffer
 
         Opcodes GetOpcode() const { return m_opcode; }
         void SetOpcode(Opcodes opcode) { m_opcode = opcode; }
-        bool IsCompressed() const { return (m_opcode & COMPRESSED_OPCODE_MASK) != 0; }
         void Compress(z_stream_s* compressionStream);
         void Compress(z_stream_s* compressionStream, WorldPacket const* source);
         void SetReceivedOpcode(uint16 opcode) { m_rcvdOpcodeNumber = opcode; }

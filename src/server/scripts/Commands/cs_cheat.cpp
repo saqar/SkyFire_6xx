@@ -34,7 +34,7 @@ class cheat_commandscript : public CommandScript
 public:
     cheat_commandscript() : CommandScript("cheat_commandscript") { }
 
-    ChatCommand* GetCommands() const override
+    ChatCommand* GetCommands() const OVERRIDE
     {
 
         static ChatCommand cheatCommandTable[] =

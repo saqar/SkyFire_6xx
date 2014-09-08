@@ -202,7 +202,7 @@ Unit::Unit(bool isWorldObject) :
     for (uint8 i = 0; i < MAX_GAMEOBJECT_SLOT; ++i)
         m_ObjectSlot[i] = 0;
 
-    m_OverrideAutoattackSpellInfo = 0;
+    m_overrideAutoattackSpellInfo = 0;
     m_auraUpdateIterator = m_ownedAuras.end();
 
     m_interruptMask = 0;
@@ -1827,8 +1827,8 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
     // melee attack spell casted at main hand attack only - no normal melee dmg dealt
     if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra)
         m_currentSpells[CURRENT_MELEE_SPELL]->cast();
-    else if (m_OverrideAutoattackSpellInfo)
-        CastSpell(victim, m_OverrideAutoattackSpellInfo, false);
+    else if (m_overrideAutoattackSpellInfo)
+        CastSpell(victim, m_overrideAutoattackSpellInfo, false);
     else
     {
         // attack can be redirected to another target
@@ -9875,7 +9875,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
     // done scripted mod (take it from owner)
     // Unit* owner = GetOwner() ? GetOwner() : this;
-    // AuraEffectList const& mOverrideClassScript = owner->GetAuraEffectsByType(SPELL_AURA_Override_CLASS_SCRIPTS);
+    // AuraEffectList const& mOverrideClassScript = owner->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
 
     float tmpDamage = float(int32(pdamage) + DoneFlatBenefit) * DoneTotalMod;
 
@@ -9967,7 +9967,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
     }
 
     // .. taken pct: class scripts
-    //*AuraEffectList const& mclassScritAuras = GetAuraEffectsByType(SPELL_AURA_Override_CLASS_SCRIPTS);
+    //*AuraEffectList const& mclassScritAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     //for (AuraEffectList::const_iterator i = mclassScritAuras.begin(); i != mclassScritAuras.end(); ++i)
     //{
     //    switch ((*i)->GetMiscValue())
@@ -14399,7 +14399,7 @@ void Unit::RemoveCharmedBy(Unit* charmer)
 
     if (!charmer)
         charmer = GetCharmer();
-    if (charmer != GetCharmer()) // one aura Overrides another?
+    if (charmer != GetCharmer()) // one aura overrides another?
     {
 //        TC_LOG_FATAL("entities.unit", "Unit::RemoveCharmedBy: this: " UI64FMTD " true charmer: " UI64FMTD " false charmer: " UI64FMTD,
 //            GetGUID(), GetCharmerGUID(), charmer->GetGUID());
@@ -15314,6 +15314,30 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
 
 uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
 {
+    if (totemType == 3211)
+        totemType = SUMMON_TYPE_TOTEM_FIRE;
+
+    if (totemType == 3403)
+        totemType = SUMMON_TYPE_TOTEM_FIRE;
+
+    if (totemType == 3402)
+        totemType = SUMMON_TYPE_TOTEM_WATER;
+
+    if (totemType == 3406)
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
+    if (totemType == 3407)
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
+    if (totemType == 3405)
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
+    if (totemType == 3399)
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
+    if (totemType == 3400)
+        totemType = SUMMON_TYPE_TOTEM_EARTH;
+
     switch (getRace())
     {
         case RACE_ORC:
@@ -15403,6 +15427,23 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
                     return 30784;
                 case SUMMON_TYPE_TOTEM_AIR:     // air
                     return 30781;
+            }
+            break;
+        }
+        case RACE_PANDAREN_NEUTRAL:
+        case RACE_PANDAREN_ALLIANCE:
+        case RACE_PANDAREN_HORDE:
+        {
+            switch (totemType)
+            {
+                case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                    return 41670;
+                case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                    return 41669;
+                case SUMMON_TYPE_TOTEM_WATER:   // water
+                    return 41671;
+                case SUMMON_TYPE_TOTEM_AIR:     // air
+                    return 41668;
             }
             break;
         }

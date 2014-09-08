@@ -49,7 +49,7 @@ class boss_azgalor : public CreatureScript
 public:
     boss_azgalor() : CreatureScript("boss_azgalor") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_azgalorAI(creature);
     }
@@ -71,7 +71,7 @@ public:
 
         bool go;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             damageTaken = 0;
             RainTimer = 20000;
@@ -85,19 +85,19 @@ public:
                 instance->SetData(DATA_AZGALOREVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance && IsEvent)
                 instance->SetData(DATA_AZGALOREVENT, IN_PROGRESS);
             Talk(SAY_ONAGGRO);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_ONSLAY);
         }
 
-        void WaypointReached(uint32 waypointId) override
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             if (waypointId == 7 && instance)
             {
@@ -107,7 +107,7 @@ public:
             }
         }
 
-        void JustDied(Unit* killer) override
+        void JustDied(Unit* killer) OVERRIDE
         {
             hyjal_trashAI::JustDied(killer);
             if (instance && IsEvent)
@@ -115,7 +115,7 @@ public:
             Talk(SAY_ONDEATH);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (IsEvent)
             {
@@ -187,7 +187,7 @@ class npc_lesser_doomguard : public CreatureScript
 public:
     npc_lesser_doomguard() : CreatureScript("npc_lesser_doomguard") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_lesser_doomguardAI(creature);
     }
@@ -207,7 +207,7 @@ public:
         uint64 AzgalorGUID;
         InstanceScript* instance;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             CrippleTimer = 50000;
             WarstompTimer = 10000;
@@ -215,30 +215,30 @@ public:
             CheckTimer = 5000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
         }
 
-        void WaypointReached(uint32 /*waypointId*/) override
+        void WaypointReached(uint32 /*waypointId*/) OVERRIDE
         {
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
             if (me->IsWithinDist(who, 50) && !me->IsInCombat() && me->IsValidAttackTarget(who))
                 AttackStart(who);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (CheckTimer <= diff)
             {

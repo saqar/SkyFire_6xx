@@ -39,7 +39,7 @@ class modify_commandscript : public CommandScript
 public:
     modify_commandscript() : CommandScript("modify_commandscript") { }
 
-    ChatCommand* GetCommands() const override
+    ChatCommand* GetCommands() const OVERRIDE
     {
         static ChatCommand modifyspeedCommandTable[] =
         {

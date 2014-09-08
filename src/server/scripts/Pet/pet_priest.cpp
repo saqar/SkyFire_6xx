@@ -46,7 +46,7 @@ class npc_pet_pri_lightwell : public CreatureScript
                 DoCast(me, SPELL_PRIEST_LIGHTWELL_CHARGES, false);
             }
 
-            void EnterEvadeMode() override
+            void EnterEvadeMode() OVERRIDE
             {
                 if (!me->IsAlive())
                     return;
@@ -57,7 +57,7 @@ class npc_pet_pri_lightwell : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_pet_pri_lightwellAI(creature);
         }
@@ -72,7 +72,7 @@ class npc_pet_pri_shadowfiend : public CreatureScript
         {
             npc_pet_pri_shadowfiendAI(Creature* creature) : PetAI(creature) { }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 if (me->IsSummon())
                     if (Unit* owner = me->ToTempSummon()->GetSummoner())
@@ -81,7 +81,7 @@ class npc_pet_pri_shadowfiend : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_pet_pri_shadowfiendAI(creature);
         }

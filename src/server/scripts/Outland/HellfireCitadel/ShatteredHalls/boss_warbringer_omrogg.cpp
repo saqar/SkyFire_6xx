@@ -142,7 +142,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 RightHeadGUID = 0;
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 if (Unit* LeftHead  = Unit::GetUnit(*me, LeftHeadGUID))
                 {
@@ -191,7 +191,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 ThreatYell = true;
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 me->SummonCreature(NPC_LEFT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 me->SummonCreature(NPC_RIGHT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
@@ -210,7 +210,7 @@ class boss_warbringer_omrogg : public CreatureScript
                     instance->SetBossState(DATA_OMROGG, IN_PROGRESS);
             }
 
-            void JustSummoned(Creature* summoned) override
+            void JustSummoned(Creature* summoned) OVERRIDE
             {
                 if (summoned->GetEntry() == NPC_LEFT_HEAD)
                     LeftHeadGUID = summoned->GetGUID();
@@ -223,7 +223,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 summoned->SetVisible(false);
             }
 
-            void KilledUnit(Unit* /*victim*/) override
+            void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
                 Creature* LeftHead  = Creature::GetCreature(*me, LeftHeadGUID);
                 Creature* RightHead = Creature::GetCreature(*me, RightHeadGUID);
@@ -249,7 +249,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Creature* LeftHead  = Creature::GetCreature(*me, LeftHeadGUID);
                 Creature* RightHead = Creature::GetCreature(*me, RightHeadGUID);
@@ -265,7 +265,7 @@ class boss_warbringer_omrogg : public CreatureScript
                     instance->SetBossState(DATA_OMROGG, DONE);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (Delay_Timer <= diff)
                 {
@@ -388,7 +388,7 @@ class boss_warbringer_omrogg : public CreatureScript
                 uint32 ResetThreat_Timer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_warbringer_omroggAI(creature);
         }
@@ -410,9 +410,9 @@ class npc_omrogg_heads : public CreatureScript
                 instance = creature->GetInstanceScript();
             }
 
-            void Reset() override { }
+            void Reset() OVERRIDE { }
 
-            void EnterCombat(Unit* /*who*/) override { }
+            void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
             void SetData(uint32 data, uint32 value)
             {
@@ -422,7 +422,7 @@ class npc_omrogg_heads : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 events.Update(diff);
 
@@ -438,7 +438,7 @@ class npc_omrogg_heads : public CreatureScript
                 EventMap events;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_omrogg_headsAI(creature);
         }

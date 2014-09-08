@@ -71,7 +71,7 @@ class boss_doomlord_kazzak : public CreatureScript
             {
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_SHADOW_VOLLEY, urand(6000, 10000));
@@ -84,17 +84,17 @@ class boss_doomlord_kazzak : public CreatureScript
                 _events.ScheduleEvent(EVENT_BERSERK, 180000);
             }
 
-            void JustRespawned() override
+            void JustRespawned() OVERRIDE
             {
                 Talk(SAY_INTRO);
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
             }
 
-            void KilledUnit(Unit* victim) override
+            void KilledUnit(Unit* victim) OVERRIDE
             {
                 // When Kazzak kills a player (not pets/totems), he regens some health
                 if (victim->GetTypeId() != TYPEID_PLAYER)
@@ -105,12 +105,12 @@ class boss_doomlord_kazzak : public CreatureScript
                 Talk(SAY_KILL);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Talk(SAY_DEATH);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 // Return since we have no target
                 if (!UpdateVictim())
@@ -171,7 +171,7 @@ class boss_doomlord_kazzak : public CreatureScript
             EventMap _events;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_doomlordkazzakAI(creature);
         }
@@ -186,7 +186,7 @@ class spell_mark_of_kazzak : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mark_of_kazzak_AuraScript);
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_MARK_OF_KAZZAK_DAMAGE))
                     return false;
@@ -211,14 +211,14 @@ class spell_mark_of_kazzak : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mark_of_kazzak_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_MANA_LEECH);
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_mark_of_kazzak_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_MANA_LEECH);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_mark_of_kazzak_AuraScript();
         }

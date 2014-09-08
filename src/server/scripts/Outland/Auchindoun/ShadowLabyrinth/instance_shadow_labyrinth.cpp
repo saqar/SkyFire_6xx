@@ -47,7 +47,7 @@ class instance_shadow_labyrinth : public InstanceMapScript
                 FelOverseerCount      = 0;
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) OVERRIDE
             {
                 switch (creature->GetEntry())
                 {
@@ -70,7 +70,7 @@ class instance_shadow_labyrinth : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            void OnGameObjectCreate(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -83,7 +83,7 @@ class instance_shadow_labyrinth : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectRemove(GameObject* go) override
+            void OnGameObjectRemove(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -113,7 +113,7 @@ class instance_shadow_labyrinth : public InstanceMapScript
                 }
             }
 
-            uint32 GetData(uint32 type) const override
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -125,7 +125,7 @@ class instance_shadow_labyrinth : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 type) const override
+            uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -137,7 +137,7 @@ class instance_shadow_labyrinth : public InstanceMapScript
                 return 0;
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
 
@@ -148,7 +148,7 @@ class instance_shadow_labyrinth : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(char const* str) override
+            void Load(char const* str) OVERRIDE
             {
                 if (!str)
                 {
@@ -186,7 +186,7 @@ class instance_shadow_labyrinth : public InstanceMapScript
             uint32 FelOverseerCount;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_shadow_labyrinth_InstanceMapScript(map);
         }

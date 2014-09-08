@@ -39,7 +39,7 @@ class disable_commandscript : public CommandScript
 public:
     disable_commandscript() : CommandScript("disable_commandscript") { }
 
-    ChatCommand* GetCommands() const override
+    ChatCommand* GetCommands() const OVERRIDE
     {
         static ChatCommand removeDisableCommandTable[] =
         {

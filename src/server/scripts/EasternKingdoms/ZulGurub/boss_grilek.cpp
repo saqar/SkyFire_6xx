@@ -46,19 +46,19 @@ class boss_grilek : public CreatureScript
             {
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -82,7 +82,7 @@ class boss_grilek : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_grilekAI(creature);
         }

@@ -51,7 +51,7 @@ class npc_converted_sentry : public CreatureScript
 public:
     npc_converted_sentry() : CreatureScript("npc_converted_sentry") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_converted_sentryAI(creature);
     }
@@ -63,17 +63,17 @@ public:
         bool Credit;
         uint32 Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Credit = false;
             Timer = 2500;
         }
 
-        void MoveInLineOfSight(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!Credit)
             {
@@ -105,7 +105,7 @@ class npc_greengill_slave : public CreatureScript
 public:
     npc_greengill_slave() : CreatureScript("npc_greengill_slave") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_greengill_slaveAI(creature);
     }
@@ -114,9 +114,9 @@ public:
     {
         npc_greengill_slaveAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void SpellHit(Unit* caster, SpellInfo const* spellInfo) override
+        void SpellHit(Unit* caster, SpellInfo const* spellInfo) OVERRIDE
         {
             Player* player = caster->ToPlayer();
             if (!player)
@@ -137,7 +137,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 /*diff*/) override
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
         {
             DoMeleeAttackIfReady();
         }

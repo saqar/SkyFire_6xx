@@ -97,7 +97,7 @@ class boss_sapphiron : public CreatureScript
                 _map(me->GetMap())
             { }
 
-            void InitializeAI() override
+            void InitializeAI() OVERRIDE
             {
                 float x, y, z;
                 me->GetPosition(x, y, z);
@@ -109,7 +109,7 @@ class boss_sapphiron : public CreatureScript
                 BossAI::InitializeAI();
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
 
@@ -122,7 +122,7 @@ class boss_sapphiron : public CreatureScript
                 _checkFrostResistTimer = 5 * IN_MILLISECONDS;
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
 
@@ -134,7 +134,7 @@ class boss_sapphiron : public CreatureScript
                 CheckPlayersFrostResist();
             }
 
-            void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+            void SpellHitTarget(Unit* target, SpellInfo const* spell) OVERRIDE
             {
                 if (spell->Id == SPELL_ICEBOLT)
                 {
@@ -147,7 +147,7 @@ class boss_sapphiron : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 _JustDied();
                 me->CastSpell(me, SPELL_DIES, true);
@@ -155,13 +155,13 @@ class boss_sapphiron : public CreatureScript
                 CheckPlayersFrostResist();
             }
 
-            void MovementInform(uint32 /*type*/, uint32 id) override
+            void MovementInform(uint32 /*type*/, uint32 id) OVERRIDE
             {
                 if (id == 1)
                     events.ScheduleEvent(EVENT_LIFTOFF, 0);
             }
 
-            void DoAction(int32 param) override
+            void DoAction(int32 param) OVERRIDE
             {
                 if (param == DATA_SAPPHIRON_BIRTH)
                 {
@@ -211,7 +211,7 @@ class boss_sapphiron : public CreatureScript
                 _iceblocks.clear();
             }
 
-            uint32 GetData(uint32 data) const override
+            uint32 GetData(uint32 data) const OVERRIDE
             {
                 if (data == DATA_THE_HUNDRED_CLUB)
                     return _canTheHundredClub;
@@ -219,7 +219,7 @@ class boss_sapphiron : public CreatureScript
                 return 0;
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!_phase)
                     return;
@@ -404,7 +404,7 @@ class boss_sapphiron : public CreatureScript
             Map* _map;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_sapphironAI(creature);
         }
@@ -415,7 +415,7 @@ class achievement_the_hundred_club : public AchievementCriteriaScript
     public:
         achievement_the_hundred_club() : AchievementCriteriaScript("achievement_the_hundred_club") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target) override
+        bool OnCheck(Player* /*source*/, Unit* target) OVERRIDE
         {
             return target && target->GetAI()->GetData(DATA_THE_HUNDRED_CLUB);
         }

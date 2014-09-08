@@ -28,7 +28,7 @@ class CharacterDatabaseConnection : public MySQLConnection
     public:
         //- Constructors for sync and async connections
         CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-        CharacterDatabaseConnection(ProducerConsumerQueue<SQLOperation*>* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+        CharacterDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
 
         //- Loads database type specific prepared statements
         void DoPrepareStatements();
@@ -90,6 +90,7 @@ enum CharacterDatabaseStatements
     CHAR_SEL_CHARACTER_AURAS,
     CHAR_SEL_CHARACTER_SPELL,
     CHAR_SEL_CHARACTER_QUESTSTATUS,
+    CHAR_SEL_CHARACTER_QUEST_OBJECTIVE_STATUS,
     CHAR_SEL_CHARACTER_DAILYQUESTSTATUS,
     CHAR_SEL_CHARACTER_WEEKLYQUESTSTATUS,
     CHAR_SEL_CHARACTER_MONTHLYQUESTSTATUS,
@@ -480,6 +481,9 @@ enum CharacterDatabaseStatements
     CHAR_UPD_MAIL,
     CHAR_REP_CHAR_QUESTSTATUS,
     CHAR_DEL_CHAR_QUESTSTATUS_BY_QUEST,
+    CHAR_REP_CHAR_QUESTSTATUS_OBJECTIVE,
+    CHAR_DEL_CHAR_QUESTSTATUS_OBJECTIVE,
+    CHAR_DEL_CHAR_QUESTSTATUS_OBJECTIVE_ALL,
     CHAR_INS_CHAR_QUESTSTATUS_REWARDED,
     CHAR_DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST,
     CHAR_UPD_CHAR_QUESTSTATUS_REWARDED_FACTION_CHANGE,

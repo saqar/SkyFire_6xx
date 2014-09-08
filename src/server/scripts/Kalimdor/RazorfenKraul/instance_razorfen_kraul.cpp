@@ -37,7 +37,7 @@ class instance_razorfen_kraul : public InstanceMapScript
 public:
     instance_razorfen_kraul() : InstanceMapScript("instance_razorfen_kraul", 47) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_razorfen_kraul_InstanceMapScript(map);
     }
@@ -49,7 +49,7 @@ public:
         uint64 DoorWardGUID;
         int WardKeeperDeath;
 
-        void Initialize() override
+        void Initialize() OVERRIDE
         {
             WardKeeperDeath = 0;
             DoorWardGUID = 0;
@@ -71,7 +71,7 @@ public:
             return NULL;
         }
 
-        void OnGameObjectCreate(GameObject* go) override
+        void OnGameObjectCreate(GameObject* go) OVERRIDE
         {
             switch (go->GetEntry())
             {
@@ -90,7 +90,7 @@ public:
                 }
         }
 
-        void SetData(uint32 type, uint32 /*data*/) override
+        void SetData(uint32 type, uint32 /*data*/) OVERRIDE
         {
             switch (type)
             {

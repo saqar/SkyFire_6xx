@@ -51,27 +51,27 @@ public:
     {
         boss_lord_valthalakAI(Creature* creature) : BossAI(creature, DATA_LORD_VALTHALAK) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _Reset();
             frenzy40 = false;
             frenzy15 = false;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_SUMMON_SPECTRAL_ASSASSIN, urand(6000,8000));
             events.ScheduleEvent(EVENT_SHADOW_WRATH, urand(9000,18000));
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_LORD_VALTHALAK, DONE);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -129,7 +129,7 @@ public:
             bool frenzy15;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_lord_valthalakAI(creature);
     }

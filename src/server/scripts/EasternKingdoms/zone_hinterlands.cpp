@@ -79,7 +79,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_00x09hlAI(creature);
     }
@@ -88,7 +88,7 @@ public:
     {
         npc_00x09hlAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void Reset() override { }
+        void Reset() OVERRIDE { }
 
         void WaypointReached(uint32 waypointId)
         {
@@ -141,7 +141,7 @@ public:
             Talk(SAY_OOX_AGGRO);
         }
 
-        void JustSummoned(Creature* summoned) override
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             summoned->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
         }

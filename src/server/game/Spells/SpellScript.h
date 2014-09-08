@@ -57,7 +57,7 @@ enum SpellScriptState
 class _SpellScript
 {
     // internal use classes & functions
-    // DO NOT Override THESE IN SCRIPTS
+    // DO NOT OVERRIDE THESE IN SCRIPTS
     protected:
         virtual bool _Validate(SpellInfo const* entry);
 
@@ -110,7 +110,7 @@ class _SpellScript
     public:
         //
         // SpellScript/AuraScript interface base
-        // these functions are safe to Override, see notes below for usage instructions
+        // these functions are safe to override, see notes below for usage instructions
         //
         // Function in which handler functions are registered, must be implemented in script
         virtual void Register() = 0;
@@ -152,7 +152,7 @@ enum SpellScriptHookType
 class SpellScript : public _SpellScript
 {
     // internal use classes & functions
-    // DO NOT Override THESE IN SCRIPTS
+    // DO NOT OVERRIDE THESE IN SCRIPTS
     public:
         #define SPELLSCRIPT_FUNCTION_TYPE_DEFINES(CLASSNAME) \
             typedef SpellCastResult(CLASSNAME::*SpellCheckCastFnType)(); \
@@ -303,7 +303,7 @@ class SpellScript : public _SpellScript
 
         // hooks are executed in following order, at specified event of spell:
         // 1. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
-        // 2. OnCheckCast - allows to Override result of CheckCast function
+        // 2. OnCheckCast - allows to override result of CheckCast function
         // 3a. OnObjectAreaTargetSelect - executed just before adding selected targets to final target list (for area targets)
         // 3b. OnObjectTargetSelect - executed just before adding selected target to final target list (for single unit targets)
         // 4. OnCast - executed just before spell is launched (creates missile) or executed
@@ -449,7 +449,7 @@ enum AuraScriptHookType
 class AuraScript : public _SpellScript
 {
     // internal use classes & functions
-    // DO NOT Override THESE IN SCRIPTS
+    // DO NOT OVERRIDE THESE IN SCRIPTS
     public:
 
     #define AURASCRIPT_FUNCTION_TYPE_DEFINES(CLASSNAME) \

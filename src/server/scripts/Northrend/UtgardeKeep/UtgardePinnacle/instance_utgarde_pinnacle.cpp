@@ -43,7 +43,7 @@ class instance_utgarde_pinnacle : public InstanceMapScript
 public:
     instance_utgarde_pinnacle() : InstanceMapScript("instance_utgarde_pinnacle", 575) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_pinnacle(map);
     }
@@ -74,7 +74,7 @@ public:
 
         std::string str_data;
 
-        void Initialize() override
+        void Initialize() OVERRIDE
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                m_auiEncounter[i] = NOT_STARTED;
@@ -98,7 +98,7 @@ public:
             uiSacrificedPlayer = 0;
         }
 
-        bool IsEncounterInProgress() const override
+        bool IsEncounterInProgress() const OVERRIDE
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)
@@ -107,7 +107,7 @@ public:
             return false;
         }
 
-        void OnCreatureCreate(Creature* creature) override
+        void OnCreatureCreate(Creature* creature) OVERRIDE
         {
             switch (creature->GetEntry())
             {
@@ -124,7 +124,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) override
+        void OnGameObjectCreate(GameObject* go) OVERRIDE
         {
             switch (go->GetEntry())
             {
@@ -147,7 +147,7 @@ public:
             }
         }
 
-        void SetData(uint32 type, uint32 data) override
+        void SetData(uint32 type, uint32 data) OVERRIDE
         {
             switch (type)
             {
@@ -173,7 +173,7 @@ public:
                 SaveToDB();
         }
 
-        void SetData64(uint32 type, uint64 data) override
+        void SetData64(uint32 type, uint64 data) OVERRIDE
         {
             switch (type)
             {
@@ -183,7 +183,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 type) const override
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             switch (type)
             {
@@ -195,7 +195,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 identifier) const override
+        uint64 GetData64(uint32 identifier) const OVERRIDE
         {
             switch (identifier)
             {
@@ -216,7 +216,7 @@ public:
             return 0;
         }
 
-        std::string GetSaveData() override
+        std::string GetSaveData() OVERRIDE
         {
             OUT_SAVE_INST_DATA;
 
@@ -230,7 +230,7 @@ public:
             return str_data;
         }
 
-        void Load(const char* in) override
+        void Load(const char* in) OVERRIDE
         {
             if (!in)
             {

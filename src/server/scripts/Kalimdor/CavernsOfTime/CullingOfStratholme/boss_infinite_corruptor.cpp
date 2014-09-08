@@ -40,7 +40,7 @@ class boss_infinite_corruptor : public CreatureScript
 public:
     boss_infinite_corruptor() : CreatureScript("boss_infinite_corruptor") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_infinite_corruptorAI(creature);
     }
@@ -54,20 +54,20 @@ public:
 
         InstanceScript* instance;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_INFINITE_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
             if (instance)
                 instance->SetData(DATA_INFINITE_EVENT, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 /*diff*/) override
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -76,7 +76,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
             if (instance)

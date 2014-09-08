@@ -45,24 +45,24 @@ public:
     {
         boss_quatermasterzigrisAI(Creature* creature) : BossAI(creature, DATA_QUARTERMASTER_ZIGRIS) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _Reset();
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_SHOOT,      1000);
             events.ScheduleEvent(EVENT_STUN_BOMB, 16000);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             _JustDied();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -90,7 +90,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_quatermasterzigrisAI(creature);
     }

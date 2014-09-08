@@ -39,7 +39,7 @@ class lookup_commandscript : public CommandScript
 public:
     lookup_commandscript() : CommandScript("lookup_commandscript") { }
 
-    ChatCommand* GetCommands() const override
+    ChatCommand* GetCommands() const OVERRIDE
     {
         static ChatCommand lookupPlayerCommandTable[] =
         {
@@ -1222,7 +1222,8 @@ public:
         char* limitStr = strtok(NULL, " ");
         int32 limit = limitStr ? atoi(limitStr) : -1;
 
-        if (!Utf8ToUpperOnlyLatin(account))
+        if (!Utf8ToUpperOnlyLatin
+            (account))
             return false;
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_LIST_BY_NAME);

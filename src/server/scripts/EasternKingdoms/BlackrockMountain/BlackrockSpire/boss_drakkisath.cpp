@@ -47,12 +47,12 @@ public:
     {
         boss_drakkisathAI(Creature* creature) : BossAI(creature, DATA_GENERAL_DRAKKISATH) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _Reset();
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_FIRE_NOVA, 6000);
@@ -61,12 +61,12 @@ public:
             events.ScheduleEvent(EVENT_THUNDERCLAP,    17000);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             _JustDied();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -102,7 +102,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_drakkisathAI(creature);
     }

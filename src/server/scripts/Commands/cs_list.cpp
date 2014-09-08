@@ -38,7 +38,7 @@ class list_commandscript : public CommandScript
 public:
     list_commandscript() : CommandScript("list_commandscript") { }
 
-    ChatCommand* GetCommands() const override
+    ChatCommand* GetCommands() const OVERRIDE
     {
         static ChatCommand listCommandTable[] =
         {

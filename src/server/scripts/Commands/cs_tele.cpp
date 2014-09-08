@@ -37,7 +37,7 @@ class tele_commandscript : public CommandScript
 public:
     tele_commandscript() : CommandScript("tele_commandscript") { }
 
-    ChatCommand* GetCommands() const override
+    ChatCommand* GetCommands() const OVERRIDE
     {
         static ChatCommand teleCommandTable[] =
         {

@@ -1,9 +1,11 @@
 /*
+ * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
+ * Free Software Foundation; either version 3 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -19,20 +21,22 @@
 #include "MySQLConnection.h"
 
 /*! Basic, ad-hoc queries. */
-BasicStatementTask::BasicStatementTask(const char* sql, bool async) :
-m_result(nullptr)
+BasicStatementTask::BasicStatementTask(const char* sql) :
+m_has_result(false)
 {
     m_sql = strdup(sql);
-    m_has_result = async; // If the operation is async, then there's a result
-    if (async)
-        m_result = new QueryResultPromise();
+}
+
+BasicStatementTask::BasicStatementTask(const char* sql, QueryResultFuture result) :
+m_has_result(true),
+m_result(result)
+{
+    m_sql = strdup(sql);
 }
 
 BasicStatementTask::~BasicStatementTask()
 {
     free((void*)m_sql);
-    if (m_has_result && m_result != nullptr)
-        delete m_result;
 }
 
 bool BasicStatementTask::Execute()
@@ -40,14 +44,14 @@ bool BasicStatementTask::Execute()
     if (m_has_result)
     {
         ResultSet* result = m_conn->Query(m_sql);
-        if (!result || !result->GetRowCount() || !result->NextRow())
+        if (!result || !result->GetRowCount())
         {
             delete result;
-            m_result->set_value(QueryResult(NULL));
+            m_result.set(QueryResult(NULL));
             return false;
         }
-
-        m_result->set_value(QueryResult(result));
+        result->NextRow();
+        m_result.set(QueryResult(result));
         return true;
     }
 

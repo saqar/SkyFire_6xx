@@ -63,9 +63,9 @@ class boss_postmaster_malown : public CreatureScript
         {
             boss_postmaster_malownAI(Creature* creature) : BossAI(creature, TYPE_MALOWN) { }
 
-            void Reset() override { }
+            void Reset() OVERRIDE { }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 events.ScheduleEvent(EVENT_WAILINGDEAD, 19000);     // lasts 6 sec
                 events.ScheduleEvent(EVENT_BACKHAND, 8000);         // 2 sec stun
@@ -74,12 +74,12 @@ class boss_postmaster_malown : public CreatureScript
                 events.ScheduleEvent(EVENT_CALLOFTHEGRAVE, 25000);
             }
 
-            void KilledUnit(Unit* /*victim*/) override
+            void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
                 Talk(SAY_KILL);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -126,7 +126,7 @@ class boss_postmaster_malown : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_postmaster_malownAI(creature);
         }

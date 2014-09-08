@@ -570,7 +570,7 @@ struct AreaTableEntry
     {
         if (mapid == 609)
             return true;
-        return (flags & AREA_FLAG_SANCTUARY) != 0;
+        return (flags & AREA_FLAG_SANCTUARY);
     }
 };
 
@@ -2254,9 +2254,9 @@ typedef std::set<uint32> SpellCategorySet;
 typedef std::map<uint32, SpellCategorySet > SpellCategoryStore;
 typedef std::set<uint32> PetFamilySpellsSet;
 typedef std::map<uint32, PetFamilySpellsSet > PetFamilySpellsStore;
-typedef std::unordered_map<uint32, std::list<SkillLineAbilityEntry const*> > SpellsPerClassStore;
-typedef std::unordered_map<uint32, uint32> ClassBySkillIdStore;
-typedef std::unordered_map<uint32, uint32> SpellEffectScallingByEffectId;
+typedef UNORDERED_MAP<uint32, std::list<SkillLineAbilityEntry const*> > SpellsPerClassStore;
+typedef UNORDERED_MAP<uint32, uint32> ClassBySkillIdStore;
+typedef UNORDERED_MAP<uint32, uint32> SpellEffectScallingByEffectId;
 
 struct SpellCastTimesEntry
 {
@@ -2703,12 +2703,12 @@ struct VehicleSeatEntry
     uint32  m_flagsB;                                       // 45
                                                             // 46-57 added in 3.1, floats mostly
 
-    bool CanEnterOrExit() const { return (m_flags & VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT) != 0; }
-    bool CanSwitchFromSeat() const { return (m_flags & VEHICLE_SEAT_FLAG_CAN_SWITCH) != 0; }
+    bool CanEnterOrExit() const { return m_flags & VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT; }
+    bool CanSwitchFromSeat() const { return m_flags & VEHICLE_SEAT_FLAG_CAN_SWITCH; }
     bool IsUsableByOverride() const { return (m_flags & (VEHICLE_SEAT_FLAG_UNCONTROLLED | VEHICLE_SEAT_FLAG_UNK18)
                                     || (m_flagsB & (VEHICLE_SEAT_FLAG_B_USABLE_FORCED | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_2 |
                                         VEHICLE_SEAT_FLAG_B_USABLE_FORCED_3 | VEHICLE_SEAT_FLAG_B_USABLE_FORCED_4))); }
-    bool IsEjectable() const { return (m_flagsB & VEHICLE_SEAT_FLAG_B_EJECTABLE) != 0; }
+    bool IsEjectable() const { return m_flagsB & VEHICLE_SEAT_FLAG_B_EJECTABLE; }
 };
 
 struct WMOAreaTableEntry

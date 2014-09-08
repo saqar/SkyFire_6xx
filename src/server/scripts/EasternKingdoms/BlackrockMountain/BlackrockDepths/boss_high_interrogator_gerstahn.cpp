@@ -34,7 +34,7 @@ class boss_high_interrogator_gerstahn : public CreatureScript
 public:
     boss_high_interrogator_gerstahn() : CreatureScript("boss_high_interrogator_gerstahn") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_high_interrogator_gerstahnAI(creature);
     }
@@ -48,7 +48,7 @@ public:
         uint32 PsychicScream_Timer;
         uint32 ShadowShield_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             ShadowWordPain_Timer = 4000;
             ManaBurn_Timer = 14000;
@@ -56,9 +56,9 @@ public:
             ShadowShield_Timer = 8000;
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())

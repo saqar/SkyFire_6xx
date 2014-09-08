@@ -54,7 +54,7 @@ class boss_captain_skarloc : public CreatureScript
 public:
     boss_captain_skarloc() : CreatureScript("boss_captain_skarloc") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_captain_skarlocAI(creature);
     }
@@ -75,7 +75,7 @@ public:
         uint32 DevotionAura_Timer;
         uint32 Consecration_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Holy_Light_Timer = urand(20000, 30000);
             Cleanse_Timer = 10000;
@@ -85,19 +85,19 @@ public:
             Consecration_Timer = 8000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             //This is not correct. Should taunt Thrall before engage in combat
             Talk(SAY_TAUNT1);
             Talk(SAY_TAUNT2);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -105,7 +105,7 @@ public:
                 instance->SetData(TYPE_THRALL_PART1, DONE);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())

@@ -59,7 +59,7 @@ class boss_gluth : public CreatureScript
 public:
     boss_gluth() : CreatureScript("boss_gluth") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_gluthAI(creature);
     }
@@ -72,7 +72,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_INFECTED_WOUND, true);
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
             if (who->GetEntry() == NPC_ZOMBIE && me->IsWithinDistInMap(who, 7))
@@ -85,7 +85,7 @@ public:
                 BossAI::MoveInLineOfSight(who);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_WOUND, 10000);
@@ -95,14 +95,14 @@ public:
             events.ScheduleEvent(EVENT_SUMMON, 15000);
         }
 
-        void JustSummoned(Creature* summon) override
+        void JustSummoned(Creature* summon) OVERRIDE
         {
             if (summon->GetEntry() == NPC_ZOMBIE)
                 summon->AI()->AttackStart(me);
             summons.Summon(summon);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictimWithGaze() || !CheckInRoom())
                 return;

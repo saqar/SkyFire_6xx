@@ -85,7 +85,7 @@ public:
             return 100*(me->GetHealth()-damage)/me->GetMaxHealth();
         }
 
-        void DamageTaken(Unit* /*pAttacker*/, uint32 &damage) override
+        void DamageTaken(Unit* /*pAttacker*/, uint32 &damage) OVERRIDE
         {
             if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                 damage = 0;
@@ -98,7 +98,7 @@ public:
             }
         }
 
-        void SpellHitTarget(Unit* target, const SpellInfo* spell) override
+        void SpellHitTarget(Unit* target, const SpellInfo* spell) OVERRIDE
         {
             if (spell->Id == SPELL_INSANITY)
             {
@@ -146,7 +146,7 @@ public:
             }
         }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiMindFlayTimer = 8*IN_MILLISECONDS;
             uiShadowBoltVolleyTimer = 5*IN_MILLISECONDS;
@@ -171,7 +171,7 @@ public:
             me->SetControlled(false, UNIT_STATE_STUNNED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -182,7 +182,7 @@ public:
             }
         }
 
-        void JustSummoned(Creature* summon) override
+        void JustSummoned(Creature* summon) OVERRIDE
         {
             Summons.Summon(summon);
         }
@@ -211,7 +211,7 @@ public:
             return spell;
         }
 
-        void SummonedCreatureDespawn(Creature* summon) override
+        void SummonedCreatureDespawn(Creature* summon) OVERRIDE
         {
             uint32 phase = summon->GetPhaseMask();
             uint32 nextPhase = 0;
@@ -255,7 +255,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -294,7 +294,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -305,13 +305,13 @@ public:
             ResetPlayersPhaseMask();
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_volazjAI(creature);
     }

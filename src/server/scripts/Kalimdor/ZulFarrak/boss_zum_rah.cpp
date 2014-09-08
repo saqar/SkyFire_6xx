@@ -64,7 +64,7 @@ public:
     {
         boss_zum_rahAI(Creature* creature) : BossAI(creature, DATA_ZUM_RAH) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             me->setFaction(ZUMRAH_FRIENDLY_FACTION); // areatrigger sets faction to enemy
             _ward80 = false;
@@ -72,25 +72,25 @@ public:
             _heal30 = false;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_SANCT_INVADE);
             events.ScheduleEvent(EVENT_SHADOW_BOLT, 1000);
             events.ScheduleEvent(EVENT_SHADOWBOLT_VOLLEY, 10000);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_ZUM_RAH, DONE);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_KILL);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -151,7 +151,7 @@ public:
 
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_zum_rahAI(creature);
     }

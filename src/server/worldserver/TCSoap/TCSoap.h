@@ -1,69 +1,89 @@
 /*
-* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef _TCSOAP_H
 #define _TCSOAP_H
 
 #include "Define.h"
-#include <mutex>
-#include <future>
-#include <string>
 
-void process_message(struct soap* soap_message);
-void TCSoapThread(const std::string& host, uint16 port);
+#include <ace/Semaphore.h>
+#include <ace/Task.h>
+#include <Threading.h>
+
+class TCSoapRunnable : public ACE_Based::Runnable
+{
+    public:
+        TCSoapRunnable() : _port(0) { }
+
+        void run() OVERRIDE;
+
+        void SetListenArguments(const std::string& host, uint16 port)
+        {
+            _host = host;
+            _port = port;
+        }
+
+    private:
+        void process_message(ACE_Message_Block* mb);
+
+        std::string _host;
+        uint16 _port;
+};
 
 class SOAPCommand
 {
-public:
-    SOAPCommand() :
-        m_success(false)
-    {
-    }
+    public:
+        SOAPCommand():
+            pendingCommands(0, USYNC_THREAD, "pendingCommands"), m_success(false)
+        {
+        }
 
-    ~SOAPCommand()
-    {
-    }
+        ~SOAPCommand()
+        {
+        }
 
-    void appendToPrintBuffer(const char* msg)
-    {
-        m_printBuffer += msg;
-    }
+        void appendToPrintBuffer(const char* msg)
+        {
+            m_printBuffer += msg;
+        }
 
-    void setCommandSuccess(bool val)
-    {
-        m_success = val;
-        finishedPromise.set_value();
-    }
+        ACE_Semaphore pendingCommands;
 
-    bool hasCommandSucceeded() const
-    {
-        return m_success;
-    }
+        void setCommandSuccess(bool val)
+        {
+            m_success = val;
+        }
 
-    static void print(void* callbackArg, const char* msg)
-    {
-        ((SOAPCommand*)callbackArg)->appendToPrintBuffer(msg);
-    }
+        bool hasCommandSucceeded() const
+        {
+            return m_success;
+        }
 
-    static void commandFinished(void* callbackArg, bool success);
+        static void print(void* callbackArg, const char* msg)
+        {
+            ((SOAPCommand*)callbackArg)->appendToPrintBuffer(msg);
+        }
 
-    bool m_success;
-    std::string m_printBuffer;
-    std::promise<void> finishedPromise;
+        static void commandFinished(void* callbackArg, bool success);
+
+        bool m_success;
+        std::string m_printBuffer;
 };
 
 #endif

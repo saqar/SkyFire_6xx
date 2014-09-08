@@ -26,6 +26,8 @@
 
 #include "Common.h"
 #include "Timer.h"
+#include <ace/Singleton.h>
+#include <ace/Atomic_Op.h>
 #include "SharedDefines.h"
 #include "QueryResult.h"
 #include "Callback.h"
@@ -33,8 +35,6 @@
 #include <map>
 #include <set>
 #include <list>
-#include <future>
-#include <atomic>
 
 class Object;
 class WorldPacket;
@@ -531,7 +531,7 @@ struct CliCommandHolder
     ~CliCommandHolder() { delete[] m_command; }
 };
 
-typedef std::unordered_map<uint32, WorldSession*> SessionMap;
+typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 
 struct CharacterNameData
 {
@@ -546,13 +546,10 @@ struct CharacterNameData
 class World
 {
     public:
-        static World* instance()
-        {
-            static World* instance = new World();
-            return instance;
-        }
+        static ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_worldLoopCounter;
 
-        static std::atomic<uint32> m_worldLoopCounter;
+        World();
+        ~World();
 
         WorldSession* FindSession(uint32 id) const;
         void AddSession(WorldSession* s);
@@ -665,7 +662,7 @@ class World
         void ShutdownMsg(bool show = false, Player* player = NULL);
         static uint8 GetExitCode() { return m_ExitCode; }
         static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
-        static bool IsStopped() { return m_stopEvent; }
+        static bool IsStopped() { return m_stopEvent.value(); }
 
         void Update(uint32 diff);
 
@@ -796,10 +793,7 @@ class World
         void ResetGuildCap();
         void ResetCurrencyWeekCap();
     private:
-        World();
-        ~World();
-
-        static std::atomic<bool> m_stopEvent;
+        static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
@@ -818,7 +812,7 @@ class World
         uint32 m_currentTime;
 
         SessionMap m_sessions;
-        typedef std::unordered_map<uint32, time_t> DisconnectMap;
+        typedef UNORDERED_MAP<uint32, time_t> DisconnectMap;
         DisconnectMap m_disconnects;
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;
@@ -851,7 +845,7 @@ class World
         static int32 m_visibility_notify_periodInBGArenas;
 
         // CLI command holder to be thread safe
-        LockedQueue<CliCommandHolder*> cliCmdQueue;
+        ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;
 
         // scheduled reset times
         time_t m_NextDailyQuestReset;
@@ -866,7 +860,7 @@ class World
 
         // sessions that are added async
         void AddSession_(WorldSession* s);
-        LockedQueue<WorldSession*> addSessQueue;
+        ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue;
 
         // used versions
         std::string m_DBVersion;
@@ -881,7 +875,7 @@ class World
         void LoadCharacterNameData();
 
         void ProcessQueryCallbacks();
-        std::deque<std::future<PreparedQueryResult>> m_realmCharCallbacks;
+        ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
 };
 
 typedef std::map<uint32, std::string> RealmNameMap;
@@ -889,6 +883,6 @@ typedef std::map<uint32, std::string> RealmNameMap;
 extern RealmNameMap realmNameStore;
 extern uint32 realmID;
 
-#define sWorld World::instance()
+#define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
 #endif
 /// @}

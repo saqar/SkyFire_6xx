@@ -30,7 +30,7 @@ class instance_scholomance : public InstanceMapScript
     public:
         instance_scholomance() : InstanceMapScript("instance_scholomance", 289) { }
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_scholomance_InstanceMapScript(map);
         }
@@ -51,7 +51,7 @@ class instance_scholomance : public InstanceMapScript
                 BrazierOfTheHeraldGUID  = 0;
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            void OnGameObjectCreate(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -87,7 +87,7 @@ class instance_scholomance : public InstanceMapScript
                 }
             }
 
-            bool SetBossState(uint32 type, EncounterState state) override
+            bool SetBossState(uint32 type, EncounterState state) OVERRIDE
             {
                 if (!InstanceScript::SetBossState(type, state))
                     return false;
@@ -109,7 +109,7 @@ class instance_scholomance : public InstanceMapScript
                 return true;
             }
 
-            uint64 GetData64(uint32 type) const override
+            uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -171,7 +171,7 @@ class instance_scholomance : public InstanceMapScript
                     instance->SummonCreature(NPC_DARKMASTER_GANDLING, GandlingLoc);
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
 
@@ -182,7 +182,7 @@ class instance_scholomance : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* str) override
+            void Load(const char* str) OVERRIDE
             {
                 if (!str)
                 {

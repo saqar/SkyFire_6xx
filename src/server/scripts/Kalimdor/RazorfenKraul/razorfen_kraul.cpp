@@ -36,7 +36,7 @@ enum Willix
     SAY_BAD                     = 5,
     SAY_THINK                   = 6,
     SAY_SOON                    = 7,
-    SAY_finalY                  = 8,
+    SAY_FINALY                  = 8,
     SAY_WIN                     = 9,
     SAY_END                     = 10,
 
@@ -49,7 +49,7 @@ class npc_willix : public CreatureScript
 public:
     npc_willix() : CreatureScript("npc_willix") { }
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
     {
         if (quest->GetQuestId() == QUEST_WILLIX_THE_IMPORTER)
         {
@@ -61,7 +61,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_willixAI(creature);
     }
@@ -70,7 +70,7 @@ public:
     {
         npc_willixAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void WaypointReached(uint32 waypointId) override
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             Player* player = GetPlayerForEscort();
             if (!player)
@@ -104,7 +104,7 @@ public:
                     Talk(SAY_SOON, player);
                     break;
                 case 42:
-                    Talk(SAY_finalY, player);
+                    Talk(SAY_FINALY, player);
                     break;
                 case 43:
                     me->SummonCreature(ENTRY_BOAR, 1956.43f, 1596.97f, 81.75f, 1.54f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
@@ -120,19 +120,19 @@ public:
             }
         }
 
-        void Reset() override { }
+        void Reset() OVERRIDE { }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO1);
         }
 
-        void JustSummoned(Creature* summoned) override
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             summoned->AI()->AttackStart(me);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (Player* player = GetPlayerForEscort())
                 player->FailQuest(QUEST_WILLIX_THE_IMPORTER);
@@ -166,7 +166,7 @@ struct npc_snufflenose_gopher : public CreatureScript
 public:
     npc_snufflenose_gopher() : CreatureScript("npc_snufflenose_gopher") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_snufflenose_gopherAI(creature);
     }
@@ -175,12 +175,12 @@ public:
     {
         npc_snufflenose_gopherAI(Creature* creature) : PetAI(creature) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             IsMovementActive = false;
         }
 
-        void MovementInform(uint32 type, uint32 id) override
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
             if (type == POINT_MOTION_TYPE && id == POINT_TUBBER)
             {
@@ -229,13 +229,13 @@ public:
             IsMovementActive = true;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!IsMovementActive)
                 PetAI::UpdateAI(diff);
         }
 
-        void DoAction(int32 action) override
+        void DoAction(int32 action) OVERRIDE
         {
             if (action == ACTION_FIND_NEW_TUBBER)
                 DoFindNewTubber();
@@ -256,7 +256,7 @@ class spell_snufflenose_command : public SpellScriptLoader
         {
             PrepareSpellScript(spell_snufflenose_commandSpellScript);
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
@@ -268,13 +268,13 @@ class spell_snufflenose_command : public SpellScriptLoader
                         target->ToCreature()->AI()->DoAction(ACTION_FIND_NEW_TUBBER);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterCast += SpellCastFn(spell_snufflenose_commandSpellScript::HandleAfterCast);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_snufflenose_commandSpellScript();
         }

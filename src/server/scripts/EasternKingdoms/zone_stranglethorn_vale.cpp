@@ -43,7 +43,7 @@ class npc_yenniku : public CreatureScript
 public:
     npc_yenniku() : CreatureScript("npc_yenniku") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_yennikuAI(creature);
     }
@@ -58,13 +58,13 @@ public:
         uint32 Reset_Timer;
         bool bReset;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Reset_Timer = 0;
             me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_NONE);
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell) override
+        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
             if (bReset || spell->Id != 3607)
                 return;
@@ -84,9 +84,9 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (bReset)
             {

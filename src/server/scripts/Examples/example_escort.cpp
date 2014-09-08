@@ -81,13 +81,13 @@ class example_escort : public CreatureScript
             uint32 m_uiDeathCoilTimer;
             uint32 m_uiChatTimer;
 
-            void JustSummoned(Creature* summoned) override
+            void JustSummoned(Creature* summoned) OVERRIDE
             {
                 summoned->AI()->AttackStart(me);
             }
 
             // Pure Virtual Functions (Have to be implemented)
-            void WaypointReached(uint32 waypointId) override
+            void WaypointReached(uint32 waypointId) OVERRIDE
             {
                 switch (waypointId)
                 {
@@ -110,7 +110,7 @@ class example_escort : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 if (HasEscortState(STATE_ESCORT_ESCORTING))
                 {
@@ -121,13 +121,13 @@ class example_escort : public CreatureScript
                     Talk(SAY_AGGRO2);
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 m_uiDeathCoilTimer = 4000;
                 m_uiChatTimer = 4000;
             }
 
-            void JustDied(Unit* killer) override
+            void JustDied(Unit* killer) OVERRIDE
             {
                 if (HasEscortState(STATE_ESCORT_ESCORTING))
                 {
@@ -144,7 +144,7 @@ class example_escort : public CreatureScript
                     Talk(SAY_DEATH_3);
             }
 
-            void UpdateAI(uint32 uiDiff) override
+            void UpdateAI(uint32 uiDiff) OVERRIDE
             {
                 //Must update npc_escortAI
                 npc_escortAI::UpdateAI(uiDiff);
@@ -188,12 +188,12 @@ class example_escort : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new example_escortAI(creature);
         }
 
-        bool OnGossipHello(Player* player, Creature* creature) override
+        bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
         {
             player->TalkedToCreature(creature->GetEntry(), creature->GetGUID());
             player->PrepareGossipMenu(creature, 0);
@@ -207,7 +207,7 @@ class example_escort : public CreatureScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
         {
             player->PlayerTalkClass->ClearMenus();
             npc_escortAI* pEscortAI = CAST_AI(example_escort::example_escortAI, creature->AI());

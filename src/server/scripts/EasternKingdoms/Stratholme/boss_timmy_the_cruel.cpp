@@ -43,7 +43,7 @@ class boss_timmy_the_cruel : public CreatureScript
 public:
     boss_timmy_the_cruel() : CreatureScript("boss_timmy_the_cruel") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_timmy_the_cruelAI(creature);
     }
@@ -55,13 +55,13 @@ public:
         uint32 RavenousClaw_Timer;
         bool HasYelled;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             RavenousClaw_Timer = 10000;
             HasYelled = false;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (!HasYelled)
             {
@@ -70,7 +70,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())

@@ -67,14 +67,14 @@ class boss_loatheb : public CreatureScript
             {
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
                 _doomCounter = 0;
                 _sporeLoserData = true;
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
                 events.ScheduleEvent(EVENT_NECROTIC_AURA, 17000);
@@ -83,12 +83,12 @@ class boss_loatheb : public CreatureScript
                 events.ScheduleEvent(EVENT_INEVITABLE_DOOM, 120000);
             }
 
-            void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/) override
+            void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/) OVERRIDE
             {
                 _sporeLoserData = false;
             }
 
-            uint32 GetData(uint32 id) const override
+            uint32 GetData(uint32 id) const OVERRIDE
             {
                 if (id != DATA_ACHIEVEMENT_SPORE_LOSER)
                    return 0;
@@ -96,7 +96,7 @@ class boss_loatheb : public CreatureScript
                 return uint32(_sporeLoserData);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -142,7 +142,7 @@ class boss_loatheb : public CreatureScript
             uint8 _doomCounter;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_loathebAI(creature);
         }
@@ -153,7 +153,7 @@ class achievement_spore_loser : public AchievementCriteriaScript
     public:
         achievement_spore_loser() : AchievementCriteriaScript("achievement_spore_loser") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target) override
+        bool OnCheck(Player* /*source*/, Unit* target) OVERRIDE
         {
             return target && target->GetAI()->GetData(DATA_ACHIEVEMENT_SPORE_LOSER);
         }
@@ -170,7 +170,7 @@ class spell_loatheb_necrotic_aura_warning : public SpellScriptLoader
         {
             PrepareAuraScript(spell_loatheb_necrotic_aura_warning_AuraScript);
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellStore.LookupEntry(SPELL_WARN_NECROTIC_AURA))
                     return false;
@@ -189,14 +189,14 @@ class spell_loatheb_necrotic_aura_warning : public SpellScriptLoader
                     CAST_AI(LoathebAI, GetTarget()->GetAI())->Talk(SAY_NECROTIC_AURA_REMOVED);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterEffectApply += AuraEffectApplyFn(spell_loatheb_necrotic_aura_warning_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_loatheb_necrotic_aura_warning_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_loatheb_necrotic_aura_warning_AuraScript();
         }

@@ -118,7 +118,7 @@ class WorldObject;
 class WorldPacket;
 class ZoneScript;
 
-typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
+typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
 //! Structure to ease conversions from single 64 bit integer guid into individual bytes, for packet sending purposes
 //! Nuke this out when porting ObjectGuid from MaNGOS, but preserve the per-byte storage
@@ -198,7 +198,7 @@ class Object
         virtual void SetObjectScale(float scale) { SetFloatValue(OBJECT_FIELD_SCALE, scale); }
 
         TypeID GetTypeId() const { return m_objectTypeId; }
-        bool isType(uint16 mask) const { return (mask & m_objectType) != 0; }
+        bool isType(uint16 mask) const { return (mask & m_objectType); }
 
         virtual void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const;
         void SendUpdateToPlayer(Player* player);
@@ -531,13 +531,13 @@ struct MovementInfo
     void SetMovementFlags(uint32 flag) { flags = flag; }
     void AddMovementFlag(uint32 flag) { flags |= flag; }
     void RemoveMovementFlag(uint32 flag) { flags &= ~flag; }
-    bool HasMovementFlag(uint32 flag) const { return (flags & flag) != 0; }
+    bool HasMovementFlag(uint32 flag) const { return flags & flag; }
 
     uint16 GetExtraMovementFlags() const { return flags2; }
     void SetExtraMovementFlags(uint16 flag) { flags2 = flag; }
     void AddExtraMovementFlag(uint16 flag) { flags2 |= flag; }
     void RemoveExtraMovementFlag(uint16 flag) { flags2 &= ~flag; }
-    bool HasExtraMovementFlag(uint16 flag) const { return (flags2 & flag) != 0; }
+    bool HasExtraMovementFlag(uint16 flag) const { return flags2 & flag; }
 
     void SetFallTime(uint32 time) { jump.fallTime = time; }
 
@@ -668,7 +668,7 @@ class WorldObject : public Object, public WorldLocation
         virtual void SetPhaseMask(uint32 newPhaseMask, bool update);
         uint32 GetPhaseMask() const { return m_phaseMask; }
         bool InSamePhase(WorldObject const* obj) const;
-        bool InSamePhase(uint32 phasemask) const { return (GetPhaseMask() & phasemask) != 0; }
+        bool InSamePhase(uint32 phasemask) const { return (GetPhaseMask() & phasemask); }
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;
@@ -774,6 +774,7 @@ class WorldObject : public Object, public WorldLocation
 
         void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
         void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
+        void GetPlayerListInGrid(std::list<Player*>& lList, float fMaxSearchRange) const;
 
         void DestroyForNearbyPlayers();
         virtual void UpdateObjectVisibility(bool forced = true);
@@ -781,10 +782,10 @@ class WorldObject : public Object, public WorldLocation
 
         //relocation and visibility system functions
         void AddToNotify(uint16 f) { m_notifyflags |= f;}
-        bool isNeedNotify(uint16 f) const { return (m_notifyflags & f) != 0; }
+        bool isNeedNotify(uint16 f) const { return m_notifyflags & f;}
         uint16 GetNotifyFlags() const { return m_notifyflags; }
-        bool NotifyExecuted(uint16 f) const { return (m_executed_notifies & f) != 0; }
-        void SetNotified(uint16 f) { m_executed_notifies |= f; }
+        bool NotifyExecuted(uint16 f) const { return m_executed_notifies & f;}
+        void SetNotified(uint16 f) { m_executed_notifies |= f;}
         void ResetAllNotifies() { m_notifyflags = 0; m_executed_notifies = 0; }
 
         bool isActiveObject() const { return m_isActive; }

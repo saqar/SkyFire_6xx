@@ -90,7 +90,7 @@ class boss_four_horsemen : public CreatureScript
 public:
     boss_four_horsemen() : CreatureScript("boss_four_horsemen") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_four_horsemenAI(creature);
     }
@@ -119,7 +119,7 @@ public:
         bool encounterActionReset;
         bool doDelayPunish;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             if (!encounterActionReset)
                 DoEncounteraction(NULL, false, true, false);
@@ -223,7 +223,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 id) override
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -266,7 +266,7 @@ public:
             }
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
             BossAI::MoveInLineOfSight(who);
@@ -274,7 +274,7 @@ public:
                 SelectNearestTarget(who);
         }
 
-        void AttackStart(Unit* who) override
+        void AttackStart(Unit* who) OVERRIDE
         {
             if (!movementCompleted && !movementStarted)
             {
@@ -293,13 +293,13 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             if (!(rand()%5))
                 Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             events.Reset();
             summons.DespawnAll();
@@ -320,7 +320,7 @@ public:
             Talk(SAY_DEATH);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
             Talk(SAY_AGGRO);
@@ -330,7 +330,7 @@ public:
             events.ScheduleEvent(EVENT_BERSERK, 15*100*1000);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (nextWP && movementStarted && !movementCompleted && !nextMovementStarted)
             {
@@ -439,13 +439,13 @@ class spell_four_horsemen_mark : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterEffectApply += AuraEffectApplyFn(spell_four_horsemen_mark_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_four_horsemen_mark_AuraScript();
         }

@@ -52,36 +52,36 @@ class boss_thorim : public CreatureScript
             {
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
             }
 
-            void EnterEvadeMode() override
+            void EnterEvadeMode() OVERRIDE
             {
                 Talk(SAY_WIPE);
                 _EnterEvadeMode();
             }
 
-            void KilledUnit(Unit* who) override
+            void KilledUnit(Unit* who) OVERRIDE
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Talk(SAY_DEATH);
                 _JustDied();
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
                 _EnterCombat();
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -94,7 +94,7 @@ class boss_thorim : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetUlduarAI<boss_thorimAI>(creature);
         }

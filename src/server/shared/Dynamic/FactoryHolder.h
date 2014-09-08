@@ -31,13 +31,16 @@ class FactoryHolder
 {
     public:
         typedef ObjectRegistry<FactoryHolder<T, Key >, Key > FactoryHolderRegistry;
+        friend class ACE_Singleton<FactoryHolderRegistry, ACE_Null_Mutex>;
+        typedef ACE_Singleton<FactoryHolderRegistry, ACE_Null_Mutex> FactoryHolderRepository;
 
         FactoryHolder(Key k) : i_key(k) { }
         virtual ~FactoryHolder() { }
         inline Key key() const { return i_key; }
 
-        void RegisterSelf(void) { FactoryHolderRegistry::instance()->InsertItem(this, i_key); }
-        void DeregisterSelf(void) { FactoryHolderRegistry::instance()->RemoveItem(this, false); }
+        void RegisterSelf(void) { FactoryHolderRepository::instance()->InsertItem(this, i_key); }
+        void DeregisterSelf(void) { FactoryHolderRepository::instance()->RemoveItem(this, false); }
+
         /// Abstract Factory create method
         virtual T* Create(void *data = NULL) const = 0;
     private:
@@ -56,3 +59,4 @@ class Permissible
         virtual int Permit(const T *) const = 0;
 };
 #endif
+

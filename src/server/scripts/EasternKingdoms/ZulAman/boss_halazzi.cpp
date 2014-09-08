@@ -50,30 +50,30 @@ class boss_halazzi : public CreatureScript
         {
             boss_halazziAI(Creature* creature) : BossAI(creature, DATA_HALAZZI) { }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
                 _EnterCombat();
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Talk(SAY_DEATH);
                 _JustDied();
             }
 
-            void KilledUnit(Unit* victim) override
+            void KilledUnit(Unit* victim) OVERRIDE
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_PLAYER_KILL);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -97,7 +97,7 @@ class boss_halazzi : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetZulAmanAI<boss_halazziAI>(creature);
         }

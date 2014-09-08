@@ -53,19 +53,19 @@ class boss_ironaya : public CreatureScript
             bool bHasCastedWstomp;
             bool bHasCastedKnockaway;
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 uiArcingTimer = 3000;
                 bHasCastedKnockaway = false;
                 bHasCastedWstomp = false;
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
             }
 
-            void UpdateAI(uint32 uiDiff) override
+            void UpdateAI(uint32 uiDiff) OVERRIDE
             {
                 //Return since we have no target
                 if (!UpdateVictim())
@@ -106,7 +106,7 @@ class boss_ironaya : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_ironayaAI(creature);
         }

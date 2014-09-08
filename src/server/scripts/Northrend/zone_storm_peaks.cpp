@@ -51,7 +51,7 @@ public:
     {
         npc_injured_goblinAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void WaypointReached(uint32 waypointId) override
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             Player* player = GetPlayerForEscort();
             if (!player)
@@ -68,18 +68,18 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void Reset() override { }
+        void Reset() OVERRIDE { }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Player* player = GetPlayerForEscort();
             if (HasEscortState(STATE_ESCORT_ESCORTING) && player)
                 player->FailQuest(QUEST_BITTER_DEPARTURE);
         }
 
-       void UpdateAI(uint32 uiDiff) override
+       void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             npc_escortAI::UpdateAI(uiDiff);
             if (!UpdateVictim())
@@ -87,7 +87,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void sGossipSelect(Player* player, uint32 sender, uint32 action) override
+        void sGossipSelect(Player* player, uint32 sender, uint32 action) OVERRIDE
         {
             if (sender == GOSSIP_ID && action == GOSSIP_OPTION_ID)
             {
@@ -98,12 +98,12 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_injured_goblinAI(creature);
     }
 
-    bool OnQuestAccept(Player* /*player*/, Creature* creature, Quest const* quest) override
+    bool OnQuestAccept(Player* /*player*/, Creature* creature, Quest const* quest) OVERRIDE
     {
         if (quest->GetQuestId() == QUEST_BITTER_DEPARTURE)
             creature->AI()->Talk(SAY_QUEST_ACCEPT);
@@ -127,7 +127,7 @@ class npc_roxi_ramrocket : public CreatureScript
 public:
     npc_roxi_ramrocket() : CreatureScript("npc_roxi_ramrocket") { }
 
-    bool OnGossipHello(Player* player, Creature* creature) override
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
         //Quest Menu
         if (creature->IsQuestGiver())
@@ -146,7 +146,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -185,18 +185,18 @@ public:
 
         bool freed;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             freed = false;
             me->CastSpell(me, SPELL_ICE_PRISON, true);
         }
 
-        void JustRespawned() override
+        void JustRespawned() OVERRIDE
         {
             Reset();
         }
 
-        void UpdateAI(uint32 /*diff*/) override
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
         {
             if (!freed)
                 return;
@@ -205,7 +205,7 @@ public:
                 me->DespawnOrUnsummon();
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell) override
+        void SpellHit(Unit* caster, const SpellInfo* spell) OVERRIDE
         {
             if (spell->Id != SPELL_ICE_LANCE)
                 return;
@@ -220,7 +220,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_brunnhildar_prisonerAI(creature);
     }
@@ -257,12 +257,12 @@ public:
 
         EventMap events;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             events.ScheduleEvent(EVENT_CHECK_AREA, 5000);
         }
 
-        void MovementInform(uint32 type, uint32 id) override
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
             if (type != WAYPOINT_MOTION_TYPE)
                 return;
@@ -272,7 +272,7 @@ public:
             events.ScheduleEvent(EVENT_REACHED_HOME, 2000);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             events.Update(diff);
 
@@ -313,7 +313,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_freed_protodrakeAI(creature);
     }
@@ -328,11 +328,11 @@ public:
     {
         npc_icefangAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void AttackStart(Unit* /*who*/) override { }
-        void EnterCombat(Unit* /*who*/) override { }
-        void EnterEvadeMode() override { }
+        void AttackStart(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterEvadeMode() OVERRIDE { }
 
-        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) override
+        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) OVERRIDE
         {
             if (who->GetTypeId() == TYPEID_PLAYER)
             {
@@ -341,19 +341,19 @@ public:
             }
         }
 
-        void WaypointReached(uint32 /*waypointId*/) override
+        void WaypointReached(uint32 /*waypointId*/) OVERRIDE
         {
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
         }
 
-        void OnCharmed(bool /*apply*/) override
+        void OnCharmed(bool /*apply*/) OVERRIDE
         {
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             npc_escortAI::UpdateAI(diff);
 
@@ -362,7 +362,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_icefangAI(creature);
     }
@@ -383,7 +383,7 @@ class npc_hyldsmeet_protodrake : public CreatureScript
             public:
                 npc_hyldsmeet_protodrakeAI(Creature* creature) : CreatureAI(creature), _accessoryRespawnTimer(0), _vehicleKit(creature->GetVehicleKit()) { }
 
-                void PassengerBoarded(Unit* who, int8 /*seat*/, bool apply) override
+                void PassengerBoarded(Unit* who, int8 /*seat*/, bool apply) OVERRIDE
                 {
                     if (apply)
                         return;
@@ -392,7 +392,7 @@ class npc_hyldsmeet_protodrake : public CreatureScript
                         _accessoryRespawnTimer = 5 * MINUTE * IN_MILLISECONDS;
                 }
 
-                void UpdateAI(uint32 diff) override
+                void UpdateAI(uint32 diff) OVERRIDE
                 {
                     //! We need to manually reinstall accessories because the vehicle itself is friendly to players,
                     //! so EnterEvadeMode is never triggered. The accessory on the other hand is hostile and killable.
@@ -410,7 +410,7 @@ class npc_hyldsmeet_protodrake : public CreatureScript
                 Vehicle* _vehicleKit;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_hyldsmeet_protodrakeAI(creature);
         }
@@ -430,13 +430,13 @@ class spell_close_rift : public SpellScriptLoader
         {
             PrepareAuraScript(spell_close_rift_AuraScript);
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 _counter = 0;
                 return true;
             }
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 return sSpellMgr->GetSpellInfo(SPELL_DESPAWN_RIFT);
             }
@@ -447,7 +447,7 @@ class spell_close_rift : public SpellScriptLoader
                     GetTarget()->CastSpell((Unit*)NULL, SPELL_DESPAWN_RIFT, true);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_close_rift_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
             }
@@ -457,7 +457,7 @@ class spell_close_rift : public SpellScriptLoader
 
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_close_rift_AuraScript();
         }

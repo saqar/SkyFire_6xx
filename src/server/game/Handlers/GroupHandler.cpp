@@ -33,7 +33,6 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Object.h"
 
 class Aura;
 

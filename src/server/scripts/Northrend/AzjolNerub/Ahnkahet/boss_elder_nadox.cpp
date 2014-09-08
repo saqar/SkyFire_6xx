@@ -63,14 +63,14 @@ class boss_elder_nadox : public CreatureScript
         {
             boss_elder_nadoxAI(Creature* creature) : BossAI(creature, DATA_ELDER_NADOX) { }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
                 AmountHealthModifier = 1;
                 GuardianDied = false;
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
@@ -85,13 +85,13 @@ class boss_elder_nadox : public CreatureScript
                 }
             }
 
-            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) OVERRIDE
             {
                 if (summon->GetEntry() == NPC_AHNKAHAR_GUARDIAN)
                     GuardianDied = true;
             }
 
-            uint32 GetData(uint32 type) const override
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                 if (type == DATA_RESPECT_YOUR_ELDERS)
                     return !GuardianDied ? 1 : 0;
@@ -99,19 +99,19 @@ class boss_elder_nadox : public CreatureScript
                 return 0;
             }
 
-            void KilledUnit(Unit* who) override
+            void KilledUnit(Unit* who) OVERRIDE
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 _JustDied();
                 Talk(SAY_DEATH);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -163,7 +163,7 @@ class boss_elder_nadox : public CreatureScript
             uint8 AmountHealthModifier;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetAhnKahetAI<boss_elder_nadoxAI>(creature);
         }
@@ -180,7 +180,7 @@ class npc_ahnkahar_nerubian : public CreatureScript
 
             EventMap events;
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 if (me->GetEntry() == NPC_AHNKAHAR_GUARDIAN)
                     DoCast(me, SPELL_GUARDIAN_AURA, true);
@@ -188,13 +188,13 @@ class npc_ahnkahar_nerubian : public CreatureScript
                 events.ScheduleEvent(EVENT_SPRINT, 13 * IN_MILLISECONDS);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 if (me->GetEntry() == NPC_AHNKAHAR_GUARDIAN)
                     me->RemoveAurasDueToSpell(SPELL_GUARDIAN_AURA);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -218,7 +218,7 @@ class npc_ahnkahar_nerubian : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_ahnkahar_nerubianAI(creature);
         }
@@ -238,15 +238,15 @@ public:
             creature->UpdateAllStats();
         }
 
-        void Reset() override { }
-        void EnterCombat(Unit* /*who*/) override { }
-        void AttackStart(Unit* /*victim*/) override { }
-        void MoveInLineOfSight(Unit* /*who*/) override { }
+        void Reset() OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void AttackStart(Unit* /*victim*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
-        void UpdateAI(uint32 /*diff*/) override { }
+        void UpdateAI(uint32 /*diff*/) OVERRIDE { }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_nadox_eggsAI(creature);
     }
@@ -278,14 +278,14 @@ public:
             targets.remove_if (GuardianCheck());
         }
 
-        void Register() override
+        void Register() OVERRIDE
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_elder_nadox_guardian_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_elder_nadox_guardian_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);
         }
     };
 
-    SpellScript* GetSpellScript() const override
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_elder_nadox_guardian_SpellScript();
     }
@@ -296,7 +296,7 @@ class achievement_respect_your_elders : public AchievementCriteriaScript
 public:
     achievement_respect_your_elders() : AchievementCriteriaScript("achievement_respect_your_elders") { }
 
-    bool OnCheck(Player* /*player*/, Unit* target) override
+    bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
     {
         if (!target)
             return false;

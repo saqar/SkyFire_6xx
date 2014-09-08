@@ -42,7 +42,7 @@ class npc_defiant_troll : public CreatureScript
 public:
     npc_defiant_troll() : CreatureScript("npc_defiant_troll") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_defiant_trollAI(creature);
     }
@@ -54,14 +54,14 @@ public:
         uint32 rebuffTimer;
         bool work;
 
-        void Reset () override
+        void Reset () OVERRIDE
         {
             rebuffTimer = 0;
             work = false;
             me->CastSpell(me, SPELL_ENRAGE, true);
         }
 
-        void MovementInform(uint32 /*type*/, uint32 id) override
+        void MovementInform(uint32 /*type*/, uint32 id) OVERRIDE
         {
             if (id == 1)
                 work = true;
@@ -69,7 +69,7 @@ public:
 
         bool IsWorking() const { return work; }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (IsWorking())
                 me->HandleEmoteCommand(EMOTE_ONESHOT_WORK_MINING);
@@ -102,7 +102,7 @@ public:
         }
     };
 
-    bool OnGossipHello(Player* player, Creature* creature) override
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
         if (player->GetQuestStatus(QUEST_GOOD_HELP_IS_HARD_TO_FIND) == QUEST_STATUS_INCOMPLETE && !CAST_AI(npc_defiant_troll::npc_defiant_trollAI, creature->AI())->IsWorking())
         {

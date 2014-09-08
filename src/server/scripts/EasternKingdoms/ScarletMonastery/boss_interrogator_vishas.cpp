@@ -48,7 +48,7 @@ class boss_interrogator_vishas : public CreatureScript
 public:
     boss_interrogator_vishas() : CreatureScript("boss_interrogator_vishas") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_interrogator_vishasAI(creature);
     }
@@ -66,22 +66,22 @@ public:
         bool Yell60;
         uint32 ShadowWordPain_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             ShadowWordPain_Timer = 5000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void KilledUnit(Unit* /*Victim*/) override
+        void KilledUnit(Unit* /*Victim*/) OVERRIDE
         {
             Talk(SAY_KILL);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (!instance)
                 return;
@@ -91,7 +91,7 @@ public:
                 vorrel->AI()->Talk(SAY_TRIGGER_VORREL);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

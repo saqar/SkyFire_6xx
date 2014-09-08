@@ -65,7 +65,7 @@ class boss_scarlet_commander_mograine : public CreatureScript
 public:
     boss_scarlet_commander_mograine() : CreatureScript("boss_scarlet_commander_mograine") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_scarlet_commander_mograineAI(creature);
     }
@@ -86,7 +86,7 @@ public:
         bool _bHeal;
         bool _bFakeDeath;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             CrusaderStrike_Timer = 10000;
             HammerOfJustice_Timer = 10000;
@@ -105,7 +105,7 @@ public:
             _bFakeDeath = false;
         }
 
-        void JustReachedHome() override
+        void JustReachedHome() OVERRIDE
         {
             if (instance)
             {
@@ -114,7 +114,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_MO_AGGRO);
             DoCast(me, SPELL_RETRIBUTIONAURA);
@@ -122,12 +122,12 @@ public:
             me->CallForHelp(VISIBLE_RANGE);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_MO_KILL);
         }
 
-        void DamageTaken(Unit* /*doneBy*/, uint32 &damage) override
+        void DamageTaken(Unit* /*doneBy*/, uint32 &damage) OVERRIDE
         {
             if (damage < me->GetHealth() || _bHasDied || _bFakeDeath)
                 return;
@@ -164,7 +164,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* /*who*/, const SpellInfo* spell) override
+        void SpellHit(Unit* /*who*/, const SpellInfo* spell) OVERRIDE
         {
             //When hit with ressurection say text
             if (spell->Id == SPELL_SCARLETRESURRECTION)
@@ -177,7 +177,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -231,7 +231,7 @@ class boss_high_inquisitor_whitemane : public CreatureScript
 public:
     boss_high_inquisitor_whitemane() : CreatureScript("boss_high_inquisitor_whitemane") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_high_inquisitor_whitemaneAI(creature);
     }
@@ -253,7 +253,7 @@ public:
         bool _bCanResurrectCheck;
         bool _bCanResurrect;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Wait_Timer = 7000;
             Heal_Timer = 10000;
@@ -268,7 +268,7 @@ public:
                     instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, NOT_STARTED);
         }
 
-        void AttackStart(Unit* who) override
+        void AttackStart(Unit* who) OVERRIDE
         {
             if (instance && instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) == NOT_STARTED)
                 return;
@@ -276,23 +276,23 @@ public:
             ScriptedAI::AttackStart(who);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_WH_INTRO);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_WH_KILL);
         }
 
-        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
         {
             if (!_bCanResurrectCheck && damage >= me->GetHealth())
                 damage = me->GetHealth() - 1;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

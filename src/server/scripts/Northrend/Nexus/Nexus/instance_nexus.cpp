@@ -35,7 +35,7 @@ class instance_nexus : public InstanceMapScript
 public:
     instance_nexus() : InstanceMapScript("instance_nexus", 576) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_nexus_InstanceMapScript(map);
     }
@@ -55,7 +55,7 @@ public:
 
         std::string strInstData;
 
-        void Initialize() override
+        void Initialize() OVERRIDE
         {
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
@@ -66,7 +66,7 @@ public:
             TelestrasContainmentSphere = 0;
         }
 
-        void OnCreatureCreate(Creature* creature) override
+        void OnCreatureCreate(Creature* creature) OVERRIDE
         {
             Map::PlayerList const &players = instance->GetPlayers();
             uint32 TeamInInstance = 0;
@@ -128,7 +128,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) override
+        void OnGameObjectCreate(GameObject* go) OVERRIDE
         {
             switch (go->GetEntry())
             {
@@ -156,7 +156,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 identifier) const override
+        uint32 GetData(uint32 identifier) const OVERRIDE
         {
             switch (identifier)
             {
@@ -168,7 +168,7 @@ public:
             return 0;
         }
 
-        void SetData(uint32 identifier, uint32 data) override
+        void SetData(uint32 identifier, uint32 data) OVERRIDE
         {
             switch (identifier)
             {
@@ -223,7 +223,7 @@ public:
             }
         }
 
-        uint64 GetData64(uint32 uiIdentifier) const override
+        uint64 GetData64(uint32 uiIdentifier) const OVERRIDE
         {
             switch (uiIdentifier)
             {
@@ -236,7 +236,7 @@ public:
             return 0;
         }
 
-        std::string GetSaveData() override
+        std::string GetSaveData() OVERRIDE
         {
             return strInstData;
         }

@@ -43,7 +43,7 @@ class boss_maleki_the_pallid : public CreatureScript
 public:
     boss_maleki_the_pallid() : CreatureScript("boss_maleki_the_pallid") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_maleki_the_pallidAI(creature);
     }
@@ -61,24 +61,24 @@ public:
         uint32 IceTomb_Timer;
         uint32 DrainLife_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Frostbolt_Timer = 1000;
             IceTomb_Timer = 16000;
             DrainLife_Timer = 31000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(TYPE_PALLID, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())

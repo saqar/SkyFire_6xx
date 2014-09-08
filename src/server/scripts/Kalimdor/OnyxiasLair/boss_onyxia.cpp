@@ -136,7 +136,7 @@ public:
             Reset();
         }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             if (!IsCombatMovementAllowed())
                 SetCombatMovement(true);
@@ -156,7 +156,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
             me->SetInCombatWithZone();
@@ -173,7 +173,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetBossState(DATA_ONYXIA, DONE);
@@ -181,7 +181,7 @@ public:
             Summons.DespawnAll();
         }
 
-        void JustSummoned(Creature* summoned) override
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             summoned->SetInCombatWithZone();
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
@@ -199,17 +199,17 @@ public:
             Summons.Summon(summoned);
         }
 
-        void SummonedCreatureDespawn(Creature* summon) override
+        void SummonedCreatureDespawn(Creature* summon) OVERRIDE
         {
             Summons.Despawn(summon);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_KILL);
         }
 
-        void SpellHit(Unit* /*pCaster*/, const SpellInfo* Spell) override
+        void SpellHit(Unit* /*pCaster*/, const SpellInfo* Spell) OVERRIDE
         {
             if (Spell->Id == SPELL_BREATH_EAST_TO_WEST ||
                 Spell->Id == SPELL_BREATH_WEST_TO_EAST ||
@@ -226,7 +226,7 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 id) override
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
             if (type == POINT_MOTION_TYPE)
             {
@@ -267,7 +267,7 @@ public:
             }
         }
 
-        void SpellHitTarget(Unit* target, const SpellInfo* Spell) override
+        void SpellHitTarget(Unit* target, const SpellInfo* Spell) OVERRIDE
         {
             //Workaround - Couldn't find a way to group this spells (All Eruption)
             if (((Spell->Id >= 17086 && Spell->Id <= 17095) ||
@@ -315,7 +315,7 @@ public:
             MovePoint = iTemp;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -470,7 +470,7 @@ public:
             bool IsMoving;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_onyxiaAI(creature);
     }

@@ -50,7 +50,7 @@ class boss_kazrogal : public CreatureScript
 public:
     boss_kazrogal() : CreatureScript("boss_kazrogal") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_kazrogalAI(creature);
     }
@@ -69,7 +69,7 @@ public:
         uint32 MarkTimerBase;
         bool go;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             damageTaken = 0;
             CleaveTimer = 5000;
@@ -81,19 +81,19 @@ public:
                 instance->SetData(DATA_KAZROGALEVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance && IsEvent)
                 instance->SetData(DATA_KAZROGALEVENT, IN_PROGRESS);
             Talk(SAY_ONAGGRO);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_ONSLAY);
         }
 
-        void WaypointReached(uint32 waypointId) override
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             if (waypointId == 7 && instance)
             {
@@ -103,7 +103,7 @@ public:
             }
         }
 
-        void JustDied(Unit* killer) override
+        void JustDied(Unit* killer) OVERRIDE
         {
             hyjal_trashAI::JustDied(killer);
             if (instance && IsEvent)
@@ -111,7 +111,7 @@ public:
             DoPlaySoundToSet(me, SOUND_ONDEATH);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (IsEvent)
             {
@@ -194,7 +194,7 @@ class spell_mark_of_kazrogal : public SpellScriptLoader
                 targets.remove_if(MarkTargetFilter());
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mark_of_kazrogal_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
@@ -204,7 +204,7 @@ class spell_mark_of_kazrogal : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mark_of_kazrogal_AuraScript);
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_MARK_DAMAGE))
                     return false;
@@ -223,18 +223,18 @@ class spell_mark_of_kazrogal : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_mark_of_kazrogal_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_MANA_LEECH);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_mark_of_kazrogal_SpellScript();
         }
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_mark_of_kazrogal_AuraScript();
         }

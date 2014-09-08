@@ -52,7 +52,7 @@ enum DruidSpells
     SPELL_DRUID_ITEM_T8_BALANCE_RELIC       = 64950,
     SPELL_DRUID_KING_OF_THE_JUNGLE          = 48492,
     SPELL_DRUID_LIFEBLOOM_ENERGIZE          = 64372,
-    SPELL_DRUID_LIFEBLOOM_final_HEAL        = 33778,
+    SPELL_DRUID_LIFEBLOOM_FINAL_HEAL        = 33778,
     SPELL_DRUID_LIVING_SEED_HEAL            = 48503,
     SPELL_DRUID_LIVING_SEED_PROC            = 48504,
     SPELL_DRUID_NATURES_GRACE               = 16880,
@@ -82,13 +82,13 @@ class spell_dru_dash : public SpellScriptLoader
                     amount = 0;
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_dash_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_INCREASE_SPEED);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_dash_AuraScript();
         }
@@ -105,7 +105,7 @@ class spell_dru_eclipse : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_eclipse_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_NATURES_GRACE) ||
                     !sSpellMgr->GetSpellInfo(SPELL_DRUID_NATURES_GRACE_TRIGGER))
@@ -113,7 +113,7 @@ class spell_dru_eclipse : public SpellScriptLoader
                 return true;
             }
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
@@ -128,13 +128,13 @@ class spell_dru_eclipse : public SpellScriptLoader
                     caster->ToPlayer()->RemoveSpellCooldown(SPELL_DRUID_NATURES_GRACE_TRIGGER, true);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectApply += AuraEffectApplyFn(spell_dru_eclipse_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_eclipse_AuraScript();
         }
@@ -152,7 +152,7 @@ class spell_dru_eclipse_energize : public SpellScriptLoader
 
             int32 energizeAmount;
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
                     return false;
@@ -238,13 +238,13 @@ class spell_dru_eclipse_energize : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dru_eclipse_energize_SpellScript::HandleEnergize, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_eclipse_energize_SpellScript;
         }
@@ -260,7 +260,7 @@ class spell_dru_enrage : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_enrage_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_KING_OF_THE_JUNGLE)
                     || !sSpellMgr->GetSpellInfo(SPELL_DRUID_ENRAGE_MOD_DAMAGE))
@@ -274,13 +274,13 @@ class spell_dru_enrage : public SpellScriptLoader
                     GetHitUnit()->CastCustomSpell(SPELL_DRUID_ENRAGE_MOD_DAMAGE, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetHitUnit(), true);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterHit += SpellHitFn(spell_dru_enrage_SpellScript::OnHit);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_enrage_SpellScript();
         }
@@ -296,7 +296,7 @@ class spell_dru_glyph_of_innervate : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_glyph_of_innervate_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_GLYPH_OF_INNERVATE))
                     return false;
@@ -315,14 +315,14 @@ class spell_dru_glyph_of_innervate : public SpellScriptLoader
                 GetTarget()->CastSpell(GetTarget(), SPELL_DRUID_GLYPH_OF_INNERVATE, true, NULL, aurEff);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 DoCheckProc += AuraCheckProcFn(spell_dru_glyph_of_innervate_AuraScript::CheckProc);
                 OnEffectProc += AuraEffectProcFn(spell_dru_glyph_of_innervate_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_glyph_of_innervate_AuraScript();
         }
@@ -338,7 +338,7 @@ class spell_dru_glyph_of_starfire : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_glyph_of_starfire_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_INCREASED_MOONFIRE_DURATION))
                     return false;
@@ -366,13 +366,13 @@ class spell_dru_glyph_of_starfire : public SpellScriptLoader
                     }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dru_glyph_of_starfire_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_glyph_of_starfire_SpellScript();
         }
@@ -388,7 +388,7 @@ class spell_dru_glyph_of_starfire_proc : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_glyph_of_starfire_proc_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_GLYPH_OF_STARFIRE))
                     return false;
@@ -401,13 +401,13 @@ class spell_dru_glyph_of_starfire_proc : public SpellScriptLoader
                 GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_DRUID_GLYPH_OF_STARFIRE, true, NULL, aurEff);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectProc += AuraEffectProcFn(spell_dru_glyph_of_starfire_proc_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_glyph_of_starfire_proc_AuraScript();
         }
@@ -437,13 +437,13 @@ class spell_dru_idol_lifebloom : public SpellScriptLoader
                 spellMod->value = aurEff->GetAmount() / 7;
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_dru_idol_lifebloom_AuraScript::HandleEffectCalcSpellMod, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_idol_lifebloom_AuraScript();
         }
@@ -464,13 +464,13 @@ class spell_dru_innervate : public SpellScriptLoader
                 amount = CalculatePct(int32(GetUnitOwner()->GetCreatePowers(POWER_MANA) / aurEff->GetTotalTicks()), amount);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_innervate_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_innervate_AuraScript();
         }
@@ -493,13 +493,13 @@ class spell_dru_insect_swarm : public SpellScriptLoader
                         amount += relicAurEff->GetAmount() / aurEff->GetTotalTicks();
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                  DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_insect_swarm_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_insect_swarm_AuraScript();
         }
@@ -515,9 +515,9 @@ class spell_dru_lifebloom : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_lifebloom_AuraScript);
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_final_HEAL))
+                if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL))
                     return false;
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_ENERGIZE))
                     return false;
@@ -526,7 +526,7 @@ class spell_dru_lifebloom : public SpellScriptLoader
 
             void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
             {
-                // final heal only on duration end
+                // Final heal only on duration end
                 if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
                     return;
 
@@ -538,7 +538,7 @@ class spell_dru_lifebloom : public SpellScriptLoader
                     healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
                     healAmount = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, stack);
 
-                    GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_final_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+                    GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
 
                     // restore mana
                     int32 returnMana = CalculatePct(caster->GetCreateMana(), GetSpellInfo()->ManaCostPercentage) * stack / 2;
@@ -546,7 +546,7 @@ class spell_dru_lifebloom : public SpellScriptLoader
                     return;
                 }
 
-                GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_final_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
+                GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
             }
 
             void HandleDispel(DispelInfo* dispelInfo)
@@ -561,7 +561,7 @@ class spell_dru_lifebloom : public SpellScriptLoader
                         {
                             healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
                             healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
-                            target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_final_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+                            target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
 
                             // restore mana
                             int32 returnMana = CalculatePct(caster->GetCreateMana(), GetSpellInfo()->ManaCostPercentage) * dispelInfo->GetRemovedCharges() / 2;
@@ -569,19 +569,19 @@ class spell_dru_lifebloom : public SpellScriptLoader
                             return;
                         }
 
-                        target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_final_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+                        target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
                     }
                 }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterEffectRemove += AuraEffectRemoveFn(spell_dru_lifebloom_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
                 AfterDispel += AuraDispelFn(spell_dru_lifebloom_AuraScript::HandleDispel);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_lifebloom_AuraScript();
         }
@@ -597,7 +597,7 @@ class spell_dru_living_seed : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_living_seed_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIVING_SEED_PROC))
                     return false;
@@ -611,13 +611,13 @@ class spell_dru_living_seed : public SpellScriptLoader
                 GetTarget()->CastCustomSpell(SPELL_DRUID_LIVING_SEED_PROC, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectProc += AuraEffectProcFn(spell_dru_living_seed_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_living_seed_AuraScript();
         }
@@ -633,7 +633,7 @@ class spell_dru_living_seed_proc : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_living_seed_proc_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIVING_SEED_HEAL))
                     return false;
@@ -646,13 +646,13 @@ class spell_dru_living_seed_proc : public SpellScriptLoader
                 GetTarget()->CastCustomSpell(SPELL_DRUID_LIVING_SEED_HEAL, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetTarget(), true, NULL, aurEff);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectProc += AuraEffectProcFn(spell_dru_living_seed_proc_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_living_seed_proc_AuraScript();
         }
@@ -674,14 +674,14 @@ class spell_dru_predatory_strikes : public SpellScriptLoader
                     target->UpdateAttackPowerAndDamage();
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterEffectApply += AuraEffectApplyFn(spell_dru_predatory_strikes_AuraScript::UpdateAmount, EFFECT_ALL, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_dru_predatory_strikes_AuraScript::UpdateAmount, EFFECT_ALL, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_predatory_strikes_AuraScript();
         }
@@ -697,7 +697,7 @@ class spell_dru_rip : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_rip_AuraScript);
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 Unit* caster = GetCaster();
                 return caster && caster->GetTypeId() == TYPEID_PLAYER;
@@ -723,13 +723,13 @@ class spell_dru_rip : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_rip_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_rip_AuraScript();
         }
@@ -747,7 +747,7 @@ class spell_dru_savage_defense : public SpellScriptLoader
 
             uint32 absorbPct;
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
                 return true;
@@ -765,14 +765,14 @@ class spell_dru_savage_defense : public SpellScriptLoader
                 aurEff->SetAmount(0);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                  DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_savage_defense_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
                  OnEffectAbsorb += AuraEffectAbsorbFn(spell_dru_savage_defense_AuraScript::Absorb, EFFECT_0);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_savage_defense_AuraScript();
         }
@@ -797,7 +797,7 @@ class spell_dru_savage_roar : public SpellScriptLoader
                 return SPELL_CAST_OK;
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnCheckCast += SpellCheckCastFn(spell_dru_savage_roar_SpellScript::CheckCast);
             }
@@ -807,7 +807,7 @@ class spell_dru_savage_roar : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_savage_roar_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_SAVAGE_ROAR))
                     return false;
@@ -825,19 +825,19 @@ class spell_dru_savage_roar : public SpellScriptLoader
                 GetTarget()->RemoveAurasDueToSpell(SPELL_DRUID_SAVAGE_ROAR);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterEffectApply += AuraEffectApplyFn(spell_dru_savage_roar_AuraScript::AfterApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_dru_savage_roar_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_savage_roar_SpellScript();
         }
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_savage_roar_AuraScript();
         }
@@ -876,14 +876,14 @@ class spell_dru_starfall_dummy : public SpellScriptLoader
                 caster->CastSpell(GetHitUnit(), uint32(GetEffectValue()), true);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dru_starfall_dummy_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_dru_starfall_dummy_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_starfall_dummy_SpellScript();
         }
@@ -899,7 +899,7 @@ class spell_dru_stampede : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_stampede_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_STAMPEDE_BAER_RANK_1) ||
                     !sSpellMgr->GetSpellInfo(SPELL_DRUID_STAMPEDE_CAT_RANK_1) ||
@@ -929,14 +929,14 @@ class spell_dru_stampede : public SpellScriptLoader
                 GetTarget()->CastSpell(GetTarget(), sSpellMgr->GetSpellWithRank(SPELL_DRUID_STAMPEDE_BAER_RANK_1, GetSpellInfo()->GetRank()), true, NULL, aurEff);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectProc += AuraEffectProcFn(spell_dru_stampede_AuraScript::HandleEffectCatProc, EFFECT_0, SPELL_AURA_DUMMY);
                 OnEffectProc += AuraEffectProcFn(spell_dru_stampede_AuraScript::HandleEffectBearProc, EFFECT_1, SPELL_AURA_DUMMY);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_stampede_AuraScript();
         }
@@ -961,7 +961,7 @@ class spell_dru_survival_instincts : public SpellScriptLoader
                 return SPELL_CAST_OK;
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnCheckCast += SpellCheckCastFn(spell_dru_survival_instincts_SpellScript::CheckCast);
             }
@@ -971,7 +971,7 @@ class spell_dru_survival_instincts : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_survival_instincts_AuraScript);
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_SURVIVAL_INSTINCTS))
                     return false;
@@ -990,19 +990,19 @@ class spell_dru_survival_instincts : public SpellScriptLoader
                 GetTarget()->RemoveAurasDueToSpell(SPELL_DRUID_SURVIVAL_INSTINCTS);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterEffectApply += AuraEffectApplyFn(spell_dru_survival_instincts_AuraScript::AfterApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_dru_survival_instincts_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_survival_instincts_SpellScript();
         }
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_survival_instincts_AuraScript();
         }
@@ -1018,7 +1018,7 @@ class spell_dru_swift_flight_passive : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dru_swift_flight_passive_AuraScript);
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
@@ -1030,13 +1030,13 @@ class spell_dru_swift_flight_passive : public SpellScriptLoader
                         amount = 310;
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_swift_flight_passive_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_MOD_INCREASE_VEHICLE_FLIGHT_SPEED);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_dru_swift_flight_passive_AuraScript();
         }
@@ -1058,13 +1058,13 @@ class spell_dru_tiger_s_fury : public SpellScriptLoader
                     GetHitUnit()->CastCustomSpell(SPELL_DRUID_TIGER_S_FURY_ENERGIZE, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), GetHitUnit(), true);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterHit += SpellHitFn(spell_dru_tiger_s_fury_SpellScript::OnHit);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_tiger_s_fury_SpellScript();
         }
@@ -1087,13 +1087,13 @@ class spell_dru_typhoon : public SpellScriptLoader
                     PreventHitDefaultEffect(effIndex);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dru_typhoon_SpellScript::HandleKnockBack, EFFECT_0, SPELL_EFFECT_KNOCK_BACK);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_typhoon_SpellScript();
         }
@@ -1109,7 +1109,7 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_t10_restoration_4p_bonus_SpellScript);
 
-            bool Load() override
+            bool Load() OVERRIDE
             {
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
@@ -1142,13 +1142,13 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dru_t10_restoration_4p_bonus_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_dru_t10_restoration_4p_bonus_SpellScript();
         }

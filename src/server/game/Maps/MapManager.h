@@ -25,19 +25,18 @@
 #include "GridStates.h"
 #include "MapUpdater.h"
 
+#include <ace/Singleton.h>
+#include <ace/Thread_Mutex.h>
+
 
 class Transport;
 struct TransportCreatureProto;
 
 class MapManager
 {
-    public:
-        static MapManager* instance()
-        {
-            static MapManager instance;
-            return &instance;
-        }
+    friend class ACE_Singleton<MapManager, ACE_Thread_Mutex>;
 
+    public:
         Map* CreateBaseMap(uint32 mapId);
         Map* FindBaseNonInstanceMap(uint32 mapId) const;
         Map* CreateMap(uint32 mapId, Player* player);
@@ -128,7 +127,7 @@ class MapManager
         MapUpdater * GetMapUpdater() { return &m_updater; }
 
     private:
-        typedef std::unordered_map<uint32, Map*> MapMapType;
+        typedef UNORDERED_MAP<uint32, Map*> MapMapType;
         typedef std::vector<bool> InstanceIds;
 
         // debugging code, should be deleted some day
@@ -148,7 +147,7 @@ class MapManager
         MapManager(const MapManager &);
         MapManager& operator=(const MapManager &);
 
-        std::mutex Lock;
+        ACE_Thread_Mutex Lock;
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;
@@ -157,5 +156,5 @@ class MapManager
         uint32 _nextInstanceId;
         MapUpdater m_updater;
 };
-#define sMapMgr MapManager::instance()
+#define sMapMgr ACE_Singleton<MapManager, ACE_Thread_Mutex>::instance()
 #endif

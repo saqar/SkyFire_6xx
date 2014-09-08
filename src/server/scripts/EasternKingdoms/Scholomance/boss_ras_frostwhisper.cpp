@@ -43,7 +43,7 @@ class boss_boss_ras_frostwhisper : public CreatureScript
 public:
     boss_boss_ras_frostwhisper() : CreatureScript("boss_boss_ras_frostwhisper") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_rasfrostAI(creature);
     }
@@ -59,7 +59,7 @@ public:
         uint32 ChillNova_Timer;
         uint32 FrostVolley_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             IceArmor_Timer = 2000;
             Frostbolt_Timer = 8000;
@@ -71,9 +71,9 @@ public:
             DoCast(me, SPELL_ICEARMOR, true);
         }
 
-        void EnterCombat(Unit* /*who*/)override { }
+        void EnterCombat(Unit* /*who*/)OVERRIDE { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

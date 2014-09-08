@@ -55,7 +55,7 @@ class boss_moorabi : public CreatureScript
 public:
     boss_moorabi() : CreatureScript("boss_moorabi") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_moorabiAI(creature);
     }
@@ -76,7 +76,7 @@ public:
         uint32 uiDeterminedStabTimer;
         uint32 uiTransformationTImer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiGroundTremorTimer = 18*IN_MILLISECONDS;
             uiNumblingShoutTimer =  10*IN_MILLISECONDS;
@@ -88,7 +88,7 @@ public:
                 instance->SetData(DATA_MOORABI_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
             DoCast(me, SPELL_MOJO_FRENZY, true);
@@ -97,7 +97,7 @@ public:
                 instance->SetData(DATA_MOORABI_EVENT, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 uiDiff) override
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             //Return since we have no target
              if (!UpdateVictim())
@@ -148,7 +148,7 @@ public:
             DoMeleeAttackIfReady();
          }
 
-        uint32 GetData(uint32 type) const override
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             if (type == DATA_LESS_RABI)
                 return bPhase ? 0 : 1;
@@ -156,7 +156,7 @@ public:
             return 0;
         }
 
-         void JustDied(Unit* /*killer*/) override
+         void JustDied(Unit* /*killer*/) OVERRIDE
          {
             Talk(SAY_DEATH);
 
@@ -164,7 +164,7 @@ public:
                 instance->SetData(DATA_MOORABI_EVENT, DONE);
         }
 
-        void KilledUnit(Unit* victim) override
+        void KilledUnit(Unit* victim) OVERRIDE
         {
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -182,7 +182,7 @@ class achievement_less_rabi : public AchievementCriteriaScript
         {
         }
 
-        bool OnCheck(Player* /*player*/, Unit* target) override
+        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
         {
             if (!target)
                 return false;

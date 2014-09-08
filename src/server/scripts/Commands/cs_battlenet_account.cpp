@@ -16,7 +16,6 @@
 */
 
 #include "BattlenetAccountMgr.h"
-#include "AccountMgr.h"
 #include "Chat.h"
 #include "Language.h"
 #include "Player.h"

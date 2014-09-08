@@ -17,6 +17,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Cryptography/HmacHash.h"
 #include "Cryptography/WardenKeyGeneration.h"
 #include "Common.h"
 #include "WorldPacket.h"
@@ -33,7 +34,6 @@
 #include "WardenModuleWin.h"
 #include "WardenCheckMgr.h"
 #include "AccountMgr.h"
-#include "Cryptography\HmacHash.h"
 
 WardenWin::WardenWin() : Warden() { }
 
@@ -207,7 +207,7 @@ void WardenWin::RequestData()
     ByteBuffer buff;
     buff << uint8(WARDEN_SMSG_CHEAT_CHECKS_REQUEST);
 
-    boost::shared_lock<boost::shared_mutex> lock(sWardenCheckMgr->_checkStoreLock);
+    ACE_READ_GUARD(ACE_RW_Mutex, g, sWardenCheckMgr->_checkStoreLock);
 
     for (uint32 i = 0; i < sWorld->getIntConfig(CONFIG_WARDEN_NUM_OTHER_CHECKS); ++i)
     {
@@ -370,7 +370,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
     uint8 type;
     uint16 checkFailed = 0;
 
-    boost::shared_lock<boost::shared_mutex> lock(sWardenCheckMgr->_checkStoreLock);
+    ACE_READ_GUARD(ACE_RW_Mutex, g, sWardenCheckMgr->_checkStoreLock);
 
     for (std::list<uint16>::iterator itr = _currentChecks.begin(); itr != _currentChecks.end(); ++itr)
     {

@@ -18,41 +18,35 @@
  */
 
 #include "LogWorker.h"
-#include <thread>
 
 LogWorker::LogWorker()
+    : m_queue(HIGH_WATERMARK, LOW_WATERMARK)
 {
-    _cancelationToken = false;
-    _workerThread = std::thread(&LogWorker::WorkerThread, this);
+    ACE_Task_Base::activate(THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED, 1);
 }
 
 LogWorker::~LogWorker()
 {
-    _cancelationToken = true;
-
-    _queue.Cancel();
-
-    _workerThread.join();
+    m_queue.deactivate();
+    wait();
 }
 
-void LogWorker::Enqueue(LogOperation* op)
+int LogWorker::enqueue(LogOperation* op)
 {
-    return _queue.Push(op);
+    return m_queue.enqueue(op);
 }
 
-void LogWorker::WorkerThread()
+int LogWorker::svc()
 {
     while (1)
     {
-        LogOperation* operation = nullptr;
+        LogOperation* request;
+        if (m_queue.dequeue(request) == -1)
+            break;
 
-        _queue.WaitAndPop(operation);
-
-        if (_cancelationToken)
-            return;
-
-        operation->call();
-
-        delete operation;
+        request->call();
+        delete request;
     }
+
+    return 0;
 }

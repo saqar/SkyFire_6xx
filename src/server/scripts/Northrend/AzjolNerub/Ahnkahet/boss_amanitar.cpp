@@ -60,14 +60,14 @@ class boss_amanitar : public CreatureScript
         {
             boss_amanitarAI(Creature* creature) : BossAI(creature, DATA_AMANITAR) { }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
                 me->SetMeleeDamageSchool(SPELL_SCHOOL_NATURE);
                 me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
 
@@ -78,7 +78,7 @@ class boss_amanitar : public CreatureScript
                 events.ScheduleEvent(EVENT_SPAWN, 5  * IN_MILLISECONDS);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 _JustDied();
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MINI);
@@ -113,7 +113,7 @@ class boss_amanitar : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -155,7 +155,7 @@ class boss_amanitar : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetAhnKahetAI<boss_amanitarAI>(creature);
         }
@@ -172,7 +172,7 @@ public:
 
         EventMap events;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             events.Reset();
             events.ScheduleEvent(EVENT_AURA, 1 * IN_MILLISECONDS);
@@ -186,16 +186,16 @@ public:
                 DoCast(SPELL_POWER_MUSHROOM_VISUAL_AURA);
         }
 
-        void DamageTaken(Unit* /*attacker*/, uint32 &damage) override
+        void DamageTaken(Unit* /*attacker*/, uint32 &damage) OVERRIDE
         {
             if (damage >= me->GetHealth() && me->GetEntry() == NPC_HEALTHY_MUSHROOM)
                 DoCast(me, SPELL_HEALTHY_MUSHROOM_POTENT_FUNGUS, true);
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
-        void AttackStart(Unit* /*victim*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void AttackStart(Unit* /*victim*/) OVERRIDE { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -224,7 +224,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_amanitar_mushroomsAI(creature);
     }

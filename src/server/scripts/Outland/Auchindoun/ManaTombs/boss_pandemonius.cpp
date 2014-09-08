@@ -46,7 +46,7 @@ class boss_pandemonius : public CreatureScript
 public:
     boss_pandemonius() : CreatureScript("boss_pandemonius") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_pandemoniusAI(creature);
     }
@@ -61,29 +61,29 @@ public:
         uint32 DarkShell_Timer;
         uint32 VoidBlast_Counter;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             VoidBlast_Timer = 8000+rand()%15000;
             DarkShell_Timer = 20000;
             VoidBlast_Counter = 0;
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_KILL);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

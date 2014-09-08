@@ -75,7 +75,7 @@ class instance_the_black_morass : public InstanceMapScript
 public:
     instance_the_black_morass() : InstanceMapScript("instance_the_black_morass", 269) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_the_black_morass_InstanceMapScript(map);
     }
@@ -94,7 +94,7 @@ public:
         uint64 _medivhGUID;
         uint8  _currentRiftId;
 
-        void Initialize() override
+        void Initialize() OVERRIDE
         {
             _medivhGUID         = 0;
             Clear();
@@ -119,7 +119,7 @@ public:
             DoUpdateWorldState(WORLD_STATE_BM_RIFT, 0);
         }
 
-        bool IsEncounterInProgress() const override
+        bool IsEncounterInProgress() const OVERRIDE
         {
             if (GetData(TYPE_MEDIVH) == IN_PROGRESS)
                 return true;
@@ -127,7 +127,7 @@ public:
             return false;
         }
 
-        void OnPlayerEnter(Player* player) override
+        void OnPlayerEnter(Player* player) OVERRIDE
         {
             if (GetData(TYPE_MEDIVH) == IN_PROGRESS)
                 return;
@@ -135,7 +135,7 @@ public:
             player->SendUpdateWorldState(WORLD_STATE_BM, 0);
         }
 
-        void OnCreatureCreate(Creature* creature) override
+        void OnCreatureCreate(Creature* creature) OVERRIDE
         {
             if (creature->GetEntry() == NPC_MEDIVH)
                 _medivhGUID = creature->GetGUID();
@@ -167,7 +167,7 @@ public:
             }
         }
 
-        void SetData(uint32 type, uint32 data) override
+        void SetData(uint32 type, uint32 data) OVERRIDE
         {
             switch (type)
             {
@@ -238,7 +238,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 type) const override
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             switch (type)
             {
@@ -254,7 +254,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 data) const override
+        uint64 GetData64(uint32 data) const OVERRIDE
         {
             if (data == DATA_MEDIVH)
                 return _medivhGUID;
@@ -319,7 +319,7 @@ public:
             }
         }
 
-        void Update(uint32 diff) override
+        void Update(uint32 diff) OVERRIDE
         {
             if (m_auiEncounter[1] != IN_PROGRESS)
                 return;

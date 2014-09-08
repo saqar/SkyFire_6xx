@@ -92,7 +92,7 @@ class boss_grandmaster_vorpil : public CreatureScript
                 _intro = false;
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
                 _helpYell = false;
@@ -118,19 +118,19 @@ class boss_grandmaster_vorpil : public CreatureScript
                 }
             }
 
-            void KilledUnit(Unit* who) override
+            void KilledUnit(Unit* who) OVERRIDE
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 _JustDied();
                 Talk(SAY_DEATH);
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
                 events.ScheduleEvent(EVENT_SHADOWBOLT_VOLLEY, urand(7000, 14000));
@@ -143,7 +143,7 @@ class boss_grandmaster_vorpil : public CreatureScript
                 SummonPortals();
             }
 
-            void MoveInLineOfSight(Unit* who) override
+            void MoveInLineOfSight(Unit* who) OVERRIDE
             {
                 BossAI::MoveInLineOfSight(who);
 
@@ -154,7 +154,7 @@ class boss_grandmaster_vorpil : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -211,7 +211,7 @@ class boss_grandmaster_vorpil : public CreatureScript
                 bool _helpYell;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetShadowLabyrinthAI<boss_grandmaster_vorpilAI>(creature);
         }
@@ -229,15 +229,15 @@ class npc_voidtraveler : public CreatureScript
                 _instance = creature->GetInstanceScript();
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _moveTimer = 0;
                 _sacrificed = false;
             }
 
-            void EnterCombat(Unit* /*who*/) override { }
+            void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (_moveTimer <= diff)
                 {
@@ -272,7 +272,7 @@ class npc_voidtraveler : public CreatureScript
             bool _sacrificed;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetShadowLabyrinthAI<npc_voidtravelerAI>(creature);
         }

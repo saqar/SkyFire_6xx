@@ -56,11 +56,11 @@ namespace Movement
 
         explicit MoveSplineInit(Unit* m);
 
-        /*  final pass of initialization that launches spline movement.
+        /*  Final pass of initialization that launches spline movement.
          */
         int32 Launch();
 
-        /*  final pass of initialization that stops movement.
+        /*  Final pass of initialization that stops movement.
          */
         void Stop();
 

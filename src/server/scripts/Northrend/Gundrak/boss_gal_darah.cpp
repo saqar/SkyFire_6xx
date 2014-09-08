@@ -71,7 +71,7 @@ class boss_gal_darah : public CreatureScript
 public:
     boss_gal_darah() : CreatureScript("boss_gal_darah") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_gal_darahAI(creature);
     }
@@ -101,7 +101,7 @@ public:
 
         InstanceScript* instance;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiStampedeTimer = 10*IN_MILLISECONDS;
             uiWhirlingSlashTimer = 21*IN_MILLISECONDS;
@@ -125,7 +125,7 @@ public:
                 instance->SetData(DATA_GAL_DARAH_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -133,7 +133,7 @@ public:
                 instance->SetData(DATA_GAL_DARAH_EVENT, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -260,7 +260,7 @@ public:
             impaledList.push_back(guid);
         }
 
-        uint32 GetData(uint32 type) const override
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             if (type == DATA_SHARE_THE_LOVE)
                 return shareTheLove;
@@ -268,7 +268,7 @@ public:
             return 0;
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -276,7 +276,7 @@ public:
                 instance->SetData(DATA_GAL_DARAH_EVENT, DONE);
         }
 
-        void KilledUnit(Unit* victim) override
+        void KilledUnit(Unit* victim) OVERRIDE
         {
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -294,7 +294,7 @@ class achievement_share_the_love : public AchievementCriteriaScript
         {
         }
 
-        bool OnCheck(Player* /*player*/, Unit* target) override
+        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
         {
             if (!target)
                 return false;

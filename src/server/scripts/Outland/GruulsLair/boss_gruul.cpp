@@ -85,7 +85,7 @@ class boss_gruul : public CreatureScript
 
             bool m_bPerformingGroundSlam;
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
                 m_uiGrowth_Timer= 30000;
@@ -97,25 +97,25 @@ class boss_gruul : public CreatureScript
                 m_uiReverberation_Timer= 60000+45000;
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
             }
 
-            void KilledUnit(Unit* who) override
+            void KilledUnit(Unit* who) OVERRIDE
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 _JustDied();
                 Talk(SAY_DEATH);
             }
 
-            void SpellHitTarget(Unit* target, const SpellInfo* pSpell) override
+            void SpellHitTarget(Unit* target, const SpellInfo* pSpell) OVERRIDE
             {
                 //This to emulate effect1 (77) of SPELL_GROUND_SLAM, knock back to any direction
                 //It's initially wrong, since this will cause fall damage, which is by comments, not intended.
@@ -155,7 +155,7 @@ class boss_gruul : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -252,7 +252,7 @@ class boss_gruul : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetGruulsLairAI<boss_gruulAI>(creature);
         }
@@ -267,7 +267,7 @@ class spell_gruul_shatter : public SpellScriptLoader
         {
             PrepareSpellScript(spell_gruul_shatter_SpellScript);
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_STONED))
                     return false;
@@ -285,13 +285,13 @@ class spell_gruul_shatter : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_gruul_shatter_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_gruul_shatter_SpellScript();
         }
@@ -320,13 +320,13 @@ class spell_gruul_shatter_effect : public SpellScriptLoader
                     SetHitDamage(int32(GetHitDamage() * ((radius - distance) / radius)));
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnHit += SpellHitFn(spell_gruul_shatter_effect_SpellScript::CalculateDamage);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_gruul_shatter_effect_SpellScript();
         }

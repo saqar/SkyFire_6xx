@@ -56,7 +56,7 @@ class npc_stolen_soul : public CreatureScript
 public:
     npc_stolen_soul() : CreatureScript("npc_stolen_soul") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_stolen_soulAI(creature);
     }
@@ -68,12 +68,12 @@ public:
         uint8 myClass;
         uint32 Class_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Class_Timer = 1000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         { }
 
         void SetMyClass(uint8 myclass)
@@ -81,7 +81,7 @@ public:
             myClass = myclass;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -158,7 +158,7 @@ class boss_exarch_maladaar : public CreatureScript
 public:
     boss_exarch_maladaar() : CreatureScript("boss_exarch_maladaar") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_exarch_maladaarAI(creature);
     }
@@ -181,7 +181,7 @@ public:
         bool HasTaunted;
         bool Avatar_summoned;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             soulmodel = 0;
             soulholder = 0;
@@ -194,7 +194,7 @@ public:
             Avatar_summoned = false;
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
             if (!HasTaunted && me->IsWithinDistInMap(who, 150.0f))
@@ -206,12 +206,12 @@ public:
             ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void JustSummoned(Creature* summoned) override
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             if (summoned->GetEntry() == ENTRY_STOLEN_SOUL)
             {
@@ -229,7 +229,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             if (rand()%2)
                 return;
@@ -237,14 +237,14 @@ public:
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
             //When Exarch Maladar is defeated D'ore appear.
             me->SummonCreature(19412, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 600000);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -309,7 +309,7 @@ class npc_avatar_of_martyred : public CreatureScript
 public:
     npc_avatar_of_martyred() : CreatureScript("npc_avatar_of_martyred") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_avatar_of_martyredAI(creature);
     }
@@ -320,16 +320,16 @@ public:
 
         uint32 Mortal_Strike_timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Mortal_Strike_timer = 10000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

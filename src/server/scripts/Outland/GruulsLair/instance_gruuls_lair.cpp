@@ -54,7 +54,7 @@ class instance_gruuls_lair : public InstanceMapScript
                 MaulgarGUID = 0;
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) OVERRIDE
             {
                 switch (creature->GetEntry())
                 {
@@ -72,7 +72,7 @@ class instance_gruuls_lair : public InstanceMapScript
                 }
             }
 
-            void OnCreatureRemove(Creature* creature) override
+            void OnCreatureRemove(Creature* creature) OVERRIDE
             {
                 switch (creature->GetEntry())
                 {
@@ -88,7 +88,7 @@ class instance_gruuls_lair : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            void OnGameObjectCreate(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -101,7 +101,7 @@ class instance_gruuls_lair : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectRemove(GameObject* go) override
+            void OnGameObjectRemove(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -114,7 +114,7 @@ class instance_gruuls_lair : public InstanceMapScript
                 }
             }
 
-            uint64 GetData64(uint32 type) const override
+            uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -126,7 +126,7 @@ class instance_gruuls_lair : public InstanceMapScript
                 return 0;
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
 
@@ -137,7 +137,7 @@ class instance_gruuls_lair : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(char const* str) override
+            void Load(char const* str) OVERRIDE
             {
                 if (!str)
                 {
@@ -173,7 +173,7 @@ class instance_gruuls_lair : public InstanceMapScript
             uint64 MaulgarGUID;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_gruuls_lair_InstanceMapScript(map);
         }

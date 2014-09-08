@@ -24,18 +24,12 @@
 
 class GroupMgr
 {
-
+    friend class ACE_Singleton<GroupMgr, ACE_Null_Mutex>;
 private:
     GroupMgr();
     ~GroupMgr();
 
 public:
-    static GroupMgr* instance()
-    {
-        static GroupMgr instance;
-        return &instance;
-    }
-
     typedef std::map<uint32, Group*> GroupContainer;
     typedef std::vector<Group*>      GroupDbContainer;
 
@@ -61,6 +55,6 @@ protected:
     GroupDbContainer GroupDbStore;
 };
 
-#define sGroupMgr GroupMgr::instance()
+#define sGroupMgr ACE_Singleton<GroupMgr, ACE_Null_Mutex>::instance()
 
 #endif

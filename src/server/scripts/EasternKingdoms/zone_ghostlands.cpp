@@ -46,7 +46,7 @@ class npc_rathis_tomber : public CreatureScript
 public:
     npc_rathis_tomber() : CreatureScript("npc_rathis_tomber") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_TRADE)
@@ -54,7 +54,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) override
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -108,7 +108,7 @@ public:
     {
         npc_ranger_lilathaAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void WaypointReached(uint32 waypointId) override
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             Player* player = GetPlayerForEscort();
             if (!player)
@@ -165,14 +165,14 @@ public:
             }
         }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             if (GameObject* Cage = me->FindNearestGameObject(GO_CAGE, 20))
                 Cage->SetGoState(GO_STATE_READY);
         }
     };
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
     {
         if (quest->GetQuestId() == QUEST_ESCAPE_FROM_THE_CATACOMBS)
         {
@@ -184,7 +184,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_ranger_lilathaAI(creature);
     }

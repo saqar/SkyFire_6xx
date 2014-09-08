@@ -66,7 +66,7 @@ class go_bridge_console : public GameObjectScript
     public:
         go_bridge_console() : GameObjectScript("go_bridge_console") { }
 
-        bool OnGossipHello(Player* /*player*/, GameObject* go) override
+        bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
         {
             InstanceScript* instance = go->GetInstanceScript();
 
@@ -91,7 +91,7 @@ class instance_serpent_shrine : public InstanceMapScript
             {
             }
 
-            void Initialize() override
+            void Initialize() OVERRIDE
             {
                 memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
@@ -124,7 +124,7 @@ class instance_serpent_shrine : public InstanceMapScript
 
             }
 
-            bool IsEncounterInProgress() const override
+            bool IsEncounterInProgress() const OVERRIDE
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                     if (m_auiEncounter[i] == IN_PROGRESS)
@@ -133,7 +133,7 @@ class instance_serpent_shrine : public InstanceMapScript
                 return false;
             }
 
-            void Update(uint32 diff) override
+            void Update(uint32 diff) OVERRIDE
             {
                 //Water checks
                 if (WaterCheckTimer <= diff)
@@ -193,7 +193,7 @@ class instance_serpent_shrine : public InstanceMapScript
                     FrenzySpawnTimer -= diff;
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            void OnGameObjectCreate(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -218,7 +218,7 @@ class instance_serpent_shrine : public InstanceMapScript
                 }
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) OVERRIDE
             {
                 switch (creature->GetEntry())
                 {
@@ -248,7 +248,7 @@ class instance_serpent_shrine : public InstanceMapScript
                 }
             }
 
-            void SetData64(uint32 type, uint64 data) override
+            void SetData64(uint32 type, uint64 data) OVERRIDE
             {
                 if (type == DATA_KARATHRESSEVENT_STARTER)
                     KarathressEvent_Starter = data;
@@ -256,7 +256,7 @@ class instance_serpent_shrine : public InstanceMapScript
                     LeotherasEventStarter = data;
             }
 
-            uint64 GetData64(uint32 identifier) const override
+            uint64 GetData64(uint32 identifier) const OVERRIDE
             {
                 switch (identifier)
                 {
@@ -284,7 +284,7 @@ class instance_serpent_shrine : public InstanceMapScript
                 return 0;
             }
 
-            void SetData(uint32 type, uint32 data) override
+            void SetData(uint32 type, uint32 data) OVERRIDE
             {
                 switch (type)
                 {
@@ -354,7 +354,7 @@ class instance_serpent_shrine : public InstanceMapScript
                     SaveToDB();
             }
 
-            uint32 GetData(uint32 type) const override
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -394,7 +394,7 @@ class instance_serpent_shrine : public InstanceMapScript
                 return 0;
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
                 std::ostringstream stream;
@@ -404,7 +404,7 @@ class instance_serpent_shrine : public InstanceMapScript
                 return stream.str();
             }
 
-            void Load(const char* in) override
+            void Load(const char* in) OVERRIDE
             {
                 if (!in)
                 {
@@ -449,7 +449,7 @@ class instance_serpent_shrine : public InstanceMapScript
             bool DoSpawnFrenzy;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_serpentshrine_cavern_InstanceMapScript(map);
         }

@@ -48,7 +48,7 @@ class boss_fankriss : public CreatureScript
 public:
     boss_fankriss() : CreatureScript("boss_fankriss") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_fankrissAI(creature);
     }
@@ -67,7 +67,7 @@ public:
         Creature* Hatchling;
         Creature* Spawn;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             MortalWound_Timer = urand(10000, 15000);
             SpawnHatchlings_Timer = urand(6000, 12000);
@@ -98,11 +98,11 @@ public:
                 Spawn->AI()->AttackStart(victim);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())

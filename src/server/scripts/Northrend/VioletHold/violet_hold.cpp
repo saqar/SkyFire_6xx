@@ -220,32 +220,32 @@ float SixthPoralWPs [4][3] =
     //{1826.889648f, 803.929993f, 44.363239f}
 };
 
-const float SaboteurfinalPos1[3][3] =
+const float SaboteurFinalPos1[3][3] =
 {
     {1892.502319f, 777.410767f, 38.630402f},
     {1891.165161f, 762.969421f, 47.666920f},
     {1893.168091f, 740.919189f, 47.666920f}
 };
-const float SaboteurfinalPos2[3][3] =
+const float SaboteurFinalPos2[3][3] =
 {
     {1882.242676f, 834.818726f, 38.646786f},
     {1879.220825f, 842.224854f, 43.333641f},
     {1873.842896f, 863.892456f, 43.333641f}
 };
-const float SaboteurfinalPos3[2][3] =
+const float SaboteurFinalPos3[2][3] =
 {
     {1904.298340f, 792.400391f, 38.646782f},
     {1935.716919f, 758.437073f, 30.627895f}
 };
-const float SaboteurfinalPos4[3] =
+const float SaboteurFinalPos4[3] =
 {
     1855.006104f, 760.641724f, 38.655266f
 };
-const float SaboteurfinalPos5[3] =
+const float SaboteurFinalPos5[3] =
 {
     1906.667358f, 841.705566f, 38.637894f
 };
-const float SaboteurfinalPos6[5][3] =
+const float SaboteurFinalPos6[5][3] =
 {
     {1911.437012f, 821.289246f, 38.684128f},
     {1920.734009f, 822.978027f, 41.525414f},
@@ -263,7 +263,7 @@ class npc_sinclari_vh : public CreatureScript
 public:
     npc_sinclari_vh() : CreatureScript("npc_sinclari_vh") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -285,7 +285,7 @@ public:
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) override
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
         if (InstanceScript* instance = creature->GetInstanceScript())
         {
@@ -308,7 +308,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_sinclariAI(creature);
     }
@@ -325,7 +325,7 @@ public:
         uint8  uiPhase;
         uint32 uiTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiPhase = 0;
             uiTimer = 0;
@@ -349,7 +349,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 uiDiff) override
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             ScriptedAI::UpdateAI(uiDiff);
 
@@ -429,7 +429,7 @@ class npc_azure_saboteur : public CreatureScript
 public:
     npc_azure_saboteur() : CreatureScript("npc_azure_saboteur") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_saboteurAI(creature);
     }
@@ -448,7 +448,7 @@ public:
         bool bHasGotMovingPoints;
         uint32 uiBoss;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             if (instance && !uiBoss)
                 uiBoss = instance->GetData(DATA_WAVE_COUNT) == 6 ? instance->GetData(DATA_FIRST_BOSS) : instance->GetData(DATA_SECOND_BOSS);
@@ -457,7 +457,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
-        void WaypointReached(uint32 waypointId) override
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             switch (uiBoss)
             {
@@ -488,7 +488,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (instance && instance->GetData(DATA_MAIN_EVENT_PHASE) != IN_PROGRESS)
                 me->CastStop();
@@ -502,31 +502,31 @@ public:
                 {
                     case 1:
                         for (int i=0;i<3;i++)
-                            AddWaypoint(i, SaboteurfinalPos1[i][0], SaboteurfinalPos1[i][1], SaboteurfinalPos1[i][2], 0);
-                        me->SetHomePosition(SaboteurfinalPos1[2][0], SaboteurfinalPos1[2][1], SaboteurfinalPos1[2][2], 4.762346f);
+                            AddWaypoint(i, SaboteurFinalPos1[i][0], SaboteurFinalPos1[i][1], SaboteurFinalPos1[i][2], 0);
+                        me->SetHomePosition(SaboteurFinalPos1[2][0], SaboteurFinalPos1[2][1], SaboteurFinalPos1[2][2], 4.762346f);
                         break;
                     case 2:
                         for (int i=0;i<3;i++)
-                            AddWaypoint(i, SaboteurfinalPos2[i][0], SaboteurfinalPos2[i][1], SaboteurfinalPos2[i][2], 0);
-                        me->SetHomePosition(SaboteurfinalPos2[2][0], SaboteurfinalPos2[2][1], SaboteurfinalPos2[2][2], 1.862674f);
+                            AddWaypoint(i, SaboteurFinalPos2[i][0], SaboteurFinalPos2[i][1], SaboteurFinalPos2[i][2], 0);
+                        me->SetHomePosition(SaboteurFinalPos2[2][0], SaboteurFinalPos2[2][1], SaboteurFinalPos2[2][2], 1.862674f);
                         break;
                     case 3:
                         for (int i=0;i<2;i++)
-                            AddWaypoint(i, SaboteurfinalPos3[i][0], SaboteurfinalPos3[i][1], SaboteurfinalPos3[i][2], 0);
-                        me->SetHomePosition(SaboteurfinalPos3[1][0], SaboteurfinalPos3[1][1], SaboteurfinalPos3[1][2], 5.500638f);
+                            AddWaypoint(i, SaboteurFinalPos3[i][0], SaboteurFinalPos3[i][1], SaboteurFinalPos3[i][2], 0);
+                        me->SetHomePosition(SaboteurFinalPos3[1][0], SaboteurFinalPos3[1][1], SaboteurFinalPos3[1][2], 5.500638f);
                         break;
                     case 4:
-                        AddWaypoint(0, SaboteurfinalPos4[0], SaboteurfinalPos4[1], SaboteurfinalPos4[2], 0);
-                        me->SetHomePosition(SaboteurfinalPos4[0], SaboteurfinalPos4[1], SaboteurfinalPos4[2], 3.991108f);
+                        AddWaypoint(0, SaboteurFinalPos4[0], SaboteurFinalPos4[1], SaboteurFinalPos4[2], 0);
+                        me->SetHomePosition(SaboteurFinalPos4[0], SaboteurFinalPos4[1], SaboteurFinalPos4[2], 3.991108f);
                         break;
                     case 5:
-                        AddWaypoint(0, SaboteurfinalPos5[0], SaboteurfinalPos5[1], SaboteurfinalPos5[2], 0);
-                        me->SetHomePosition(SaboteurfinalPos5[0], SaboteurfinalPos5[1], SaboteurfinalPos5[2], 1.100841f);
+                        AddWaypoint(0, SaboteurFinalPos5[0], SaboteurFinalPos5[1], SaboteurFinalPos5[2], 0);
+                        me->SetHomePosition(SaboteurFinalPos5[0], SaboteurFinalPos5[1], SaboteurFinalPos5[2], 1.100841f);
                         break;
                     case 6:
                         for (int i=0;i<5;i++)
-                            AddWaypoint(i, SaboteurfinalPos6[i][0], SaboteurfinalPos6[i][1], SaboteurfinalPos6[i][2], 0);
-                        me->SetHomePosition(SaboteurfinalPos6[4][0], SaboteurfinalPos6[4][1], SaboteurfinalPos6[4][2], 0.983031f);
+                            AddWaypoint(i, SaboteurFinalPos6[i][0], SaboteurFinalPos6[i][1], SaboteurFinalPos6[i][2], 0);
+                        me->SetHomePosition(SaboteurFinalPos6[4][0], SaboteurFinalPos6[4][1], SaboteurFinalPos6[4][2], 0.983031f);
                         break;
                 }
 
@@ -553,7 +553,7 @@ class npc_teleportation_portal_vh : public CreatureScript
 public:
     npc_teleportation_portal_vh() : CreatureScript("npc_teleportation_portal_vh") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_teleportation_portalAI(creature);
     }
@@ -575,18 +575,18 @@ public:
 
         InstanceScript* instance;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiSpawnTimer = 10000;
             bPortalGuardianOrKeeperOrEliteSpawn = false;
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void MoveInLineOfSight(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!instance) //Massive usage of instance, global check
                 return;
@@ -661,20 +661,20 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(DATA_WAVE_COUNT, instance->GetData(DATA_WAVE_COUNT)+1);
         }
 
-        void JustSummoned(Creature* summoned) override
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             listOfMobs.Summon(summoned);
             if (instance)
                 instance->SetData64(DATA_ADD_TRASH_MOB, summoned->GetGUID());
         }
 
-        void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/) override
+        void SummonedCreatureDies(Creature* summoned, Unit* /*killer*/) OVERRIDE
         {
             listOfMobs.Despawn(summoned);
             if (instance)
@@ -701,7 +701,7 @@ struct violet_hold_trashAI : public npc_escortAI
         uint32 portalLocationID;
         uint32 secondPortalRouteID;
 
-    void WaypointReached(uint32 waypointId) override
+    void WaypointReached(uint32 waypointId) OVERRIDE
     {
         switch (portalLocationID)
         {
@@ -732,7 +732,7 @@ struct violet_hold_trashAI : public npc_escortAI
         }
     }
 
-    void UpdateAI(uint32) override
+    void UpdateAI(uint32) OVERRIDE
     {
         if (instance && instance->GetData(DATA_MAIN_EVENT_PHASE) != IN_PROGRESS)
             me->CastStop();
@@ -789,7 +789,7 @@ struct violet_hold_trashAI : public npc_escortAI
         }
     }
 
-    void JustDied(Unit* /*killer*/) override
+    void JustDied(Unit* /*killer*/) OVERRIDE
     {
         if (instance)
             instance->SetData(DATA_NPC_PRESENCE_AT_DOOR_REMOVE, 1);
@@ -810,7 +810,7 @@ class npc_azure_invader : public CreatureScript
 public:
     npc_azure_invader() : CreatureScript("npc_azure_invader") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_invaderAI(creature);
     }
@@ -827,7 +827,7 @@ public:
         uint32 uiBrutalStrikeTimer;
         uint32 uiSunderArmorTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiCleaveTimer = 5000;
             uiImpaleTimer = 4000;
@@ -835,7 +835,7 @@ public:
             uiSunderArmorTimer = 4000;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             violet_hold_trashAI::UpdateAI(diff);
             npc_escortAI::UpdateAI(diff);
@@ -888,7 +888,7 @@ class npc_azure_binder : public CreatureScript
 public:
     npc_azure_binder() : CreatureScript("npc_azure_binder") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_binderAI(creature);
     }
@@ -905,7 +905,7 @@ public:
         uint32 uiFrostNovaTimer;
         uint32 uiFrostboltTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiArcaneExplosionTimer = 5000;
             uiArcainBarrageTimer = 4000;
@@ -913,7 +913,7 @@ public:
             uiFrostboltTimer = 4000;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             violet_hold_trashAI::UpdateAI(diff);
             npc_escortAI::UpdateAI(diff);
@@ -966,7 +966,7 @@ class npc_azure_mage_slayer : public CreatureScript
 public:
     npc_azure_mage_slayer() : CreatureScript("npc_azure_mage_slayer") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_mage_slayerAI(creature);
     }
@@ -981,13 +981,13 @@ public:
         uint32 uiArcaneEmpowermentTimer;
         uint32 uiSpellLockTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiArcaneEmpowermentTimer = 5000;
             uiSpellLockTimer = 5000;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             violet_hold_trashAI::UpdateAI(diff);
             npc_escortAI::UpdateAI(diff);
@@ -1026,7 +1026,7 @@ class npc_azure_raider : public CreatureScript
 public:
     npc_azure_raider() : CreatureScript("npc_azure_raider") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_raiderAI(creature);
     }
@@ -1041,13 +1041,13 @@ public:
         uint32 uiConcussionBlowTimer;
         uint32 uiMagicReflectionTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiConcussionBlowTimer = 5000;
             uiMagicReflectionTimer = 8000;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             violet_hold_trashAI::UpdateAI(diff);
             npc_escortAI::UpdateAI(diff);
@@ -1085,14 +1085,14 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _backstabTimer = 1300;
             _tacticalBlinkTimer = 8000;
             _tacticalBlinkCast =false;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             violet_hold_trashAI::UpdateAI(diff);
             npc_escortAI::UpdateAI(diff);
@@ -1132,7 +1132,7 @@ public:
         bool _tacticalBlinkCast;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_stalkerAI(creature);
     }
@@ -1155,7 +1155,7 @@ public:
         uint32 uiChainsOfIceTimer;
         uint32 uiConeOfColdTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiArcaneBlastTimer = 5000;
             uiSlowTimer = 4000;
@@ -1163,7 +1163,7 @@ public:
             uiConeOfColdTimer = 4000;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             violet_hold_trashAI::UpdateAI(diff);
             npc_escortAI::UpdateAI(diff);
@@ -1211,7 +1211,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_spellbreakerAI(creature);
     }
@@ -1222,7 +1222,7 @@ class npc_azure_captain : public CreatureScript
 public:
     npc_azure_captain() : CreatureScript("npc_azure_captain") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_captainAI(creature);
     }
@@ -1237,13 +1237,13 @@ public:
         uint32 uiMortalStrikeTimer;
         uint32 uiWhirlwindTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiMortalStrikeTimer = 5000;
             uiWhirlwindTimer = 8000;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             violet_hold_trashAI::UpdateAI(diff);
             npc_escortAI::UpdateAI(diff);
@@ -1274,7 +1274,7 @@ class npc_azure_sorceror : public CreatureScript
 public:
     npc_azure_sorceror() : CreatureScript("npc_azure_sorceror") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_azure_sorcerorAI(creature);
     }
@@ -1290,14 +1290,14 @@ public:
         uint32 uiArcaneStreamTimerStartingValueHolder;
         uint32 uiManaDetonationTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             uiArcaneStreamTimer = 4000;
             uiArcaneStreamTimerStartingValueHolder = uiArcaneStreamTimer;
             uiManaDetonationTimer = 5000;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             violet_hold_trashAI::UpdateAI(diff);
             npc_escortAI::UpdateAI(diff);
@@ -1337,7 +1337,7 @@ public:
 
         uint32 DespawnTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             DespawnTimer = 3000;
 
@@ -1345,9 +1345,9 @@ public:
             DoCast(me, SPELL_ARCANE_SPHERE_PASSIVE, true);
         }
 
-        void EnterCombat(Unit * /*who*/) override { }
+        void EnterCombat(Unit * /*who*/) OVERRIDE { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (DespawnTimer <= diff)
                 me->Kill(me);
@@ -1356,7 +1356,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_violet_hold_arcane_sphereAI(creature);
     }
@@ -1367,7 +1367,7 @@ class go_activation_crystal : public GameObjectScript
 public:
     go_activation_crystal() : GameObjectScript("go_activation_crystal") { }
 
-    bool OnGossipHello(Player * /*player*/, GameObject* go) override
+    bool OnGossipHello(Player * /*player*/, GameObject* go) OVERRIDE
     {
         go->EventInform(EVENT_ACTIVATE_CRYSTAL);
         return false;

@@ -64,7 +64,7 @@ class boss_razuvious : public CreatureScript
 public:
     boss_razuvious() : CreatureScript("boss_razuvious") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_razuviousAI(creature);
     }
@@ -73,13 +73,13 @@ public:
     {
         boss_razuviousAI(Creature* creature) : BossAI(creature, BOSS_RAZUVIOUS) { }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             if (!(rand()%3))
                 DoPlaySoundToSet(me, SOUND_SLAY);
         }
 
-        void DamageTaken(Unit* pDone_by, uint32& uiDamage) override
+        void DamageTaken(Unit* pDone_by, uint32& uiDamage) OVERRIDE
         {
             // Damage done by the controlled Death Knight understudies should also count toward damage done by players
             if (pDone_by->GetTypeId() == TYPEID_UNIT && (pDone_by->GetEntry() == 16803 || pDone_by->GetEntry() == 29941))
@@ -88,14 +88,14 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             _JustDied();
             DoPlaySoundToSet(me, SOUND_DEATH);
             me->CastSpell(me, SPELL_HOPELESS, true); /// @todo this may affect other creatures
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
             DoPlaySoundToSet(me, SOUND_AGGRO);
@@ -105,7 +105,7 @@ public:
             events.ScheduleEvent(EVENT_KNIFE, 10000);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

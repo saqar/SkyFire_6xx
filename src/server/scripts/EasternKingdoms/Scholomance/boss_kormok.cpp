@@ -39,7 +39,7 @@ class boss_kormok : public CreatureScript
 public:
     boss_kormok() : CreatureScript("boss_kormok") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_kormokAI(creature);
     }
@@ -54,7 +54,7 @@ public:
         uint32 Mage_Timer;
         bool Mages;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             ShadowVolley_Timer = 10000;
             BoneShield_Timer = 2000;
@@ -63,7 +63,7 @@ public:
             Mages = false;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
         }
 
@@ -79,7 +79,7 @@ public:
                 SummonedMage->AI()->AttackStart(victim);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

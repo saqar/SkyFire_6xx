@@ -50,20 +50,20 @@ public:
     {
         boss_halyconAI(Creature* creature) : BossAI(creature, DATA_HALYCON) { }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _Reset();
             Summoned = false;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
             events.ScheduleEvent(EVENT_REND, urand(17000,20000));
             events.ScheduleEvent(EVENT_THRASH, urand(10000,12000));
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             me->SummonCreature(NPC_GIZRUL_THE_SLAVENER, SummonLocation, TEMPSUMMON_TIMED_DESPAWN, 300000);
             Talk(EMOTE_DEATH);
@@ -71,7 +71,7 @@ public:
             Summoned = true;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -102,7 +102,7 @@ public:
             bool Summoned;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_halyconAI(creature);
     }

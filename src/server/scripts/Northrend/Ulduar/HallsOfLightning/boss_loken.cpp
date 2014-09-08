@@ -69,7 +69,7 @@ class boss_loken : public CreatureScript
 public:
     boss_loken() : CreatureScript("boss_loken") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_lokenAI(creature);
     }
@@ -89,7 +89,7 @@ public:
 
         uint32 m_uiHealthAmountModifier;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             m_uiArcLightning_Timer = 15000;
             m_uiLightningNova_Timer = 20000;
@@ -104,7 +104,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -115,7 +115,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -126,12 +126,12 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void UpdateAI(uint32 uiDiff) override
+        void UpdateAI(uint32 uiDiff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -212,13 +212,13 @@ class spell_loken_pulsing_shockwave : public SpellScriptLoader
                     SetHitDamage(int32(GetHitDamage() * distance));
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_loken_pulsing_shockwave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_loken_pulsing_shockwave_SpellScript();
         }

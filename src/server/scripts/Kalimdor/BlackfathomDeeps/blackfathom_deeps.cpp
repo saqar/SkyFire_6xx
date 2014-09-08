@@ -41,7 +41,7 @@ class go_blackfathom_altar : public GameObjectScript
 public:
     go_blackfathom_altar() : GameObjectScript("go_blackfathom_altar") { }
 
-    bool OnGossipHello(Player* player, GameObject* /*go*/) override
+    bool OnGossipHello(Player* player, GameObject* /*go*/) OVERRIDE
     {
         if (!player->HasAura(SPELL_BLESSING_OF_BLACKFATHOM))
             player->AddAura(SPELL_BLESSING_OF_BLACKFATHOM, player);
@@ -54,7 +54,7 @@ class go_blackfathom_fire : public GameObjectScript
 public:
     go_blackfathom_fire() : GameObjectScript("go_blackfathom_fire") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) override
+    bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
     {
         InstanceScript* instance = go->GetInstanceScript();
 
@@ -74,7 +74,7 @@ class npc_blackfathom_deeps_event : public CreatureScript
 public:
     npc_blackfathom_deeps_event() : CreatureScript("npc_blackfathom_deeps_event") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_blackfathom_deeps_eventAI(creature);
     }
@@ -100,7 +100,7 @@ public:
 
         bool Flee;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Flee = false;
 
@@ -133,7 +133,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -182,7 +182,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (me->IsSummon()) //we are not a normal spawn.
                 if (instance)
@@ -211,7 +211,7 @@ public:
             Start(false, false, 0);
         }
 
-        void WaypointReached(uint32 waypointId) override
+        void WaypointReached(uint32 waypointId) OVERRIDE
         {
             switch (waypointId)
             {
@@ -224,13 +224,13 @@ public:
             }
         }
 
-        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) override
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
         {
             DoCast(player, SPELL_TELEPORT_DARNASSUS);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_morriduneAI(creature);
     }

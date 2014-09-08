@@ -47,7 +47,7 @@ class boss_maiden_of_virtue : public CreatureScript
 public:
     boss_maiden_of_virtue() : CreatureScript("boss_maiden_of_virtue") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_maiden_of_virtueAI(creature);
     }
@@ -64,7 +64,7 @@ public:
 
         bool Enraged;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Repentance_Timer    = 25000+(rand()%15000);
             Holyfire_Timer      = 8000+(rand()%17000);
@@ -75,23 +75,23 @@ public:
             Enraged = false;
         }
 
-        void KilledUnit(Unit* /*Victim*/) override
+        void KilledUnit(Unit* /*Victim*/) OVERRIDE
         {
             if (urand(0, 1) == 0)
                 Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

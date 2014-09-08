@@ -46,9 +46,9 @@ class npc_pet_hunter_snake_trap : public CreatureScript
         {
             npc_pet_hunter_snake_trapAI(Creature* creature) : ScriptedAI(creature) { }
 
-            void EnterCombat(Unit* /*who*/) override { }
+            void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _spellTimer = 0;
 
@@ -70,7 +70,7 @@ class npc_pet_hunter_snake_trap : public CreatureScript
             }
 
             // Redefined for random target selection:
-            void MoveInLineOfSight(Unit* who) override
+            void MoveInLineOfSight(Unit* who) OVERRIDE
             {
                 if (!me->GetVictim() && me->CanCreatureAttack(who))
                 {
@@ -90,7 +90,7 @@ class npc_pet_hunter_snake_trap : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -136,7 +136,7 @@ class npc_pet_hunter_snake_trap : public CreatureScript
             uint32 _spellTimer;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_pet_hunter_snake_trapAI(creature);
         }

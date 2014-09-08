@@ -77,7 +77,7 @@ class npc_professor_phizzlethorpe : public CreatureScript
         {
             npc_professor_phizzlethorpeAI(Creature* creature) : npc_escortAI(creature) { }
 
-            void WaypointReached(uint32 waypointId) override
+            void WaypointReached(uint32 waypointId) OVERRIDE
             {
                 Player* player = GetPlayerForEscort();
                 if (!player)
@@ -105,17 +105,17 @@ class npc_professor_phizzlethorpe : public CreatureScript
                 }
             }
 
-            void JustSummoned(Creature* summoned) override
+            void JustSummoned(Creature* summoned) OVERRIDE
             {
                 summoned->AI()->AttackStart(me);
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 Player* player = GetPlayerForEscort();
                 if (!player)
@@ -147,12 +147,12 @@ class npc_professor_phizzlethorpe : public CreatureScript
             EventMap events;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_professor_phizzlethorpeAI(creature);
         }
 
-        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+        bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
         {
             if (quest->GetQuestId() == QUEST_GOGGLE_BOGGLE)
             {

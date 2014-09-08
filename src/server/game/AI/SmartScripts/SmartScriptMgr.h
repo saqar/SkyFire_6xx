@@ -1317,21 +1317,16 @@ struct SmartScriptHolder
     bool enableTimed;
 };
 
-typedef std::unordered_map<uint32, WayPoint*> WPPath;
+typedef UNORDERED_MAP<uint32, WayPoint*> WPPath;
 
 typedef std::list<WorldObject*> ObjectList;
-typedef std::unordered_map<uint32, ObjectList*> ObjectListMap;
+typedef UNORDERED_MAP<uint32, ObjectList*> ObjectListMap;
 
 class SmartWaypointMgr
 {
+    friend class ACE_Singleton<SmartWaypointMgr, ACE_Null_Mutex>;
     SmartWaypointMgr() { }
     public:
-        static SmartWaypointMgr* instance()
-        {
-            static SmartWaypointMgr instance;
-            return &instance;
-        }
-
         ~SmartWaypointMgr();
 
         void LoadFromDB();
@@ -1344,25 +1339,20 @@ class SmartWaypointMgr
         }
 
     private:
-        std::unordered_map<uint32, WPPath*> waypoint_map;
+        UNORDERED_MAP<uint32, WPPath*> waypoint_map;
 };
 
 // all events for a single entry
 typedef std::vector<SmartScriptHolder> SmartAIEventList;
 
 // all events for all entries / guids
-typedef std::unordered_map<int32, SmartAIEventList> SmartAIEventMap;
+typedef UNORDERED_MAP<int32, SmartAIEventList> SmartAIEventMap;
 
 class SmartAIMgr
 {
+    friend class ACE_Singleton<SmartAIMgr, ACE_Null_Mutex>;
     SmartAIMgr(){ }
     public:
-        static SmartAIMgr* instance()
-        {
-            static SmartAIMgr instance;
-            return &instance;
-        }
-
         ~SmartAIMgr(){ }
 
         void LoadSmartAIFromDB();
@@ -1520,6 +1510,6 @@ class SmartAIMgr
         //bool IsTextValid(SmartScriptHolder const& e, uint32 id);
 };
 
-#define sSmartScriptMgr SmartAIMgr::instance()
-#define sSmartWaypointMgr SmartWaypointMgr::instance()
+#define sSmartScriptMgr ACE_Singleton<SmartAIMgr, ACE_Null_Mutex>::instance()
+#define sSmartWaypointMgr ACE_Singleton<SmartWaypointMgr, ACE_Null_Mutex>::instance()
 #endif

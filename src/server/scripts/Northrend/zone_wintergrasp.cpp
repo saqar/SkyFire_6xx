@@ -119,7 +119,7 @@ class npc_wg_demolisher_engineer : public CreatureScript
     public:
         npc_wg_demolisher_engineer() : CreatureScript("npc_wg_demolisher_engineer") { }
 
-        bool OnGossipHello(Player* player, Creature* creature) override
+        bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
         {
             if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
@@ -142,7 +142,7 @@ class npc_wg_demolisher_engineer : public CreatureScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
         {
             player->CLOSE_GOSSIP_MENU();
 
@@ -190,7 +190,7 @@ class npc_wg_spirit_guide : public CreatureScript
     public:
         npc_wg_spirit_guide() : CreatureScript("npc_wg_spirit_guide") { }
 
-        bool OnGossipHello(Player* player, Creature* creature) override
+        bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
         {
             if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
@@ -208,7 +208,7 @@ class npc_wg_spirit_guide : public CreatureScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
+        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) OVERRIDE
         {
             player->CLOSE_GOSSIP_MENU();
 
@@ -228,14 +228,14 @@ class npc_wg_spirit_guide : public CreatureScript
         {
             npc_wg_spirit_guideAI(Creature* creature) : ScriptedAI(creature) { }
 
-            void UpdateAI(uint32 /*diff*/) override
+            void UpdateAI(uint32 /*diff*/) OVERRIDE
             {
                 if (!me->HasUnitState(UNIT_STATE_CASTING))
                     DoCast(me, SPELL_CHANNEL_SPIRIT_HEAL);
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_wg_spirit_guideAI(creature);
         }
@@ -246,7 +246,7 @@ class npc_wg_queue : public CreatureScript
     public:
         npc_wg_queue() : CreatureScript("npc_wg_queue") { }
 
-        bool OnGossipHello(Player* player, Creature* creature) override
+        bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
         {
             if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
@@ -275,7 +275,7 @@ class npc_wg_queue : public CreatureScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 /*action*/) override
+        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
         {
             player->CLOSE_GOSSIP_MENU();
 
@@ -304,7 +304,7 @@ class go_wg_vehicle_teleporter : public GameObjectScript
         {
             go_wg_vehicle_teleporterAI(GameObject* gameObject) : GameObjectAI(gameObject), _checkTimer(1000) { }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (_checkTimer <= diff)
                 {
@@ -325,7 +325,7 @@ class go_wg_vehicle_teleporter : public GameObjectScript
               uint32 _checkTimer;
         };
 
-        GameObjectAI* GetAI(GameObject* go) const override
+        GameObjectAI* GetAI(GameObject* go) const OVERRIDE
         {
             return new go_wg_vehicle_teleporterAI(go);
         }
@@ -336,7 +336,7 @@ class npc_wg_quest_giver : public CreatureScript
     public:
         npc_wg_quest_giver() : CreatureScript("npc_wg_quest_giver") { }
 
-        bool OnGossipHello(Player* player, Creature* creature) override
+        bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
         {
             Battlefield* wintergrasp = sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
             if (!wintergrasp)
@@ -448,7 +448,7 @@ class spell_wintergrasp_force_building : public SpellScriptLoader
         {
             PrepareSpellScript(spell_wintergrasp_force_building_SpellScript);
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_BUILD_CATAPULT_FORCE)
                     || !sSpellMgr->GetSpellInfo(SPELL_BUILD_DEMOLISHER_FORCE)
@@ -464,13 +464,13 @@ class spell_wintergrasp_force_building : public SpellScriptLoader
                 GetHitUnit()->CastSpell(GetHitUnit(), GetEffectValue(), false);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_wintergrasp_force_building_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_wintergrasp_force_building_SpellScript();
         }
@@ -491,13 +491,13 @@ class spell_wintergrasp_grab_passenger : public SpellScriptLoader
                     target->CastSpell(GetCaster(), SPELL_RIDE_WG_VEHICLE, false);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_wintergrasp_grab_passenger_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_wintergrasp_grab_passenger_SpellScript();
         }
@@ -508,7 +508,7 @@ class achievement_wg_didnt_stand_a_chance : public AchievementCriteriaScript
 public:
     achievement_wg_didnt_stand_a_chance() : AchievementCriteriaScript("achievement_wg_didnt_stand_a_chance") { }
 
-    bool OnCheck(Player* source, Unit* target) override
+    bool OnCheck(Player* source, Unit* target) OVERRIDE
     {
         if (!target)
             return false;
@@ -551,13 +551,13 @@ public:
             return SPELL_CAST_OK;
         }
 
-        void Register() override
+        void Register() OVERRIDE
         {
             OnCheckCast += SpellCheckCastFn(spell_wintergrasp_defender_teleport_SpellScript::CheckCast);
         }
     };
 
-    SpellScript* GetSpellScript() const override
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_wintergrasp_defender_teleport_SpellScript();
     }
@@ -582,13 +582,13 @@ public:
             }
         }
 
-        void Register() override
+        void Register() OVERRIDE
         {
             OnEffectHitTarget += SpellEffectFn(spell_wintergrasp_defender_teleport_trigger_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const override
+    SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_wintergrasp_defender_teleport_trigger_SpellScript();
     }

@@ -22,86 +22,6 @@
 #include "WorldPacket.h"
 #include "Config.h"
 
-
-void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
-{
-
-    /*  Maybe this stuff is still used? I don't know for sure.   */
-    std::map<uint32, std::string> realmNamesToSend;
-
-    QueryResult classResult = LoginDatabase.PQuery("SELECT class FROM realm_classes, gameaccount_classes WHERE realmId = %u", realmID);
-    QueryResult raceResult = LoginDatabase.PQuery("SELECT race FROM realm_races, gameaccount_races WHERE realmId = %u", realmID);
-
-    if (!classResult || !raceResult)
-    {
-        TC_LOG_ERROR("network", "Unable to retrieve class or race data.");
-        return;
-    }
-
-    RealmNameMap::const_iterator iter = realmNameStore.find(realmID);
-    if (iter != realmNameStore.end()) // Add local realm
-        realmNamesToSend[realmID] = iter->second;
-
-
-    /*   Now sending the packets for ClientAuthResponse   */
-    TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
-    
-    // Result
-    packet.WriteBit(code == AUTH_OK);
-
-    // If the auth is okay, send this
-    if (code == AUTH_OK)
-    {
-        packet << uint32(0);
-        packet << uint32(0);
-        packet << uint32(0);
-        packet << uint32(0);
-        packet << uint32(0);
-        packet << uint8(5);             // Account Exp. level
-        packet << uint8(5);             // Active  Exp. level
-        packet << uint32(0);
-
-        uint8 availibleRaces[13];
-        for (uint8 i = 0; i < 13; i++)
-        {
-            packet << availibleRaces[i];
-        }
-
-        uint8 avalibleClasses[11];
-        for (uint8 i = 0; i < 11; i++)
-        {
-            packet << avalibleClasses[i];
-        }
-
-        packet << uint32(0);
-        packet << uint32(0);
-        packet << uint32(0);
-        packet << uint32(0);
-        packet << uint32(0);
-        packet.FlushBits();
-
-        uint16 getNumPlayersA, getNumPlayersH;
-
-        packet << getNumPlayersH;
-        packet << getNumPlayersA;
-    }
-    
-    // If auth isnt okay? No else stmt, so hard to say.
-    packet << uint8(code);                             // Auth response ?
-
-    SendPacket(&packet);
-}
-
-
-void WorldSession::SendClientCacheVersion(uint32 version)
-{
-    WorldPacket data(SMSG_CLIENTCACHE_VERSION, 4);
-    data << uint32(version);
-    SendPacket(&data);
-}
-
-/*
 void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 {
     std::map<uint32, std::string> realmNamesToSend;
@@ -122,44 +42,33 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     TC_LOG_ERROR("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 80);
 
+    packet << uint8(code);                             // Auth response ?
     packet.WriteBit(code == AUTH_OK);
-
-    if (code == AUTH_OK)
-    {
-        packet.WriteBits(realmNamesToSend.size(), 21); // Send current realmId
-
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
-        {
-            packet.WriteBits(itr->second.size(), 8);
-            packet.WriteBits(itr->second.size(), 8);
-            packet.WriteBit(itr->first == realmID); // Home realm
-        }
-
-        packet.WriteBits(classResult->GetRowCount(), 23);
-        packet.WriteBits(0, 21);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
-        packet.WriteBits(raceResult->GetRowCount(), 23);
-        packet.WriteBit(0);
-    }
-
     packet.WriteBit(queued);
 
-    if (queued)
-        packet.WriteBit(1);                             // Unknown
-
-    packet.FlushBits();
-
-    if (queued)
-        packet << uint32(0);                            // Unknown
-
     if (code == AUTH_OK)
     {
+        packet << uint32(realmID);
+        packet << uint32(realmNamesToSend.size());     
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint32(0);
+        packet << uint8(Expansion()); // box level
+        packet << uint8(Expansion()); // box level
+        packet << uint32(0);
+        packet << uint32(raceResult->GetRowCount());
+        packet << uint32(classResult->GetRowCount());
+        packet << uint32(0);
+        packet << uint32(0);
+
+        // Templates avail. races and classes
         for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
         {
             packet << uint32(itr->first);
+            packet.WriteBit(itr->first == realmID);
+            packet.WriteBits(itr->second.size(), 8);
+            packet.WriteBits(itr->second.size(), 8);
+            packet.FlushBits();
             packet.WriteString(itr->second);
             packet.WriteString(itr->second);
         }
@@ -168,29 +77,37 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
         {
             Field* fields = raceResult->Fetch();
 
-            packet << fields[1].GetUInt8();
             packet << fields[0].GetUInt8();
+            packet << fields[1].GetUInt8();
         } while (raceResult->NextRow());
 
         do
         {
             Field* fields = classResult->Fetch();
 
-            packet << fields[1].GetUInt8();
             packet << fields[0].GetUInt8();
+            packet << fields[1].GetUInt8();
         } while (classResult->NextRow());
 
-        packet << uint32(0);
-        packet << uint8(Expansion());
-        packet << uint32(Expansion());
-        packet << uint32(0);
-        packet << uint8(Expansion());
-        packet << uint32(0);
-        packet << uint32(0);
-        packet << uint32(0);
+        packet.WriteBit(0);
+        packet.WriteBit(0);
+        packet.WriteBit(0);
+        packet.WriteBit(0);
     }
 
-    packet << uint8(code);                             // Auth response ?
+    if (queued)
+    {
+        packet << uint32(0);                            // Unk
+        packet.WriteBit(1);                             // Unk
+    }
 
+    packet.FlushBits();
     SendPacket(&packet);
-}*/
+}
+
+void WorldSession::SendClientCacheVersion(uint32 version)
+{
+    WorldPacket data(SMSG_CLIENTCACHE_VERSION, 4);
+    data << uint32(version);
+    SendPacket(&data);
+}

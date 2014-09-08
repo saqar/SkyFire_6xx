@@ -1224,7 +1224,7 @@ class Player : public Unit, public GridObject<Player>
         explicit Player(WorldSession* session);
         ~Player();
 
-        void CleanupsBeforeDelete(bool FinalCleanup = true);
+        void CleanupsBeforeDelete(bool finalCleanup = true);
 
         void AddToWorld();
         void RemoveFromWorld();
@@ -1281,13 +1281,13 @@ class Player : public Unit, public GridObject<Player>
         void CleanupAfterTaxiFlight();
         void ContinueTaxiFlight();
                                                             // mount_id can be used in scripting calls
-        bool isAcceptWhispers() const { return (m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS) != 0; }
+        bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
         void SetAcceptWhispers(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
-        bool IsGameMaster() const { return (m_ExtraFlags & PLAYER_EXTRA_GM_ON) != 0; }
+        bool IsGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
         void SetGameMaster(bool on);
-        bool isGMChat() const { return (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT) != 0; }
+        bool isGMChat() const { return m_ExtraFlags & PLAYER_EXTRA_GM_CHAT; }
         void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
-        bool isTaxiCheater() const { return (m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT) != 0; }
+        bool isTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
         void SetTaxiCheater(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
@@ -1299,7 +1299,7 @@ class Player : public Unit, public GridObject<Player>
         void InitStatsForLevel(bool reapplyMods = false);
 
         // .cheat command related
-        bool GetCommandStatus(uint32 command) const { return (_activeCheats & command) != 0; }
+        bool GetCommandStatus(uint32 command) const { return _activeCheats & command; }
         void SetCommandStatusOn(uint32 command) { _activeCheats |= command; }
         void SetCommandStatusOff(uint32 command) { _activeCheats &= ~command; }
 
@@ -1653,8 +1653,8 @@ class Player : public Unit, public GridObject<Player>
         static bool   LoadPositionFromDB(uint32& mapid, float& x, float& y, float& z, float& o, bool& in_flight, uint64 guid);
 
         static bool IsValidGender(uint8 Gender) { return Gender <= GENDER_FEMALE; }
-        static bool IsValidClass(uint8 Class) { return ((1 << (Class - 1)) & CLASSMASK_ALL_PLAYABLE) != 0; }
-        static bool IsValidRace(uint8 Race) { return ((1 << (Race - 1)) & RACEMASK_ALL_PLAYABLE) != 0; }
+        static bool IsValidClass(uint8 Class) { return (1 << (Class - 1)) & CLASSMASK_ALL_PLAYABLE; }
+        static bool IsValidRace(uint8 Race) { return (1 << (Race - 1)) & RACEMASK_ALL_PLAYABLE; }
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -1701,7 +1701,7 @@ class Player : public Unit, public GridObject<Player>
         Unit* GetSelectedUnit() const;
         Player* GetSelectedPlayer() const;
 
-        void SetTarget(uint64 /*guid*/) override { } /// Used for serverside target changes, does not apply to players
+        void SetTarget(uint64 /*guid*/) OVERRIDE { } /// Used for serverside target changes, does not apply to players
         void SetSelection(uint64 guid) { SetUInt64Value(UNIT_FIELD_TARGET, guid); }
 
         uint8 GetComboPoints() const { return m_comboPoints; }
@@ -2361,7 +2361,7 @@ class Player : public Unit, public GridObject<Player>
 
         uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
 
-        bool HasAtLoginFlag(AtLoginFlags f) const { return (m_atLoginFlags & f) != 0; }
+        bool HasAtLoginFlag(AtLoginFlags f) const { return m_atLoginFlags & f; }
         void SetAtLoginFlag(AtLoginFlags f) { m_atLoginFlags |= f; }
         void RemoveAtLoginFlag(AtLoginFlags flags, bool persist = false);
 
@@ -2449,9 +2449,6 @@ class Player : public Unit, public GridObject<Player>
         // Set map to player and add reference
         void SetMap(Map* map);
         void ResetMap();
-
-        std::vector<Item*> m_itemUpdateQueue;
-        bool m_itemUpdateQueueBlocked;
 
         bool isAllowedToLoot(const Creature* creature);
 
@@ -2694,6 +2691,9 @@ class Player : public Unit, public GridObject<Player>
         void UpdateConquestCurrencyCap(uint32 currency);
 
         VoidStorageItem* _voidStorageItems[VOID_STORAGE_MAX_SLOT];
+
+        std::vector<Item*> m_itemUpdateQueue;
+        bool m_itemUpdateQueueBlocked;
 
         uint32 m_ExtraFlags;
 

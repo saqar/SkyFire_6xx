@@ -50,7 +50,7 @@ class boss_commander_kolurg : public CreatureScript
 public:
     boss_commander_kolurg() : CreatureScript("boss_commander_kolurg") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_commander_kolurgAI(creature);
     }
@@ -59,12 +59,12 @@ public:
     {
         boss_commander_kolurgAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() override { }
-        void EnterCombat(Unit* /*who*/) override { }
-        void AttackStart(Unit* /*who*/) override { }
-        void MoveInLineOfSight(Unit* /*who*/) override { }
+        void Reset() OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void AttackStart(Unit* /*who*/) OVERRIDE { }
+        void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
 
-        void UpdateAI(uint32 /*diff*/) override
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -72,7 +72,7 @@ public:
 
             DoMeleeAttackIfReady();
         }
-        void JustDied(Unit* /*killer*/)  override { }
+        void JustDied(Unit* /*killer*/)  OVERRIDE { }
     };
 
 };

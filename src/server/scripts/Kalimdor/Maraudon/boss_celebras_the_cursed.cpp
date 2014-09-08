@@ -40,7 +40,7 @@ class celebras_the_cursed : public CreatureScript
 public:
     celebras_the_cursed() : CreatureScript("celebras_the_cursed") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new celebras_the_cursedAI(creature);
     }
@@ -53,21 +53,21 @@ public:
         uint32 EntanglingRootsTimer;
         uint32 CorruptForcesTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             WrathTimer = 8000;
             EntanglingRootsTimer = 2000;
             CorruptForcesTimer = 30000;
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             me->SummonCreature(13716, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 600000);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

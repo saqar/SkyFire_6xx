@@ -60,7 +60,7 @@ public:
 
         bool SummonedRend;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             SummonedRend = false;
             if (instance->GetBossState(DATA_GYTH) == IN_PROGRESS)
@@ -70,7 +70,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
 
@@ -80,12 +80,12 @@ public:
             events.ScheduleEvent(EVENT_KNOCK_AWAY, urand(12000, 18000));
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             instance->SetBossState(DATA_GYTH, DONE);
         }
 
-        void SetData(uint32 /*type*/, uint32 data) override
+        void SetData(uint32 /*type*/, uint32 data) OVERRIDE
         {
             switch (data)
             {
@@ -97,7 +97,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
 
             if (!SummonedRend && HealthBelowPct(5))
@@ -163,7 +163,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_gythAI(creature);
     }

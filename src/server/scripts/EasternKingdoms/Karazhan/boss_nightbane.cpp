@@ -71,7 +71,7 @@ class boss_nightbane : public CreatureScript
 public:
     boss_nightbane() : CreatureScript("boss_nightbane") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_nightbaneAI(creature);
     }
@@ -111,7 +111,7 @@ public:
         uint32 WaitTimer;
         uint32 MovePhase;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             BellowingRoarTimer = 30000;
             CharredEarthTimer = 15000;
@@ -162,7 +162,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(TYPE_NIGHTBANE, IN_PROGRESS);
@@ -171,13 +171,13 @@ public:
            Talk(YELL_AGGRO);
         }
 
-        void AttackStart(Unit* who) override
+        void AttackStart(Unit* who) OVERRIDE
         {
             if (!Intro && !Flying)
                 ScriptedAI::AttackStart(who);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetData(TYPE_NIGHTBANE, DONE);
@@ -185,14 +185,14 @@ public:
             HandleTerraceDoors(true);
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
             if (!Intro && !Flying)
                 ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void MovementInform(uint32 type, uint32 id) override
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -238,7 +238,7 @@ public:
             }
         }
 
-        void JustSummoned(Creature* summoned) override
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             summoned->AI()->AttackStart(me->GetVictim());
         }
@@ -263,7 +263,7 @@ public:
             Skeletons = false;
          }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             /* The timer for this was never setup apparently, not sure if the code works properly:
             if (WaitTimer <= diff)

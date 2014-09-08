@@ -106,7 +106,7 @@ class boss_ymiron : public CreatureScript
 public:
     boss_ymiron() : CreatureScript("boss_ymiron") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_ymironAI(creature);
     }
@@ -160,7 +160,7 @@ public:
 
         InstanceScript* instance;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             m_bIsWalking = false;
             m_bIsPause = false;
@@ -192,7 +192,7 @@ public:
                 instance->SetData(DATA_KING_YMIRON_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -200,13 +200,13 @@ public:
                 instance->SetData(DATA_KING_YMIRON_EVENT, IN_PROGRESS);
         }
 
-        void SpellHitTarget(Unit* who, SpellInfo const* spell) override
+        void SpellHitTarget(Unit* who, SpellInfo const* spell) OVERRIDE
         {
             if (who && who->GetTypeId() == TYPEID_PLAYER && spell->Id == 59302)
                 kingsBane = false;
         }
 
-        uint32 GetData(uint32 type) const override
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             if (type == DATA_KINGS_BANE)
                 return kingsBane ? 1 : 0;
@@ -214,7 +214,7 @@ public:
             return 0;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (m_bIsWalking)
             {
@@ -372,7 +372,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -383,7 +383,7 @@ public:
                 instance->SetData(DATA_KING_YMIRON_EVENT, DONE);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
@@ -407,7 +407,7 @@ class achievement_kings_bane : public AchievementCriteriaScript
         {
         }
 
-        bool OnCheck(Player* /*player*/, Unit* target) override
+        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
         {
             if (!target)
                 return false;

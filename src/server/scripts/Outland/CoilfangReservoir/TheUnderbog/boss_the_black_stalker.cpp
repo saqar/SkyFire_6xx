@@ -49,7 +49,7 @@ class boss_the_black_stalker : public CreatureScript
 public:
     boss_the_black_stalker() : CreatureScript("boss_the_black_stalker") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_the_black_stalkerAI(creature);
     }
@@ -70,7 +70,7 @@ public:
         uint32 check_Timer;
         std::list<uint64> Striders;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Levitate_Timer = 12000;
             ChainLightning_Timer = 6000;
@@ -82,9 +82,9 @@ public:
             Striders.clear();
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void JustSummoned(Creature* summon) override
+        void JustSummoned(Creature* summon) OVERRIDE
         {
             if (summon && summon->GetEntry() == ENTRY_SPORE_STRIDER)
             {
@@ -97,14 +97,14 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             for (std::list<uint64>::const_iterator i = Striders.begin(); i != Striders.end(); ++i)
                 if (Creature* strider = Unit::GetCreature(*me, *i))
                     strider->DisappearAndDie();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

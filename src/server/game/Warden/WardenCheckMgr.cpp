@@ -165,7 +165,7 @@ void WardenCheckMgr::LoadWardenOverrides()
 
     uint32 count = 0;
 
-    boost::unique_lock<boost::shared_mutex> lock(sWardenCheckMgr->_checkStoreLock);
+    ACE_WRITE_GUARD(ACE_RW_Mutex, g, _checkStoreLock);
 
     do
     {

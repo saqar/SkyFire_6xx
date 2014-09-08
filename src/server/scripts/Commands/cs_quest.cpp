@@ -35,7 +35,7 @@ class quest_commandscript : public CommandScript
 public:
     quest_commandscript() : CommandScript("quest_commandscript") { }
 
-    ChatCommand* GetCommands() const override
+    ChatCommand* GetCommands() const OVERRIDE
     {
         static ChatCommand questCommandTable[] =
         {

@@ -21,6 +21,7 @@
 #define _ACCMGR_H
 
 #include "RBAC.h"
+#include <ace/Singleton.h>
 
 enum class AccountOpResult : uint8
 {
@@ -43,6 +44,7 @@ enum PasswordChangeSecurity
 #define MAX_PASS_STR 16
 #define MAX_ACCOUNT_STR 16
 #define MAX_EMAIL_STR 64
+#define MAX_BNET_EMAIL_STR 320
 
 namespace rbac
 {
@@ -52,17 +54,13 @@ typedef std::map<uint8, rbac::RBACPermissionContainer> RBACDefaultPermissionsCon
 
 class AccountMgr
 {
+    friend class ACE_Singleton<AccountMgr, ACE_Null_Mutex>;
+
     private:
         AccountMgr();
         ~AccountMgr();
 
     public:
-        static AccountMgr* instance()
-        {
-            static AccountMgr instance;
-            return &instance;
-        }
-
         AccountOpResult CreateAccount(std::string username, std::string password, std::string email = "");
         static AccountOpResult DeleteAccount(uint32 accountId);
         static AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword);
@@ -99,5 +97,5 @@ class AccountMgr
         rbac::RBACDefaultPermissionsContainer _defaultPermissions;
 };
 
-#define sAccountMgr AccountMgr::instance()
+#define sAccountMgr ACE_Singleton<AccountMgr, ACE_Null_Mutex>::instance()
 #endif

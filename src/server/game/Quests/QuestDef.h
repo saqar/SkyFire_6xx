@@ -322,14 +322,14 @@ class Quest
         uint32 GetQuestGiverPortrait() const { return QuestGiverPortrait; }
         uint32 GetQuestTurnInPortrait() const { return QuestTurnInPortrait; }
         uint32 GetRewChoiceItemCount(uint32 itemId) const;
-        bool   IsDaily() const { return (Flags & QUEST_FLAGS_DAILY) != 0; }
-        bool   IsWeekly() const { return (Flags & QUEST_FLAGS_WEEKLY) != 0; }
-        bool   IsMonthly() const { return (SpecialFlags & QUEST_SPECIAL_FLAGS_MONTHLY) != 0; }
+        bool   IsDaily() const { return Flags & QUEST_FLAGS_DAILY; }
+        bool   IsWeekly() const { return Flags & QUEST_FLAGS_WEEKLY; }
+        bool   IsMonthly() const { return SpecialFlags & QUEST_SPECIAL_FLAGS_MONTHLY; }
         bool   IsSeasonal() const { return (ZoneOrSort == -QUEST_SORT_SEASONAL || ZoneOrSort == -QUEST_SORT_SPECIAL || ZoneOrSort == -QUEST_SORT_LUNAR_FESTIVAL || ZoneOrSort == -QUEST_SORT_MIDSUMMER || ZoneOrSort == -QUEST_SORT_BREWFEST || ZoneOrSort == -QUEST_SORT_LOVE_IS_IN_THE_AIR || ZoneOrSort == -QUEST_SORT_NOBLEGARDEN) && !IsRepeatable(); }
-        bool   IsDailyOrWeekly() const { return (Flags & (QUEST_FLAGS_DAILY | QUEST_FLAGS_WEEKLY)) != 0; }
+        bool   IsDailyOrWeekly() const { return Flags & (QUEST_FLAGS_DAILY | QUEST_FLAGS_WEEKLY); }
         bool   IsRaidQuest(Difficulty difficulty) const;
         bool   IsAllowedInRaid(Difficulty difficulty) const;
-        bool   IsDFQuest() const { return (SpecialFlags & QUEST_SPECIAL_FLAGS_DF_QUEST) != 0; }
+        bool   IsDFQuest() const { return SpecialFlags & QUEST_SPECIAL_FLAGS_DF_QUEST; }
         bool   IsRewChoiceItemValid(uint32 itemId) const;
         uint32 CalculateHonorGain(uint8 level) const;
 

@@ -138,7 +138,7 @@ void UnitAI::DoCast(uint32 spellId)
         {
             if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
             {
-                bool playerOnly = spellInfo->AttributesEx3 & SPELL_ATTR3_ONLY_TARGET_PLAYERS != 0;
+                bool playerOnly = spellInfo->AttributesEx3 & SPELL_ATTR3_ONLY_TARGET_PLAYERS;
                 target = SelectTarget(SELECT_TARGET_RANDOM, 0, spellInfo->GetMaxRange(false), playerOnly);
             }
             break;

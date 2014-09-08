@@ -20,6 +20,7 @@
 #ifndef _LFGMGR_H
 #define _LFGMGR_H
 
+#include <ace/Singleton.h>
 #include "DBCStructure.h"
 #include "Field.h"
 #include "LFG.h"
@@ -147,7 +148,7 @@ typedef std::map<uint64, LfgProposalPlayer> LfgProposalPlayerContainer;
 typedef std::map<uint64, LfgPlayerBoot> LfgPlayerBootContainer;
 typedef std::map<uint64, LfgGroupData> LfgGroupDataContainer;
 typedef std::map<uint64, LfgPlayerData> LfgPlayerDataContainer;
-typedef std::unordered_map<uint32, LFGDungeonData> LFGDungeonContainer;
+typedef UNORDERED_MAP<uint32, LFGDungeonData> LFGDungeonContainer;
 
 // Data needed by SMSG_LFG_JOIN_RESULT
 struct LfgJoinResultData
@@ -296,17 +297,13 @@ struct LFGDungeonData
 
 class LFGMgr
 {
+    friend class ACE_Singleton<LFGMgr, ACE_Null_Mutex>;
+
     private:
         LFGMgr();
         ~LFGMgr();
 
     public:
-        static LFGMgr* instance()
-        {
-            static LFGMgr instance;
-            return &instance;
-        }
-
         // Functions used outside lfg namespace
         void Update(uint32 diff);
 
@@ -481,5 +478,5 @@ class LFGMgr
 
 } // namespace lfg
 
-#define sLFGMgr lfg::LFGMgr::instance()
+#define sLFGMgr ACE_Singleton<lfg::LFGMgr, ACE_Null_Mutex>::instance()
 #endif

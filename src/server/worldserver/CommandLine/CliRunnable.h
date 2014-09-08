@@ -24,7 +24,12 @@
 #ifndef __CLIRUNNABLE_H
 #define __CLIRUNNABLE_H
 
-void CliThread();
+/// Command Line Interface handling thread
+class CliRunnable : public ACE_Based::Runnable
+{
+    public:
+        void run() OVERRIDE;
+};
 
 #endif
 

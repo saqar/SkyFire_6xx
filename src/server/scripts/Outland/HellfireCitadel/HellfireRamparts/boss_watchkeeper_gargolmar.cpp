@@ -63,7 +63,7 @@ class boss_watchkeeper_gargolmar : public CreatureScript
         {
             boss_watchkeeper_gargolmarAI(Creature* creature) : BossAI(creature, DATA_WATCHKEEPER_GARGOLMAR) { }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 hasTaunted    = false;
                 yelledForHeal = false;
@@ -71,7 +71,7 @@ class boss_watchkeeper_gargolmar : public CreatureScript
                 _Reset();
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
                 events.ScheduleEvent(EVENT_MORTAL_WOUND, 5000);
@@ -79,7 +79,7 @@ class boss_watchkeeper_gargolmar : public CreatureScript
                 _EnterCombat();
             }
 
-            void MoveInLineOfSight(Unit* who) override
+            void MoveInLineOfSight(Unit* who) OVERRIDE
 
             {
                 if (!me->GetVictim() && me->CanCreatureAttack(who))
@@ -101,18 +101,18 @@ class boss_watchkeeper_gargolmar : public CreatureScript
                 }
             }
 
-            void KilledUnit(Unit* /*victim*/) override
+            void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
                 Talk(SAY_KILL);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Talk(SAY_DIE);
                 _JustDied();
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -169,7 +169,7 @@ class boss_watchkeeper_gargolmar : public CreatureScript
                 bool retaliation;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_watchkeeper_gargolmarAI(creature);
         }

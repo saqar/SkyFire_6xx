@@ -51,7 +51,7 @@ class instance_karazhan : public InstanceMapScript
 public:
     instance_karazhan() : InstanceMapScript("instance_karazhan", 532) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_karazhan_InstanceMapScript(map);
     }
@@ -82,7 +82,7 @@ public:
         uint64 ImageGUID;
         uint64 DustCoveredChest;
 
-        void Initialize() override
+        void Initialize() OVERRIDE
         {
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
@@ -110,7 +110,7 @@ public:
             DustCoveredChest    = 0;
         }
 
-        bool IsEncounterInProgress() const override
+        bool IsEncounterInProgress() const OVERRIDE
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)
@@ -119,7 +119,7 @@ public:
             return false;
         }
 
-        void OnCreatureCreate(Creature* creature) override
+        void OnCreatureCreate(Creature* creature) OVERRIDE
         {
             switch (creature->GetEntry())
             {
@@ -129,7 +129,7 @@ public:
             }
         }
 
-        void SetData(uint32 type, uint32 uiData) override
+        void SetData(uint32 type, uint32 uiData) OVERRIDE
         {
             switch (type)
             {
@@ -184,7 +184,7 @@ public:
             }
         }
 
-         void SetData64(uint32 identifier, uint64 data) override
+         void SetData64(uint32 identifier, uint64 data) OVERRIDE
          {
              switch (identifier)
              {
@@ -192,7 +192,7 @@ public:
              }
          }
 
-        void OnGameObjectCreate(GameObject* go) override
+        void OnGameObjectCreate(GameObject* go) OVERRIDE
         {
             switch (go->GetEntry())
             {
@@ -238,12 +238,12 @@ public:
             }
         }
 
-        std::string GetSaveData() override
+        std::string GetSaveData() OVERRIDE
         {
             return strSaveData;
         }
 
-        uint32 GetData(uint32 uiData) const override
+        uint32 GetData(uint32 uiData) const OVERRIDE
         {
             switch (uiData)
             {
@@ -266,7 +266,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 uiData) const override
+        uint64 GetData64(uint32 uiData) const OVERRIDE
         {
             switch (uiData)
             {

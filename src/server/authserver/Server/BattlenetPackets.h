@@ -44,7 +44,7 @@ namespace Battlenet
         SUPPORT                             = 7,
         ACHIEVEMENT                         = 8,
         CACHE                               = 11,
-        PROFILE                             = 14
+        PROFILE                             = 13
     };
 
     enum AuthOpcode

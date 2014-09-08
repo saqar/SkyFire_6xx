@@ -44,7 +44,7 @@ class instance_scarlet_monastery : public InstanceMapScript
 public:
     instance_scarlet_monastery() : InstanceMapScript("instance_scarlet_monastery", 189) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_scarlet_monastery_InstanceMapScript(map);
     }
@@ -65,7 +65,7 @@ public:
 
         uint32 encounter[MAX_ENCOUNTER];
 
-        void Initialize() override
+        void Initialize() OVERRIDE
         {
             memset(&encounter, 0, sizeof(encounter));
 
@@ -80,7 +80,7 @@ public:
             DoorHighInquisitorGUID = 0;
         }
 
-        void OnGameObjectCreate(GameObject* go) override
+        void OnGameObjectCreate(GameObject* go) OVERRIDE
         {
             switch (go->GetEntry())
             {
@@ -89,7 +89,7 @@ public:
             }
         }
 
-        void OnCreatureCreate(Creature* creature) override
+        void OnCreatureCreate(Creature* creature) OVERRIDE
         {
             switch (creature->GetEntry())
             {
@@ -102,7 +102,7 @@ public:
             }
         }
 
-        void SetData(uint32 type, uint32 data) override
+        void SetData(uint32 type, uint32 data) OVERRIDE
         {
             switch (type)
             {
@@ -134,7 +134,7 @@ public:
             }
         }
 
-        uint64 GetData64(uint32 type) const override
+        uint64 GetData64(uint32 type) const OVERRIDE
         {
             switch (type)
             {
@@ -149,7 +149,7 @@ public:
             return 0;
         }
 
-        uint32 GetData(uint32 type) const override
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             if (type == TYPE_MOGRAINE_AND_WHITE_EVENT)
                 return encounter[0];

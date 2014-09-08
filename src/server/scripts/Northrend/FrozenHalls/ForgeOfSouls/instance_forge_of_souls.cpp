@@ -46,7 +46,7 @@ class instance_forge_of_souls : public InstanceMapScript
                 teamInInstance = 0;
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) OVERRIDE
             {
                 Map::PlayerList const &players = instance->GetPlayers();
                 if (!players.isEmpty())
@@ -76,7 +76,7 @@ class instance_forge_of_souls : public InstanceMapScript
                 }
             }
 
-            uint32 GetData(uint32 type) const override
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -89,7 +89,7 @@ class instance_forge_of_souls : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 type) const override
+            uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -104,7 +104,7 @@ class instance_forge_of_souls : public InstanceMapScript
                 return 0;
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
 
@@ -115,7 +115,7 @@ class instance_forge_of_souls : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* in) override
+            void Load(const char* in) OVERRIDE
             {
                 if (!in)
                 {
@@ -152,7 +152,7 @@ class instance_forge_of_souls : public InstanceMapScript
             uint32 teamInInstance;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_forge_of_souls_InstanceScript(map);
         }

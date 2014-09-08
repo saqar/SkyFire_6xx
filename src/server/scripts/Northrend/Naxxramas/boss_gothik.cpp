@@ -178,7 +178,7 @@ class boss_gothik : public CreatureScript
             std::vector<uint64> LiveTriggerGUID;
             std::vector<uint64> DeadTriggerGUID;
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 LiveTriggerGUID.clear();
                 DeadTriggerGUID.clear();
@@ -192,7 +192,7 @@ class boss_gothik : public CreatureScript
                 thirtyPercentReached = false;
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 for (uint32 i = 0; i < POS_LIVE; ++i)
                     if (Creature* trigger = DoSummon(WORLD_TRIGGER, PosSummonLive[i]))
@@ -217,7 +217,7 @@ class boss_gothik : public CreatureScript
                     instance->SetData(DATA_GOTHIK_GATE, GO_STATE_READY);
             }
 
-            void JustSummoned(Creature* summon) override
+            void JustSummoned(Creature* summon) OVERRIDE
             {
                 if (summon->GetEntry() == WORLD_TRIGGER)
                     summon->setActive(true);
@@ -234,18 +234,18 @@ class boss_gothik : public CreatureScript
                 summons.Summon(summon);
             }
 
-            void SummonedCreatureDespawn(Creature* summon) override
+            void SummonedCreatureDespawn(Creature* summon) OVERRIDE
             {
                 summons.Despawn(summon);
             }
 
-            void KilledUnit(Unit* /*victim*/) override
+            void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
                 if (!(rand()%5))
                     Talk(SAY_KILL);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 LiveTriggerGUID.clear();
                 DeadTriggerGUID.clear();
@@ -353,7 +353,7 @@ class boss_gothik : public CreatureScript
                 return false;
             }
 
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell) OVERRIDE
             {
                 uint32 spellId = 0;
                 switch (spell->Id)
@@ -370,13 +370,13 @@ class boss_gothik : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* /*who*/, uint32& damage) override
+            void DamageTaken(Unit* /*who*/, uint32& damage) OVERRIDE
             {
                 if (!phaseTwo)
                     damage = 0;
             }
 
-            void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+            void SpellHitTarget(Unit* target, SpellInfo const* spell) OVERRIDE
             {
                 if (!me->IsInCombat())
                     return;
@@ -396,7 +396,7 @@ class boss_gothik : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
@@ -501,7 +501,7 @@ class boss_gothik : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_gothikAI(creature);
         }
@@ -527,25 +527,25 @@ class npc_gothik_minion : public CreatureScript
                 return (liveSide == IN_LIVE_SIDE(who));
             }
 
-            void DoAction(int32 param) override
+            void DoAction(int32 param) OVERRIDE
             {
                 gateClose = param;
             }
 
-            void DamageTaken(Unit* attacker, uint32 &damage) override
+            void DamageTaken(Unit* attacker, uint32 &damage) OVERRIDE
             {
                 if (gateClose && !isOnSameSide(attacker))
                     damage = 0;
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 if (me->IsSummon())
                     if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         CombatAI::JustDied(owner);
             }
 
-            void EnterEvadeMode() override
+            void EnterEvadeMode() OVERRIDE
             {
                 if (!gateClose)
                 {
@@ -577,7 +577,7 @@ class npc_gothik_minion : public CreatureScript
                 Reset();
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (gateClose && (!isOnSameSide(me) || (me->GetVictim() && !isOnSameSide(me->GetVictim()))))
                 {
@@ -589,7 +589,7 @@ class npc_gothik_minion : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_gothik_minionAI(creature);
         }
@@ -609,13 +609,13 @@ class spell_gothik_shadow_bolt_volley : public SpellScriptLoader
                 targets.remove_if(Trinity::UnitAuraCheck(false, SPELL_SHADOW_MARK));
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gothik_shadow_bolt_volley_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_gothik_shadow_bolt_volley_SpellScript();
         }

@@ -130,13 +130,13 @@ bool Battlenet::Session::HandleAuthChallenge(PacketHeader& header, BitStream& pa
     AuthChallenge info(header, packet);
     info.Read();
 
-    if (info.Program != "WoW")
+    /*if (info.Program != "WoW")
     {
         AuthComplete* complete = new AuthComplete();
         complete->SetAuthResult(AUTH_INVALID_PROGRAM);
         AsyncWrite(complete);
         return true;
-    }
+    }*/
 
     if (!sBattlenetMgr->HasPlatform(info.Platform))
     {
@@ -168,7 +168,7 @@ bool Battlenet::Session::HandleAuthChallenge(PacketHeader& header, BitStream& pa
             }
             else
             {
-                if (component.Program != "WoW" || AuthHelper::IsBuildSupportingBattlenet(component.Build))
+                if (component.Program != "WoWB" /*|| AuthHelper::IsBuildSupportingBattlenet(component.Build)*/)
                     complete->SetAuthResult(AUTH_REGION_BAD_VERSION);
                 else
                     complete->SetAuthResult(AUTH_USE_GRUNT_LOGON);

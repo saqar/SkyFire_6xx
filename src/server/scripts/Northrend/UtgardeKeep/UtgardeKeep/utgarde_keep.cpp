@@ -49,7 +49,7 @@ class npc_dragonflayer_forge_master : public CreatureScript
                 _forgeId = 0;
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 if (!_forgeId)
                     _forgeId = GetForgeMasterType();
@@ -61,7 +61,7 @@ class npc_dragonflayer_forge_master : public CreatureScript
                     _instance->SetData(DATA_FORGE_1 + _forgeId - 1, NOT_STARTED);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 if (!_forgeId)
                     _forgeId = GetForgeMasterType();
@@ -70,7 +70,7 @@ class npc_dragonflayer_forge_master : public CreatureScript
                     _instance->SetData(DATA_FORGE_1 + _forgeId - 1, DONE);
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 if (!_forgeId)
                     _forgeId = GetForgeMasterType();
@@ -81,7 +81,7 @@ class npc_dragonflayer_forge_master : public CreatureScript
                 me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
             }
 
-            void UpdateAI(uint32 /*diff*/) override
+            void UpdateAI(uint32 /*diff*/) OVERRIDE
             {
                 if (!_forgeId)
                     _forgeId = GetForgeMasterType();
@@ -116,7 +116,7 @@ class npc_dragonflayer_forge_master : public CreatureScript
             uint8 _forgeId;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetUtgardeKeepAI<npc_dragonflayer_forge_masterAI>(creature);
         }
@@ -136,7 +136,7 @@ class spell_ticking_time_bomb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_ticking_time_bomb_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_TICKING_TIME_BOMB_EXPLODE))
                     return false;
@@ -149,13 +149,13 @@ class spell_ticking_time_bomb : public SpellScriptLoader
                     GetTarget()->CastSpell(GetTarget(), SPELL_TICKING_TIME_BOMB_EXPLODE, true);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectRemove += AuraEffectRemoveFn(spell_ticking_time_bomb_AuraScript::HandleOnEffectRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_ticking_time_bomb_AuraScript();
         }
@@ -175,7 +175,7 @@ class spell_fixate : public SpellScriptLoader
         {
             PrepareSpellScript(spell_fixate_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_FIXATE_TRIGGER))
                     return false;
@@ -187,13 +187,13 @@ class spell_fixate : public SpellScriptLoader
                 GetHitUnit()->CastSpell(GetCaster(), SPELL_FIXATE_TRIGGER, true);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnEffectHitTarget += SpellEffectFn(spell_fixate_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_fixate_SpellScript();
         }
@@ -231,7 +231,7 @@ class npc_enslaved_proto_drake : public CreatureScript
                 _setData = false;
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_REND, urand(2000, 3000));
@@ -239,7 +239,7 @@ class npc_enslaved_proto_drake : public CreatureScript
                 _events.ScheduleEvent(EVENT_KNOCKAWAY, urand(3500, 6000));
             }
 
-            void MovementInform(uint32 type, uint32 id) override
+            void MovementInform(uint32 type, uint32 id) OVERRIDE
             {
                 if (type == WAYPOINT_MOTION_TYPE && id == POINT_LAST)
                 {
@@ -247,7 +247,7 @@ class npc_enslaved_proto_drake : public CreatureScript
                 }
             }
 
-            void SetData(uint32 type, uint32 data) override
+            void SetData(uint32 type, uint32 data) OVERRIDE
             {
                 if (type == TYPE_PROTODRAKE_AT && data == DATA_PROTODRAKE_MOVE && !_setData && me->GetDistance(protodrakeCheckPos) < 5.0f)
                 {
@@ -257,7 +257,7 @@ class npc_enslaved_proto_drake : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -297,7 +297,7 @@ class npc_enslaved_proto_drake : public CreatureScript
 
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new npc_enslaved_proto_drakeAI(creature);
         }
@@ -312,7 +312,7 @@ class spell_uk_second_wind_proc : public SpellScriptLoader
         {
             PrepareAuraScript(spell_uk_second_wind_proc_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
+            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_UK_SECOUND_WIND_TRIGGER))
                     return false;
@@ -334,7 +334,7 @@ class spell_uk_second_wind_proc : public SpellScriptLoader
                 GetTarget()->CastCustomSpell(SPELL_UK_SECOUND_WIND_TRIGGER, SPELLVALUE_BASE_POINT0, 5, GetTarget(), true, NULL, aurEff);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 DoCheckProc += AuraCheckProcFn(spell_uk_second_wind_proc_AuraScript::CheckProc);
                 OnEffectProc += AuraEffectProcFn(spell_uk_second_wind_proc_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
@@ -342,7 +342,7 @@ class spell_uk_second_wind_proc : public SpellScriptLoader
 
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_uk_second_wind_proc_AuraScript();
         }

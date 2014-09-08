@@ -43,7 +43,7 @@ class boss_high_inquisitor_fairbanks : public CreatureScript
 public:
     boss_high_inquisitor_fairbanks() : CreatureScript("boss_high_inquisitor_fairbanks") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_high_inquisitor_fairbanksAI(creature);
     }
@@ -60,7 +60,7 @@ public:
         uint32 Dispel_Timer;
         bool PowerWordShield;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             CurseOfBlood_Timer = 10000;
             DispelMagic_Timer = 30000;
@@ -73,13 +73,13 @@ public:
             me->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 7);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             me->SetStandState(UNIT_STAND_STATE_STAND);
             me->SetUInt32Value(UNIT_FIELD_ANIM_TIER, 0);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

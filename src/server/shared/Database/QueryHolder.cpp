@@ -51,7 +51,7 @@ bool SQLQueryHolder::SetPQuery(size_t index, const char *format, ...)
     }
 
     va_list ap;
-    char szQuery[MAX_QUERY_LEN];
+    char szQuery [MAX_QUERY_LEN];
     va_start(ap, format);
     int res = vsnprintf(szQuery, MAX_QUERY_LEN, format, ap);
     va_end(ap);
@@ -91,9 +91,10 @@ QueryResult SQLQueryHolder::GetResult(size_t index)
     if (index < m_queries.size())
     {
         ResultSet* result = m_queries[index].second.qresult;
-        if (!result || !result->GetRowCount() || !result->NextRow())
+        if (!result || !result->GetRowCount())
             return QueryResult(NULL);
 
+        result->NextRow();
         return QueryResult(result);
     }
     else
@@ -151,12 +152,12 @@ SQLQueryHolder::~SQLQueryHolder()
         {
             switch (data->type)
             {
-            case SQL_ELEMENT_RAW:
-                free((void*)(const_cast<char*>(data->element.query)));
-                break;
-            case SQL_ELEMENT_PREPARED:
-                delete data->element.stmt;
-                break;
+                case SQL_ELEMENT_RAW:
+                    free((void*)(const_cast<char*>(data->element.query)));
+                    break;
+                case SQL_ELEMENT_PREPARED:
+                    delete data->element.stmt;
+                    break;
             }
         }
     }
@@ -168,15 +169,10 @@ void SQLQueryHolder::SetSize(size_t size)
     m_queries.resize(size);
 }
 
-SQLQueryHolderTask::~SQLQueryHolderTask()
-{
-    if (!m_executed)
-        delete m_holder;
-}
-
 bool SQLQueryHolderTask::Execute()
 {
-    m_executed = true;
+    //the result can't be ready as we are processing it right now
+    ASSERT(!m_result.ready());
 
     if (!m_holder)
         return false;
@@ -191,24 +187,24 @@ bool SQLQueryHolderTask::Execute()
         {
             switch (data->type)
             {
-            case SQL_ELEMENT_RAW:
-            {
-                char const* sql = data->element.query;
-                if (sql)
-                    m_holder->SetResult(i, m_conn->Query(sql));
-                break;
-            }
-            case SQL_ELEMENT_PREPARED:
-            {
-                PreparedStatement* stmt = data->element.stmt;
-                if (stmt)
-                    m_holder->SetPreparedResult(i, m_conn->Query(stmt));
-                break;
-            }
+                case SQL_ELEMENT_RAW:
+                {
+                    char const* sql = data->element.query;
+                    if (sql)
+                        m_holder->SetResult(i, m_conn->Query(sql));
+                    break;
+                }
+                case SQL_ELEMENT_PREPARED:
+                {
+                    PreparedStatement* stmt = data->element.stmt;
+                    if (stmt)
+                        m_holder->SetPreparedResult(i, m_conn->Query(stmt));
+                    break;
+                }
             }
         }
     }
 
-    m_result.set_value(m_holder);
+    m_result.set(m_holder);
     return true;
 }

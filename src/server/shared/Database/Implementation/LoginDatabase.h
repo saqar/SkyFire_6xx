@@ -28,7 +28,7 @@ class LoginDatabaseConnection : public MySQLConnection
     public:
         //- Constructors for sync and async connections
         LoginDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-        LoginDatabaseConnection(ProducerConsumerQueue<SQLOperation*>* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+        LoginDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
 
         //- Loads database type specific prepared statements
         void DoPrepareStatements();
@@ -65,7 +65,6 @@ enum LoginDatabaseStatements
     LOGIN_SEL_ACCOUNT_ID_BY_NAME,
     LOGIN_SEL_ACCOUNT_LIST_BY_NAME,
     LOGIN_SEL_ACCOUNT_INFO_BY_NAME,
-    LOGIN_SEL_ACCOUNT_INFO_BY_BNET,
     LOGIN_SEL_ACCOUNT_LIST_BY_EMAIL,
     LOGIN_SEL_NUM_CHARS_ON_REALM,
     LOGIN_SEL_ACCOUNT_BY_IP,
@@ -93,7 +92,6 @@ enum LoginDatabaseStatements
     LOGIN_UPD_MUTE_TIME,
     LOGIN_UPD_MUTE_TIME_LOGIN,
     LOGIN_UPD_LAST_IP,
-    LOGIN_UPD_LAST_ATTEMPT_IP,
     LOGIN_UPD_ACCOUNT_ONLINE,
     LOGIN_UPD_UPTIME_PLAYERS,
     LOGIN_DEL_OLD_LOGS,
@@ -120,10 +118,6 @@ enum LoginDatabaseStatements
     LOGIN_SEL_IP2NATION_COUNTRY,
     LOGIN_SEL_AUTOBROADCAST,
     LOGIN_GET_EMAIL_BY_ID,
-    LOGIN_INS_ALDL_IP_LOGGING,
-    LOGIN_INS_FACL_IP_LOGGING,
-    LOGIN_INS_CHAR_IP_LOGGING,
-    LOGIN_INS_FALP_IP_LOGGING,
 
     LOGIN_SEL_ACCOUNT_ACCESS_BY_ID,
     LOGIN_SEL_RBAC_ACCOUNT_PERMISSIONS,

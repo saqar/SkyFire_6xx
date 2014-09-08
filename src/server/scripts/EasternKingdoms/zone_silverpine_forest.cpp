@@ -109,7 +109,7 @@ public:
             }
         }
 
-        void Reset() override { }
+        void Reset() OVERRIDE { }
 
         void EnterCombat(Unit* who)
         {
@@ -130,7 +130,7 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_deathstalker_erlandAI(creature);
     }

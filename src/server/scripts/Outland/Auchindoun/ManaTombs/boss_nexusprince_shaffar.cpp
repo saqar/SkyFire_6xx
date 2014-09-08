@@ -73,7 +73,7 @@ class boss_nexusprince_shaffar : public CreatureScript
 public:
     boss_nexusprince_shaffar() : CreatureScript("boss_nexusprince_shaffar") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_nexusprince_shaffarAI(creature);
     }
@@ -93,7 +93,7 @@ public:
         bool HasTaunted;
         bool CanBlink;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Blink_Timer = 1500;
             Beacon_Timer = 10000;
@@ -112,13 +112,13 @@ public:
             me->SummonCreature(NPC_BEACON, posX + dist, posY, posZ, angle, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
         }
 
-        void EnterEvadeMode() override
+        void EnterEvadeMode() OVERRIDE
         {
             summons.DespawnAll();
             ScriptedAI::EnterEvadeMode();
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
             if (!HasTaunted && who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 100.0f))
@@ -128,7 +128,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -136,7 +136,7 @@ public:
             summons.DoZoneInCombat();
         }
 
-        void JustSummoned(Creature* summoned) override
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             if (summoned->GetEntry() == NPC_BEACON)
             {
@@ -149,23 +149,23 @@ public:
             summons.Summon(summoned);
         }
 
-        void SummonedCreatureDespawn(Creature* summon) override
+        void SummonedCreatureDespawn(Creature* summon) OVERRIDE
         {
             summons.Despawn(summon);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEAD);
             summons.DespawnAll();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -234,7 +234,7 @@ class npc_ethereal_beacon : public CreatureScript
 public:
     npc_ethereal_beacon() : CreatureScript("npc_ethereal_beacon") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_ethereal_beaconAI(creature);
     }
@@ -254,14 +254,14 @@ public:
             me->Kill(me);
         }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Apprentice_Timer = DUNGEON_MODE(20000, 10000);
             ArcaneBolt_Timer = 1000;
             Check_Timer = 1000;
         }
 
-        void EnterCombat(Unit* who) override
+        void EnterCombat(Unit* who) OVERRIDE
         {
             // Send Shaffar to fight
             Creature* Shaffar = me->FindNearestCreature(NPC_SHAFFAR, 100);
@@ -274,12 +274,12 @@ public:
                 Shaffar->AI()->AttackStart(who);
         }
 
-        void JustSummoned(Creature* summoned) override
+        void JustSummoned(Creature* summoned) OVERRIDE
         {
             summoned->AI()->AttackStart(me->GetVictim());
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -326,7 +326,7 @@ class npc_ethereal_apprentice : public CreatureScript
 public:
     npc_ethereal_apprentice() : CreatureScript("npc_ethereal_apprentice") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_ethereal_apprenticeAI(creature);
     }
@@ -339,13 +339,13 @@ public:
 
         bool isFireboltTurn;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Cast_Timer = 3000;
             isFireboltTurn = true;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -382,14 +382,14 @@ public:
     {
         npc_yorAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset() override { }
+        void Reset() OVERRIDE { }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             events.ScheduleEvent(EVENT_DOUBLE_BREATH, urand(6000,9000));
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -416,7 +416,7 @@ public:
             EventMap events;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new npc_yorAI(creature);
     }

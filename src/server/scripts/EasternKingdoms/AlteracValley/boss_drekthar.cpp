@@ -57,7 +57,7 @@ public:
         uint32 YellTimer;
         uint32 ResetTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             WhirlwindTimer    = urand(1 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
             Whirlwind2Timer   = urand(1 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
@@ -67,18 +67,18 @@ public:
             YellTimer         = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS); //20 to 30 seconds
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(YELL_AGGRO);
         }
 
-        void JustRespawned() override
+        void JustRespawned() OVERRIDE
         {
             Reset();
             Talk(YELL_RESPAWN);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -128,7 +128,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_drektharAI(creature);
     }

@@ -154,7 +154,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 BloodQuickeningMinutes = 0;
             }
 
-            void FillInitialWorldStates(WorldStateBuilder& builder) override
+            void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE
             {
                 builder.AppendState(WORLDSTATE_SHOW_TIMER,         BloodQuickeningState == IN_PROGRESS);
                 builder.AppendState(WORLDSTATE_EXECUTION_TIME,     BloodQuickeningMinutes);
@@ -163,13 +163,13 @@ class instance_icecrown_citadel : public InstanceMapScript
                 builder.AppendState(WORLDSTATE_ATTEMPTS_MAX,       MaxHeroicAttempts);
             }
 
-            void OnPlayerEnter(Player* player) override
+            void OnPlayerEnter(Player* player) OVERRIDE
             {
                 if (!TeamInInstance)
                     TeamInInstance = player->GetTeam();
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) OVERRIDE
             {
                 if (!TeamInInstance)
                 {
@@ -312,7 +312,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
             }
 
-            void OnCreatureRemove(Creature* creature) override
+            void OnCreatureRemove(Creature* creature) OVERRIDE
             {
                 if (creature->GetEntry() == NPC_SINDRAGOSA)
                     SindragosaGUID = 0;
@@ -351,7 +351,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 return entry;
             }
 
-            void OnUnitDeath(Unit* unit) override
+            void OnUnitDeath(Unit* unit) OVERRIDE
             {
                 Creature* creature = unit->ToCreature();
                 if (!creature)
@@ -409,7 +409,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            void OnGameObjectCreate(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -557,7 +557,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectRemove(GameObject* go) override
+            void OnGameObjectRemove(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -591,7 +591,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
             }
 
-            uint32 GetData(uint32 type) const override
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -616,7 +616,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 type) const override
+            uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -682,7 +682,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 return 0;
             }
 
-            bool SetBossState(uint32 type, EncounterState state) override
+            bool SetBossState(uint32 type, EncounterState state) OVERRIDE
             {
                 if (!InstanceScript::SetBossState(type, state))
                     return false;
@@ -845,7 +845,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                  return true;
             }
 
-            void SetData(uint32 type, uint32 data) override
+            void SetData(uint32 type, uint32 data) OVERRIDE
             {
                 switch (type)
                 {
@@ -911,7 +911,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
             }
 
-            bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/) override
+            bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/) OVERRIDE
             {
                 switch (criteria_id)
                 {
@@ -951,7 +951,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 return false;
             }
 
-            bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const override
+            bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const OVERRIDE
             {
                 if (player && player->GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_INSTANCE_REQUIRED_BOSSES))
                     return true;
@@ -1106,7 +1106,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
 
@@ -1118,7 +1118,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* str) override
+            void Load(const char* str) OVERRIDE
             {
                 if (!str)
                 {
@@ -1160,7 +1160,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
-            void Update(uint32 diff) override
+            void Update(uint32 diff) OVERRIDE
             {
                 if (BloodQuickeningState != IN_PROGRESS && GetBossState(DATA_THE_LICH_KING) != IN_PROGRESS)
                     return;
@@ -1218,7 +1218,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
             }
 
-            void ProcessEvent(WorldObject* /*source*/, uint32 eventId) override
+            void ProcessEvent(WorldObject* /*source*/, uint32 eventId) OVERRIDE
             {
                 switch (eventId)
                 {
@@ -1313,7 +1313,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             bool IsOrbWhispererEligible;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_icecrown_citadel_InstanceMapScript(map);
         }

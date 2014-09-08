@@ -69,7 +69,7 @@ class boss_nethermancer_sepethrea : public CreatureScript
         {
             boss_nethermancer_sepethreaAI(Creature* creature) : BossAI(creature, DATA_NETHERMANCER_SEPRETHREA) { }
 
-            void EnterCombat(Unit* who) override
+            void EnterCombat(Unit* who) OVERRIDE
             {
                 _EnterCombat();
                 events.ScheduleEvent(EVENT_FROST_ATTACK, urand(7000, 10000));
@@ -82,18 +82,18 @@ class boss_nethermancer_sepethrea : public CreatureScript
                 Talk(SAY_SUMMON);
             }
 
-            void KilledUnit(Unit* /*victim*/) override
+            void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
                 Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 _JustDied();
                 Talk(SAY_DEATH);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -138,7 +138,7 @@ class boss_nethermancer_sepethrea : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_nethermancer_sepethreaAI(creature);
         }
@@ -164,7 +164,7 @@ class npc_ragin_flames : public CreatureScript
 
                 bool onlyonce;
 
-                void Reset() override
+                void Reset() OVERRIDE
                 {
                     inferno_Timer = 10000;
                     flame_timer = 500;
@@ -175,11 +175,11 @@ class npc_ragin_flames : public CreatureScript
                     me->SetSpeed(MOVE_RUN, DUNGEON_MODE(0.5f, 0.7f));
                 }
 
-                void EnterCombat(Unit* /*who*/) override
+                void EnterCombat(Unit* /*who*/) OVERRIDE
                 {
                 }
 
-                void UpdateAI(uint32 diff) override
+                void UpdateAI(uint32 diff) OVERRIDE
                 {
                     //Check_Timer
                     if (Check_Timer <= diff)
@@ -223,7 +223,7 @@ class npc_ragin_flames : public CreatureScript
                 }
 
             };
-            CreatureAI* GetAI(Creature* creature) const override
+            CreatureAI* GetAI(Creature* creature) const OVERRIDE
             {
                 return new npc_ragin_flamesAI(creature);
             }

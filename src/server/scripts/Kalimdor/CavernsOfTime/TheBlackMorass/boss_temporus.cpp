@@ -61,9 +61,9 @@ public:
     {
         boss_temporusAI(Creature* creature) : BossAI(creature, TYPE_TEMPORUS) { }
 
-        void Reset() override { }
+        void Reset() OVERRIDE { }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             events.ScheduleEvent(EVENT_HASTE, urand(15000, 23000));
             events.ScheduleEvent(EVENT_MORTAL_WOUND, 8000);
@@ -74,12 +74,12 @@ public:
             Talk(SAY_AGGRO);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -87,7 +87,7 @@ public:
                 instance->SetData(TYPE_RIFT, SPECIAL);
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) OVERRIDE
 
         {
             //Despawn Time Keeper
@@ -104,7 +104,7 @@ public:
             ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -143,7 +143,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_temporusAI(creature);
     }

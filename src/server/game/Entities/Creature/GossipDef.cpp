@@ -1,21 +1,21 @@
 /*
- * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
+* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 3 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "QuestDef.h"
 #include "GossipDef.h"
@@ -57,23 +57,23 @@ void GossipMenu::AddMenuItem(int32 menuItemId, uint8 icon, std::string const& me
 
     GossipMenuItem& menuItem = _menuItems[menuItemId];
 
-    menuItem.MenuItemIcon    = icon;
-    menuItem.Message         = message;
-    menuItem.IsCoded         = coded;
-    menuItem.Sender          = sender;
-    menuItem.OptionType      = action;
-    menuItem.BoxMessage      = boxMessage;
-    menuItem.BoxMoney        = boxMoney;
+    menuItem.MenuItemIcon = icon;
+    menuItem.Message = message;
+    menuItem.IsCoded = coded;
+    menuItem.Sender = sender;
+    menuItem.OptionType = action;
+    menuItem.BoxMessage = boxMessage;
+    menuItem.BoxMoney = boxMoney;
 }
 
 /**
- * @name AddMenuItem
- * @brief Adds a localized gossip menu item from db by menu id and menu item id.
- * @param menuId Gossip menu id.
- * @param menuItemId Gossip menu item id.
- * @param sender Identifier of the current menu.
- * @param action Custom action given to OnGossipHello.
- */
+* @name AddMenuItem
+* @brief Adds a localized gossip menu item from db by menu id and menu item id.
+* @param menuId Gossip menu id.
+* @param menuItemId Gossip menu item id.
+* @param sender Identifier of the current menu.
+* @param action Custom action given to OnGossipHello.
+*/
 void GossipMenu::AddMenuItem(uint32 menuId, uint32 menuItemId, uint32 sender, uint32 action)
 {
     /// Find items for given menu id.
@@ -98,9 +98,9 @@ void GossipMenu::AddMenuItem(uint32 menuId, uint32 menuItemId, uint32 sender, ui
             /// Find localizations from database.
             if (GossipMenuItemsLocale const* no = sObjectMgr->GetGossipMenuItemsLocale(MAKE_PAIR32(menuId, menuItemId)))
             {
-                /// Translate texts if there are any.
-                ObjectMgr::GetLocaleString(no->OptionText, GetLocale(), strOptionText);
-                ObjectMgr::GetLocaleString(no->BoxText, GetLocale(), strBoxText);
+            /// Translate texts if there are any.
+            ObjectMgr::GetLocaleString(no->OptionText, GetLocale(), strOptionText);
+            ObjectMgr::GetLocaleString(no->BoxText, GetLocale(), strBoxText);
             }
 
         /// Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
@@ -112,8 +112,8 @@ void GossipMenu::AddGossipMenuItemData(uint32 menuItemId, uint32 gossipActionMen
 {
     GossipMenuItemData& itemData = _menuItemData[menuItemId];
 
-    itemData.GossipActionMenuId  = gossipActionMenuId;
-    itemData.GossipActionPoi     = gossipActionPoi;
+    itemData.GossipActionMenuId = gossipActionMenuId;
+    itemData.GossipActionPoi = gossipActionPoi;
 }
 
 uint32 GossipMenu::GetMenuItemSender(uint32 menuItemId) const
@@ -186,8 +186,8 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
 
         int32 locale = _session->GetSessionDbLocaleIndex();
         if (locale >= 0)
-        if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(questId))
-            ObjectMgr::GetLocaleString(localeData->Title, locale, title);
+            if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(questId))
+                ObjectMgr::GetLocaleString(localeData->Title, locale, title);
 
         if (questLevelInTitle)
             AddQuestLevelToTitle(title, quest->GetQuestLevel());
@@ -314,8 +314,8 @@ void QuestMenu::AddMenuItem(uint32 QuestId, uint8 Icon)
 
     QuestMenuItem questMenuItem;
 
-    questMenuItem.QuestId        = QuestId;
-    questMenuItem.QuestIcon      = Icon;
+    questMenuItem.QuestId = QuestId;
+    questMenuItem.QuestIcon = Icon;
 
     _questMenuItems.push_back(questMenuItem);
 }
@@ -440,13 +440,13 @@ void PlayerMenu::SendQuestGiverStatus(uint32 questStatus, uint64 npcGUID) const
 
 void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, bool activateAccept) const
 {
-    std::string questTitle           = quest->GetTitle();
-    std::string questDetails         = quest->GetDetails();
-    std::string questObjectives      = quest->GetObjectives();
+    std::string questTitle = quest->GetTitle();
+    std::string questDetails = quest->GetDetails();
+    std::string questObjectives = quest->GetObjectives();
     std::string questGiverTextWindow = quest->GetQuestGiverTextWindow();
     std::string questGiverTargetName = quest->GetQuestGiverTargetName();
-    std::string questTurnTextWindow  = quest->GetQuestTurnTextWindow();
-    std::string questTurnTargetName  = quest->GetQuestTurnTargetName();
+    std::string questTurnTextWindow = quest->GetQuestTurnTextWindow();
+    std::string questTurnTargetName = quest->GetQuestTurnTargetName();
 
     int32 locale = _session->GetSessionDbLocaleIndex();
     if (locale >= 0)
@@ -467,12 +467,12 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
         AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
 
     /*
-     *  -- Objective Structure --
-     *  uint32 - objective count (value required to complete objective)
-     *  uint32 - objective Id (NPC, GO, item, spell, currency or faction Id)
-     *  uint8  - objective type (see QuestObjectiveType enum)
-     *  uint32 - unknown
-     */
+    *  -- Objective Structure --
+    *  uint32 - objective count (value required to complete objective)
+    *  uint32 - objective Id (NPC, GO, item, spell, currency or faction Id)
+    *  uint8  - objective type (see QuestObjectiveType enum)
+    *  uint32 - unknown
+    */
 
     ByteBuffer objData;
     int objCount = 0;
@@ -710,19 +710,19 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     data.WriteByteSeq(guid2[4]);
 
     /*for (uint i = 0; i < unkCounterBits22; i++)
-        data << uint32(0);*/
+    data << uint32(0);*/
 
     _session->SendPacket(&data);
 
     /*
-     *  -- Missing Values from Cata could be an unknown --
-     *  activateAccept (auto finish)
-     *  quest->GetQuestGiverPortrait()
-     *  quest->GetQuestTurnInPortrait()
-     *  GetRewSpellCast()
-     *  GetRewardSkillId()
-     *  GetRewardSkillPoints()
-     */
+    *  -- Missing Values from Cata could be an unknown --
+    *  activateAccept (auto finish)
+    *  quest->GetQuestGiverPortrait()
+    *  quest->GetQuestTurnInPortrait()
+    *  GetRewSpellCast()
+    *  GetRewardSkillId()
+    *  GetRewardSkillPoints()
+    */
 
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u", GUID_LOPART(npcGUID), quest->GetQuestId());
 }
@@ -784,19 +784,19 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data.WriteBits(questObjectives.size(), 12);
 
     /*
-     *  -- Objective Structure --
-     *  -- Bits --
-     *  bits22 - unknown counter
-     *  bits8  - objective text length
-     *  -- Bytes --
-     *  uint32 - unknown
-     *  string - objective text (WoW string, not null terminated and no length prefix)
-     *  uint8  - objective type (see QuestObjectiveType enum)
-     *  uint8  - objective index
-     *  int32  - objective count (value required to complete objective)
-     *  uint   - unknown
-     *  uint   - objective Id (NPC, GO, item, spell, currency or faction Id)
-     */
+    *  -- Objective Structure --
+    *  -- Bits --
+    *  bits22 - unknown counter
+    *  bits8  - objective text length
+    *  -- Bytes --
+    *  uint32 - unknown
+    *  string - objective text (WoW string, not null terminated and no length prefix)
+    *  uint8  - objective type (see QuestObjectiveType enum)
+    *  uint8  - objective index
+    *  int32  - objective count (value required to complete objective)
+    *  uint   - unknown
+    *  uint   - objective Id (NPC, GO, item, spell, currency or faction Id)
+    */
 
     ByteBuffer objData;
     uint8 objCount = 0;
@@ -1027,11 +1027,11 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << uint32(quest->GetSrcItemId());                                  // source item id
 
     /*
-     *  -- Missing Values from Cata could be an unknown --
-     *  quest->GetMinimapTargetMark()
-     *  quest->GetRewArenaPoints()
-     *  quest->GetSrcItemCount()
-     */
+    *  -- Missing Values from Cata could be an unknown --
+    *  quest->GetMinimapTargetMark()
+    *  quest->GetRewArenaPoints()
+    *  quest->GetSrcItemCount()
+    */
 
     _session->SendPacket(&data);
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u", quest->GetQuestId());
@@ -1205,11 +1205,11 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGUID, b
     _session->SendPacket(&data);
 
     /*
-     *  -- Missing Values from Cata could be an unknown --
-     *  quest->GetQuestGiverPortrait()
-     *  quest->GetQuestTurnInPortrait()
-     *  quest->GetSuggestedPlayers())
-     */
+    *  -- Missing Values from Cata could be an unknown --
+    *  quest->GetQuestGiverPortrait()
+    *  quest->GetQuestTurnInPortrait()
+    *  quest->GetSuggestedPlayers())
+    */
 
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u", GUID_LOPART(npcGUID), quest->GetQuestId());
 }

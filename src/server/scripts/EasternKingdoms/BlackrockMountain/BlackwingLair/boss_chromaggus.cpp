@@ -175,7 +175,7 @@ public:
             EnterEvadeMode();
         }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _Reset();
 
@@ -183,7 +183,7 @@ public:
             Enraged = false;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             if (instance && instance->GetBossState(BOSS_FLAMEGOR) != DONE)
             {
@@ -199,7 +199,7 @@ public:
             events.ScheduleEvent(EVENT_FRENZY, 15000);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -282,7 +282,7 @@ public:
         bool Enraged;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_chromaggusAI(creature);
     }

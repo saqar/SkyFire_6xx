@@ -78,7 +78,7 @@ public:
     {
         instance_halls_of_reflection_InstanceMapScript(Map* map) : InstanceScript(map) { }
 
-        void Initialize() override
+        void Initialize() OVERRIDE
         {
             SetBossNumber(MAX_ENCOUNTER);
             events.Reset();
@@ -105,13 +105,13 @@ public:
             _mobsaticewall = 0;
         }
 
-        void OnPlayerEnter(Player* player) override
+        void OnPlayerEnter(Player* player) OVERRIDE
         {
             if (!_teamInInstance)
                 _teamInInstance = player->GetTeam();
         }
 
-        void OnCreatureCreate(Creature* creature) override
+        void OnCreatureCreate(Creature* creature) OVERRIDE
         {
             Map::PlayerList const& players = instance->GetPlayers();
             if (!players.isEmpty())
@@ -143,7 +143,7 @@ public:
             }
         }
 
-        void OnCreatureRemove(Creature* creature) override
+        void OnCreatureRemove(Creature* creature) OVERRIDE
         {
             switch (creature->GetEntry())
             {
@@ -160,7 +160,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) override
+        void OnGameObjectCreate(GameObject* go) OVERRIDE
         {
             switch (go->GetEntry())
             {
@@ -199,13 +199,13 @@ public:
             }
         }
 
-        void FillInitialWorldStates(WorldStateBuilder& builder) override
+        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE
         {
             builder.AppendState(WORLD_STATE_HOR_WAVES_ENABLED, 0);
             builder.AppendState(WORLD_STATE_HOR_WAVE_COUNT, 0);
         }
 
-        bool SetBossState(uint32 type, EncounterState state) override
+        bool SetBossState(uint32 type, EncounterState state) OVERRIDE
         {
             if (!InstanceScript::SetBossState(type, state))
                 return false;
@@ -237,7 +237,7 @@ public:
             return true;
         }
 
-        void SetData(uint32 type, uint32 data) override
+        void SetData(uint32 type, uint32 data) OVERRIDE
         {
             switch (type)
             {
@@ -308,7 +308,7 @@ public:
 
 
         // wave scheduling,checked when wave npcs die
-        void OnUnitDeath(Unit* unit) override
+        void OnUnitDeath(Unit* unit) OVERRIDE
         {
             Creature* creature = unit->ToCreature();
             if (!creature)
@@ -342,7 +342,7 @@ public:
             }
         }
 
-        void Update(uint32 diff) override
+        void Update(uint32 diff) OVERRIDE
         {
             if (!instance->HavePlayers())
                 return;
@@ -357,7 +357,7 @@ public:
             }
         }
 
-        void ProcessEvent(WorldObject* /*go*/, uint32 eventId) override
+        void ProcessEvent(WorldObject* /*go*/, uint32 eventId) OVERRIDE
         {
             switch (eventId)
             {
@@ -461,7 +461,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 type) const override
+        uint32 GetData(uint32 type) const OVERRIDE
         {
             switch (type)
             {
@@ -484,7 +484,7 @@ public:
             return 0;
         }
 
-        uint64 GetData64(uint32 type) const override
+        uint64 GetData64(uint32 type) const OVERRIDE
         {
             switch (type)
             {
@@ -509,7 +509,7 @@ public:
             return 0;
         }
 
-        std::string GetSaveData() override
+        std::string GetSaveData() OVERRIDE
         {
             OUT_SAVE_INST_DATA;
 
@@ -520,7 +520,7 @@ public:
             return saveStream.str();
         }
 
-        void Load(char const* in) override
+        void Load(char const* in) OVERRIDE OVERRIDE
         {
             if (!in)
             {
@@ -599,7 +599,7 @@ public:
         std::set<uint64> waveGuidList[8];
     };
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_halls_of_reflection_InstanceMapScript(map);
     }

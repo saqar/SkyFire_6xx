@@ -86,7 +86,7 @@ class boss_shade_of_aran : public CreatureScript
 public:
     boss_shade_of_aran() : CreatureScript("boss_shade_of_aran") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_aranAI(creature);
     }
@@ -125,7 +125,7 @@ public:
         bool Drinking;
         bool DrinkInturrupted;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             SecondarySpellTimer = 5000;
             NormalCastTimer = 0;
@@ -157,12 +157,12 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_KILL);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -173,7 +173,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -219,7 +219,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -480,13 +480,13 @@ public:
                 DoMeleeAttackIfReady();
         }
 
-        void DamageTaken(Unit* /*pAttacker*/, uint32 &damage) override
+        void DamageTaken(Unit* /*pAttacker*/, uint32 &damage) OVERRIDE
         {
             if (!DrinkInturrupted && Drinking && damage)
                 DrinkInturrupted = true;
         }
 
-        void SpellHit(Unit* /*pAttacker*/, const SpellInfo* Spell) override
+        void SpellHit(Unit* /*pAttacker*/, const SpellInfo* Spell) OVERRIDE
         {
             //We only care about interrupt effects and only if they are durring a spell currently being casted
             if ((Spell->Effects[0].Effect != SPELL_EFFECT_INTERRUPT_CAST &&
@@ -515,7 +515,7 @@ class npc_aran_elemental : public CreatureScript
 public:
     npc_aran_elemental() : CreatureScript("npc_aran_elemental") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new water_elementalAI(creature);
     }
@@ -526,14 +526,14 @@ public:
 
         uint32 CastTimer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             CastTimer = 2000 + (rand()%3000);
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

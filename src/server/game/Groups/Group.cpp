@@ -2447,7 +2447,7 @@ bool Group::IsFull() const
 
 bool Group::isLFGGroup() const
 {
-    return (m_groupType & GROUPTYPE_LFG) != 0;
+    return m_groupType & GROUPTYPE_LFG;
 }
 
 bool Group::isRaidGroup() const

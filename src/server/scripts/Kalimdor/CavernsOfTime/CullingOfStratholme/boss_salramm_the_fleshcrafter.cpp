@@ -57,7 +57,7 @@ class boss_salramm : public CreatureScript
 public:
     boss_salramm() : CreatureScript("boss_salramm") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_salrammAI(creature);
     }
@@ -79,7 +79,7 @@ public:
 
         InstanceScript* instance;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
              uiCurseFleshTimer = 30000;  //30s DBM
              uiExplodeGhoulTimer = urand(25000, 28000); //approx 6 sec after summon ghouls
@@ -91,7 +91,7 @@ public:
                  instance->SetData(DATA_SALRAMM_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
 
@@ -99,7 +99,7 @@ public:
                  instance->SetData(DATA_SALRAMM_EVENT, IN_PROGRESS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())
@@ -141,7 +141,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
 
@@ -149,7 +149,7 @@ public:
                 instance->SetData(DATA_SALRAMM_EVENT, DONE);
         }
 
-        void KilledUnit(Unit* victim) override
+        void KilledUnit(Unit* victim) OVERRIDE
         {
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 return;

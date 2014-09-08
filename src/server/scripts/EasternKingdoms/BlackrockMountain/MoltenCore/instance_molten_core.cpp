@@ -81,7 +81,7 @@ class instance_molten_core : public InstanceMapScript
                 }
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) OVERRIDE
             {
                 switch (creature->GetEntry())
                 {
@@ -96,7 +96,7 @@ class instance_molten_core : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            void OnGameObjectCreate(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -108,7 +108,7 @@ class instance_molten_core : public InstanceMapScript
                 }
             }
 
-            void SetData(uint32 type, uint32 data) override
+            void SetData(uint32 type, uint32 data) OVERRIDE
             {
                 if (type == DATA_RAGNAROS_ADDS)
                 {
@@ -119,7 +119,7 @@ class instance_molten_core : public InstanceMapScript
                 }
             }
 
-            uint32 GetData(uint32 type) const override
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -130,7 +130,7 @@ class instance_molten_core : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 type) const override
+            uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -185,7 +185,7 @@ class instance_molten_core : public InstanceMapScript
                         summon->AI()->DoAction(ACTION_START_RAGNAROS_ALT);
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
 
@@ -254,7 +254,7 @@ class instance_molten_core : public InstanceMapScript
             bool _summonedExecutus;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_molten_core_InstanceMapScript(map);
         }

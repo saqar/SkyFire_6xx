@@ -70,7 +70,7 @@ class boss_ordos : public CreatureScript
             {
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _events.ScheduleEvent(EVENT_MAGMA_CRUSH, urand(10000, 13000)); // 10-13
                 
@@ -81,23 +81,23 @@ class boss_ordos : public CreatureScript
                 _events.ScheduleEvent(EVENT_POOL_OF_FIRE, urand(30000, 45000)); // 30-40
             }
 
-            void KilledUnit(Unit* victim) override
+            void KilledUnit(Unit* victim) OVERRIDE
             {
                 Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Talk(SAY_DEATH);
             }
     
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _events.ScheduleEvent(EVENT_ETERNAL_AGONY, 300000); // ENRAGE SPELL AFTER 5 MINUTES
                 Talk(SAY_AGGRO);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -146,7 +146,7 @@ class boss_ordos : public CreatureScript
                 EventMap _events;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return new boss_ordosAI(creature);
         }

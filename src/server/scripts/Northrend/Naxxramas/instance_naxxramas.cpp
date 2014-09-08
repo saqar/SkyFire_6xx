@@ -134,7 +134,7 @@ class instance_naxxramas : public InstanceMapScript
                 memset(PortalsGUID, 0, sizeof(PortalsGUID));
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) OVERRIDE
             {
                 switch (creature->GetEntry())
                 {
@@ -178,12 +178,12 @@ class instance_naxxramas : public InstanceMapScript
                 AddMinion(creature, true);
             }
 
-            void OnCreatureRemove(Creature* creature) override
+            void OnCreatureRemove(Creature* creature) OVERRIDE
             {
                 AddMinion(creature, false);
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            void OnGameObjectCreate(GameObject* go) OVERRIDE
             {
                 if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
                 {
@@ -223,7 +223,7 @@ class instance_naxxramas : public InstanceMapScript
                 AddDoor(go, true);
             }
 
-            void OnGameObjectRemove(GameObject* go) override
+            void OnGameObjectRemove(GameObject* go) OVERRIDE
             {
                 if (go->GetGOInfo()->displayId == 6785 || go->GetGOInfo()->displayId == 1287)
                 {
@@ -250,7 +250,7 @@ class instance_naxxramas : public InstanceMapScript
                 AddDoor(go, false);
             }
 
-            void OnUnitDeath(Unit* unit) override
+            void OnUnitDeath(Unit* unit) OVERRIDE
             {
                 if (unit->GetTypeId() == TYPEID_PLAYER && IsEncounterInProgress())
                 {
@@ -259,7 +259,7 @@ class instance_naxxramas : public InstanceMapScript
                 }
             }
 
-            void SetData(uint32 id, uint32 value) override
+            void SetData(uint32 id, uint32 value) OVERRIDE
             {
                 switch (id)
                 {
@@ -295,7 +295,7 @@ class instance_naxxramas : public InstanceMapScript
                 }
             }
 
-            uint32 GetData(uint32 id) const override
+            uint32 GetData(uint32 id) const OVERRIDE
             {
                 switch (id)
                 {
@@ -308,7 +308,7 @@ class instance_naxxramas : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 id) const override
+            uint64 GetData64(uint32 id) const OVERRIDE
             {
                 switch (id)
                 {
@@ -347,7 +347,7 @@ class instance_naxxramas : public InstanceMapScript
                 return 0;
             }
 
-            bool SetBossState(uint32 id, EncounterState state) override
+            bool SetBossState(uint32 id, EncounterState state) OVERRIDE
             {
                 if (!InstanceScript::SetBossState(id, state))
                     return false;
@@ -430,7 +430,7 @@ class instance_naxxramas : public InstanceMapScript
                 return false;
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
 
@@ -441,7 +441,7 @@ class instance_naxxramas : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* strIn) override
+            void Load(const char* strIn) OVERRIDE
             {
                 if (!strIn)
                 {
@@ -516,7 +516,7 @@ class instance_naxxramas : public InstanceMapScript
             uint32 playerDied;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_naxxramas_InstanceMapScript(map);
         }

@@ -22,54 +22,42 @@
 #include "utf8.h"
 #include "SFMT.h"
 #include "Errors.h" // for ASSERT
-#include <boost/thread/tss.hpp>
+#include <ace/TSS_T.h>
 
-static boost::thread_specific_ptr<SFMTRand> sfmtRand;
-
-static SFMTRand* GetRng()
-{
-    SFMTRand* rand = sfmtRand.get();
-
-    if (!rand)
-    {
-        rand = new SFMTRand();
-        sfmtRand.reset(rand);
-    }
-
-    return rand;
-}
+typedef ACE_TSS<SFMTRand> SFMTRandTSS;
+static SFMTRandTSS sfmtRand;
 
 int32 irand(int32 min, int32 max)
 {
     ASSERT(max >= min);
-    return int32(GetRng()->IRandom(min, max));
+    return int32(sfmtRand->IRandom(min, max));
 }
 
 uint32 urand(uint32 min, uint32 max)
 {
     ASSERT(max >= min);
-    return GetRng()->URandom(min, max);
+    return sfmtRand->URandom(min, max);
 }
 
 float frand(float min, float max)
 {
     ASSERT(max >= min);
-    return float(GetRng()->Random() * (max - min) + min);
+    return float(sfmtRand->Random() * (max - min) + min);
 }
 
 int32 rand32()
 {
-    return int32(GetRng()->BRandom());
+    return int32(sfmtRand->BRandom());
 }
 
 double rand_norm(void)
 {
-    return GetRng()->Random();
+    return sfmtRand->Random();
 }
 
 double rand_chance(void)
 {
-    return GetRng()->Random() * 100.0;
+    return sfmtRand->Random() * 100.0;
 }
 
 Tokenizer::Tokenizer(const std::string &src, const char sep, uint32 vectorReserve)
@@ -138,16 +126,6 @@ void stripLineInvisibleChars(std::string &str)
     if (str.find("|TInterface")!=std::string::npos)
         str.clear();
 
-}
-
-struct tm* localtime_r(const time_t* time, struct tm *result)
-{
-    #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
-    localtime_s(result, time);
-    return result;
-#else
-    return localtime_r(&time, &result); // POSIX
-#endif
 }
 
 std::string secsToTimeString(uint64 timeInSecs, bool shortText, bool hoursOnly)
@@ -239,7 +217,7 @@ uint32 TimeStringToSecs(const std::string& timestring)
 std::string TimeToTimestampStr(time_t t)
 {
     tm aTm;
-    localtime_r(&t, &aTm);
+    ACE_OS::localtime_r(&t, &aTm);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
@@ -260,6 +238,21 @@ bool IsIPAddress(char const* ipaddress)
     // Let the big boys do it.
     // Drawback: all valid ip address formats are recognized e.g.: 12.23, 121234, 0xABCD)
     return inet_addr(ipaddress) != INADDR_NONE;
+}
+
+std::string GetAddressString(ACE_INET_Addr const& addr)
+{
+    char buf[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 16];
+    addr.addr_to_string(buf, ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 16);
+    return buf;
+}
+
+bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask)
+{
+    uint32 mask = subnetMask.get_ip_address();
+    if ((net.get_ip_address() & mask) == (addr.get_ip_address() & mask))
+        return true;
+    return false;
 }
 
 /// create PID file
@@ -549,7 +542,7 @@ std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse 
     if (reverse)
     {
         init = arrayLen - 1;
-        end = -2;
+        end = -1;
         op = -1;
     }
 
@@ -562,29 +555,4 @@ std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse 
     }
 
     return ss.str();
-}
-
-void HexStrToByteArray(std::string const& str, uint8* out, bool reverse /*= false*/)
-{
-    // string must have even number of characters
-    if (str.length() & 1)
-        return;
-
-    int32 init = 0;
-    int32 end = str.length();
-    int8 op = 1;
-
-    if (reverse)
-    {
-        init = str.length() - 2;
-        end = -2;
-        op = -1;
-    }
-
-    uint32 j = 0;
-    for (int32 i = init; i != end; i += 2 * op)
-    {
-        char buffer[3] = { str[i], str[i + 1], '\0' };
-        out[j++] = strtoul(buffer, NULL, 16);
-    }
 }

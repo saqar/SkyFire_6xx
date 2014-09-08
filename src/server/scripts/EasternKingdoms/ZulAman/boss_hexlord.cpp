@@ -54,30 +54,30 @@ class boss_hexlord_malacrass : public CreatureScript
         {
             boss_hex_lord_malacrassAI(Creature* creature) : BossAI(creature, DATA_HEXLORD) { }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 _Reset();
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 Talk(SAY_AGGRO);
                 _EnterCombat();
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 Talk(SAY_DEATH);
                 _JustDied();
             }
 
-            void KilledUnit(Unit* victim) override
+            void KilledUnit(Unit* victim) OVERRIDE
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_PLAYER_KILL);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -101,7 +101,7 @@ class boss_hexlord_malacrass : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetZulAmanAI<boss_hex_lord_malacrassAI>(creature);
         }
@@ -116,7 +116,7 @@ class spell_hexlord_unstable_affliction : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hexlord_unstable_affliction_AuraScript);
 
-            bool Validate(SpellInfo const* /*spell*/) override
+            bool Validate(SpellInfo const* /*spell*/) OVERRIDE
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WL_UNSTABLE_AFFL_DISPEL))
                     return false;
@@ -129,13 +129,13 @@ class spell_hexlord_unstable_affliction : public SpellScriptLoader
                     caster->CastSpell(dispelInfo->GetDispeller(), SPELL_WL_UNSTABLE_AFFL_DISPEL, true, NULL, GetEffect(EFFECT_0));
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 AfterDispel += AuraDispelFn(spell_hexlord_unstable_affliction_AuraScript::HandleDispel);
             }
         };
 
-        AuraScript* GetAuraScript() const override
+        AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_hexlord_unstable_affliction_AuraScript();
         }

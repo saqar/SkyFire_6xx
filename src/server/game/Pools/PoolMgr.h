@@ -21,6 +21,7 @@
 #define TRINITY_POOLHANDLER_H
 
 #include "Define.h"
+#include <ace/Singleton.h>
 #include "Creature.h"
 #include "GameObject.h"
 #include "QuestDef.h"
@@ -104,17 +105,13 @@ typedef std::pair<PooledQuestRelation::iterator, PooledQuestRelation::iterator> 
 
 class PoolMgr
 {
+    friend class ACE_Singleton<PoolMgr, ACE_Null_Mutex>;
+
     private:
         PoolMgr();
         ~PoolMgr() { };
 
     public:
-        static PoolMgr* instance()
-        {
-            static PoolMgr instance;
-            return &instance;
-        }
-
         void LoadFromDB();
         void LoadQuestPools();
         void SaveQuestsToDB();
@@ -168,7 +165,7 @@ class PoolMgr
         ActivePoolData mSpawnedData;
 };
 
-#define sPoolMgr PoolMgr::instance()
+#define sPoolMgr ACE_Singleton<PoolMgr, ACE_Null_Mutex>::instance()
 
 // Method that tell if the creature is part of a pool and return the pool id if yes
 template<>

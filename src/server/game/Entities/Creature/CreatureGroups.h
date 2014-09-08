@@ -37,17 +37,12 @@ struct FormationInfo
     uint16 point_2;
 };
 
-typedef std::unordered_map<uint32/*memberDBGUID*/, FormationInfo*>   CreatureGroupInfoType;
+typedef UNORDERED_MAP<uint32/*memberDBGUID*/, FormationInfo*>   CreatureGroupInfoType;
 
 class FormationMgr
 {
+    friend class ACE_Singleton<FormationMgr, ACE_Null_Mutex>;
     public:
-        static FormationMgr* instance()
-        {
-            static FormationMgr* instance = new FormationMgr();
-            return instance;
-        }
-
         FormationMgr() { }
         ~FormationMgr();
         void AddCreatureToGroup(uint32 group_id, Creature* creature);
@@ -84,6 +79,6 @@ class CreatureGroup
         void MemberAttackStart(Creature* member, Unit* target);
 };
 
-#define sFormationMgr FormationMgr::instance()
+#define sFormationMgr ACE_Singleton<FormationMgr, ACE_Null_Mutex>::instance()
 
 #endif

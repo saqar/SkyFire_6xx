@@ -83,7 +83,7 @@ public:
         uint32 StatuesState;
         uint8 felCristalIndex;
 
-        void Initialize() override
+        void Initialize() OVERRIDE
         {
             memset(&Encounter, 0, sizeof(Encounter));
 
@@ -105,7 +105,7 @@ public:
             felCristalIndex = 0;
         }
 
-        bool IsEncounterInProgress() const override
+        bool IsEncounterInProgress() const OVERRIDE
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (Encounter[i] == IN_PROGRESS)
@@ -185,7 +185,7 @@ public:
             SaveToDB();
         }
 
-        void OnCreatureCreate(Creature* creature) override
+        void OnCreatureCreate(Creature* creature) OVERRIDE
         {
             switch (creature->GetEntry())
             {
@@ -201,7 +201,7 @@ public:
             }
         }
 
-        void OnGameObjectCreate(GameObject* go) override
+        void OnGameObjectCreate(GameObject* go) OVERRIDE
         {
             switch (go->GetEntry())
             {
@@ -232,7 +232,7 @@ public:
             }
         }
 
-        std::string GetSaveData() override
+        std::string GetSaveData() OVERRIDE
         {
             OUT_SAVE_INST_DATA;
 
@@ -243,7 +243,7 @@ public:
             return saveStream.str();
         }
 
-        void Load(const char* str) override
+        void Load(const char* str) OVERRIDE
         {
             if (!str)
             {
@@ -309,7 +309,7 @@ public:
         }
     };
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_magisters_terrace_InstanceMapScript(map);
     }

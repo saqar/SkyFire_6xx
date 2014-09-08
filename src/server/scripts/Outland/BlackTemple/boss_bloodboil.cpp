@@ -64,7 +64,7 @@ class boss_gurtogg_bloodboil : public CreatureScript
 public:
     boss_gurtogg_bloodboil() : CreatureScript("boss_gurtogg_bloodboil") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_gurtogg_bloodboilAI(creature);
     }
@@ -95,7 +95,7 @@ public:
 
         bool Phase1;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             if (instance)
                 instance->SetBossState(DATA_GURTOGG_BLOODBOIL, NOT_STARTED);
@@ -121,7 +121,7 @@ public:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             DoZoneInCombat();
             Talk(SAY_AGGRO);
@@ -129,12 +129,12 @@ public:
                 instance->SetBossState(DATA_GURTOGG_BLOODBOIL, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
                 instance->SetBossState(DATA_GURTOGG_BLOODBOIL, DONE);
@@ -198,7 +198,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;

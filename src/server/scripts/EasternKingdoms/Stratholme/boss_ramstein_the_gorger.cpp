@@ -45,7 +45,7 @@ class boss_ramstein_the_gorger : public CreatureScript
 public:
     boss_ramstein_the_gorger() : CreatureScript("boss_ramstein_the_gorger") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_ramstein_the_gorgerAI(creature);
     }
@@ -62,17 +62,17 @@ public:
         uint32 Trample_Timer;
         uint32 Knockout_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             Trample_Timer = 3000;
             Knockout_Timer = 12000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             for (uint8 i = 0; i < 30; ++i)
             {
@@ -84,7 +84,7 @@ public:
                 instance->SetData(TYPE_RAMSTEIN, DONE);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             //Return since we have no target
             if (!UpdateVictim())

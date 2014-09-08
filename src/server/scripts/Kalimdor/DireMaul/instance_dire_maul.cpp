@@ -33,7 +33,7 @@ class instance_dire_maul : public InstanceMapScript
 public:
     instance_dire_maul() : InstanceMapScript("instance_dire_maul", 429) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const override
+    InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_dire_maul_InstanceMapScript(map);
     }

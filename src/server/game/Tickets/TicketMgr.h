@@ -21,6 +21,8 @@
 #define _TICKETMGR_H
 
 #include <string>
+#include <ace/Singleton.h>
+
 #include "ObjectMgr.h"
 
 class ChatHandler;
@@ -172,17 +174,13 @@ typedef std::map<uint32, GmTicket*> GmTicketList;
 
 class TicketMgr
 {
+    friend class ACE_Singleton<TicketMgr, ACE_Null_Mutex>;
+
 private:
     TicketMgr();
     ~TicketMgr();
 
 public:
-    static TicketMgr* instance()
-    {
-        static TicketMgr instance;
-        return &instance;
-    }
-
     void LoadTickets();
     void LoadSurveys();
 
@@ -248,6 +246,6 @@ protected:
     uint64 _lastChange;
 };
 
-#define sTicketMgr TicketMgr::instance()
+#define sTicketMgr ACE_Singleton<TicketMgr, ACE_Null_Mutex>::instance()
 
 #endif // _TICKETMGR_H

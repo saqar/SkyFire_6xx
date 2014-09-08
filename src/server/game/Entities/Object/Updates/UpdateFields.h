@@ -82,7 +82,7 @@ enum EUnitFields
     UNIT_FIELD_SUMMONED_BY_HOME_REALM                        = OBJECT_END + 0x15, // Size: 1, Flags: UF_FLAG_PUBLIC
     UNIT_FIELD_SEX                                           = OBJECT_END + 0x16, // Size: 1, Flags: UF_FLAG_PUBLIC
     UNIT_FIELD_DISPLAY_POWER                                 = OBJECT_END + 0x17, // Size: 1, Flags: UF_FLAG_PUBLIC
-    UNIT_FIELD_override_DISPLAY_POWER_ID                     = OBJECT_END + 0x18, // Size: 1, Flags: UF_FLAG_PUBLIC
+    UNIT_FIELD_OVERRIDE_DISPLAY_POWER_ID                     = OBJECT_END + 0x18, // Size: 1, Flags: UF_FLAG_PUBLIC
     UNIT_FIELD_HEALTH                                        = OBJECT_END + 0x19, // Size: 1, Flags: UF_FLAG_PUBLIC
     UNIT_FIELD_POWER                                         = OBJECT_END + 0x1A, // Size: 5, Flags: UF_FLAG_PUBLIC
     UNIT_FIELD_MAX_HEALTH                                    = OBJECT_END + 0x1F, // Size: 1, Flags: UF_FLAG_PUBLIC
@@ -222,8 +222,8 @@ enum EPlayerFields
     PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS                      = UNIT_END + 0x69D, // Size: 3, Flags: UF_FLAG_PRIVATE
     PLAYER_FIELD_MOD_SPELL_POWER_PERCENT                     = UNIT_END + 0x6A0, // Size: 1, Flags: UF_FLAG_PRIVATE
     PLAYER_FIELD_MOD_RESILIENCE_PERCENT                      = UNIT_END + 0x6A1, // Size: 1, Flags: UF_FLAG_PRIVATE
-    PLAYER_FIELD_override_SPELL_POWER_BY_APPERCENT           = UNIT_END + 0x6A2, // Size: 1, Flags: UF_FLAG_PRIVATE
-    PLAYER_FIELD_override_APBY_SPELL_POWER_PERCENT           = UNIT_END + 0x6A3, // Size: 1, Flags: UF_FLAG_PRIVATE
+    PLAYER_FIELD_OVERRIDE_SPELL_POWER_BY_APPERCENT           = UNIT_END + 0x6A2, // Size: 1, Flags: UF_FLAG_PRIVATE
+    PLAYER_FIELD_OVERRIDE_APBY_SPELL_POWER_PERCENT           = UNIT_END + 0x6A3, // Size: 1, Flags: UF_FLAG_PRIVATE
     PLAYER_FIELD_MOD_TARGET_RESISTANCE                       = UNIT_END + 0x6A4, // Size: 1, Flags: UF_FLAG_PRIVATE
     PLAYER_FIELD_MOD_TARGET_PHYSICAL_RESISTANCE              = UNIT_END + 0x6A5, // Size: 1, Flags: UF_FLAG_PRIVATE
     PLAYER_FIELD_LIFETIME_MAX_RANK                           = UNIT_END + 0x6A6, // Size: 1, Flags: UF_FLAG_PRIVATE
@@ -250,10 +250,10 @@ enum EPlayerFields
     PLAYER_FIELD_HOME_REALM_TIME_OFFSET                      = UNIT_END + 0x71A, // Size: 1, Flags: UF_FLAG_PRIVATE
     PLAYER_FIELD_MOD_PET_HASTE                               = UNIT_END + 0x71B, // Size: 1, Flags: UF_FLAG_PRIVATE
     PLAYER_FIELD_SUMMONED_BATTLE_PET_GUID                    = UNIT_END + 0x71C, // Size: 2, Flags: UF_FLAG_PRIVATE
-    PLAYER_FIELD_override_SPELLS_ID                          = UNIT_END + 0x71E, // Size: 1, Flags: UF_FLAG_PRIVATE, UF_FLAG_URGENT_SELF_ONLY
+    PLAYER_FIELD_OVERRIDE_SPELLS_ID                          = UNIT_END + 0x71E, // Size: 1, Flags: UF_FLAG_PRIVATE, UF_FLAG_URGENT_SELF_ONLY
     PLAYER_FIELD_LFG_BONUS_FACTION_ID                        = UNIT_END + 0x71F, // Size: 1, Flags: UF_FLAG_PRIVATE
     PLAYER_FIELD_LOOT_SPEC_ID                                = UNIT_END + 0x720, // Size: 1, Flags: UF_FLAG_PRIVATE
-    PLAYER_FIELD_override_ZONE_PVPTYPE                       = UNIT_END + 0x721, // Size: 1, Flags: UF_FLAG_PRIVATE, UF_FLAG_URGENT_SELF_ONLY
+    PLAYER_FIELD_OVERRIDE_ZONE_PVPTYPE                       = UNIT_END + 0x721, // Size: 1, Flags: UF_FLAG_PRIVATE, UF_FLAG_URGENT_SELF_ONLY
     PLAYER_FIELD_ITEM_LEVEL_DELTA                            = UNIT_END + 0x722, // Size: 1, Flags: UF_FLAG_PRIVATE
     PLAYER_END                                               = UNIT_END + 0x723
 };

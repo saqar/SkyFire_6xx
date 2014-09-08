@@ -52,10 +52,17 @@ void MapManager::Initialize()
 {
     Map::InitStateMachine();
 
+    // debugging code, should be deleted some day
+    {
+        for (uint8 i = 0; i < MAX_GRID_STATE; ++i)
+             i_GridStates[i] = si_GridStates[i];
+
+        i_GridStateErrorCount = 0;
+    }
     int num_threads(sWorld->getIntConfig(CONFIG_NUMTHREADS));
     // Start mtmaps if needed.
-    if (num_threads > 0)
-        m_updater.activate(num_threads);
+    if (num_threads > 0 && m_updater.activate(num_threads) == -1)
+        abort();
 }
 
 void MapManager::InitializeVisibilityDistanceInfo()
@@ -95,7 +102,7 @@ Map* MapManager::CreateBaseMap(uint32 id)
 
     if (map == NULL)
     {
-        std::lock_guard<std::mutex> lock(Lock);
+        TRINITY_GUARD(ACE_Thread_Mutex, Lock);
 
         MapEntry const* entry = sMapStore.LookupEntry(id);
         ASSERT(entry);
@@ -329,7 +336,7 @@ void MapManager::UnloadAll()
 
 uint32 MapManager::GetNumInstances()
 {
-    std::lock_guard<std::mutex> lock(Lock);
+    TRINITY_GUARD(ACE_Thread_Mutex, Lock);
 
     uint32 ret = 0;
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
@@ -346,7 +353,7 @@ uint32 MapManager::GetNumInstances()
 
 uint32 MapManager::GetNumPlayersInInstances()
 {
-    std::lock_guard<std::mutex> lock(Lock);
+    TRINITY_GUARD(ACE_Thread_Mutex, Lock);
 
     uint32 ret = 0;
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)

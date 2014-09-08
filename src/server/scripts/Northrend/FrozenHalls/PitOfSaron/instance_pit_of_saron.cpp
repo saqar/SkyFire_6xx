@@ -56,13 +56,13 @@ class instance_pit_of_saron : public InstanceMapScript
                 _teamInInstance = 0;
             }
 
-            void OnPlayerEnter(Player* player) override
+            void OnPlayerEnter(Player* player) OVERRIDE
             {
                 if (!_teamInInstance)
                     _teamInInstance = player->GetTeam();
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) OVERRIDE
             {
                 if (!_teamInInstance)
                 {
@@ -167,7 +167,7 @@ class instance_pit_of_saron : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go) override
+            void OnGameObjectCreate(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -178,7 +178,7 @@ class instance_pit_of_saron : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectRemove(GameObject* go) override
+            void OnGameObjectRemove(GameObject* go) OVERRIDE
             {
                 switch (go->GetEntry())
                 {
@@ -189,7 +189,7 @@ class instance_pit_of_saron : public InstanceMapScript
                 }
             }
 
-            bool SetBossState(uint32 type, EncounterState state) override
+            bool SetBossState(uint32 type, EncounterState state) OVERRIDE
             {
                 if (!InstanceScript::SetBossState(type, state))
                     return false;
@@ -227,7 +227,7 @@ class instance_pit_of_saron : public InstanceMapScript
                 return true;
             }
 
-            uint32 GetData(uint32 type) const override
+            uint32 GetData(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -240,7 +240,7 @@ class instance_pit_of_saron : public InstanceMapScript
                 return 0;
             }
 
-            uint64 GetData64(uint32 type) const override
+            uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
                 {
@@ -267,7 +267,7 @@ class instance_pit_of_saron : public InstanceMapScript
                 return 0;
             }
 
-            std::string GetSaveData() override
+            std::string GetSaveData() OVERRIDE
             {
                 OUT_SAVE_INST_DATA;
 
@@ -278,7 +278,7 @@ class instance_pit_of_saron : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* in) override
+            void Load(const char* in) OVERRIDE
             {
                 if (!in)
                 {
@@ -325,7 +325,7 @@ class instance_pit_of_saron : public InstanceMapScript
             uint32 _teamInInstance;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
         {
             return new instance_pit_of_saron_InstanceScript(map);
         }

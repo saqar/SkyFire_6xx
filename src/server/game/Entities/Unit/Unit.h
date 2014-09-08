@@ -1057,7 +1057,7 @@ struct GlobalCooldown
     uint32 cast_time;
 };
 
-typedef std::unordered_map<uint32 /*category*/, GlobalCooldown> GlobalCooldownList;
+typedef UNORDERED_MAP<uint32 /*category*/, GlobalCooldown> GlobalCooldownList;
 
 class GlobalCooldownMgr                                     // Shared by Player and CharmInfo
 {
@@ -1345,18 +1345,18 @@ class Unit : public WorldObject
         void SendMeleeAttackStart(Unit* victim);
 
         void AddUnitState(uint32 f) { m_state |= f; }
-        bool HasUnitState(const uint32 f) const { return (m_state & f) != 0; }
+        bool HasUnitState(const uint32 f) const { return (m_state & f); }
         void ClearUnitState(uint32 f) { m_state &= ~f; }
         bool CanFreeMove() const;
 
         uint32 HasUnitTypeMask(uint32 mask) const { return mask & m_unitTypeMask; }
         void AddUnitTypeMask(uint32 mask) { m_unitTypeMask |= mask; }
-        bool IsSummon() const   { return (m_unitTypeMask & UNIT_MASK_SUMMON) != 0; }
-        bool IsGuardian() const { return (m_unitTypeMask & UNIT_MASK_GUARDIAN) != 0; }
-        bool IsPet() const      { return (m_unitTypeMask & UNIT_MASK_PET) != 0; }
-        bool IsHunterPet() const{ return (m_unitTypeMask & UNIT_MASK_HUNTER_PET) != 0; }
-        bool IsTotem() const    { return (m_unitTypeMask & UNIT_MASK_TOTEM) != 0; }
-        bool IsVehicle() const  { return (m_unitTypeMask & UNIT_MASK_VEHICLE) != 0; }
+        bool IsSummon() const   { return m_unitTypeMask & UNIT_MASK_SUMMON; }
+        bool IsGuardian() const { return m_unitTypeMask & UNIT_MASK_GUARDIAN; }
+        bool IsPet() const      { return m_unitTypeMask & UNIT_MASK_PET; }
+        bool IsHunterPet() const{ return m_unitTypeMask & UNIT_MASK_HUNTER_PET; }
+        bool IsTotem() const    { return m_unitTypeMask & UNIT_MASK_TOTEM; }
+        bool IsVehicle() const  { return m_unitTypeMask & UNIT_MASK_VEHICLE; }
 
         uint8 getLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }
         uint8 getLevelForTarget(WorldObject const* /*target*/) const { return getLevel(); }
@@ -2154,8 +2154,8 @@ class Unit : public WorldObject
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
 
         uint32 GetMovementCounter() const { return m_movementCounter; }
-        void SetAutoattackOverrideSpell(SpellInfo const* spellInfo) { m_OverrideAutoattackSpellInfo = spellInfo; }
-        void SetAutoattackOverrideRange(uint32 range) { m_OverrideAutoattackRange = range; }
+        void SetAutoattackOverrideSpell(SpellInfo const* spellInfo) { m_overrideAutoattackSpellInfo = spellInfo; }
+        void SetAutoattackOverrideRange(uint32 range) { m_overrideAutoattackRange = range; }
 
     protected:
         explicit Unit (bool isWorldObject);
@@ -2191,8 +2191,8 @@ class Unit : public WorldObject
         uint32 m_transform;
 
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
-        SpellInfo const* m_OverrideAutoattackSpellInfo;
-        uint32 m_OverrideAutoattackRange;
+        SpellInfo const* m_overrideAutoattackSpellInfo;
+        uint32 m_overrideAutoattackRange;
 
         AuraMap m_ownedAuras;
         AuraApplicationMap m_appliedAuras;

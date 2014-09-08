@@ -67,7 +67,7 @@ class boss_ambassador_hellmaw : public CreatureScript
                 _intro = false;
             }
 
-            void Reset() override
+            void Reset() OVERRIDE
             {
                 if (!me->IsAlive())
                     return;
@@ -83,7 +83,7 @@ class boss_ambassador_hellmaw : public CreatureScript
                 DoAction(ACTION_AMBASSADOR_HELLMAW_BANISH);
             }
 
-            void MoveInLineOfSight(Unit* who) override
+            void MoveInLineOfSight(Unit* who) OVERRIDE
             {
                 if (me->HasAura(SPELL_BANISH))
                     return;
@@ -91,7 +91,7 @@ class boss_ambassador_hellmaw : public CreatureScript
                 npc_escortAI::MoveInLineOfSight(who);
             }
 
-            void WaypointReached(uint32 /*waypointId*/) override
+            void WaypointReached(uint32 /*waypointId*/) OVERRIDE
             {
             }
 
@@ -120,25 +120,25 @@ class boss_ambassador_hellmaw : public CreatureScript
                 Start(true, false, 0, NULL, false, true);
             }
 
-            void EnterCombat(Unit* /*who*/) override
+            void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _instance->SetBossState(DATA_AMBASSADOR_HELLMAW, IN_PROGRESS);
                 Talk(SAY_AGGRO);
             }
 
-            void KilledUnit(Unit* who) override
+            void KilledUnit(Unit* who) OVERRIDE
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_SLAY);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 _instance->SetBossState(DATA_AMBASSADOR_HELLMAW, DONE);
                 Talk(SAY_DEATH);
             }
 
-            void UpdateEscortAI(uint32 const diff) override
+            void UpdateEscortAI(uint32 const diff) OVERRIDE
             {
                 if (!UpdateVictim())
                     return;
@@ -183,7 +183,7 @@ class boss_ambassador_hellmaw : public CreatureScript
             bool _intro;
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
         {
             return GetShadowLabyrinthAI<boss_ambassador_hellmawAI>(creature);
         }

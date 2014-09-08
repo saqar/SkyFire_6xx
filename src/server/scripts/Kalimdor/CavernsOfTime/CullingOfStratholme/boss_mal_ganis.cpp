@@ -67,7 +67,7 @@ class boss_mal_ganis : public CreatureScript
 public:
     boss_mal_ganis() : CreatureScript("boss_mal_ganis") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_mal_ganisAI(creature);
     }
@@ -94,7 +94,7 @@ public:
 
         InstanceScript* instance;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
              bYelled = false;
              bYelled2 = false;
@@ -109,20 +109,20 @@ public:
                  instance->SetData(DATA_MAL_GANIS_EVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
             if (instance)
                 instance->SetData(DATA_MAL_GANIS_EVENT, IN_PROGRESS);
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) override
+        void DamageTaken(Unit* done_by, uint32 &damage) OVERRIDE
         {
             if (damage >= me->GetHealth() && done_by != me)
                 damage = me->GetHealth()-1;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             switch (Phase)
             {
@@ -229,7 +229,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             if (instance)
             {
@@ -240,7 +240,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit* victim) override
+        void KilledUnit(Unit* victim) OVERRIDE
         {
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 return;

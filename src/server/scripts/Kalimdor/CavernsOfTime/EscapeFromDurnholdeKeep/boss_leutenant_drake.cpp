@@ -39,7 +39,7 @@ class go_barrel_old_hillsbrad : public GameObjectScript
 public:
     go_barrel_old_hillsbrad() : GameObjectScript("go_barrel_old_hillsbrad") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) override
+    bool OnGossipHello(Player* /*player*/, GameObject* go) OVERRIDE
     {
         if (InstanceScript* instance = go->GetInstanceScript())
         {
@@ -109,7 +109,7 @@ class boss_lieutenant_drake : public CreatureScript
 public:
     boss_lieutenant_drake() : CreatureScript("boss_lieutenant_drake") { }
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return new boss_lieutenant_drakeAI(creature);
     }
@@ -126,7 +126,7 @@ public:
         uint32 MortalStrike_Timer;
         uint32 ExplodingShout_Timer;
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             CanPatrol = true;
             wpId = 0;
@@ -137,22 +137,22 @@ public:
             ExplodingShout_Timer = 25000;
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
         }
 
-        void KilledUnit(Unit* /*victim*/) override
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
             Talk(SAY_SLAY);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             /// @todo make this work
             if (CanPatrol && wpId == 0)

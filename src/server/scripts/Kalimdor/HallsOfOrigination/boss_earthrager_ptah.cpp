@@ -125,7 +125,7 @@ public:
         }
 
         // Send packet to all players in Tomb of the Earthrager
-        void SendPacketToPlayers(WorldPacket* data) const
+        void SendPacketToPlayers(WorldPacket const* data) const
         {
             Map::PlayerList const& players = me->GetMap()->GetPlayers();
             if (!players.isEmpty())
@@ -135,7 +135,7 @@ public:
                             player->GetSession()->SendPacket(data);
         }
 
-        void Reset() override
+        void Reset() OVERRIDE
         {
             _summonDeaths = 0;
             _hasDispersed = false;
@@ -147,7 +147,7 @@ public:
             events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
         }
 
-        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
         {
             if (me->HealthBelowPctDamaged(50, damage) && (events.GetPhaseMask() & PHASE_MASK_NORMAL) && !_hasDispersed)
             {
@@ -181,7 +181,7 @@ public:
             }
         }
 
-        void SetData(uint32 index, uint32 /*value*/) override
+        void SetData(uint32 index, uint32 /*value*/) OVERRIDE
         {
             if (index == DATA_SUMMON_DEATHS)
             {
@@ -198,14 +198,14 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/) override
+        void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
             Talk(SAY_AGGRO);
             _EnterCombat();
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             Talk(SAY_DEATH);
@@ -213,14 +213,14 @@ public:
             Cleanup();
         }
 
-        void JustReachedHome() override
+        void JustReachedHome() OVERRIDE
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _JustReachedHome();
             instance->SetBossState(DATA_EARTHRAGER_PTAH, FAIL);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim() || !CheckInRoom())
                 return;
@@ -269,7 +269,7 @@ public:
         bool _hasDispersed;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
         return GetHallsOfOriginationAI<boss_earthrager_ptahAI>(creature);
     }
@@ -289,13 +289,13 @@ class spell_earthrager_ptah_flame_bolt : public SpellScriptLoader
                 Trinity::Containers::RandomResizeList(targets, GetCaster()->GetMap()->IsHeroic() ? 3 : 2);
             }
 
-            void Register() override
+            void Register() OVERRIDE
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_earthrager_ptah_flame_bolt_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_earthrager_ptah_flame_bolt_SpellScript();
         }

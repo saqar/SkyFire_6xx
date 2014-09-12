@@ -306,16 +306,15 @@ void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recvData*/)
 void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 {
     uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender, outfitId;
-
-    recvData >> outfitId >> hairStyle >> class_ >> skin;
-    recvData >> face >> race_ >> facialHair >> gender >> hairColor;
-
     uint32 nameLength = recvData.ReadBits(6);
     uint8 unk = recvData.ReadBit();
+
+    recvData >> race_ >> class_ >> gender >> skin;
+    recvData >> face >> hairStyle >> hairColor >> facialHair;
+
     std::string name = recvData.ReadString(nameLength);
 
-    if (unk)
-        recvData.read_skip<uint32>();
+    recvData.read_skip(1);
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 

@@ -37,7 +37,6 @@ void WorldPacketCrypt::Init(BigNumber* K)
     _clientDecrypt.Init(decryptHash);
     _serverEncrypt.Init(encryptHash);
 
-    // Drop first 1024 bytes, as WoW uses ARC4-drop1024.
     uint8 syncBuf[1024];
     memset(syncBuf, 0, 1024);
 

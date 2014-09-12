@@ -1,11 +1,9 @@
 /*
  * Copyright (C) 2011-2014 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 1 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -163,7 +161,6 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
     // Dump outgoing packet
     if (sPacketLog->CanLogPacket())
         sPacketLog->LogPacket(pct, SERVER_TO_CLIENT);
-    TC_LOG_DEBUG("network", "WORLD OF WARCRAFT - SERVER TO CLIENT");
 
     WorldPacket const* pkt = &pct;
 
@@ -771,7 +768,6 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     // Dump received packet.
     if (sPacketLog->CanLogPacket())
         sPacketLog->LogPacket(*new_pct, CLIENT_TO_SERVER);
-    TC_LOG_DEBUG("network", "WORLD OF WARCRAFT - CLIENT TO SERVER");
 
     std::string opcodeName = GetOpcodeNameForLogging(opcode, false);
     if (m_Session)

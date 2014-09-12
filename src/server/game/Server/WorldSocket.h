@@ -216,4 +216,3 @@ class WorldSocket : public WorldHandler
 #endif  /* _WORLDSOCKET_H */
 
 /// @}
-

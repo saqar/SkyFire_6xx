@@ -2102,86 +2102,25 @@ void Unit::SendMeleeAttackStart(Unit* victim)
     ObjectGuid attackerGuid = victim->GetGUID();
     ObjectGuid victimGuid = GetGUID();
 
-    data.WriteBit(victimGuid[7]);
-    data.WriteBit(attackerGuid[7]);
-    data.WriteBit(attackerGuid[3]);
-    data.WriteBit(victimGuid[3]);
-    data.WriteBit(victimGuid[5]);
-    data.WriteBit(attackerGuid[4]);
-    data.WriteBit(attackerGuid[1]);
-    data.WriteBit(victimGuid[4]);
-    data.WriteBit(attackerGuid[0]);
-    data.WriteBit(victimGuid[6]);
-    data.WriteBit(attackerGuid[5]);
-    data.WriteBit(victimGuid[2]);
-    data.WriteBit(attackerGuid[6]);
-    data.WriteBit(victimGuid[1]);
-    data.WriteBit(attackerGuid[2]);
-    data.WriteBit(victimGuid[0]);
-
-    data.WriteByteSeq(attackerGuid[5]);
-    data.WriteByteSeq(attackerGuid[0]);
-    data.WriteByteSeq(victimGuid[5]);
-    data.WriteByteSeq(attackerGuid[4]);
-    data.WriteByteSeq(attackerGuid[6]);
-    data.WriteByteSeq(victimGuid[6]);
-    data.WriteByteSeq(victimGuid[1]);
-    data.WriteByteSeq(victimGuid[0]);
-    data.WriteByteSeq(attackerGuid[7]);
-    data.WriteByteSeq(victimGuid[4]);
-    data.WriteByteSeq(attackerGuid[2]);
-    data.WriteByteSeq(victimGuid[3]);
-    data.WriteByteSeq(victimGuid[7]);
-    data.WriteByteSeq(victimGuid[2]);
-    data.WriteByteSeq(attackerGuid[3]);
-    data.WriteByteSeq(attackerGuid[1]);
+    data << attackerGuid;
+    data << victimGuid;
 
     SendMessageToSet(&data, true);
 }
 
 void Unit::SendMeleeAttackStop(Unit* victim)
 {
-    WorldPacket data(SMSG_ATTACKSTOP, 8 + 8);
+    WorldPacket data(SMSG_ATTACKSTOP, 1 + 2 + 2 + 16 + 16);
 
     ObjectGuid attackerGuid = GetGUID();
     ObjectGuid victimGuid = victim ? victim->GetGUID() : 0;
 
-    data.WriteBit(victimGuid[5]);
-    data.WriteBit(victimGuid[6]);
-    data.WriteBit(attackerGuid[3]);
-    data.WriteBit(attackerGuid[6]);
-    data.WriteBit(attackerGuid[7]);
-    data.WriteBit(attackerGuid[2]);
-    data.WriteBit(attackerGuid[5]);
-    data.WriteBit(victimGuid[4]);
+    data << attackerGuid;
+    data << victimGuid;
+    
     data.WriteBit(1);
-    data.WriteBit(victimGuid[3]);
-    data.WriteBit(victimGuid[0]);
-    data.WriteBit(victimGuid[2]);
-    data.WriteBit(victimGuid[7]);
-    data.WriteBit(attackerGuid[4]);
-    data.WriteBit(attackerGuid[1]);
-    data.WriteBit(attackerGuid[0]);
-    data.WriteBit(victimGuid[1]);
 
     data.FlushBits();
-
-    data.WriteByteSeq(victimGuid[0]);
-    data.WriteByteSeq(victimGuid[3]);
-    data.WriteByteSeq(victimGuid[5]);
-    data.WriteByteSeq(victimGuid[2]);
-    data.WriteByteSeq(attackerGuid[0]);
-    data.WriteByteSeq(attackerGuid[6]);
-    data.WriteByteSeq(attackerGuid[3]);
-    data.WriteByteSeq(victimGuid[4]);
-    data.WriteByteSeq(attackerGuid[1]);
-    data.WriteByteSeq(attackerGuid[4]);
-    data.WriteByteSeq(victimGuid[6]);
-    data.WriteByteSeq(attackerGuid[5]);
-    data.WriteByteSeq(attackerGuid[7]);
-    data.WriteByteSeq(attackerGuid[2]);
-    data.WriteByteSeq(victimGuid[1]);
-    data.WriteByteSeq(victimGuid[7]);
 
     SendMessageToSet(&data, true);
 }

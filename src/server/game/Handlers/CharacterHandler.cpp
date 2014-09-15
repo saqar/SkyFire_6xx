@@ -231,7 +231,6 @@ bool LoginQueryHolder::Initialize()
 void WorldSession::HandleCharEnum(PreparedQueryResult result)
 {
     uint32 charCount = 0;
-    ByteBuffer bitBuffer;
     ByteBuffer dataBuffer;
 
     if (result)
@@ -239,11 +238,15 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         _legitCharacters.clear();
 
         charCount = uint32(result->GetRowCount());
-        bitBuffer.reserve(24 * charCount / 8);
         dataBuffer.reserve(charCount * 381);
 
-        bitBuffer.WriteBits(0, 21); // factionChangeRestrictions - raceId / mask loop
-        bitBuffer.WriteBits(charCount, 16);
+        dataBuffer.WriteBit(1);
+        dataBuffer.WriteBit(0);
+        
+        dataBuffer.FlushBits();
+
+        dataBuffer << uint32(charCount);
+        dataBuffer << uint32(0);
 
         do
         {
@@ -251,7 +254,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             TC_LOG_INFO("network", "Loading char guid %u from account %u.", guidLow, GetAccountId());
 
-            Player::BuildEnumData(result, &dataBuffer, &bitBuffer);
+            Player::BuildEnumData(result, &dataBuffer);
 
             // Do not allow banned characters to log in
             if (!(*result)[20].GetUInt32())
@@ -259,30 +262,23 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             if (!sWorld->HasCharacterNameData(guidLow)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                 sWorld->AddCharacterNameData(guidLow, (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
-        }
-        while (result->NextRow());
-
-        bitBuffer.WriteBit(1); // Sucess
-        bitBuffer.FlushBits();
+        } while (result->NextRow());
     }
     else
     {
-        bitBuffer.WriteBits(0, 21);
-        bitBuffer.WriteBits(0, 16);
-        bitBuffer.WriteBit(1); // Success
-        bitBuffer.FlushBits();
+        dataBuffer.WriteBit(1); // Success
+        dataBuffer.WriteBit(0); // IsDeleted
+        dataBuffer.FlushBits();
+        dataBuffer << uint32(0);
+        dataBuffer << uint32(0);
     }
 
-    WorldPacket data(SMSG_CHAR_ENUM, 7 + bitBuffer.size() + dataBuffer.size());
+    WorldPacket data(SMSG_CHAR_ENUM, 7 + dataBuffer.size() + dataBuffer.size());
 
-    data.append(bitBuffer);
-
-    if (charCount)
-        data.append(dataBuffer);
+    data.append(dataBuffer);
 
     SendPacket(&data);
 }
-
 
 void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recvData*/)
 {
@@ -305,16 +301,15 @@ void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recvData*/)
 
 void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 {
-    uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender, outfitId;
+    uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender;
     uint32 nameLength = recvData.ReadBits(6);
     uint8 unk = recvData.ReadBit();
 
     recvData >> race_ >> class_ >> gender >> skin;
     recvData >> face >> hairStyle >> hairColor >> facialHair;
 
-    std::string name = recvData.ReadString(nameLength);
-
     recvData.read_skip(1);
+    std::string name = recvData.ReadString(nameLength);
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
@@ -449,7 +444,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
     }
 
     delete _charCreateCallback.GetParam();  // Delete existing if any, to make the callback chain reset to stage 0
-    _charCreateCallback.SetParam(new CharacterCreateInfo(name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId, recvData));
+    _charCreateCallback.SetParam(new CharacterCreateInfo(name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, recvData));
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHECK_NAME);
     stmt->setString(0, name);
     _charCreateCallback.SetFutureResult(CharacterDatabase.AsyncQuery(stmt));

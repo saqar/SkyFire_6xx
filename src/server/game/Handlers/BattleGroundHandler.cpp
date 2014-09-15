@@ -835,6 +835,7 @@ void WorldSession::HandleRequestPvpOptions(WorldPacket& /*recvData*/)
     data.WriteBit(1);
     data.WriteBit(1);       // RatedBGsEnabled
     data.WriteBit(1);       // RatedArenasEnabled
+    data.WriteBit(1);       // New WoD
 
     data.FlushBits();
 
@@ -854,13 +855,15 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
 
     WorldPacket data(SMSG_BATTLEFIELD_RATED_INFO, 29);
     data << uint32(0);  // Reward
-    data << uint8(3);   // unk
     data << uint32(0);  // unk
     data << uint32(0);  // unk
-    data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
     data << uint32(0);  // unk
     data << uint32(0);  // unk
-    data << _player->GetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, true);
+    data << uint32(0);  // unk
+    data << uint32(0);  // unk
+    data << uint32(0);  // unk
+    //data << _player->GetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, true); WoD Depreciated?
+    //data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true); WoD Depreciated?
 
     SendPacket(&data);
 }

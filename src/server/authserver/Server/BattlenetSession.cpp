@@ -530,6 +530,8 @@ bool Battlenet::Session::HandleRealmJoinRequest(PacketHeader& header, BitStream&
 
     memcpy(sessionKey + hmac.GetLength(), hmac2.GetDigest(), hmac2.GetLength());
 
+    TC_LOG_DEBUG("network", "Header: ", header.ToString().c_str());
+
     LoginDatabase.DirectPExecute("UPDATE account SET sessionkey = '%s', last_ip = '%s', last_login = NOW(), locale = %u, failed_logins = 0, os = '%s' WHERE id = %u",
         ByteArrayToHexStr(sessionKey, 40, true).c_str(), GetRemoteIpAddress().to_string().c_str(), GetLocaleByName(_locale), _os.c_str(), _gameAccountId);
 

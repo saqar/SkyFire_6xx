@@ -549,24 +549,8 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvData*/)
 {
     ObjectGuid guid = GetPlayer()->GetGUID();
 
-    WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 1 + 8);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[3]);
-
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
+    WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 2 + 16);
+    data << guid;
 
     GetPlayer()->SendMessageToSet(&data, false);
 }
@@ -583,7 +567,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
 
     _player->m_movementInfo = movementInfo;
 
-    WorldPacket data(SMSG_MOVE_UPDATE_KNOCK_BACK, 66);
+    WorldPacket data(SMSG_MOVE_UPDATE_KNOCK_BACK, 2 + 8 + 8 + 8 + 8 + 16);
     _player->WriteMovementInfo(data);
     _player->SendMessageToSet(&data, false);
 }

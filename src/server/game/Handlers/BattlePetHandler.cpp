@@ -149,45 +149,14 @@ void WorldSession::HandleBattlePetQueryName(WorldPacket& recvData)
 
     ObjectGuid petEntry, petguid;
 
-    petguid[2] = recvData.ReadBit();
-    petEntry[6] = recvData.ReadBit();
-    petEntry[3] = recvData.ReadBit();
-    petguid[3] = recvData.ReadBit();
-    petEntry[7] = recvData.ReadBit();
-    petguid[4] = recvData.ReadBit();
-    petguid[1] = recvData.ReadBit();
-    petguid[0] = recvData.ReadBit();
-    petEntry[0] = recvData.ReadBit();
-    petguid[7] = recvData.ReadBit();
-    petguid[5] = recvData.ReadBit();
-    petguid[6] = recvData.ReadBit();
-    petEntry[1] = recvData.ReadBit();
-    petEntry[2] = recvData.ReadBit();
-    petEntry[5] = recvData.ReadBit();
-    petEntry[4] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(petguid[5]);
-    recvData.ReadByteSeq(petEntry[1]);
-    recvData.ReadByteSeq(petguid[0]);
-    recvData.ReadByteSeq(petEntry[4]);
-    recvData.ReadByteSeq(petguid[3]);
-    recvData.ReadByteSeq(petEntry[3]);
-    recvData.ReadByteSeq(petguid[1]);
-    recvData.ReadByteSeq(petguid[6]);
-    recvData.ReadByteSeq(petEntry[6]);
-    recvData.ReadByteSeq(petEntry[0]);
-    recvData.ReadByteSeq(petEntry[2]);
-    recvData.ReadByteSeq(petguid[7]);
-    recvData.ReadByteSeq(petguid[2]);
-    recvData.ReadByteSeq(petEntry[7]);
-    recvData.ReadByteSeq(petguid[4]);
-    recvData.ReadByteSeq(petEntry[5]);
+    recvData << petEntry;
+    recvData << petguid;
 
     Unit* tempUnit = sObjectAccessor->FindUnit(petguid);
     if (!tempUnit)
     {
         TC_LOG_DEBUG("network", "CMSG_BATTLE_PET_QUERY_NAME - Player %u queried the name of Battle Pet %lu which doesnt't exist in world!",
-            GetPlayer()->GetGUIDLow(), (uint64)petEntry);
+            GetPlayer()->GetGUIDLow(), petEntry);
         return;
     }
 
@@ -204,7 +173,7 @@ void WorldSession::HandleBattlePetQueryName(WorldPacket& recvData)
     BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(battlePet->GetSpecies());
 
     WorldPacket data(SMSG_BATTLE_PET_QUERY_NAME_RESPONSE, 8 + 4 + 4 + 5 + battlePet->GetNickname().size());
-    data << uint64(petEntry);
+    data << petEntry;
     data << uint32(battlePet->GetTimestamp());
     data << uint32(speciesEntry->NpcId);
     data.WriteBit(1);               // has names

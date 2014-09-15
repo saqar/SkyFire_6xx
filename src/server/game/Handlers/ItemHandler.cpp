@@ -337,11 +337,12 @@ Guid[2] = recvData.ReadBit();
     if (pItem && pItem->GetTemplate()->PageText)
     {
         WorldPacket data;
-
+        ObjectGuid guid;
         InventoryResult msg = _player->CanUseItem(pItem);
         if (msg == EQUIP_ERR_OK)
         {
             data.Initialize(SMSG_READ_ITEM_OK, 8);
+            data >> guid;
             TC_LOG_INFO("network", "STORAGE: Item page sent");
         }
         else
@@ -1072,22 +1073,30 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::SendEnchantmentLog(uint64 target, uint64 caster, uint32 itemId, uint32 enchantId)
 {
+    ObjectGuid guid;
+    ObjectGuid guid2;
+    ObjectGuid guid3;
     WorldPacket data(SMSG_ENCHANTMENTLOG, (8+8+4+4));
-    data.appendPackGUID(target);
-    data.appendPackGUID(caster);
+    data << guid;
+    data << guid2;
+    data << guid3;
     data << uint32(itemId);
     data << uint32(enchantId);
+    data << uint32(0);
     GetPlayer()->SendMessageToSet(&data, true);
 }
 
 void WorldSession::SendItemEnchantTimeUpdate(uint64 Playerguid, uint64 Itemguid, uint32 slot, uint32 Duration)
 {
                                                             // last check 2.0.10
+    ObjectGuid guid = GetPlayer()->GetGUID128();
+    ObjectGuid guid2;
+
     WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, (8+4+4+8));
-    data << uint64(Itemguid);
+    data << guid;
     data << uint32(slot);
     data << uint32(Duration);
-    data << uint64(Playerguid);
+    data << guid2;
     SendPacket(&data);
 }
 
@@ -1502,7 +1511,7 @@ void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
 void WorldSession::HandleItemRefund(WorldPacket &recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_ITEM_REFUND");
-    uint64 guid;
+    ObjectGuid guid;
     recvData >> guid;                                      // item guid
 
     Item* item = _player->GetItemByGuid(guid);

@@ -642,27 +642,11 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recvData)
     ObjectGuid guid = GetPlayer()->GetGUID();
 
     // everything's fine, do it
-    WorldPacket data(SMSG_MINIMAP_PING, 1 + 8 + 4 + 4);
+    WorldPacket data(SMSG_MINIMAP_PING, 2 + 16 + 4 + 4);
+    data << guid;
+
     data << float(y);
     data << float(x);
-
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[4]);
-
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
 
     GetPlayer()->GetGroup()->BroadcastPacket(&data, true, -1, GetPlayer()->GetGUID());
 }
@@ -687,30 +671,18 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recvData)
     //TC_LOG_DEBUG("misc", "ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
 
     ObjectGuid guid = GetPlayer()->GetGUID();
+    ObjectGuid guid2;
 
     WorldPacket data(SMSG_RANDOM_ROLL, 4 + 4 + 4 + 1 + 8);
+    
+    data << guid;
+    data << guid2;
+
     data << uint32(roll);
     data << uint32(minimum);
     data << uint32(maximum);
 
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[3]);
-
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
-
+    
     if (GetPlayer()->GetGroup())
         GetPlayer()->GetGroup()->BroadcastPacket(&data, false);
     else
@@ -897,45 +869,17 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& /*recvData*/)
     /********************/
 
     uint32 readyCheckDuration = 35000;
-    ObjectGuid groupGuid = group->GetGUID();
+    ObjectGuid groupGuid;
+    ObjectGuid guid2;
 
     // everything's fine, do it
     WorldPacket data(SMSG_RAID_READY_CHECK, 1 + 8 + 1 + 8 + 1 + 4);
-    data.WriteBit(groupGuid[4]);
-    data.WriteBit(groupGuid[2]);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(groupGuid[3]);
-    data.WriteBit(groupGuid[7]);
-    data.WriteBit(groupGuid[1]);
-    data.WriteBit(groupGuid[0]);
-    data.WriteBit(playerGuid[6]);
-    data.WriteBit(playerGuid[5]);
-    data.WriteBit(groupGuid[6]);
-    data.WriteBit(groupGuid[5]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(playerGuid[1]);
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(playerGuid[3]);
+
+    data << groupGuid;
+    data << guid2;
 
     data << uint32(readyCheckDuration);
-    data.WriteByteSeq(groupGuid[2]);
-    data.WriteByteSeq(groupGuid[7]);
-    data.WriteByteSeq(groupGuid[3]);
-    data.WriteByteSeq(playerGuid[4]);
-    data.WriteByteSeq(groupGuid[1]);
-    data.WriteByteSeq(groupGuid[0]);
-    data.WriteByteSeq(playerGuid[1]);
-    data.WriteByteSeq(playerGuid[2]);
-    data.WriteByteSeq(playerGuid[6]);
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(groupGuid[6]);
-    data.WriteByteSeq(playerGuid[0]);
     data << uint8(0);                       // unknown
-    data.WriteByteSeq(playerGuid[7]);
-    data.WriteByteSeq(groupGuid[4]);
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(groupGuid[5]);
 
     group->BroadcastPacket(&data, false);
 
@@ -981,45 +925,16 @@ void WorldSession::HandleRaidReadyCheckConfirmOpcode(WorldPacket& recvData)
     recvData.ReadByteSeq(guid[7]);
     recvData.ReadByteSeq(guid[6]);
 
-    ObjectGuid groupGuid = group->GetGUID();
-    ObjectGuid playerGuid = GetPlayer()->GetGUID();
+    ObjectGuid groupGuid;
+    ObjectGuid playerGuid = GetPlayer()->GetGUID128();
 
     WorldPacket data(SMSG_RAID_READY_CHECK_CONFIRM, 1 + 1 + 8 + 1 + 8);
-    data.WriteBit(groupGuid[4]);
-    data.WriteBit(playerGuid[5]);
-    data.WriteBit(playerGuid[3]);
-    data.WriteBit(status);
-    data.WriteBit(groupGuid[2]);
-    data.WriteBit(playerGuid[6]);
-    data.WriteBit(groupGuid[3]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(playerGuid[1]);
-    data.WriteBit(groupGuid[1]);
-    data.WriteBit(groupGuid[5]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(groupGuid[6]);
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(groupGuid[0]);
-    data.WriteBit(groupGuid[7]);
-    data.FlushBits();
 
-    data.WriteByteSeq(playerGuid[4]);
-    data.WriteByteSeq(playerGuid[2]);
-    data.WriteByteSeq(playerGuid[1]);
-    data.WriteByteSeq(groupGuid[4]);
-    data.WriteByteSeq(groupGuid[2]);
-    data.WriteByteSeq(playerGuid[0]);
-    data.WriteByteSeq(groupGuid[5]);
-    data.WriteByteSeq(groupGuid[3]);
-    data.WriteByteSeq(playerGuid[7]);
-    data.WriteByteSeq(groupGuid[6]);
-    data.WriteByteSeq(groupGuid[1]);
-    data.WriteByteSeq(playerGuid[6]);
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(groupGuid[0]);
-    data.WriteByteSeq(groupGuid[7]);
+    data << groupGuid;
+    data << playerGuid;
+
+    data.WriteBit(status);
+    data.FlushBits();
 
     group->BroadcastPacket(&data, false);
     group->ReadyCheckMemberHasResponded(playerGuid);

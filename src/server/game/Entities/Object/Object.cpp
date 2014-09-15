@@ -103,6 +103,24 @@ WorldObject::~WorldObject()
     }
 }
 
+ObjectGuid Object::GetGuidValue(uint16 index) const
+{
+    return ObjectGuid(GetUInt64Value(index), GetUInt64Value(index + 2));
+}
+
+void Object::SetGuidValue(uint16 index, ObjectGuid& guid)
+{
+    SetUInt64Value(index, guid.GetLoGuid());
+    SetUInt64Value(index + 2, guid.GetHiGuid());
+}
+
+void Object::SetGuidValue(uint16 index, uint64 guid64)
+{
+    ObjectGuid guid(guid64);
+    SetUInt64Value(index, guid.GetLoGuid());
+    SetUInt64Value(index + 2, guid.GetHiGuid());
+}
+
 Object::~Object()
 {
     if (IsInWorld())
@@ -3253,4 +3271,35 @@ uint64 WorldObject::GetTransGUID() const
     if (GetTransport())
         return GetTransport()->GetGUID();
     return 0;
+}
+
+ByteBuffer &operator>>(ByteBuffer& buffer, ObjectGuid& value)
+{
+    uint8 loMask = buffer.read<uint8>();
+    uint8 hiMask = buffer.read<uint8>();
+    buffer.readPackGUID(value.GetRefGuid().loGuid, loMask);
+    buffer.readPackGUID(value.GetRefGuid().hiGuid, hiMask);
+    return buffer;
+}
+
+ByteBuffer &operator<<(ByteBuffer& buffer, const ObjectGuid& value)
+{
+    uint8 loMask, hiMask;
+    size_t loSize, hiSize;
+    uint8 hiBuffer[8], loBuffer[8];
+    uint64 loGuid = value.GetLoGuid();
+    uint64 hiPart = value.GetHiGuid();
+
+    buffer.generatePackGuid(loGuid, loMask, loBuffer, loSize);
+    buffer.generatePackGuid(hiPart, hiMask, hiBuffer, hiSize);
+
+    buffer.append<uint8>(loMask);
+    buffer.append<uint8>(hiMask);
+
+    if (loSize)
+        buffer.append(loBuffer, loSize);
+    if (hiSize)
+        buffer.append(hiBuffer, hiSize);
+
+    return buffer;
 }

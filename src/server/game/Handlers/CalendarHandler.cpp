@@ -263,7 +263,8 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
             uint64 invitee = 0;
             uint8 status = 0;
             uint8 rank = 0;
-            recvData.readPackGUID(invitee);
+            uint8 mask = 0;
+            recvData.readPackGUID(invitee, mask);
             recvData >> status >> rank;
 
             // 946684800 is 01/01/2000 00:00:00 - default response time

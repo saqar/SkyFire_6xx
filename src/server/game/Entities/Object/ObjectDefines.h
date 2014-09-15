@@ -24,21 +24,45 @@
 
 enum HighGuid
 {
-    HIGHGUID_ITEM           = 0x400,                       // blizz 4000
-    HIGHGUID_CONTAINER      = 0x400,                       // blizz 4000
-    HIGHGUID_PLAYER         = 0x000,                       // blizz 0000
-    HIGHGUID_GAMEOBJECT     = 0xF11,                       // blizz F110
-    HIGHGUID_TRANSPORT      = 0xF12,                       // blizz F120 (for GAMEOBJECT_TYPE_TRANSPORT)
-    HIGHGUID_UNIT           = 0xF13,                       // blizz F130
-    HIGHGUID_PET            = 0xF14,                       // blizz F140
-    HIGHGUID_VEHICLE        = 0xF15,                       // blizz F550
-    HIGHGUID_DYNAMICOBJECT  = 0xF10,                       // blizz F100
-    HIGHGUID_CORPSE         = 0xF101,                      // blizz F100
-    HIGHGUID_AREATRIGGER    = 0xF102,                      // blizz F100
-    HIGHGUID_BATTLEGROUND   = 0x1F1,                       // new 4.x
-    HIGHGUID_MO_TRANSPORT   = 0x1FC,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
-    HIGHGUID_GROUP          = 0x1F5,
-    HIGHGUID_GUILD          = 0x1FF                        // new 4.x
+    HIGHGUID_ITEM = 0x400,                       // blizz 4000
+    HIGHGUID_CONTAINER = 0x400,                       // blizz 4000
+    HIGHGUID_PLAYER = 0x000,                       // blizz 0000
+    HIGHGUID_GAMEOBJECT = 0xF11,                       // blizz F110
+    HIGHGUID_TRANSPORT = 0xF12,                       // blizz F120 (for GAMEOBJECT_TYPE_TRANSPORT)
+    HIGHGUID_UNIT = 0xF13,                       // blizz F130
+    HIGHGUID_PET = 0xF14,                       // blizz F140
+    HIGHGUID_VEHICLE = 0xF15,                       // blizz F550
+    HIGHGUID_DYNAMICOBJECT = 0xF10,                       // blizz F100
+    HIGHGUID_CORPSE = 0xF101,                      // blizz F100
+    HIGHGUID_AREATRIGGER = 0xF102,                      // blizz F100
+    HIGHGUID_BATTLEGROUND = 0x1F1,                       // new 4.x
+    HIGHGUID_MO_TRANSPORT = 0x1FC,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
+    HIGHGUID_GROUP = 0x1F5,
+    HIGHGUID_GUILD = 0x1FF                        // new 4.x
+};
+
+enum GuidType
+{
+    GUID_TYPE_PLAYER = 2,
+    GUID_TYPE_ITEM = 3,
+    GUID_TYPE_TRANSPORT = 5,
+    GUID_TYPE_CREATURE = 7,
+    GUID_TYPE_VEHICLE = 8,
+    GUID_TYPE_PET = 9,
+    GUID_TYPE_GAMEOBJECT = 10,
+    GUID_TYPE_DYNAMICOBJECT = 11,
+    GUID_TYPE_AREATRIGGER = 12,
+    GUID_TYPE_CORPSE = 13,
+    GUID_TYPE_PARTY = 26,
+    GUID_TYPE_GUILD = 27,
+    GUID_TYPE_WOWACCOUNT = 28,
+    GUID_TYPE_BATTLEGROUND = 39
+};
+
+struct Guid128
+{
+    uint64 loGuid;
+    uint64 hiGuid;
 };
 
 // used for creating values for respawn for example
@@ -72,6 +96,14 @@ inline bool IS_AREATRIGGER_GUID(uint64 guid);
 // e - OBJECT_FIELD_ENTRY_ID for GO (except GAMEOBJECT_TYPE_MO_TRANSPORT) and creatures or UNIT_FIELD_PET_NUMBER for pets
 // h - OBJECT_FIELD_GUID + 1
 inline uint64 MAKE_NEW_GUID(uint32 l, uint32 e, uint32 h);
+
+static Guid128 MAKE_NEW_GUID128(uint64 l, uint32 e, uint32 t)
+{
+    Guid128 guid = {0, 0};
+    guid.hiGuid |= ((uint64(t) << 58) | (uint64(e) << 6));
+    guid.loGuid |= l;
+    return guid;
+}
 
 //#define GUID_HIPART(x)   (uint32)((uint64(x) >> 52)) & 0x0000FFFF)
 inline uint32 GUID_HIPART(uint64 guid);

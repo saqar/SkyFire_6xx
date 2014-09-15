@@ -84,26 +84,9 @@ void WorldSession::SendAuctionHello(ObjectGuid guid, Creature* unit)
         return;
 
     WorldPacket data(SMSG_AUCTION_HELLO, 1 + 1 + 8 + 4);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[3]);
+    data << guid;
     data.WriteBit(1);            // 1 - AH enabled, 0 - AH disabled
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[1]);
     data.FlushBits();
-
-    data.WriteByteSeq(guid[3]);
-    data << uint32(ahEntry->houseId);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[5]);
 
     SendPacket(&data);
 }
@@ -114,55 +97,19 @@ void WorldSession::SendAuctionCommandResult(AuctionEntry* auction, uint32 action
     ObjectGuid guid = GetPlayer()->GetGUID();
 
     WorldPacket data(SMSG_AUCTION_COMMAND_RESULT, 1 + 1 + 8 + 4 + 4 + 4 + 4 + 8 + 8);
-    data.WriteBit(1);
-    data.WriteBit(1);
-    data.WriteBit(1);
-
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[7]);
-    data.FlushBits();
-
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[2]);
 
     data << uint32(errorCode);
     data << uint32(action);
     data << uint32(auction ? auction->Id : 0);
     data << uint32(40);                 // bag result
 
+    data << guid;
+     
+    data << float(0);
+    data << float(0);
+
     SendPacket(&data);
-
-    /*data << uint32(auction ? auction->Id : 0);
-    data << uint32(action);
-    data << uint32(errorCode);
-
-    switch (errorCode)
-    {
-        case ERR_AUCTION_OK:
-            if (action == AUCTION_PLACE_BID)
-                data << uint64(auction->bid ? auction->GetAuctionOutBid() : 0);
-            break;
-        case ERR_AUCTION_INVENTORY:
-            data << uint32(bidError);
-            break;
-        case ERR_AUCTION_HIGHER_BID:
-            data << uint64(auction->bidder);
-            data << uint64(auction->bid);
-            data << uint64(auction->bid ? auction->GetAuctionOutBid() : 0);
-            break;
-    }*/
+    
 }
 
 //this function sends notification, if bidder is online

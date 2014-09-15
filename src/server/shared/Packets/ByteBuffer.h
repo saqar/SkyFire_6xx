@@ -445,11 +445,15 @@ class ByteBuffer
             if (rpos() + 1 > size())
                 throw ByteBufferPositionException(false, _rpos, 1, size());
 
-            guid = 0;
-
             uint8 guidmark = 0;
             (*this) >> guidmark;
 
+            readPackGUID(guid, guidmark);
+        }
+
+        void readPackGUID(uint64& guid, uint8 guidmark)
+        {
+            guid = 0;
             for (int i = 0; i < 8; ++i)
             {
                 if (guidmark & (uint8(1) << i))
@@ -463,7 +467,6 @@ class ByteBuffer
                 }
             }
         }
-
         std::string ReadString(uint32 length)
         {
             if (!length)
@@ -496,6 +499,23 @@ class ByteBuffer
             lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
 
             return uint32(mktime(&lt) + timezone);
+        }
+
+        void generatePackGuid(uint64 guid, uint8& mask, uint8* packGUID, size_t& size)
+        {
+            size = 0;
+            mask = 0;
+
+            for (uint8 i = 0; guid != 0; ++i)
+            {
+                if (guid & 0xFF)
+                {
+                    mask |= uint8(1 << i);
+                    packGUID[size++] = uint8(guid & 0xFF);
+                }
+
+                guid >>= 8;
+            }
         }
 
         ByteBuffer& ReadPackedTime(uint32& time)

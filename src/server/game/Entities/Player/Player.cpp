@@ -1939,7 +1939,7 @@ void Player::InnEnter(time_t time, uint32 mapid, float x, float y, float z)
     time_inn_enter = time;
 }
 
-bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, ByteBuffer* bitBuffer)
+bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer)
 {
     //             0               1                2                3                 4                  5                       6                        7
     //    "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
@@ -2016,50 +2016,32 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
         }
     }
 
-    // Packet content flags
-
-    bitBuffer->WriteBit(guildGuid[4]);
-    bitBuffer->WriteBit(guid[0]);
-    bitBuffer->WriteBit(guildGuid[3]);
-    bitBuffer->WriteBit(guid[3]);
-    bitBuffer->WriteBit(guid[7]);
-    bitBuffer->WriteBit(0); // Can boost ?
-    bitBuffer->WriteBit(atLoginFlags & AT_LOGIN_FIRST);
-    bitBuffer->WriteBit(guid[6]);
-    bitBuffer->WriteBit(guildGuid[6]);
-    bitBuffer->WriteBits(uint32(name.length()), 6);
-    bitBuffer->WriteBit(guid[1]);
-    bitBuffer->WriteBit(guildGuid[1]);
-    bitBuffer->WriteBit(guildGuid[0]);
-    bitBuffer->WriteBit(guid[4]);
-    bitBuffer->WriteBit(guildGuid[7]);
-    bitBuffer->WriteBit(guid[2]);
-    bitBuffer->WriteBit(guid[5]);
-    bitBuffer->WriteBit(guildGuid[2]);
-    bitBuffer->WriteBit(guildGuid[5]);
-
     // Character data
-    *dataBuffer << uint32(0);                                   // UNK02 - might be swaped with UNK03
-
-    dataBuffer->WriteByteSeq(guid[1]);
-
+    *dataBuffer << guid;                                        // GUID
     *dataBuffer << uint8(slot);                                 // List order
-    *dataBuffer << uint8(hairStyle);                            // Hair style
-
-    dataBuffer->WriteByteSeq(guildGuid[2]);
-    dataBuffer->WriteByteSeq(guildGuid[0]);
-    dataBuffer->WriteByteSeq(guildGuid[6]);
-
-    dataBuffer->append(name.c_str(), name.length());            // Name
-
-    dataBuffer->WriteByteSeq(guildGuid[3]);
-
-    *dataBuffer << float(x);                                    // X
-    *dataBuffer << uint32(0);                                   // UNK00 new field - Boost fieldand the pet fields
-    *dataBuffer << uint8(face);                                 // Face
+    *dataBuffer << uint8(playerRace);                           // Hair style
     *dataBuffer << uint8(playerClass);                          // Class
-
-    dataBuffer->WriteByteSeq(guildGuid[5]);
+    *dataBuffer << uint8(gender);                               // Gender
+    *dataBuffer << uint8(face);                                 // Face
+    *dataBuffer << uint8(skin);                                 // Skin
+    *dataBuffer << uint8(hairStyle);                            // Hair style
+    *dataBuffer << uint8(hairColor);                            // Hair color
+    *dataBuffer << uint8(facialHair);                           // Facial hair
+    *dataBuffer << uint8(level);                                // Level
+    *dataBuffer << uint32(zone);                                // Zone id
+    *dataBuffer << uint32(mapId);                               // Map Id
+    *dataBuffer << float(x);                                    // X
+    *dataBuffer << float(y);                                    // Y
+    *dataBuffer << float(z);                                    // Z
+    *dataBuffer << guildGuid;                                   // GuildGUID
+    *dataBuffer << uint32(charFlags);                           // Character flags
+    *dataBuffer << uint32(customizationFlag);                   // Character customization flags
+    *dataBuffer << uint32(0);                                   // FLAGS 03
+    *dataBuffer << uint32(petDisplayId);                        // Pet DisplayID
+    *dataBuffer << uint32(petLevel);                            // Pet level
+    *dataBuffer << uint32(petFamily);                           // Pet Family
+    for (int i = 0; i < 2; i++)                                 // Professions
+        *dataBuffer << uint32(0);
 
     for (uint8 slot = 0; slot < INVENTORY_SLOT_BAG_END; ++slot)
     {
@@ -2069,9 +2051,9 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
         if (!proto)
         {
+            *dataBuffer << uint32(0);
+            *dataBuffer << uint32(0);
             *dataBuffer << uint8(0);
-            *dataBuffer << uint32(0);
-            *dataBuffer << uint32(0);
             continue;
         }
 
@@ -2089,52 +2071,16 @@ bool Player::BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, B
                 break;
         }
 
+        *dataBuffer << uint32(proto->DisplayInfoID);
         *dataBuffer << uint32(enchant ? enchant->aura_id : 0);
         *dataBuffer << uint8(proto->InventoryType);
-        *dataBuffer << uint32(proto->DisplayInfoID);
     }
 
-    *dataBuffer << uint32(customizationFlag);                   // Character customization flags
+    dataBuffer->WriteBits(uint32(name.length()), 6);
+    dataBuffer->WriteBit(atLoginFlags & AT_LOGIN_FIRST);
+    dataBuffer->WriteBit(0); // Can boost ?
 
-    dataBuffer->WriteByteSeq(guid[3]);
-    dataBuffer->WriteByteSeq(guid[5]);
-
-    *dataBuffer << uint32(petFamily);                           // Pet family
-
-    dataBuffer->WriteByteSeq(guildGuid[4]);
-
-    *dataBuffer << uint32(mapId);                               // Map Id
-    *dataBuffer << uint8(playerRace);                           // Race
-    *dataBuffer << uint8(skin);                                 // Skin
-
-    dataBuffer->WriteByteSeq(guildGuid[1]);
-
-    *dataBuffer << uint8(level);                                // Level
-
-    dataBuffer->WriteByteSeq(guid[0]);
-    dataBuffer->WriteByteSeq(guid[2]);
-
-    *dataBuffer << uint8(hairColor);                            // Hair color
-    *dataBuffer << uint8(gender);                               // Gender
-    *dataBuffer << uint8(facialHair);                           // Facial hair
-
-    *dataBuffer << uint32(petLevel);                            // Pet level
-
-    dataBuffer->WriteByteSeq(guid[4]);
-    dataBuffer->WriteByteSeq(guid[7]);
-
-    *dataBuffer << float(y);                                    // Y
-    *dataBuffer << uint32(petDisplayId);                        // Pet DisplayID
-    *dataBuffer << uint32(0);                                   // UNK03 - might be swaped with UNK02 and the pet fields
-
-    dataBuffer->WriteByteSeq(guid[6]);
-
-    *dataBuffer << uint32(charFlags);                           // Character flags
-    *dataBuffer << uint32(zone);                                // Zone id
-
-    dataBuffer->WriteByteSeq(guildGuid[7]);
-
-    *dataBuffer << float(z);                                    // Z
+    dataBuffer->WriteString(name);
 
     return true;
 }
@@ -2396,11 +2342,12 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (!GetSession()->PlayerLogout())
             {
                 WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4);
-                data << float(m_teleport_dest.GetPositionX());
                 data << uint32(mapid);
+                data << float(m_teleport_dest.GetPositionX());
                 data << float(m_teleport_dest.GetPositionY());
                 data << float(m_teleport_dest.GetPositionZ());
                 data << float(m_teleport_dest.GetOrientation());
+                data << uint32(0);
                 GetSession()->SendPacket(&data);
                 SendSavedInstances();
             }
@@ -14788,59 +14735,25 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
 
     uint32 itemSlot = (item->GetCount() == count) ? item->GetSlot() : -1;
 
-    ObjectGuid playerGuid = GetGUID();
-    ObjectGuid itemGuid = item->GetGUID();
+    ObjectGuid playerGuid = GetGUID128();
+    ObjectGuid itemGuid = item->GetGUID128();
 
     WorldPacket data(SMSG_ITEM_PUSH_RESULT, 1 + 8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4);
-    data.WriteBit(itemGuid[2]);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(itemGuid[5]);
-    data.WriteBit(1);                                       // display in chat
-    data.WriteBit(playerGuid[1]);
-    data.WriteBit(received);                                // 0 = looted, 1 = npc
-    data.WriteBit(itemGuid[4]);
-    data.WriteBit(playerGuid[6]);
-    data.WriteBit(playerGuid[5]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(itemGuid[0]);
-    data.WriteBit(itemGuid[7]);
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(itemGuid[6]);
-    data.WriteBit(0);                                       // bonus loot
-    data.WriteBit(playerGuid[3]);
-    data.WriteBit(itemGuid[1]);
-    data.WriteBit(created);                                 // 0 = received. 1 = created
-    data.WriteBit(itemGuid[3]);
-    data.FlushBits();
-
-    data.WriteByteSeq(playerGuid[1]);
-    data.WriteByteSeq(itemGuid[1]);
-    data << uint32(0);                                      // battle pet species
-    data.WriteByteSeq(itemGuid[0]);
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(playerGuid[2]);
-    data << uint32(item->GetItemSuffixFactor());            // suffix factor
-    data.WriteByteSeq(itemGuid[7]);
-    data << uint32(0);                                      // battle pet quality
-    data << uint32(item->GetEntry());                       // item id
-    data << int32(item->GetItemRandomPropertyId());         // random item property id
-    data.WriteByteSeq(itemGuid[6]);
-    data << uint32(0);                                      // battle pet breed
-    data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory
-    data.WriteByteSeq(itemGuid[2]);
-    data.WriteByteSeq(playerGuid[0]);
-    data << uint32(count);                                  // count of items
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(itemGuid[5]);
-    data.WriteByteSeq(playerGuid[4]);
-    data << uint8(item->GetBagSlot());                      // bag slot
-    data << uint32(itemSlot);                               // item slot, but when added to stack: 0xFFFFFFFF
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(playerGuid[6]);
-    data << uint32(0);                                      // battle pet level
-    data.WriteByteSeq(itemGuid[3]);
-    data.WriteByteSeq(itemGuid[4]);
+    data << playerGuid;
+    data << uint8(item->GetBagSlot());
+    data << uint32(0); // BattlepetSpecies
+    data << uint32(item->GetItemSuffixFactor());
+    data << uint32(item->GetEntry());
+    data << uint32(count);
+    data << uint32(0); // Battlepet Breed
+    data << uint32(GetItemCount(item->GetEntry()));
+    data << int32(item->GetItemRandomPropertyId());
+    data << uint32(itemSlot);
+    data << itemGuid;
+    data.WriteBit(1); // Display in chat
+    data.WriteBit(0); // Bonus loot
+    data.WriteBit(created);
+    data.WriteBit(received);
 
     if (broadcast && GetGroup())
         GetGroup()->BroadcastPacket(&data, true);
@@ -17627,7 +17540,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     }
 
     // overwrite possible wrong/corrupted guid
-    SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
+    ObjectGuid objGuid = MAKE_NEW_GUID128(guid, 0, GUID_TYPE_PLAYER);
+    SetGuidValue(OBJECT_FIELD_GUID, objGuid);
 
     uint8 gender = fields[5].GetUInt8();
     if (!IsValidGender(gender))

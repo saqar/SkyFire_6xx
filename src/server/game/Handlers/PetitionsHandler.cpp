@@ -195,23 +195,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recvData)
     uint8 playerCount = 0;
     ObjectGuid petitionGuid;
 
-    petitionGuid[3] = recvData.ReadBit();
-    petitionGuid[7] = recvData.ReadBit();
-    petitionGuid[2] = recvData.ReadBit();
-    petitionGuid[4] = recvData.ReadBit();
-    petitionGuid[5] = recvData.ReadBit();
-    petitionGuid[6] = recvData.ReadBit();
-    petitionGuid[0] = recvData.ReadBit();
-    petitionGuid[1] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(petitionGuid[2]);
-    recvData.ReadByteSeq(petitionGuid[4]);
-    recvData.ReadByteSeq(petitionGuid[5]);
-    recvData.ReadByteSeq(petitionGuid[7]);
-    recvData.ReadByteSeq(petitionGuid[1]);
-    recvData.ReadByteSeq(petitionGuid[0]);
-    recvData.ReadByteSeq(petitionGuid[3]);
-    recvData.ReadByteSeq(petitionGuid[6]);
+    recvData << petitionGuid;
 
     // solve (possible) some strange compile problems with explicit use GUID_LOPART(petitionguid) at some GCC versions (wrong code optimization in compiler?)
     uint32 petitionGuidLow = GUID_LOPART(petitionGuid);

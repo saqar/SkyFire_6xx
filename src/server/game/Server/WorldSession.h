@@ -999,6 +999,19 @@ class WorldSession
         void HandleBattlePetSetFlags(WorldPacket& recvData);
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
 
+        //Garrisons (6.x)
+        void HandleGarrisonPlotPlaced(uint32 garrisonId, uint32 buildingId);
+        void HandleGarrisonBuildingActivated(uint32 building);
+        void HandleGarrisonDeleteResult();
+        void HandleGarrisonPlaceBuildingResult(WorldPacket /*recvData*/);
+        void HandleGarrisonLearnBlueprintResult(uint32 blueprint, uint32 unk);
+        void HandleGarrisonListFollowersCheatResult(uint32 unk1, uint32 unk2);
+        void HandleGarrisonOpenArchitect();
+        void HandleGarrisonPlotRemoved(uint32 plot);
+        void HandleGarrisonBuildingSetActiveSpecializationResult(uint32 unk1, uint32 unk2, uint32 unk3, uint32 unk4);
+        void HandleGarrisonStartMissionResult();
+        void HandleGarrisonUpgradeResult();
+
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();

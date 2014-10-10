@@ -36,6 +36,10 @@ extern DB2Storage<ItemToBattlePetEntry> sItemToBattlePetStore;
 extern BattlePetBreedSet sBattlePetBreedSet;
 extern BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
+// Garrisons
+extern DB2Storage<GarrAbility> sGarrAbility;
+extern DB2Storage<GarrPlot> sGarrPlot;
+
 extern DB2Storage<BroadcastTextEntry> sBroadcastTextStore;
 extern DB2Storage<ItemEntry> sItemStore;
 extern DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore;

@@ -25,15 +25,16 @@
 #include "Opcodes.h"
 #include "World.h"
 #include "zlib.h"
+#include "Object.h"
 
 UpdateData::UpdateData(uint16 map) : m_map(map), m_blockCount(0) { }
 
-void UpdateData::AddOutOfRangeGUID(std::set<uint64>& guids)
+void UpdateData::AddOutOfRangeGUID(std::set<ObjectGuid>& guids)
 {
     m_outOfRangeGUIDs.insert(guids.begin(), guids.end());
 }
 
-void UpdateData::AddOutOfRangeGUID(uint64 guid)
+void UpdateData::AddOutOfRangeGUID(ObjectGuid guid)
 {
     m_outOfRangeGUIDs.insert(guid);
 }
@@ -49,19 +50,27 @@ bool UpdateData::BuildPacket(WorldPacket* packet)
     ASSERT(packet->empty());                                // shouldn't happen
     packet->Initialize(SMSG_UPDATE_OBJECT, 2 + 4 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size()) + m_data.wpos());
 
-    *packet << uint32(m_blockCount + (m_outOfRangeGUIDs.empty() ? 0 : 1));
+    *packet << uint32(m_blockCount);
     *packet << uint16(m_map);
 
-     if (!m_outOfRangeGUIDs.empty())
-     {
-         *packet << uint16(UPDATETYPE_OUT_OF_RANGE_OBJECTS);
-         *packet << uint32(m_outOfRangeGUIDs.size());
+    packet->WriteBit(!m_outOfRangeGUIDs.empty());
+    packet->FlushBits();
 
-         for (std::set<uint64>::const_iterator i = m_outOfRangeGUIDs.begin(); i != m_outOfRangeGUIDs.end(); ++i)
-             packet->appendPackGUID(*i);
-     }
+    if (!m_outOfRangeGUIDs.empty())
+    {
+        *packet << uint16(0); // not used 
+        *packet << uint32(m_outOfRangeGUIDs.size());    
 
+        for (std::set<ObjectGuid>::const_iterator itr = m_outOfRangeGUIDs.begin(); itr != m_outOfRangeGUIDs.end(); ++itr)
+             *packet << (*itr); // not sure why this happens ask Sovak asap.
+    }
+
+    m_sizePos = packet->wpos();
+    *packet << uint32(0);
     packet->append(m_data);
+
+    if (uint32 size = packet->wpos() - m_sizePos - 4)
+        packet->put(m_sizePos, size);    
     return true;
 }
 

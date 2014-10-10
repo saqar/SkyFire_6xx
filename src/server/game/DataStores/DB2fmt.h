@@ -39,4 +39,6 @@ char const QuestPackageItemfmt[] = "niiii";
 char const SceneScriptfmt[] = "nssii";
 char const SpellReagentsfmt[] = "diiiiiiiiiiiiiiiiii";
 
+char const GarrAbilityfmt[] = "iissiii";
+char const GarrPlotfmt[] = "iiiisiiii";
 #endif

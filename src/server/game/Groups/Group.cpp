@@ -915,7 +915,7 @@ void Group::SendLooter(Creature* creature, Player* groupLooter)
     ASSERT(creature);
 
     WorldPacket data(SMSG_LOOT_LIST, (8+8));
-    data << uint64(creature->GetGUID());
+    data << uint64(creature->GetGUID128());
     data << uint8(0); // unk1
 
     if (groupLooter)
@@ -1239,7 +1239,7 @@ void Group::MasterLoot(Loot* /*loot*/, WorldObject* pLootedObject)
 
         if (looter->IsWithinDistInMap(pLootedObject, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE), false))
         {
-            data << uint64(looter->GetGUID());
+            data << uint64(looter->GetGUID128());
             ++real_count;
         }
     }

@@ -101,6 +101,31 @@ struct BattlePetStateEntry
 
 typedef std::map<uint32, uint16> BattlePetItemXSpeciesStore;
 
+
+struct GarrAbility
+{
+    uint32 EntryId;                                         // 0 - Entry Id
+    uint32 Category;                                        // 1 - Category
+    LocalizedString* Name;                                  // 2 - Name
+    LocalizedString* Description;                           // 3 - Description
+    uint32 SpellId;                                         // 4 - Spell Id
+    uint32 unk1;                                            // 5 - Unknown
+    uint32 unk2;                                            // 6 - Unknown
+};
+
+struct GarrPlot
+{
+    uint32 EntryId;
+    uint32 Size;
+    uint32 LotId;
+    uint32 Faction;
+    LocalizedString* PlotType;
+    uint32 Description;
+    uint32 unk1;
+    uint32 unk2;
+    uint32 unk3;
+};
+
 struct ItemToBattlePetEntry
 {
     uint32 ItemId;                                          // 0 - item id

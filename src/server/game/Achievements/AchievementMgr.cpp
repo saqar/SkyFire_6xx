@@ -843,8 +843,8 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
         cell.Visit(p, message, *GetOwner()->GetMap(), *GetOwner(), sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
     }
 
-    ObjectGuid guid = GetOwner()->GetGUID();
-    ObjectGuid guid2 = GetOwner()->GetGUID();
+    ObjectGuid guid = GetOwner()->GetGUID128();
+    ObjectGuid guid2 = GetOwner()->GetGUID128();
 
     WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8+4+8);
     

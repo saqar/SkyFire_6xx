@@ -278,6 +278,12 @@ public:
         return *this;
     }
 
+    ObjectGuid& operator<(ObjectGuid guid) 
+    { 
+        return GetRawValue() < guid.GetRawValue(); 
+    }
+
+    ObjectGuid GetRawValue() const { return _data.guid128; }
     uint64 GetHiGuid() const { return _data.guid128.hiGuid; };
     uint64 GetLoGuid() const { return _data.guid128.loGuid; };
     // For Sience - Hack

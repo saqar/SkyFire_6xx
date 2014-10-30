@@ -98,7 +98,7 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, uint32 battlenetAccountId, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter):
+WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter):
     m_muteTime(mute_time),
     m_timeOutTime(0),
     AntiDOS(this),
@@ -106,7 +106,6 @@ WorldSession::WorldSession(uint32 id, uint32 battlenetAccountId, WorldSocket* so
     m_Socket(sock),
     _security(sec),
     _accountId(id),
-    _battlenetAccountId(battlenetAccountId),
     m_expansion(expansion),
     _warden(NULL),
     _logoutTime(0),
@@ -227,6 +226,8 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
             return;
         }
     }
+
+    const_cast<WorldPacket*>(packet)->FlushBits();
 
 #ifdef TRINITY_DEBUG
     // Code for network use statistic
@@ -587,28 +588,9 @@ void WorldSession::LogoutPlayer(bool save)
 
         //! Send the 'logout complete' packet to the client
         //! Client will respond by sending 3x CMSG_CANCEL_TRADE, which we currently dont handle
-        WorldPacket data(SMSG_LOGOUT_COMPLETE);
         ObjectGuid guid = 0; // Autolog guid - 0 for logout
-
-        data.WriteBit(0); // Dafuck ? 1st bit twice read ??????
-
-        data.WriteBit(guid[3]);
-        data.WriteBit(guid[2]);
-        data.WriteBit(guid[1]);
-        data.WriteBit(guid[4]);
-        data.WriteBit(guid[6]);
-        data.WriteBit(guid[7]);
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[0]);
-
-        data.WriteByteSeq(guid[6]);
-        data.WriteByteSeq(guid[4]);
-        data.WriteByteSeq(guid[1]);
-        data.WriteByteSeq(guid[2]);
-        data.WriteByteSeq(guid[7]);
-        data.WriteByteSeq(guid[3]);
-        data.WriteByteSeq(guid[0]);
-        data.WriteByteSeq(guid[5]);
+        WorldPacket data(SMSG_LOGOUT_COMPLETE);
+        data << guid;
         SendPacket(&data);
 
         TC_LOG_DEBUG("network", "SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
@@ -791,18 +773,16 @@ void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string c
     m_accountData[type].Data = data;
 }
 
-void WorldSession::SendAccountDataTimes(uint32 mask)
+void WorldSession::SendAccountDataTimes()
 {
-    WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4 + 1 + 4 + NUM_ACCOUNT_DATA_TYPES * 4);
+    ObjectGuid guid = _player ? _player->GetGUID128() : 0;
+    WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 18 + 4 + NUM_ACCOUNT_DATA_TYPES * 4);
 
-    data.WriteBit(1);
-    data.FlushBits();
+    data << guid;
+    data << uint32(time(NULL));
 
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
         data << uint32(GetAccountData(AccountDataType(i))->Time); // also unix time
-
-    data << uint32(mask);
-    data << uint32(time(NULL)); // Server time
 
     SendPacket(&data);
 }
@@ -965,29 +945,17 @@ void WorldSession::SendAddonsInfo()
     WorldPacket data(SMSG_ADDON_INFO, 1000);
 
     AddonMgr::BannedAddonList const* bannedAddons = AddonMgr::GetBannedAddons();
-    data.WriteBits((uint32)bannedAddons->size(), 18);
-    data.WriteBits((uint32)m_addonsList.size(), 23);
+    data << uint32(m_addonsList.size());
+    data << uint32(bannedAddons->size());
+
 
     for (AddonsList::iterator itr = m_addonsList.begin(); itr != m_addonsList.end(); ++itr)
     {
-        data.WriteBit(0); // Has URL
+        data << uint8(itr->State);
+
         data.WriteBit(itr->Enabled);
         data.WriteBit(!itr->UsePublicKeyOrCRC); // If client doesnt have it, send it
-    }
-
-    data.FlushBits();
-
-    for (AddonsList::iterator itr = m_addonsList.begin(); itr != m_addonsList.end(); ++itr)
-    {
-        if (!itr->UsePublicKeyOrCRC)
-        {
-            size_t pos = data.wpos();
-            for (int i = 0; i < 256; i++)
-                data << uint8(0);
-
-            for (int i = 0; i < 256; i++)
-                data.put(pos + pubKeyOrder[i], addonPublicKey[i]);
-        }
+        data.WriteBit(0); // Has URL
 
         if (itr->Enabled)
         {
@@ -995,23 +963,24 @@ void WorldSession::SendAddonsInfo()
             data << uint32(0);
         }
 
-        data << uint8(itr->State);
-    }
+        if (!itr->UsePublicKeyOrCRC)
+            for (int i = 0; i < 256; i++)
+                data << uint8(addonPublicKey[i]);
 
-    m_addonsList.clear();
+    }
 
     for (AddonMgr::BannedAddonList::const_iterator itr = bannedAddons->begin(); itr != bannedAddons->end(); ++itr)
     {
         data << uint32(itr->Id);
-        data << uint32(1);  // IsBanned
 
         for (int32 i = 0; i < 8; i++)
             data << uint32(0);
 
-        // Those 3 might be in wrong order
         data << uint32(itr->Timestamp);
+        data << uint32(1);  // IsBanned
     }
 
+    m_addonsList.clear();
     SendPacket(&data);
 }
 
@@ -1028,7 +997,6 @@ void WorldSession::SendTimezoneInformation()
     WorldPacket data(SMSG_SET_TIMEZONE_INFORMATION, 2 + strlen(timezoneString) * 2);
     data.WriteBits(strlen(timezoneString), 7);
     data.WriteBits(strlen(timezoneString), 7);
-    data.FlushBits();
     data.WriteString(timezoneString);
     data.WriteString(timezoneString);
     SendPacket(&data);

@@ -687,18 +687,18 @@ void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
     SendPacket(&data);
 }
 
-void WorldSession::HandleGuildBankTabNote(WorldPacket& recvData)
-{
-    uint32 tabId, noteLength;
-    std::string note;
-
-    recvData >> tabId;
-
-    noteLength = recvData.ReadBits(14);
-    recvData.FlushBits();
-
-    note = recvData.ReadString(noteLength);
-
-    if (Guild* guild = GetPlayer()->GetGuild())
-        guild->HandleSetBankTabNote(this, tabId, note);
-}
+//void WorldSession::HandleGuildBankTabNote(WorldPacket& recvData)
+//{
+//    uint32 tabId, noteLength;
+//    std::string note;
+//
+//    recvData >> tabId;
+//
+//    noteLength = recvData.ReadBits(14);
+//    recvData.FlushBits();
+//
+//    note = recvData.ReadString(noteLength);
+//
+//    if (Guild* guild = GetPlayer()->GetGuild())
+//        guild->HandleSetBankTabNote(this, tabId, note);
+//}

@@ -130,14 +130,6 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5,
 };
 
-enum BarberShopResult
-{
-    BARBER_SHOP_SUCCESS          = 0,
-    BARBER_SHOP_NOT_ENOUGH_MONEY = 1,
-    BARBER_SHOP_NOT_SITTING      = 2
-    /*BARBER_SHOP_NOT_ENOUGH_MONEY = 3*/
-};
-
 #define DB2_REPLY_BROADCAST 35137211
 #define DB2_REPLY_SPARSE    2442913102
 #define DB2_REPLY_ITEM      1344507586
@@ -188,9 +180,9 @@ class CharacterCreateInfo
     friend class Player;
 
     protected:
-        CharacterCreateInfo(std::string const& name, uint8 race, uint8 cclass, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair,
+        CharacterCreateInfo(std::string const& name, uint8 race, uint8 cclass, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId,
         WorldPacket& data) : Name(name), Race(race), Class(cclass), Gender(gender), Skin(skin), Face(face), HairStyle(hairStyle), HairColor(hairColor), FacialHair(facialHair),
-        Data(data), CharCount(0)
+        OutfitId(outfitId), Data(data), CharCount(0)
         { }
 
         /// User specified variables
@@ -214,7 +206,7 @@ class CharacterCreateInfo
 class WorldSession
 {
     public:
-        WorldSession(uint32 id, uint32 battlenetAccountId, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter);
+        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter);
         ~WorldSession();
 
         bool PlayerLoading() const { return m_playerLoading; }
@@ -247,7 +239,6 @@ class WorldSession
 
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
-        uint32 GetBattlenetAccountId() const { return _accountId; }
         Player* GetPlayer() const { return _player; }
         std::string const& GetPlayerName() const;
         std::string GetPlayerInfo() const;
@@ -323,7 +314,7 @@ class WorldSession
         // Account Data
         AccountData* GetAccountData(AccountDataType type) { return &m_accountData[type]; }
         void SetAccountData(AccountDataType type, time_t tm, std::string const& data);
-        void SendAccountDataTimes(uint32 mask);
+        void SendAccountDataTimes();
         void LoadGlobalAccountData();
         void LoadAccountData(PreparedQueryResult result, uint32 mask);
 
@@ -711,7 +702,7 @@ class WorldSession
         void HandleQuestgiverRequestRewardOpcode(WorldPacket& recvPacket);
         void HandleQuestQueryOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverCancel(WorldPacket& recvData);
-        void HandleQuestLogSwapQuest(WorldPacket& recvData);
+        //void HandleQuestLogSwapQuest(WorldPacket& recvData);
         void HandleQuestLogRemoveQuest(WorldPacket& recvData);
         void HandleQuestConfirmAccept(WorldPacket& recvData);
         void HandleQuestgiverCompleteQuest(WorldPacket& recvData);
@@ -902,7 +893,6 @@ class WorldSession
         void HandleGuildBankDepositMoney(WorldPacket& recvData);
         void HandleGuildBankWithdrawMoney(WorldPacket& recvData);
         void HandleGuildBankSwapItems(WorldPacket& recvData);
-        void HandleGuildBankTabNote(WorldPacket& recvData);
 
         void HandleGuildBankUpdateTab(WorldPacket& recvData);
         void HandleGuildBankBuyTab(WorldPacket& recvData);
@@ -946,10 +936,6 @@ class WorldSession
         // Transmogrification
         void HandleTransmogrifyItems(WorldPacket& recvData);
 
-        // Reforge
-        void HandleReforgeItemOpcode(WorldPacket& recvData);
-        void SendReforgeResult(bool success);
-
         // BlackMarket
         void HandleBlackMarketHelloOpcode(WorldPacket& recvData);
         void SendBlackMarketHello(uint64 guid);
@@ -962,7 +948,6 @@ class WorldSession
         void HandleSpellClick(WorldPacket& recvData);
         void HandleMirrorImageDataRequest(WorldPacket& recvData);
         void HandleAlterAppearance(WorldPacket& recvData);
-        void SendBarberShopResult(BarberShopResult result);
         void HandleRemoveGlyph(WorldPacket& recvData);
         void HandleCharCustomize(WorldPacket& recvData);
         void HandleQueryInspectAchievements(WorldPacket& recvData);
@@ -998,19 +983,6 @@ class WorldSession
         void HandleBattlePetSetBattleSlot(WorldPacket& recvData);
         void HandleBattlePetSetFlags(WorldPacket& recvData);
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
-
-        //Garrisons (6.x)
-        void HandleGarrisonPlotPlaced(uint32 garrisonId, uint32 buildingId);
-        void HandleGarrisonBuildingActivated(uint32 building);
-        void HandleGarrisonDeleteResult();
-        void HandleGarrisonPlaceBuildingResult(WorldPacket /*recvData*/);
-        void HandleGarrisonLearnBlueprintResult(uint32 blueprint, uint32 unk);
-        void HandleGarrisonListFollowersCheatResult(uint32 unk1, uint32 unk2);
-        void HandleGarrisonOpenArchitect();
-        void HandleGarrisonPlotRemoved(uint32 plot);
-        void HandleGarrisonBuildingSetActiveSpecializationResult(uint32 unk1, uint32 unk2, uint32 unk3, uint32 unk4);
-        void HandleGarrisonStartMissionResult();
-        void HandleGarrisonUpgradeResult();
 
     private:
         void InitializeQueryCallbackParameters();
@@ -1086,7 +1058,6 @@ class WorldSession
 
         AccountTypes _security;
         uint32 _accountId;
-        uint32 _battlenetAccountId;
         uint8 m_expansion;
 
         typedef std::list<AddonInfo> AddonsList;

@@ -88,6 +88,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (mover != pUser)
         return;
 
+    Unit* caster = mover;
+
     uint8 bagIndex, slot;
     uint8 castCount = 0;
     uint8 castFlags = 0;
@@ -99,6 +101,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     float missileSpeed = 0.0f;
     ObjectGuid itemGuid = 0;
     ObjectGuid targetGuid = 0;
+    ObjectGuid unkGuid = 0;
     ObjectGuid itemTargetGuid = 0;
     ObjectGuid destTransportGuid = 0;
     ObjectGuid srcTransportGuid = 0;
@@ -107,295 +110,30 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     std::string targetString;
 
     // Movement data
-    MovementInfo movementInfo;
-    ObjectGuid movementTransportGuid = 0;
-    ObjectGuid movementGuid = 0;
-    bool hasTransport = false;
-    bool hasTransportTime2 = false;
-    bool hasTransportTime3 = false;
-    bool hasFallData = false;
-    bool hasFallDirection = false;
-    bool hasTimestamp = false;
-    bool hasSplineElevation = false;
-    bool hasPitch = false;
-    bool hasOrientation = false;
-    bool hasUnkMovementField = false;
-    uint32 unkMovementLoopCounter = 0;
-    Unit* caster = mover;
 
-    recvPacket >> slot >> bagIndex;
+    recvPacket >> bagIndex >> slot;
+    recvPacket >> itemGuid;
 
-    bool hasElevation = !recvPacket.ReadBit();
-    itemGuid[6] = recvPacket.ReadBit();
-    bool hasTargetString = !recvPacket.ReadBit();
-    itemGuid[1] = recvPacket.ReadBit();
-    bool hasCastFlags = !recvPacket.ReadBit();
-    bool hasDestLocation = recvPacket.ReadBit();
-    itemGuid[2] = recvPacket.ReadBit();
-    itemGuid[7] = recvPacket.ReadBit();
-    itemGuid[0] = recvPacket.ReadBit();
-    bool hasTargetMask = !recvPacket.ReadBit();
-    bool hasMissileSpeed = !recvPacket.ReadBit();
-    bool hasMovement = recvPacket.ReadBit();
-    bool hasCastCount = !recvPacket.ReadBit();
-    bool hasSpellId = !recvPacket.ReadBit();
-    recvPacket.ReadBit();
-    bool hasGlyphIndex = !recvPacket.ReadBit();
-    recvPacket.ReadBit();
-    itemGuid[4] = recvPacket.ReadBit();
+    recvPacket >> castCount;
+    recvPacket >> spellId;
+    recvPacket >> glyphIndex;
+
+    targetMask = recvPacket.ReadBits(21);
     bool hasSrcLocation = recvPacket.ReadBit();
-    itemGuid[3] = recvPacket.ReadBit();
-    itemGuid[5] = recvPacket.ReadBit();
-    uint8 researchDataCount = recvPacket.ReadBits(2);
-
-    for (uint8 i = 0; i < researchDataCount; ++i)
-        recvPacket.ReadBits(2);
-
-    if (hasMovement)
-    {
-        hasPitch = !recvPacket.ReadBit();
-        hasTransport = recvPacket.ReadBit();
-        recvPacket.ReadBit();
-
-        if (hasTransport)
-        {
-            movementTransportGuid[7] = recvPacket.ReadBit();
-            movementTransportGuid[2] = recvPacket.ReadBit();
-            movementTransportGuid[4] = recvPacket.ReadBit();
-            movementTransportGuid[5] = recvPacket.ReadBit();
-            movementTransportGuid[6] = recvPacket.ReadBit();
-            movementTransportGuid[0] = recvPacket.ReadBit();
-            movementTransportGuid[1] = recvPacket.ReadBit();
-            hasTransportTime3 = recvPacket.ReadBit();
-            movementTransportGuid[4] = recvPacket.ReadBit();
-            hasTransportTime2 = recvPacket.ReadBit();
-        }
-
-        movementGuid[6] = recvPacket.ReadBit();
-        movementGuid[2] = recvPacket.ReadBit();
-        movementGuid[1] = recvPacket.ReadBit();
-        unkMovementLoopCounter = recvPacket.ReadBits(22);
-        recvPacket.ReadBit();
-        bool hasMovementFlags2 = !recvPacket.ReadBit();
-        hasFallData = recvPacket.ReadBit();
-        movementGuid[5] = recvPacket.ReadBit();
-        hasSplineElevation = !recvPacket.ReadBit();
-        recvPacket.ReadBit();
-        movementGuid[7] = recvPacket.ReadBit();
-        movementGuid[0] = recvPacket.ReadBit();
-
-        if (hasFallData)
-            hasFallDirection = recvPacket.ReadBit();
-
-        hasOrientation = !recvPacket.ReadBit();
-        movementGuid[4] = recvPacket.ReadBit();
-        movementGuid[3] = recvPacket.ReadBit();
-        hasTimestamp = !recvPacket.ReadBit();
-        hasUnkMovementField = !recvPacket.ReadBit();
-        bool hasMovementFlags = !recvPacket.ReadBit();
-
-        if (hasMovementFlags2)
-            movementInfo.flags2 = recvPacket.ReadBits(13);
-
-        if (hasMovement)
-            movementInfo.flags = recvPacket.ReadBits(30);
-    }
-
-    if (hasSrcLocation)
-    {
-        srcTransportGuid[3] = recvPacket.ReadBit();
-        srcTransportGuid[1] = recvPacket.ReadBit();
-        srcTransportGuid[7] = recvPacket.ReadBit();
-        srcTransportGuid[4] = recvPacket.ReadBit();
-        srcTransportGuid[2] = recvPacket.ReadBit();
-        srcTransportGuid[0] = recvPacket.ReadBit();
-        srcTransportGuid[6] = recvPacket.ReadBit();
-        srcTransportGuid[5] = recvPacket.ReadBit();
-    }
-
-    if (hasDestLocation)
-    {
-        destTransportGuid[2] = recvPacket.ReadBit();
-        destTransportGuid[4] = recvPacket.ReadBit();
-        destTransportGuid[1] = recvPacket.ReadBit();
-        destTransportGuid[7] = recvPacket.ReadBit();
-        destTransportGuid[6] = recvPacket.ReadBit();
-        destTransportGuid[0] = recvPacket.ReadBit();
-        destTransportGuid[3] = recvPacket.ReadBit();
-        destTransportGuid[5] = recvPacket.ReadBit();
-    }
-
-    if (hasTargetString)
-        targetStringLength = recvPacket.ReadBits(7);
-
-    itemTargetGuid[1] = recvPacket.ReadBit();
-    itemTargetGuid[0] = recvPacket.ReadBit();
-    itemTargetGuid[5] = recvPacket.ReadBit();
-    itemTargetGuid[3] = recvPacket.ReadBit();
-    itemTargetGuid[6] = recvPacket.ReadBit();
-    itemTargetGuid[4] = recvPacket.ReadBit();
-    itemTargetGuid[7] = recvPacket.ReadBit();
-    itemTargetGuid[2] = recvPacket.ReadBit();
-
-    targetGuid[4] = recvPacket.ReadBit();
-    targetGuid[5] = recvPacket.ReadBit();
-    targetGuid[0] = recvPacket.ReadBit();
-    targetGuid[1] = recvPacket.ReadBit();
-    targetGuid[3] = recvPacket.ReadBit();
-    targetGuid[7] = recvPacket.ReadBit();
-    targetGuid[6] = recvPacket.ReadBit();
-    targetGuid[2] = recvPacket.ReadBit();
-
-    if (hasCastFlags)
-        castFlags = recvPacket.ReadBits(5);
-
-    if (hasTargetMask)
-        targetMask = recvPacket.ReadBits(20);
-
-    recvPacket.ReadByteSeq(itemGuid[0]);
-    recvPacket.ReadByteSeq(itemGuid[5]);
-    recvPacket.ReadByteSeq(itemGuid[6]);
-    recvPacket.ReadByteSeq(itemGuid[3]);
-    recvPacket.ReadByteSeq(itemGuid[4]);
-    recvPacket.ReadByteSeq(itemGuid[2]);
-    recvPacket.ReadByteSeq(itemGuid[1]);
-
-    for (uint8 i = 0; i < researchDataCount; ++i)
-    {
-        recvPacket.read_skip<uint32>();
-        recvPacket.read_skip<uint32>();
-    }
-
-    recvPacket.ReadByteSeq(itemGuid[7]);
-
-    if (hasMovement)
-    {
-        for (uint8 i = 0; i != unkMovementLoopCounter; i++)
-            recvPacket.read_skip<uint32>();
-
-        if (hasTransport)
-        {
-            recvPacket >> movementInfo.transport.pos.m_positionY;
-            recvPacket >> movementInfo.transport.pos.m_positionZ;
-            recvPacket.ReadByteSeq(movementTransportGuid[1]);
-
-            if (hasTransportTime3)
-                recvPacket >> movementInfo.transport.time3;
-
-            recvPacket.ReadByteSeq(movementTransportGuid[7]);
-            recvPacket.ReadByteSeq(movementTransportGuid[5]);
-            recvPacket.ReadByteSeq(movementTransportGuid[2]);
-            recvPacket.ReadByteSeq(movementTransportGuid[4]);
-            recvPacket >> movementInfo.transport.pos.m_positionX;
-            movementInfo.transport.pos.SetOrientation(recvPacket.read<float>());
-            recvPacket.ReadByteSeq(movementTransportGuid[0]);
-            recvPacket >> movementInfo.transport.seat;
-            recvPacket >> movementInfo.transport.time;
-            recvPacket.ReadByteSeq(movementTransportGuid[6]);
-            recvPacket.ReadByteSeq(movementTransportGuid[3]);
-
-            if (hasTransportTime2)
-                recvPacket >> movementInfo.transport.time2;
-        }
-
-        if (hasFallData)
-        {
-            recvPacket >> movementInfo.jump.zspeed;
-
-            if (hasFallDirection)
-            {
-                recvPacket >> movementInfo.jump.sinAngle;
-                recvPacket >> movementInfo.jump.cosAngle;
-                recvPacket >> movementInfo.jump.xyspeed;
-            }
-
-            recvPacket >> movementInfo.jump.fallTime;
-        }
-
-        recvPacket.ReadByteSeq(movementTransportGuid[3]);
-        recvPacket.ReadByteSeq(movementTransportGuid[7]);
-        recvPacket.ReadByteSeq(movementTransportGuid[6]);
-        recvPacket.ReadByteSeq(movementTransportGuid[1]);
-        recvPacket >> movementInfo.pos.m_positionY;
-
-        if (hasSplineElevation)
-            recvPacket >> movementInfo.splineElevation;
-
-        if (hasUnkMovementField)
-            recvPacket.read_skip<uint32>();
-
-        if (hasOrientation)
-            movementInfo.pos.SetOrientation(recvPacket.read<float>());
-
-        recvPacket.ReadByteSeq(movementTransportGuid[2]);
-        recvPacket >> movementInfo.pos.m_positionZ;
-
-        if (hasTimestamp)
-            recvPacket >> movementInfo.time;
-
-        recvPacket >> movementInfo.pos.m_positionX;
-        recvPacket.ReadByteSeq(movementTransportGuid[5]);
-        recvPacket.ReadByteSeq(movementTransportGuid[0]);
-
-        if (hasPitch)
-            movementInfo.pitch = G3D::wrap(recvPacket.read<float>(), float(-M_PI), float(M_PI));
-
-        recvPacket.ReadByteSeq(movementTransportGuid[4]);
-    }
-
-    if (hasDestLocation)
-    {
-        float x, y, z;
-
-        recvPacket.ReadByteSeq(destTransportGuid[7]);
-        recvPacket >> x;
-        recvPacket.ReadByteSeq(destTransportGuid[0]);
-        recvPacket.ReadByteSeq(destTransportGuid[6]);
-        recvPacket.ReadByteSeq(destTransportGuid[1]);
-        recvPacket.ReadByteSeq(destTransportGuid[3]);
-        recvPacket >> y;
-        recvPacket.ReadByteSeq(destTransportGuid[5]);
-        recvPacket >> z;
-        recvPacket.ReadByteSeq(destTransportGuid[4]);
-        recvPacket.ReadByteSeq(destTransportGuid[2]);
-
-        destPos.Relocate(x, y, z);
-    }
-    else
-    {
-        destTransportGuid = caster->GetTransGUID();
-
-        if (destTransportGuid)
-            destPos.Relocate(caster->GetTransOffsetX(), caster->GetTransOffsetY(), caster->GetTransOffsetZ(), caster->GetTransOffsetO());
-        else
-            destPos.Relocate(caster);
-    }
-
-    recvPacket.ReadByteSeq(targetGuid[6]);
-    recvPacket.ReadByteSeq(targetGuid[7]);
-    recvPacket.ReadByteSeq(targetGuid[2]);
-    recvPacket.ReadByteSeq(targetGuid[0]);
-    recvPacket.ReadByteSeq(targetGuid[3]);
-    recvPacket.ReadByteSeq(targetGuid[4]);
-    recvPacket.ReadByteSeq(targetGuid[1]);
-    recvPacket.ReadByteSeq(targetGuid[5]);
+    bool hasDestLocation = recvPacket.ReadBit();
+    bool hasUnkFloat = recvPacket.ReadBit();
+    targetStringLength = recvPacket.ReadBits(7);
+    recvPacket.ResetBitPos();
+    recvPacket >> targetGuid;
+    recvPacket >> itemTargetGuid;
 
     if (hasSrcLocation)
     {
         float x, y, z;
-
-        recvPacket.ReadByteSeq(srcTransportGuid[7]);
+        recvPacket >> srcTransportGuid;
         recvPacket >> x;
-        recvPacket.ReadByteSeq(srcTransportGuid[1]);
-        recvPacket.ReadByteSeq(srcTransportGuid[5]);
-        recvPacket.ReadByteSeq(srcTransportGuid[4]);
-        recvPacket >> z;
-        recvPacket.ReadByteSeq(srcTransportGuid[6]);
-        recvPacket.ReadByteSeq(srcTransportGuid[0]);
-        recvPacket.ReadByteSeq(srcTransportGuid[3]);
         recvPacket >> y;
-        recvPacket.ReadByteSeq(srcTransportGuid[2]);
-
+        recvPacket >> z;
         srcPos.Relocate(x, y, z);
     }
     else
@@ -407,32 +145,52 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             srcPos.Relocate(caster);
     }
 
-    if (hasSpellId)
-        recvPacket >> spellId;
+    if (hasDestLocation)
+    {
+        float x, y, z;
+        recvPacket >> destTransportGuid;
+        recvPacket >> x;
+        recvPacket >> y;
+        recvPacket >> z;
+        destPos.Relocate(x, y, z);
+    }
+    else
+    {
+        destTransportGuid = caster->GetTransGUID();
+        if (destTransportGuid)
+            destPos.Relocate(caster->GetTransOffsetX(), caster->GetTransOffsetY(), caster->GetTransOffsetZ(), caster->GetTransOffsetO());
+        else
+            destPos.Relocate(caster);
+    }
 
-    recvPacket.ReadByteSeq(itemTargetGuid[1]);
-    recvPacket.ReadByteSeq(itemTargetGuid[4]);
-    recvPacket.ReadByteSeq(itemTargetGuid[3]);
-    recvPacket.ReadByteSeq(itemTargetGuid[6]);
-    recvPacket.ReadByteSeq(itemTargetGuid[2]);
-    recvPacket.ReadByteSeq(itemTargetGuid[0]);
-    recvPacket.ReadByteSeq(itemTargetGuid[7]);
-    recvPacket.ReadByteSeq(itemTargetGuid[5]);
+    if (hasUnkFloat)
+        recvPacket.read_skip<float>();
 
-    if (hasTargetString)
-        targetString = recvPacket.ReadString(targetStringLength);
+    targetString = recvPacket.ReadString(targetStringLength);
 
-    if (hasElevation)
-        recvPacket >> elevation;
+    recvPacket >> elevation;
+    recvPacket >> missileSpeed;
 
-    if (hasGlyphIndex)
-        recvPacket >> glyphIndex;
+    recvPacket >> unkGuid;
+    castFlags = recvPacket.ReadBits(5);
+    bool hasMovement = recvPacket.ReadBit();
+    uint8 researchDataCount = recvPacket.ReadBits(2);
+    recvPacket.ResetBitPos();
 
-    if (hasMissileSpeed)
-        recvPacket >> missileSpeed;
+    if (hasMovement)
+    {
+        MovementInfo movementInfo;
+        GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo);
+    }
 
-    if (hasCastCount)
-        recvPacket >> castCount;
+    for (uint8 i = 0; i < researchDataCount; ++i)
+    {
+        uint32 currencyId, currencyCount;
+        recvPacket.ReadBits(2);
+        recvPacket.ResetBitPos();
+        recvPacket >> currencyId;
+        recvPacket >> currencyCount;
+    }
 
     if (glyphIndex >= MAX_GLYPH_SLOT_INDEX)
     {
@@ -624,7 +382,6 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
-
     recvData >> guid;
 
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", GUID_LOPART(guid));
@@ -643,7 +400,6 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recvData)
 void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
-
     recvPacket >> guid;
 
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_GAMEOBJ_REPORT_USE Message [in game guid: %u]", GUID_LOPART(guid));
@@ -687,292 +443,33 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     ObjectGuid itemTargetGuid = 0;
     ObjectGuid destTransportGuid = 0;
     ObjectGuid srcTransportGuid = 0;
+    ObjectGuid unkGuid = 0;
     Position srcPos;
     Position destPos;
     std::string targetString;
 
     // Movement data
-    MovementInfo movementInfo;
-    ObjectGuid movementTransportGuid = 0;
-    ObjectGuid movementGuid = 0;
-    bool hasTransport = false;
-    bool hasTransportTime2 = false;
-    bool hasTransportTime3 = false;
-    bool hasFallData = false;
-    bool hasFallDirection = false;
-    bool hasTimestamp = false;
-    bool hasSplineElevation = false;
-    bool hasPitch = false;
-    bool hasOrientation = false;
-    bool hasUnkMovementField = false;
-    uint32 unkMovementLoopCounter = 0;
     Unit* caster = mover;
 
-    recvPacket.ReadBit(); // Fake bit
-    bool hasTargetString = !recvPacket.ReadBit();
-    recvPacket.ReadBit(); // Fake Bit
-    bool hasCastCount = !recvPacket.ReadBit();
+    recvPacket >> castCount;
+    recvPacket >> spellId;
+    recvPacket >> glyphIndex;
+
+    targetMask = recvPacket.ReadBits(21);
     bool hasSrcLocation = recvPacket.ReadBit();
     bool hasDestLocation = recvPacket.ReadBit();
-    bool hasSpellId = !recvPacket.ReadBit();
-    uint8 researchDataCount = recvPacket.ReadBits(2);
-    bool hasTargetMask = !recvPacket.ReadBit();
-    bool hasMissileSpeed = !recvPacket.ReadBit();
-
-    for (uint8 i = 0; i < researchDataCount; ++i)
-        recvPacket.ReadBits(2);
-
-    bool hasGlyphIndex = !recvPacket.ReadBit();
-    bool hasMovement = recvPacket.ReadBit();
-    bool hasElevation = !recvPacket.ReadBit();
-    bool hasCastFlags = !recvPacket.ReadBit();
-
-    targetGuid[5] = recvPacket.ReadBit();
-    targetGuid[4] = recvPacket.ReadBit();
-    targetGuid[2] = recvPacket.ReadBit();
-    targetGuid[7] = recvPacket.ReadBit();
-    targetGuid[1] = recvPacket.ReadBit();
-    targetGuid[6] = recvPacket.ReadBit();
-    targetGuid[3] = recvPacket.ReadBit();
-    targetGuid[0] = recvPacket.ReadBit();
-
-    if (hasDestLocation)
-    {
-        destTransportGuid[1] = recvPacket.ReadBit();
-        destTransportGuid[3] = recvPacket.ReadBit();
-        destTransportGuid[5] = recvPacket.ReadBit();
-        destTransportGuid[0] = recvPacket.ReadBit();
-        destTransportGuid[2] = recvPacket.ReadBit();
-        destTransportGuid[6] = recvPacket.ReadBit();
-        destTransportGuid[7] = recvPacket.ReadBit();
-        destTransportGuid[4] = recvPacket.ReadBit();
-    }
-
-
-    if (hasMovement)
-    {
-        unkMovementLoopCounter = recvPacket.ReadBits(22);
-        recvPacket.ReadBit();
-        movementGuid[4] = recvPacket.ReadBit();
-        hasTransport = recvPacket.ReadBit();
-
-        if (hasTransport)
-        {
-            hasTransportTime2 = recvPacket.ReadBit();
-            movementTransportGuid[7] = recvPacket.ReadBit();
-            movementTransportGuid[4] = recvPacket.ReadBit();
-            movementTransportGuid[1] = recvPacket.ReadBit();
-            movementTransportGuid[0] = recvPacket.ReadBit();
-            movementTransportGuid[6] = recvPacket.ReadBit();
-            movementTransportGuid[3] = recvPacket.ReadBit();
-            movementTransportGuid[5] = recvPacket.ReadBit();
-            hasTransportTime3 = recvPacket.ReadBit();
-            movementTransportGuid[2] = recvPacket.ReadBit();
-        }
-
-        recvPacket.ReadBit();
-        movementGuid[7] = recvPacket.ReadBit();
-        hasOrientation = !recvPacket.ReadBit();
-        movementGuid[6] = recvPacket.ReadBit();
-        hasSplineElevation = !recvPacket.ReadBit();
-        hasPitch = !recvPacket.ReadBit();
-        movementGuid[0] = recvPacket.ReadBit();
-        recvPacket.ReadBit();
-        bool hasMovementFlags = !recvPacket.ReadBit();
-        hasTimestamp = !recvPacket.ReadBit();
-        hasUnkMovementField = !recvPacket.ReadBit();
-
-        if (hasMovementFlags)
-            movementInfo.flags = recvPacket.ReadBits(30);
-
-        movementGuid[1] = recvPacket.ReadBit();
-        movementGuid[3] = recvPacket.ReadBit();
-        movementGuid[2] = recvPacket.ReadBit();
-        movementGuid[5] = recvPacket.ReadBit();
-        hasFallData = recvPacket.ReadBit();
-
-        if (hasFallData)
-            hasFallDirection = recvPacket.ReadBit();
-
-        bool hasMovementFlags2 = !recvPacket.ReadBit();
-
-        if (hasMovementFlags2)
-            movementInfo.flags2 = recvPacket.ReadBits(13);
-    }
-
-    itemTargetGuid[1] = recvPacket.ReadBit();
-    itemTargetGuid[0] = recvPacket.ReadBit();
-    itemTargetGuid[7] = recvPacket.ReadBit();
-    itemTargetGuid[4] = recvPacket.ReadBit();
-    itemTargetGuid[6] = recvPacket.ReadBit();
-    itemTargetGuid[5] = recvPacket.ReadBit();
-    itemTargetGuid[3] = recvPacket.ReadBit();
-    itemTargetGuid[2] = recvPacket.ReadBit();
-
-    if (hasSrcLocation)
-    {
-        srcTransportGuid[4] = recvPacket.ReadBit();
-        srcTransportGuid[5] = recvPacket.ReadBit();
-        srcTransportGuid[3] = recvPacket.ReadBit();
-        srcTransportGuid[0] = recvPacket.ReadBit();
-        srcTransportGuid[7] = recvPacket.ReadBit();
-        srcTransportGuid[1] = recvPacket.ReadBit();
-        srcTransportGuid[6] = recvPacket.ReadBit();
-        srcTransportGuid[2] = recvPacket.ReadBit();
-    }
-
-    if (hasTargetMask)
-        targetMask = recvPacket.ReadBits(20);
-
-    if (hasCastFlags)
-        castFlags = recvPacket.ReadBits(5);
-
-    if (hasTargetString)
-        targetStringLength = recvPacket.ReadBits(7);
-
-    for (uint8 i = 0; i < researchDataCount; ++i)
-    {
-        recvPacket.read_skip<uint32>();
-        recvPacket.read_skip<uint32>();
-    }
-
-    if (hasMovement)
-    {
-        recvPacket >> movementInfo.pos.m_positionX;
-        recvPacket.ReadByteSeq(movementGuid[0]);
-
-        if (hasTransport)
-        {
-            recvPacket.ReadByteSeq(movementTransportGuid[2]);
-            recvPacket >> movementInfo.transport.seat;
-            recvPacket.ReadByteSeq(movementTransportGuid[3]);
-            recvPacket.ReadByteSeq(movementTransportGuid[7]);
-            recvPacket >> movementInfo.transport.pos.m_positionX;
-            recvPacket.ReadByteSeq(movementTransportGuid[5]);
-
-            if (hasTransportTime3)
-                recvPacket >> movementInfo.transport.time3;
-
-            recvPacket >> movementInfo.transport.pos.m_positionZ;
-            recvPacket >> movementInfo.transport.pos.m_positionY;
-
-            recvPacket.ReadByteSeq(movementTransportGuid[6]);
-            recvPacket.ReadByteSeq(movementTransportGuid[1]);
-            movementInfo.transport.pos.SetOrientation(recvPacket.read<float>());
-
-            recvPacket.ReadByteSeq(movementTransportGuid[4]);
-
-            if (hasTransportTime2)
-                recvPacket >> movementInfo.transport.time2;
-
-            recvPacket.ReadByteSeq(movementTransportGuid[0]);
-            recvPacket >> movementInfo.transport.time;
-
-        }
-
-        recvPacket.ReadByteSeq(movementGuid[5]);
-
-        if (hasFallData)
-        {
-            recvPacket >> movementInfo.jump.fallTime;
-            recvPacket >> movementInfo.jump.zspeed;
-
-            if (hasFallDirection)
-            {
-                recvPacket >> movementInfo.jump.sinAngle;
-                recvPacket >> movementInfo.jump.xyspeed;
-                recvPacket >> movementInfo.jump.cosAngle;
-            }
-        }
-
-        if (hasSplineElevation)
-            recvPacket >> movementInfo.splineElevation;
-
-        recvPacket.ReadByteSeq(movementGuid[6]);
-
-        if (hasUnkMovementField)
-            recvPacket.read_skip<uint32>();
-
-        recvPacket.ReadByteSeq(movementGuid[4]);
-
-        if (hasOrientation)
-            movementInfo.pos.SetOrientation(recvPacket.read<float>());
-
-        if (hasTimestamp)
-            recvPacket >> movementInfo.time;
-
-        recvPacket.ReadByteSeq(movementGuid[1]);
-
-        if (hasPitch)
-            movementInfo.pitch = G3D::wrap(recvPacket.read<float>(), float(-M_PI), float(M_PI));
-
-        recvPacket.ReadByteSeq(movementGuid[3]);
-
-        for (uint8 i = 0; i != unkMovementLoopCounter; i++)
-            recvPacket.read_skip<uint32>();
-
-        recvPacket >> movementInfo.pos.m_positionY;
-        recvPacket.ReadByteSeq(movementGuid[7]);
-        recvPacket >> movementInfo.pos.m_positionZ;
-        recvPacket.ReadByteSeq(movementGuid[2]);
-    }
-
-    recvPacket.ReadByteSeq(itemTargetGuid[4]);
-    recvPacket.ReadByteSeq(itemTargetGuid[2]);
-    recvPacket.ReadByteSeq(itemTargetGuid[1]);
-    recvPacket.ReadByteSeq(itemTargetGuid[5]);
-    recvPacket.ReadByteSeq(itemTargetGuid[7]);
-    recvPacket.ReadByteSeq(itemTargetGuid[3]);
-    recvPacket.ReadByteSeq(itemTargetGuid[6]);
-    recvPacket.ReadByteSeq(itemTargetGuid[0]);
-
-    if (hasDestLocation)
-    {
-        float x, y, z;
-        recvPacket.ReadByteSeq(destTransportGuid[2]);
-        recvPacket >> x;
-        recvPacket.ReadByteSeq(destTransportGuid[4]);
-        recvPacket.ReadByteSeq(destTransportGuid[1]);
-        recvPacket.ReadByteSeq(destTransportGuid[0]);
-        recvPacket.ReadByteSeq(destTransportGuid[3]);
-        recvPacket >> y;
-        recvPacket.ReadByteSeq(destTransportGuid[7]);
-        recvPacket >> z;
-        recvPacket.ReadByteSeq(destTransportGuid[5]);
-        recvPacket.ReadByteSeq(destTransportGuid[6]);
-        destPos.Relocate(x, y, z);
-    }
-    else
-    {
-        destTransportGuid = caster->GetTransGUID();
-        if (destTransportGuid)
-            destPos.Relocate(caster->GetTransOffsetX(), caster->GetTransOffsetY(), caster->GetTransOffsetZ(), caster->GetTransOffsetO());
-        else
-            destPos.Relocate(caster);
-    }
-
-    recvPacket.ReadByteSeq(targetGuid[3]);
-    recvPacket.ReadByteSeq(targetGuid[4]);
-    recvPacket.ReadByteSeq(targetGuid[7]);
-    recvPacket.ReadByteSeq(targetGuid[6]);
-    recvPacket.ReadByteSeq(targetGuid[2]);
-    recvPacket.ReadByteSeq(targetGuid[0]);
-    recvPacket.ReadByteSeq(targetGuid[1]);
-    recvPacket.ReadByteSeq(targetGuid[5]);
+    bool hasUnkFloat = recvPacket.ReadBit();
+    targetStringLength = recvPacket.ReadBits(7);
+    recvPacket.ResetBitPos();
+    recvPacket >> targetGuid;
+    recvPacket >> itemTargetGuid;
 
     if (hasSrcLocation)
     {
         float x, y, z;
-        recvPacket >> y;
-        recvPacket.ReadByteSeq(srcTransportGuid[5]);
-        recvPacket.ReadByteSeq(srcTransportGuid[1]);
-        recvPacket.ReadByteSeq(srcTransportGuid[7]);
-        recvPacket.ReadByteSeq(srcTransportGuid[6]);
+        recvPacket >> srcTransportGuid;
         recvPacket >> x;
-        recvPacket.ReadByteSeq(srcTransportGuid[3]);
-        recvPacket.ReadByteSeq(srcTransportGuid[2]);
-        recvPacket.ReadByteSeq(srcTransportGuid[0]);
-        recvPacket.ReadByteSeq(srcTransportGuid[4]);
+        recvPacket >> y;
         recvPacket >> z;
         srcPos.Relocate(x, y, z);
     }
@@ -985,23 +482,52 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             srcPos.Relocate(caster);
     }
 
-    if (hasTargetString)
-        targetString = recvPacket.ReadString(targetStringLength);
+    if (hasDestLocation)
+    {
+        float x, y, z;
+        recvPacket >> destTransportGuid;
+        recvPacket >> x;
+        recvPacket >> y;
+        recvPacket >> z;
+        destPos.Relocate(x, y, z);
+    }
+    else
+    {
+        destTransportGuid = caster->GetTransGUID();
+        if (destTransportGuid)
+            destPos.Relocate(caster->GetTransOffsetX(), caster->GetTransOffsetY(), caster->GetTransOffsetZ(), caster->GetTransOffsetO());
+        else
+            destPos.Relocate(caster);
+    }
 
-    if (hasMissileSpeed)
-        recvPacket >> missileSpeed;
+    if (hasUnkFloat)
+        recvPacket.read_skip<float>();
 
-    if (hasElevation)
-        recvPacket >> elevation;
+    targetString = recvPacket.ReadString(targetStringLength);
 
-    if (hasCastCount)
-        recvPacket >> castCount;
+    recvPacket >> elevation;
+    recvPacket >> missileSpeed;
 
-    if (hasSpellId)
-        recvPacket >> spellId;
+    recvPacket >> unkGuid;
+    castFlags = recvPacket.ReadBits(5);
+    bool hasMovement = recvPacket.ReadBit();
+    uint8 researchDataCount = recvPacket.ReadBits(2);
+    recvPacket.ResetBitPos();
 
-    if (hasGlyphIndex)
-        recvPacket >> glyphIndex;
+    if (hasMovement)
+    {
+        MovementInfo movementInfo;
+        GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo);
+    }
+
+    for (uint8 i = 0; i < researchDataCount; ++i)
+    {
+        uint32 currencyId, currencyCount;
+        recvPacket.ReadBits(2);
+        recvPacket.ResetBitPos();
+        recvPacket >> currencyId;
+        recvPacket >> currencyCount;
+    }
 
     TC_LOG_DEBUG("network", "WORLD: got cast spell packet, castCount: %u, spellId: %u, castFlags: %u, data length = %u", castCount, spellId, castFlags, (uint32)recvPacket.size());
 
@@ -1039,15 +565,39 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (sSpecializationOverrideSpellMap.find(spellId) != sSpecializationOverrideSpellMap.end())
+    if (Player* player = caster->ToPlayer())
     {
-        SpellInfo const* newSpellInfo = sSpellMgr->GetSpellInfo(sSpecializationOverrideSpellMap[spellId]);
-        if (newSpellInfo)
+        SpecializationOverrideSpellsMap::const_iterator iter = sSpecializationOverrideSpellMap.find(player->GetTalentSpecialization(player->GetActiveSpec()));
+        if (iter != sSpecializationOverrideSpellMap.end())
         {
-            if (newSpellInfo->SpellLevel <= caster->getLevel())
+            std::map<uint32, uint32>::const_iterator itr = iter->second.find(spellId);
+            if (itr != iter->second.end())
             {
-                spellInfo = newSpellInfo;
-                spellId = newSpellInfo->Id;
+                SpellInfo const* newSpellInfo = sSpellMgr->GetSpellInfo(itr->second);
+                if (newSpellInfo)
+                {
+                    if (newSpellInfo->SpellLevel <= caster->getLevel())
+                    {
+                        spellInfo = newSpellInfo;
+                        spellId = newSpellInfo->Id;
+                    }
+                }
+            }
+        }
+    }
+
+    if (Player* player = caster->ToPlayer())
+    {
+        TalentOverrideSpellMap::const_iterator iter = sTalentOverrideSpellMap.find(spellInfo->Id);
+        if (iter != sTalentOverrideSpellMap.end())
+        {
+            for (std::list<uint32>::const_iterator itr = iter->second.begin(); itr != iter->second.end(); itr++)
+            {
+                if (caster->HasSpell(*itr))
+                {
+                    spellInfo = sSpellMgr->GetSpellInfo(*itr);
+                    spellId = *itr;
+                }
             }
         }
     }
@@ -1113,16 +663,8 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     uint32 spellId = 0;
     uint8 counter = 0;
 
-    bool hasCounter = !recvPacket.ReadBit();
-    bool hasSpellId = !recvPacket.ReadBit();
-
-    recvPacket.FlushBits();
-
-    if (hasSpellId)
-        recvPacket >> spellId;
-
-    if (hasCounter)
-        recvPacket >> counter;
+    recvPacket >> spellId;
+    recvPacket >> counter;
 
     if (_player->IsNonMeleeSpellCasted(false))
         _player->InterruptNonMeleeSpells(false, spellId, false);
@@ -1131,14 +673,10 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 {
     uint32 spellId;
-    recvPacket >> spellId;
-
     ObjectGuid guid;
 
+    recvPacket >> spellId;
     recvPacket >> guid;
-
-    recvPacket.ReadBit(); // Fake Bit
-    recvPacket.FlushBits();
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
@@ -1163,8 +701,7 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (!spellInfo->IsPositive() || spellInfo->IsPassive())
         return;
 
-    // maybe should only remove one buff when there are multiple?
-    _player->RemoveOwnedAura(spellId, 0, 0, AURA_REMOVE_BY_CANCEL);
+    _player->RemoveOwnedAura(spellId, guid, 0, AURA_REMOVE_BY_CANCEL);
 }
 
 void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
@@ -1235,19 +772,18 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
         return;
 
     uint8 slotId;
-    uint64 guid;
+    ObjectGuid guid;
     recvPacket >> slotId;
     recvPacket >> guid;
 
-    ++slotId;
-    if (slotId >= MAX_TOTEM_SLOT)
+    if (++slotId >= MAX_TOTEM_SLOT)
         return;
 
     if (!_player->m_SummonSlot[slotId])
         return;
 
     Creature* totem = GetPlayer()->GetMap()->GetCreature(_player->m_SummonSlot[slotId]);
-    if (totem && totem->IsTotem() && totem->GetGUID() == guid)
+    if (totem && totem->IsTotem())
         totem->ToTotem()->UnSummon();
 }
 
@@ -1274,9 +810,26 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
 
     ObjectGuid guid;
 
-    recvData >> guid;
+    guid[7] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
 
     uint8 unk = recvData.ReadBit();
+
+    guid[1] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
 
     // this will get something not in world. crash
     Creature* unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
@@ -1413,7 +966,7 @@ void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
     spell->m_targets.ModDst(pos);
 
     WorldPacket data(SMSG_SET_PROJECTILE_POSITION, 21);
-    data << ObjectGuid(casterGuid);
+    data << uint64(casterGuid);
     data << uint8(castCount);
     data << float(x);
     data << float(y);
@@ -1435,8 +988,7 @@ void WorldSession::HandleRequestCategoryCooldowns(WorldPacket& /*recvPacket*/)
     }
 
     WorldPacket data(SMSG_SPELL_CATEGORY_COOLDOWN, 11);
-    data.WriteBits(categoryMods.size(), 21);
-    data.FlushBits();
+    data << uint32(categoryMods.size());
 
     for (std::map<uint32, int32>::const_iterator itr = categoryMods.begin(); itr != categoryMods.end(); ++itr)
     {

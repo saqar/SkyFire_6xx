@@ -52,6 +52,8 @@ enum ShamanSpells
     SPELL_SHAMAN_LAVA_FLOWS_R1                  = 51480,
     SPELL_SHAMAN_LAVA_FLOWS_TRIGGERED_R1        = 65264,
     SPELL_SHAMAN_LAVA_SURGE                     = 77762,
+    SPELL_SHAMAN_LAVA_LASH_SPREAD               = 105792,
+    SPELL_SHAMAN_GLYPH_OF_LAVA_LASH             = 55444,
     SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD          = 23552,
     SPELL_SHAMAN_ITEM_LIGHTNING_SHIELD_DAMAGE   = 27635,
     SPELL_SHAMAN_ITEM_MANA_SURGE                = 23571,
@@ -269,11 +271,11 @@ class spell_sha_earth_shield : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool & /*canBeRecalculated*/)
             {
                 if (Unit* caster = GetCaster())
                 {
-                    amount = caster->SpellHealingBonusDone(GetUnitOwner(), GetSpellInfo(), amount, HEAL);
+                    amount = caster->SpellHealingBonusDone(GetUnitOwner(), GetSpellInfo(), aurEff->GetEffIndex(), amount, HEAL);
                     amount = GetUnitOwner()->SpellHealingBonusTaken(caster, GetSpellInfo(), amount, HEAL);
 
                     // Glyph of Earth Shield
@@ -454,7 +456,7 @@ class spell_sha_feedback : public SpellScriptLoader
             return new spell_sha_feedback_AuraScript();
         }
 };
-
+/*
 // 1535 Fire Nova
 /// Updated 4.3.4
 class spell_sha_fire_nova : public SpellScriptLoader
@@ -466,7 +468,7 @@ class spell_sha_fire_nova : public SpellScriptLoader
         {
             PrepareSpellScript(spell_sha_fire_nova_SpellScript);
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            void HandleDummy(SpellEffIndex effIndex)
             {
                 Unit* caster = GetCaster();
                 if (Unit* target = GetHitUnit())
@@ -489,7 +491,7 @@ class spell_sha_fire_nova : public SpellScriptLoader
         {
             return new spell_sha_fire_nova_SpellScript();
         }
-};
+};*/
 
 // 8050 -Flame Shock
 /// Updated 4.3.4
@@ -637,7 +639,7 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                 return sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL);
             }
 
-            void HandleDummy(SpellEffIndex /* effIndex */)
+            void HandleDummy(SpellEffIndex effIndex )
             {
                 int32 damage = GetEffectValue();
                 SpellInfo const* triggeringSpell = GetTriggeringSpell();
@@ -647,7 +649,7 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                         if (Unit* owner = caster->GetOwner())
                         {
                             if (triggeringSpell)
-                                damage = int32(owner->SpellHealingBonusDone(target, triggeringSpell, damage, HEAL));
+                                damage = int32(owner->SpellHealingBonusDone(target, triggeringSpell, effIndex, damage, HEAL));
 
                             // Soothing Rains
                             if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_SOOTHING_RAIN, EFFECT_0))
@@ -841,25 +843,15 @@ class spell_sha_lava_lash : public SpellScriptLoader
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            void HandleDummy()
             {
-                if (Player* caster = GetCaster()->ToPlayer())
-                {
-                    int32 damage = GetEffectValue();
-                    int32 hitDamage = GetHitDamage();
-                    if (caster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-                    {
-                        // Damage is increased by 25% if your off-hand weapon is enchanted with Flametongue.
-                        if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
-                            AddPct(hitDamage, damage);
-                        SetHitDamage(hitDamage);
-                    }
-                }
+                if (!GetCaster()->HasAura(SPELL_SHAMAN_GLYPH_OF_LAVA_LASH))
+                    GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_LAVA_LASH_SPREAD, true);
             }
 
             void Register() OVERRIDE
             {
-                OnEffectHitTarget += SpellEffectFn(spell_sha_lava_lash_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+                OnHit += SpellHitFn(spell_sha_lava_lash_SpellScript::HandleDummy);
             }
 
         };
@@ -890,6 +882,8 @@ class spell_sha_lava_surge : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 GetTarget()->CastSpell(GetTarget(), SPELL_SHAMAN_LAVA_SURGE, true);
+                if (Player* player = GetTarget()->ToPlayer())
+                    player->RemoveSpellCooldown(SPELL_SHAMAN_LAVA_BURST);
             }
 
             void Register() OVERRIDE
@@ -1170,70 +1164,6 @@ class spell_sha_tidal_waves : public SpellScriptLoader
         }
 };
 
-
-// 114049 - Ascendance
-class spell_sha_ascendance : public SpellScriptLoader
-{
-    public:
-        spell_sha_ascendance() : SpellScriptLoader("spell_sha_ascendance") { }
-
-        class spell_sha_ascendance_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_sha_ascendance_SpellScript);
-
-            SpellCastResult CheckRequirement()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    switch (player->GetTalentSpecialization(player->GetActiveSpec()))
-                    {
-                        case TALENT_TREE_SHAMAN_ENHANCEMENT:
-                        case TALENT_TREE_SHAMAN_ELEMENTAL:
-                        case TALENT_TREE_SHAMAN_RESTORATION:
-                            return SPELL_CAST_OK;
-                        default:
-                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-                    }
-                }
-
-                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-            }
-
-            void HandleOnHit()
-            {
-                if (Player* player = GetCaster()->ToPlayer())
-                {
-                    switch (player->GetTalentSpecialization(player->GetActiveSpec()))
-                    {
-                        case TALENT_TREE_SHAMAN_ENHANCEMENT:
-                            player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_ENHANCEMENT, true);
-                            break;
-                        case TALENT_TREE_SHAMAN_ELEMENTAL:
-                            player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_ELEMENTAL, true);
-                            break;
-                        case TALENT_TREE_SHAMAN_RESTORATION:
-                            player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_RESTORATION, true);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            void Register() OVERRIDE
-            {
-                OnCheckCast += SpellCheckCastFn(spell_sha_ascendance_SpellScript::CheckRequirement);
-                OnHit += SpellHitFn(spell_sha_ascendance_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_sha_ascendance_SpellScript();
-        }
-};
-
-
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening();
@@ -1244,7 +1174,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_earthbind_totem();
     new spell_sha_earthen_power();
     new spell_sha_feedback();
-    new spell_sha_fire_nova();
+    //new spell_sha_fire_nova();
     new spell_sha_flame_shock();
     new spell_sha_focused_insight();
     new spell_sha_glyph_of_healing_wave();
@@ -1262,5 +1192,4 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_telluric_currents();
     new spell_sha_thunderstorm();
     new spell_sha_tidal_waves();
-    new spell_sha_ascendance();
 }

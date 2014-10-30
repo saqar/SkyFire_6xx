@@ -170,7 +170,7 @@ class spell_dru_eclipse_energize : public SpellScriptLoader
                 Player* caster = GetCaster()->ToPlayer();
 
                 // No boomy, no deal.
-                if (caster->GetTalentSpecialization(caster->GetActiveSpec()) != TALENT_TREE_DRUID_BALANCE)
+                if (caster->GetTalentSpecialization(caster->GetActiveSpec()) != SPECIALIZATION_DRUID_BALANCE)
                     return;
 
                 switch (GetSpellInfo()->Id)
@@ -535,7 +535,7 @@ class spell_dru_lifebloom : public SpellScriptLoader
                 int32 healAmount = aurEff->GetAmount();
                 if (Unit* caster = GetCaster())
                 {
-                    healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
+                    healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetEffIndex(), healAmount, HEAL, stack);
                     healAmount = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, stack);
 
                     GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
@@ -559,7 +559,7 @@ class spell_dru_lifebloom : public SpellScriptLoader
                         int32 healAmount = aurEff->GetAmount();
                         if (Unit* caster = GetCaster())
                         {
-                            healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
+                            healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), EFFECT_1, healAmount, HEAL, dispelInfo->GetRemovedCharges());
                             healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
                             target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
 

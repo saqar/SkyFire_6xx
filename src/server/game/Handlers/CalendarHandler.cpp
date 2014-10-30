@@ -171,8 +171,8 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
         for (uint8 j = 0; j < MAX_HOLIDAY_DURATIONS; ++j)
             data << uint32(holiday->Duration[j]);           // 10 * m_duration
 
-        for (uint8 j = 0; j < MAX_HOLIDAY_FLAGS; ++j)
-            data << uint32(holiday->CalendarFlags[j]);      // 10 * m_calendarFlags
+        //for (uint8 j = 0; j < MAX_HOLIDAY_FLAGS; ++j)
+        //    data << uint32(holiday->CalendarFlags[j]);      // 10 * m_calendarFlags
 
         data << holiday->TextureFilename;                   // m_textureFilename (holiday name)
     }
@@ -263,8 +263,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
             uint64 invitee = 0;
             uint8 status = 0;
             uint8 rank = 0;
-            uint8 mask = 0;
-            recvData.readPackGUID(invitee, mask);
+            recvData.readPackGUID(invitee);
             recvData >> status >> rank;
 
             // 946684800 is 01/01/2000 00:00:00 - default response time

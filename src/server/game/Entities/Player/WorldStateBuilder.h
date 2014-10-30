@@ -21,7 +21,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-// This builder had to be created because blizzard is swaping worldstate with value therefore a big rewrite would be needed everytime
+// This builder had to be created because blizzard is swapping worldstate with value therefore a big rewrite would be needed everytime
 class WorldStateBuilder
 {
     public:
@@ -32,13 +32,12 @@ class WorldStateBuilder
         {
             WorldPacket data(SMSG_INIT_WORLD_STATES, 4 + 4 + 4 + 3 + (_wstateList.size() * (4 + 4)));
             data << uint32(_mapId);
-            data << uint32(_zoneId);
             data << uint32(_areaId);
-            data.WriteBits(_wstateList.size(), 21);
-            data.FlushBits();
+            data << uint32(_zoneId);
+            data << uint32(_wstateList.size());
 
             for (std::map<uint32, uint32>::const_iterator iter = _wstateList.begin(); iter != _wstateList.end(); iter++)
-                data << uint32(iter->second) << uint32(iter->first);
+                data << uint32(iter->first) << uint32(iter->second);
 
             session->SendPacket(&data);
         }

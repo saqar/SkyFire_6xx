@@ -38,36 +38,18 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOSTORE_LOOT_ITEM");
     Player* player = GetPlayer();
     Loot* loot = NULL;
+    int32 lootCount;
 
-    int32 lootCount = recvData.ReadBits(23);
-    ObjectGuid* guids = new ObjectGuid[lootCount];
-
-    for (int i = 0; i < lootCount; i++)
-    {
-        (guids[i])[2] = recvData.ReadBit();
-        (guids[i])[7] = recvData.ReadBit();
-        (guids[i])[0] = recvData.ReadBit();
-        (guids[i])[6] = recvData.ReadBit();
-        (guids[i])[5] = recvData.ReadBit();
-        (guids[i])[3] = recvData.ReadBit();
-        (guids[i])[1] = recvData.ReadBit();
-        (guids[i])[4] = recvData.ReadBit();
-    }
+    recvData.read_skip<uint16>();
+    recvData >> lootCount;
 
     for (int i = 0; i < lootCount; i++)
     {
-        recvData.ReadByteSeq((guids[i])[0]);
-        recvData.ReadByteSeq((guids[i])[4]);
-        recvData.ReadByteSeq((guids[i])[1]);
-        recvData.ReadByteSeq((guids[i])[7]);
-        recvData.ReadByteSeq((guids[i])[6]);
-        recvData.ReadByteSeq((guids[i])[5]);
-        recvData.ReadByteSeq((guids[i])[3]);
-        recvData.ReadByteSeq((guids[i])[2]);
+        ObjectGuid guid;
         uint8 lootSlot;
-        recvData >> lootSlot;
 
-        uint64 guid = guids[i];
+        recvData >> guid;
+        recvData >> lootSlot;
 
         if (IS_GAMEOBJECT_GUID(guid))
         {
@@ -129,7 +111,6 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         if (loot->isLooted() && IS_ITEM_GUID(guid))
             player->GetSession()->DoLootRelease(guid);
     }
-    delete[] guids;
 }
 
 void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
@@ -224,9 +205,8 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                         guild->HandleMemberDepositMoney(this, guildGold, true);
 
                 WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-                data.WriteBit(playersNear.size() <= 1); // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
-                data.FlushBits();
                 data << uint32(goldPerPlayer);
+                data.WriteBit(playersNear.size() <= 1); // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
                 (*i)->GetSession()->SendPacket(&data);
             }
         }
@@ -240,9 +220,8 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                     guild->HandleMemberDepositMoney(this, guildGold, true);
 
             WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-            data.WriteBit(1);   // "You loot..."
-            data.FlushBits();
             data << uint32(loot->gold);
+            data.WriteBit(1);   // "You loot..."
             SendPacket(&data);
         }
 
@@ -263,7 +242,6 @@ void WorldSession::HandleLootOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: CMSG_LOOT");
 
     ObjectGuid guid;
-
     recvData >> guid;
 
     // Check possible cheat
@@ -285,7 +263,6 @@ void WorldSession::HandleLootReleaseOpcode(WorldPacket& recvData)
     // use internal stored guid
 
     ObjectGuid guid;
-    
     recvData >> guid;
 
     if (uint64 lootGuid = GetPlayer()->GetLootGUID())

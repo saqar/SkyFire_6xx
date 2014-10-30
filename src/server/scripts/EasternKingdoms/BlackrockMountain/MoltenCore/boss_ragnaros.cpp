@@ -96,7 +96,7 @@ class boss_ragnaros : public CreatureScript
                 _hasYelledMagmaBurst = false;
                 _hasSubmergedOnce = false;
                 _isBanished = false;
-                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0);
+                me->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, 0);
             }
 
             void EnterCombat(Unit* victim) OVERRIDE
@@ -173,7 +173,7 @@ class boss_ragnaros : public CreatureScript
                             me->SetReactState(REACT_AGGRESSIVE);
                             me->setFaction(14);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0);
+                            me->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, 0);
                             me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 AttackStart(target);
@@ -252,7 +252,7 @@ class boss_ragnaros : public CreatureScript
                                     //DoCast(me, 23973);
                                     me->setFaction(35);
                                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                    me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_SUBMERGED);
+                                    me->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, EMOTE_STATE_SUBMERGED);
                                     me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
                                     instance->SetData(DATA_RAGNAROS_ADDS, 0);
 

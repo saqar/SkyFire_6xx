@@ -570,9 +570,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (IsAIEnabled)
         GetAI()->DamageDealt(victim, damage, damagetype);
 
-    // Hook for OnDamage Event
-    sScriptMgr->OnDamage(this, victim, damage);
-
     if (victim->GetTypeId() == TYPEID_PLAYER && this != victim)
     {
         // Signal to pets that their owner was attacked
@@ -642,15 +639,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
-    if (!damage)
-    {
-        // Rage from absorbed damage
-        if (cleanDamage && cleanDamage->absorbed_damage && victim->getPowerType() == POWER_RAGE)
-            victim->RewardRage(cleanDamage->absorbed_damage, false);
-
-        return 0;
-    }
-
     TC_LOG_DEBUG("entities.unit", "DealDamageStart");
 
     uint32 health = victim->GetHealth();
@@ -682,7 +670,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
-    if (GetTypeId() == TYPEID_PLAYER && this != victim)
+    if (GetTypeId() == TYPEID_PLAYER && this != victim && damage)
     {
         Player* killer = ToPlayer();
 
@@ -706,103 +694,98 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             victim->ToCreature()->LowerPlayerDamageReq(health < damage ?  health : damage);
     }
 
-    if (health <= damage)
+    if (victim->GetTypeId() == TYPEID_PLAYER)
+        victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, damage);
+
+    if ((damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE) && damage)
     {
-        TC_LOG_DEBUG("entities.unit", "DealDamage: victim just died");
-
-        if (victim->GetTypeId() == TYPEID_PLAYER && victim != this)
-            victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
-
-        Kill(victim, durabilityLoss);
+        victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
+        if (victim->GetTypeId() == TYPEID_UNIT && !victim->IsPet())
+            victim->SetLastDamagedTime(time(NULL));
     }
-    else
+
+    if ((victim->GetTypeId() != TYPEID_PLAYER) && damage)
+        victim->AddThreat(this, float(damage), damageSchoolMask, spellProto);
+    else if (damage) // victim is a player
     {
-        TC_LOG_DEBUG("entities.unit", "DealDamageAlive");
-
-        if (victim->GetTypeId() == TYPEID_PLAYER)
-            victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, damage);
-
-        victim->ModifyHealth(-(int32)damage);
-
-        if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
+        // random durability for items (HIT TAKEN)
+        if (roll_chance_f(sWorld->getRate(RATE_DURABILITY_LOSS_DAMAGE)))
         {
-            victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
-            if (victim->GetTypeId() == TYPEID_UNIT && !victim->IsPet())
-                victim->SetLastDamagedTime(time(NULL));
+            EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END-1));
+            victim->ToPlayer()->DurabilityPointLossForEquipSlot(slot);
         }
+    }
 
-        if (victim->GetTypeId() != TYPEID_PLAYER)
-            victim->AddThreat(this, float(damage), damageSchoolMask, spellProto);
-        else                                                // victim is a player
+    // Rage from damage received
+    if (this != victim && victim->getPowerType() == POWER_RAGE)
+    {
+        uint32 rage_damage = damage + (cleanDamage ? cleanDamage->absorbed_damage : 0);
+        victim->RewardRage(rage_damage, false);
+    }
+
+    if (GetTypeId() == TYPEID_PLAYER && damage)
+    {
+        // random durability for items (HIT DONE)
+        if (roll_chance_f(sWorld->getRate(RATE_DURABILITY_LOSS_DAMAGE)))
         {
-            // random durability for items (HIT TAKEN)
-            if (roll_chance_f(sWorld->getRate(RATE_DURABILITY_LOSS_DAMAGE)))
-            {
-                EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END-1));
-                victim->ToPlayer()->DurabilityPointLossForEquipSlot(slot);
-            }
+            EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END-1));
+            ToPlayer()->DurabilityPointLossForEquipSlot(slot);
         }
+    }
 
-        // Rage from damage received
-        if (this != victim && victim->getPowerType() == POWER_RAGE)
+    if (damagetype != NODAMAGE && damage)
+    {
+        if (victim != this && victim->GetTypeId() == TYPEID_PLAYER) // does not support creature push_back
         {
-            uint32 rage_damage = damage + (cleanDamage ? cleanDamage->absorbed_damage : 0);
-            victim->RewardRage(rage_damage, false);
-        }
-
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            // random durability for items (HIT DONE)
-            if (roll_chance_f(sWorld->getRate(RATE_DURABILITY_LOSS_DAMAGE)))
-            {
-                EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END-1));
-                ToPlayer()->DurabilityPointLossForEquipSlot(slot);
-            }
-        }
-
-        if (damagetype != NODAMAGE && damage)
-        {
-            if (victim != this && victim->GetTypeId() == TYPEID_PLAYER) // does not support creature push_back
-            {
-                if (damagetype != DOT)
-                    if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL])
-                        if (spell->getState() == SPELL_STATE_PREPARING)
-                        {
-                            uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
-                            if (interruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
-                                victim->InterruptNonMeleeSpells(false);
-                            else if (interruptFlags & SPELL_INTERRUPT_FLAG_PUSH_BACK)
-                                spell->Delayed();
-                        }
-
-                if (Spell* spell = victim->m_currentSpells[CURRENT_CHANNELED_SPELL])
-                    if (spell->getState() == SPELL_STATE_CASTING)
+            if (damagetype != DOT)
+                if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL])
+                    if (spell->getState() == SPELL_STATE_PREPARING)
                     {
-                        uint32 channelInterruptFlags = spell->m_spellInfo->ChannelInterruptFlags;
-                        if (((channelInterruptFlags & CHANNEL_FLAG_DELAY) != 0) && (damagetype != DOT))
-                            spell->DelayedChannel();
+                        uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
+                        if (interruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
+                            victim->InterruptNonMeleeSpells(false);
+                        else if (interruptFlags & SPELL_INTERRUPT_FLAG_PUSH_BACK)
+                            spell->Delayed();
                     }
-            }
+
+            if (Spell* spell = victim->m_currentSpells[CURRENT_CHANNELED_SPELL])
+                if (spell->getState() == SPELL_STATE_CASTING)
+                {
+                    uint32 channelInterruptFlags = spell->m_spellInfo->ChannelInterruptFlags;
+                    if (((channelInterruptFlags & CHANNEL_FLAG_DELAY) != 0) && (damagetype != DOT))
+                        spell->DelayedChannel();
+                }
         }
+    }
 
-        // last damage from duel opponent
-        if (duel_hasEnded)
-        {
-            Player* he = duel_wasMounted ? victim->GetCharmer()->ToPlayer() : victim->ToPlayer();
+    // last damage from duel opponent
+    if (duel_hasEnded)
+    {
+        Player* he = duel_wasMounted ? victim->GetCharmer()->ToPlayer() : victim->ToPlayer();
 
-            ASSERT(he && he->duel);
+        ASSERT(he && he->duel);
 
-            if (duel_wasMounted) // In this case victim==mount
-                victim->SetHealth(1);
-            else
-                he->SetHealth(1);
+        he->duel->opponent->CombatStopWithPets(true);
+        he->CombatStopWithPets(true);
 
-            he->duel->opponent->CombatStopWithPets(true);
-            he->CombatStopWithPets(true);
+        he->CastSpell(he, 7267, true);                  // beg
+        he->DuelComplete(DUEL_WON);
+    }
 
-            he->CastSpell(he, 7267, true);                  // beg
-            he->DuelComplete(DUEL_WON);
-        }
+    {
+        if (victim->IsAIEnabled)
+            victim->GetAI()->OnDamageTaken(this, damage);
+
+        if (IsAIEnabled)
+            GetAI()->OnDamageDealt(victim, damage, damagetype);
+
+        // Hook for OnDamage Event
+        sScriptMgr->OnDamage(this, victim, damage);
+
+        if (health > damage)
+            victim->ModifyHealth(-(int32)damage);
+        else
+            Kill(victim, durabilityLoss);
     }
 
     TC_LOG_DEBUG("entities.unit", "DealDamageEnd returned %d damage", damage);
@@ -941,7 +924,7 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit* victim, uint32 spellID, uint32 damage)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellID);
     SpellNonMeleeDamage damageInfo(this, victim, spellInfo->Id, spellInfo->SchoolMask);
-    damage = SpellDamageBonusDone(victim, spellInfo, damage, SPELL_DIRECT_DAMAGE);
+    damage = SpellDamageBonusDone(victim, spellInfo, 0, damage, SPELL_DIRECT_DAMAGE);
     damage = victim->SpellDamageBonusTaken(this, spellInfo, damage, SPELL_DIRECT_DAMAGE);
 
     CalculateSpellDamageTaken(&damageInfo, damage, spellInfo);
@@ -1376,7 +1359,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
             if (Unit* caster = (*dmgShieldItr)->GetCaster())
             {
-                damage = caster->SpellDamageBonusDone(this, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                damage = caster->SpellDamageBonusDone(this, i_spellProto, (*dmgShieldItr)->GetEffIndex(), damage, SPELL_DIRECT_DAMAGE);
                 damage = this->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
             }
 
@@ -1460,22 +1443,15 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
     if (armor < 0.0f)
         armor = 0.0f;
 
-    float levelModifier = getLevel();
-
-    if (levelModifier > 85)
-        levelModifier = levelModifier + (4.5 * (levelModifier - 59)) + (20 * (levelModifier - 80)) + (22 * (levelModifier - 85));
-    else if (levelModifier > 80)
-        levelModifier = levelModifier + (4.5 * (levelModifier - 59)) + (20 * (levelModifier - 80));
-    else if (levelModifier > 59)
-        levelModifier = levelModifier + (4.5 * (levelModifier - 59));
-
-    float tmpvalue = 0.1f * armor / (8.5f * levelModifier + 40);
-    tmpvalue = tmpvalue / (1.0f + tmpvalue);
+    int scalingLevel = getLevel() > GT_MAX_LEVEL ? GT_MAX_LEVEL - 1 : getLevel() - 1;
+    float tmpvalue = armor / (armor + sgtArmorMitigationByLvlStore.LookupEntry(scalingLevel)->ratio);
 
     if (tmpvalue < 0.0f)
         tmpvalue = 0.0f;
-    if (tmpvalue > 0.75f)
-        tmpvalue = 0.75f;
+
+    // Wod MaxValue
+    if (tmpvalue > 0.85f)
+        tmpvalue = 0.85f;
 
     return std::max<uint32>(damage * (1.0f - tmpvalue), 1);
 }
@@ -2110,18 +2086,15 @@ void Unit::SendMeleeAttackStart(Unit* victim)
 
 void Unit::SendMeleeAttackStop(Unit* victim)
 {
-    WorldPacket data(SMSG_ATTACKSTOP, 1 + 2 + 2 + 16 + 16);
+    WorldPacket data(SMSG_ATTACKSTOP, 8 + 8);
 
     ObjectGuid attackerGuid = GetGUID();
     ObjectGuid victimGuid = victim ? victim->GetGUID() : 0;
 
     data << attackerGuid;
     data << victimGuid;
-    
-    data.WriteBit(1);
-
+    data.WriteBit(0);
     data.FlushBits();
-
     SendMessageToSet(&data, true);
 }
 
@@ -4700,54 +4673,22 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
     int32 overkill = log->damage - log->target->GetHealth();
 
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+4+4+4+1+4+4+1+1+4+4+1)); // we guess size
-    data.WriteBit(targetGuid[2]);
-    data.WriteBit(attackerGuid[7]);
-    data.WriteBit(attackerGuid[6]);
-    data.WriteBit(attackerGuid[1]);
-    data.WriteBit(attackerGuid[5]);
-    data.WriteBit(0); // Unk
-    data.WriteBit(attackerGuid[0]);
-    data.WriteBit(targetGuid[0]);
-    data.WriteBit(targetGuid[7]);
-    data.WriteBit(attackerGuid[3]);
-    data.WriteBit(targetGuid[6]);
-    data.WriteBit(0); // Unk
-    data.WriteBit(0); // HasPowerData
-    data.WriteBit(targetGuid[1]);
-    data.WriteBit(0); // No floats
-    data.WriteBit(targetGuid[5]);
-    data.WriteBit(attackerGuid[2]);
-    data.WriteBit(attackerGuid[4]);
-    data.WriteBit(targetGuid[3]);
-    data.WriteBit(targetGuid[4]);
+    data << targetGuid;
+    data << attackerGuid;
 
-    data.FlushBits();
-
-    data << uint32(log->blocked);
-    data.WriteByteSeq(attackerGuid[1]);
-    data << uint32(overkill > 0 ? overkill : 0);
-    data.WriteByteSeq(targetGuid[3]);
-    data.WriteByteSeq(attackerGuid[0]);
-    data.WriteByteSeq(targetGuid[6]);
-    data.WriteByteSeq(targetGuid[4]);
-    data.WriteByteSeq(attackerGuid[7]);
-    data << uint32(log->resist);
-    data << uint32(log->absorb);
-    data.WriteByteSeq(attackerGuid[5]);
-    data.WriteByteSeq(targetGuid[5]);
-    data.WriteByteSeq(attackerGuid[3]);
-    data.WriteByteSeq(attackerGuid[2]);
-    data.WriteByteSeq(targetGuid[2]);
-    data.WriteByteSeq(attackerGuid[6]);
-    data.WriteByteSeq(targetGuid[0]);
-    data.WriteByteSeq(attackerGuid[4]);
-    data << uint32(log->damage);
-    data << uint8(log->schoolMask);
-    data.WriteByteSeq(targetGuid[7]);
-    data << uint32(log->HitInfo);
-    data.WriteByteSeq(targetGuid[1]);
     data << uint32(log->SpellID);
+    data << uint32(log->damage);
+    data << uint32(overkill > 0 ? overkill : 0);
+    data << uint8(log->schoolMask);
+    data << uint32(log->absorb);
+    data << uint32(log->resist);
+    data << uint32(log->blocked);
 
+    data.WriteBit(0); // IsPeriodic
+    data.WriteBits(log->HitInfo, 9);
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.FlushBits();
     SendMessageToSet(&data, true);
 }
 
@@ -4783,70 +4724,10 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
     ObjectGuid victimGuid = GetGUID();
 
     WorldPacket data(SMSG_PERIODICAURALOG, 30);
-    data.WriteBit(victimGuid[5]);
-    data.WriteBit(victimGuid[6]);
-    data.WriteBit(casterGuid[6]);
-    data.WriteBit(casterGuid[1]);
-    data.WriteBit(victimGuid[3]);
-    data.WriteBit(victimGuid[0]);
-    data.WriteBit(casterGuid[3]);
-    data.WriteBit(victimGuid[2]);
-    data.WriteBit(casterGuid[7]);
-    data.WriteBit(casterGuid[4]);
-    data.WriteBit(casterGuid[5]);
-    data.WriteBit(victimGuid[4]);
-    data.WriteBits(1, 21); // Count
-
-    // Count loop here
-    data.WriteBit(pInfo->critical);
-    size_t pos = data.bitwpos();
-
-    // All sent for now, will mess with it l8 ^^
-    switch (aura->GetAuraType())
-    {
-
-        case SPELL_AURA_PERIODIC_DAMAGE:
-        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-            data.WriteBit(0); // Int 4 -- Absorb
-            data.WriteBit(0); // Int 3 -- SchoolMask
-            data.WriteBit(0); // Int 2 -- OverKill
-            data.WriteBit(0); // Int 5 -- Resist
-            break;
-        case SPELL_AURA_PERIODIC_HEAL:
-        case SPELL_AURA_OBS_MOD_HEALTH:
-            data.WriteBit(0); // Int 4 -- Absorb
-            data.WriteBit(0); // Int 3 -- SchoolMask
-            data.WriteBit(0); // Int 2 -- OverHeal
-            data.WriteBit(1); // Int 5
-            break;
-        case SPELL_AURA_OBS_MOD_POWER:
-        case SPELL_AURA_PERIODIC_ENERGIZE:
-            data.WriteBit(1); // Int 4
-            data.WriteBit(0); // Int 3
-            data.WriteBit(1); // Int 2
-            data.WriteBit(1); // Int 5
-        case SPELL_AURA_PERIODIC_MANA_LEECH:
-            data.WriteBit(1); // Int 4
-            data.WriteBit(0); // Int 3
-            data.WriteBit(1); // Int 2
-            data.WriteBit(1); // Int 5
-            break;
-        default:
-            data.WriteBit(1); // Int 4
-            data.WriteBit(1); // Int 3
-            data.WriteBit(1); // Int 2
-            data.WriteBit(1); // Int 5
-            break;
-    }
-
-    data.WriteBit(victimGuid[7]);
-    data.WriteBit(0); // Some data
-    data.WriteBit(casterGuid[2]);
-    data.WriteBit(casterGuid[0]);
-    data.WriteBit(victimGuid[1]);
-    data.FlushBits();
-
-    data.WriteByteSeq(victimGuid[3]);
+    data << victimGuid;
+    data << casterGuid;
+    data << uint32(aura->GetId());
+    data << uint32(1);
 
     // Switch Loop
     data << uint32(aura->GetAuraType());                    // auraId
@@ -4855,51 +4736,49 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
 
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-            data << uint32(aura->GetSpellInfo()->GetSchoolMask());
             data << uint32(pInfo->damage);                  // damage
             data << uint32(pInfo->overDamage);              // overkill
+            data << uint32(aura->GetSpellInfo()->GetSchoolMask());
             data << uint32(pInfo->absorb);                  // absorb
             data << uint32(pInfo->resist);                  // resist
             break;
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
-            data << uint32(aura->GetSpellInfo()->GetSchoolMask());
             data << uint32(pInfo->damage);                  // damage
             data << uint32(pInfo->overDamage);              // overheal
+            data << uint32(aura->GetSpellInfo()->GetSchoolMask());
             data << uint32(pInfo->absorb);                  // absorb
+            data << uint32(0);
             break;
         case SPELL_AURA_OBS_MOD_POWER:
         case SPELL_AURA_PERIODIC_ENERGIZE:
-            data << uint32(aura->GetMiscValue());           // power type
             data << uint32(pInfo->damage);                  // damage
+            data << uint32(0);
+            data << uint32(aura->GetMiscValue());           // power type
+            data << uint32(0);
+            data << uint32(0);
             break;
         case SPELL_AURA_PERIODIC_MANA_LEECH:
+            data << uint32(pInfo->damage);                  // damage
+            data << uint32(0);
             data << uint32(aura->GetMiscValue());           // power type
-            data << uint32(pInfo->damage);                  // amount
-            //data << float(pInfo->multiplier);               // gain multiplier
+            data << uint32(0);
+            data << uint32(0);
             break;
         default:
             TC_LOG_ERROR("entities.unit", "Unit::SendPeriodicAuraLog: unknown aura %u", uint32(aura->GetAuraType()));
             data << uint32(0); // Mask
+            data << uint32(0); // Mask
+            data << uint32(0); // Mask
+            data << uint32(0); // Mask
+            data << uint32(0); // Mask
             break;
     }
 
-    data.WriteByteSeq(casterGuid[4]);
-    data.WriteByteSeq(casterGuid[3]);
-    data.WriteByteSeq(casterGuid[0]);
-    data.WriteByteSeq(casterGuid[5]);
-    data.WriteByteSeq(casterGuid[1]);
-    data << uint32(aura->GetId());                          // spellId
-    data.WriteByteSeq(victimGuid[7]);
-    data.WriteByteSeq(victimGuid[4]);
-    data.WriteByteSeq(victimGuid[1]);
-    data.WriteByteSeq(casterGuid[2]);
-    data.WriteByteSeq(victimGuid[5]);
-    data.WriteByteSeq(casterGuid[7]);
-    data.WriteByteSeq(victimGuid[2]);
-    data.WriteByteSeq(casterGuid[6]);
-    data.WriteByteSeq(victimGuid[0]);
-    data.WriteByteSeq(victimGuid[6]);
+    data.WriteBit(pInfo->critical);
+    data.WriteBit(0); // Multistrike
+    data.WriteBit(0);
+    data.WriteBit(0); //HasLogData
     SendMessageToSet(&data, true);
 }
 
@@ -4947,37 +4826,22 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
     size_t maxsize = 4+5+5+4+4+1+4+4+4+4+4+1+4+4+4+4+4*12;
     WorldPacket data(SMSG_ATTACKERSTATEUPDATE, maxsize);    // we guess size
 
-    bool hasUnkFlags = damageInfo->HitInfo & HITINFO_UNK26;
+    bool hasUnkFlags = 0;//damageInfo->HitInfo & HITINFO_UNK26;
     uint32 unkCounter  = 0;
 
     data.WriteBit(hasUnkFlags);
-
-    if (hasUnkFlags)
-    {
-        data.WriteBits(unkCounter, 21);
-        data.FlushBits();
-
-        data << uint32(0);
-
-        for (uint32 i = 0; i < unkCounter; ++i)
-        {
-            data << uint32(0);
-            data << uint32(0);
-        }
-
-        data << uint32(0);
-        data << uint32(0);
-    }
-
     // Needs to be flushed because data.wpos() wouldnt return the correct placeholder
     data.FlushBits();
 
     size_t size = data.wpos();
     data << uint32(0); // Placeholder
 
+    ObjectGuid attacker = damageInfo->attacker->GetGUID128();
+    ObjectGuid target = damageInfo->target->GetGUID128();
+
     data << uint32(damageInfo->HitInfo);
-    data.append(damageInfo->attacker->GetPackGUID());
-    data.append(damageInfo->target->GetPackGUID());
+    data << attacker;
+    data << target;
     data << uint32(damageInfo->damage);                     // Full damage
     int32 overkill = damageInfo->damage - damageInfo->target->GetHealth();
     data << uint32(overkill < 0 ? 0 : overkill);            // Overkill
@@ -7282,7 +7146,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         return false;
 
     // try detect target manually if not set
-    if (target == NULL)
+    if (!target)
         target = !(procFlags & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)) && triggerEntry && triggerEntry->IsPositive() ? this : victim;
 
     if (basepoints0)
@@ -7882,7 +7746,7 @@ bool Unit::HasAuraState(AuraStateType flag, SpellInfo const* spellProto, Unit co
     return HasFlag(UNIT_FIELD_AURA_STATE, 1<<(flag-1));
 }
 
-void Unit::SetOwnerGUID(uint64 owner)
+void Unit::SetOwnerGUID(ObjectGuid owner)
 {
     if (GetOwnerGUID() == owner)
         return;
@@ -7981,7 +7845,7 @@ Unit* Unit::GetCharm() const
             return pet;
 
         TC_LOG_ERROR("entities.unit", "Unit::GetCharm: Charmed creature %u not exist.", GUID_LOPART(charm_guid));
-        const_cast<Unit*>(this)->SetUInt64Value(UNIT_FIELD_CHARM, 0);
+        const_cast<Unit*>(this)->SetGuidValue(UNIT_FIELD_CHARM, 0);
     }
 
     return NULL;
@@ -8047,7 +7911,7 @@ void Unit::SetMinion(Minion *minion, bool apply)
 
         if (minion->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
         {
-            if (AddUInt64Value(UNIT_FIELD_SUMMON, minion->GetGUID()))
+            if (AddGuidValue(UNIT_FIELD_SUMMON, minion->GetGUID128()))
             {
             }
         }
@@ -8122,7 +7986,7 @@ void Unit::SetMinion(Minion *minion, bool apply)
 
         //if (minion->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
         {
-            if (RemoveUInt64Value(UNIT_FIELD_SUMMON, minion->GetGUID()))
+            if (RemoveGuidValue(UNIT_FIELD_SUMMON, minion->GetGUID128()))
             {
                 // Check if there is another minion
                 for (ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
@@ -8144,7 +8008,7 @@ void Unit::SetMinion(Minion *minion, bool apply)
                     if (!(*itr)->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
                         continue;
 
-                    if (AddUInt64Value(UNIT_FIELD_SUMMON, (*itr)->GetGUID()))
+                    if (AddGuidValue(UNIT_FIELD_SUMMON, (*itr)->GetGUID128()))
                     {
                         // show another pet bar if there is no charm bar
                         if (GetTypeId() == TYPEID_PLAYER && !GetCharmGUID())
@@ -8193,7 +8057,7 @@ void Unit::SetCharm(Unit* charm, bool apply)
     {
         if (GetTypeId() == TYPEID_PLAYER)
         {
-            if (!AddUInt64Value(UNIT_FIELD_CHARM, charm->GetGUID()))
+            if (!AddGuidValue(UNIT_FIELD_CHARM, charm->GetGUID128()))
                 TC_LOG_FATAL("entities.unit", "Player %s is trying to charm unit %u, but it already has a charmed unit " UI64FMTD "", GetName().c_str(), charm->GetEntry(), GetCharmGUID());
 
             charm->m_ControlledByPlayer = true;
@@ -8206,7 +8070,7 @@ void Unit::SetCharm(Unit* charm, bool apply)
         // PvP, FFAPvP
         charm->SetByteValue(UNIT_FIELD_SHAPESHIFT_FORM, 1, GetByteValue(UNIT_FIELD_SHAPESHIFT_FORM, 1));
 
-        if (!charm->AddUInt64Value(UNIT_FIELD_CHARMED_BY, GetGUID()))
+        if (!charm->AddGuidValue(UNIT_FIELD_CHARMED_BY, GetGUID()))
             TC_LOG_FATAL("entities.unit", "Unit %u is being charmed, but it already has a charmer " UI64FMTD "", charm->GetEntry(), charm->GetCharmerGUID());
 
         _isWalkingBeforeCharm = charm->IsWalking();
@@ -8219,11 +8083,11 @@ void Unit::SetCharm(Unit* charm, bool apply)
     {
         if (GetTypeId() == TYPEID_PLAYER)
         {
-            if (!RemoveUInt64Value(UNIT_FIELD_CHARM, charm->GetGUID()))
+            if (!RemoveGuidValue(UNIT_FIELD_CHARM, charm->GetGUID()))
                 TC_LOG_FATAL("entities.unit", "Player %s is trying to uncharm unit %u, but it has another charmed unit " UI64FMTD "", GetName().c_str(), charm->GetEntry(), GetCharmGUID());
         }
 
-        if (!charm->RemoveUInt64Value(UNIT_FIELD_CHARMED_BY, GetGUID()))
+        if (!charm->RemoveGuidValue(UNIT_FIELD_CHARMED_BY, GetGUID()))
             TC_LOG_FATAL("entities.unit", "Unit %u is being uncharmed, but it has another charmer " UI64FMTD "", charm->GetEntry(), charm->GetCharmerGUID());
 
         if (charm->GetTypeId() == TYPEID_PLAYER)
@@ -8498,51 +8362,21 @@ void Unit::SendHealSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, uint32 
     ObjectGuid casterGuid = GetGUID();
 
     // we guess size
-    WorldPacket data(SMSG_SPELLHEALLOG, 8 + 8 + 4 + 4 + 4 + 4 + 1 + 1);
+    WorldPacket data(SMSG_SPELLHEALLOG, 16 + 16 + 4 + 4 + 4 + 4 + 1);
 
+    data << victimGuid;
+    data << casterGuid;
     data << uint32(SpellID);
-    data << uint32(Absorb);
     data << uint32(Damage);
     data << uint32(OverHeal);
+    data << uint32(Absorb);
 
-    data.WriteBit(victimGuid[0]);
-    data.WriteBit(casterGuid[2]);
-    data.WriteBit(casterGuid[6]);
-    data.WriteBit(victimGuid[2]);
     data.WriteBit(critical);
-    data.WriteBit(casterGuid[3]);
-    data.WriteBit(casterGuid[0]);
-    data.WriteBit(casterGuid[5]);
-    data.WriteBit(victimGuid[3]);
+    data.WriteBit(0); // Multistrike
+    data.WriteBit(0);
+    data.WriteBit(0);
     data.WriteBit(0); // PowerData
-    data.WriteBit(victimGuid[7]);
-    data.WriteBit(victimGuid[5]);
-    data.WriteBit(casterGuid[7]);
-    data.WriteBit(victimGuid[4]);
-    data.WriteBit(0);
-    data.WriteBit(0);
-    data.WriteBit(casterGuid[4]);
-    data.WriteBit(casterGuid[1]);
-    data.WriteBit(victimGuid[1]);
-    data.WriteBit(victimGuid[6]);
-
-    data.WriteByteSeq(casterGuid[2]);
-    data.WriteByteSeq(victimGuid[6]);
-    data.WriteByteSeq(casterGuid[5]);
-    data.WriteByteSeq(casterGuid[3]);
-    data.WriteByteSeq(victimGuid[7]);
-    data.WriteByteSeq(casterGuid[7]);
-    data.WriteByteSeq(casterGuid[6]);
-    data.WriteByteSeq(casterGuid[1]);
-    data.WriteByteSeq(victimGuid[2]);
-    data.WriteByteSeq(victimGuid[4]);
-    data.WriteByteSeq(victimGuid[3]);
-    data.WriteByteSeq(victimGuid[0]);
-    data.WriteByteSeq(victimGuid[5]);
-    data.WriteByteSeq(casterGuid[0]);
-    data.WriteByteSeq(victimGuid[1]);
-    data.WriteByteSeq(casterGuid[4]);
-
+    data.FlushBits();
     SendMessageToSet(&data, true);
 }
 
@@ -8637,7 +8471,7 @@ void Unit::EnergizeBySpell(Unit* victim, uint32 spellId, int32 damage, Powers po
     victim->getHostileRefManager().threatAssist(this, float(damage) * 0.5f, spellInfo);
 }
 
-uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack) const
+uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 effIndex, int32 pdamage, DamageEffectType damagetype, uint32 stack /*= 1*/) const
 {
     if (!spellProto || !victim || damagetype == DIRECT_DAMAGE)
         return pdamage;
@@ -8654,12 +8488,14 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // For totems get damage bonus from owner
     if (GetTypeId() == TYPEID_UNIT && ToCreature()->IsTotem())
         if (Unit* owner = GetOwner())
-            return owner->SpellDamageBonusDone(victim, spellProto, pdamage, damagetype);
+            return owner->SpellDamageBonusDone(victim, spellProto, effIndex, pdamage, damagetype);
 
     // Done total percent damage auras
     float DoneTotalMod = 1.0f;
     float ApCoeffMod = 1.0f;
     int32 DoneTotal = 0;
+
+    Unit const* ownerOrSelf = GetOwner() ? GetOwner() : this;
 
     // Pet damage?
     if (GetTypeId() == TYPEID_UNIT && !ToCreature()->IsPet())
@@ -8849,14 +8685,14 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     }
 
     // Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit  = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
+    int32 DoneAdvertisedBenefit  = ownerOrSelf->SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
     // Pets just add their bonus damage to their spell damage
     // note that their spell damage is just gain of their own auras
     if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
         DoneAdvertisedBenefit += ((Guardian*)this)->GetBonusDamage();
 
     // Check for table values
-    float coeff = 0;
+    float coeff = 0.f;
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
     if (bonus)
     {
@@ -8865,7 +8701,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             coeff = bonus->dot_damage;
             if (bonus->ap_dot_bonus > 0)
             {
-                WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
+                WeaponAttackType attType = BASE_ATTACK;//(spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
                 float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += int32(bonus->ap_dot_bonus * stack * ApCoeffMod * APbonus);
@@ -8876,7 +8712,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             coeff = bonus->direct_damage;
             if (bonus->ap_bonus > 0)
             {
-                WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
+                WeaponAttackType attType = BASE_ATTACK;//(spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
                 float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += int32(bonus->ap_bonus * stack * ApCoeffMod * APbonus);
@@ -8886,10 +8722,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Default calculation
     if (DoneAdvertisedBenefit)
     {
-        if (!bonus || coeff < 0)
-            coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack);
-
-        float factorMod = CalculateLevelPenalty(spellProto) * stack;
+        if (!bonus || !coeff)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())
         {
@@ -8897,7 +8731,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
             coeff /= 100.0f;
         }
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff * factorMod);
+
+        if (coeff > 0.f)
+            DoneTotal += int32(DoneAdvertisedBenefit * coeff * stack);
     }
 
     float tmpDamage = (int32(pdamage) + DoneTotal) * DoneTotalMod;
@@ -8962,7 +8798,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                 AddPct(TakenTotalMod, (*i)->GetAmount());
     }
 
-    int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(spellProto->GetSchoolMask());
+    int32 TakenAdvertisedBenefit = 0;SpellBaseDamageBonusTaken(spellProto->GetSchoolMask());
 
     // Check for table values
     float coeff = 0;
@@ -9022,12 +8858,15 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        if (HasAuraType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT))
+            return floor(ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * (GetTotalAuraMultiplier(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT) - 1.f));
+
         // Base value
         DoneAdvertisedBenefit += ToPlayer()->GetBaseSpellPowerBonus();
 
         // Check if we are ever using mana - PaperDollFrame.lua
         if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
-            DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+            DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)));  // spellpower from intellect
 
         // Damage bonus from stats
         AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
@@ -9301,12 +9140,12 @@ uint32 Unit::SpellCriticalHealingBonus(SpellInfo const* /*spellProto*/, uint32 d
     return damage;
 }
 
-uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack) const
+uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack /*= 1*/) const
 {
     // For totems get healing bonus from owner (statue isn't totem in fact)
     if (GetTypeId() == TYPEID_UNIT && IsTotem())
         if (Unit* owner = GetOwner())
-            return owner->SpellHealingBonusDone(victim, spellProto, healamount, damagetype, stack);
+            return owner->SpellHealingBonusDone(victim, spellProto, effIndex, healamount, damagetype, stack);
 
     // No bonus healing for potion spells
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
@@ -9314,6 +9153,8 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
 
     float DoneTotalMod = 1.0f;
     int32 DoneTotal = 0;
+
+    Unit const* ownerOrSelf = GetOwner() ? GetOwner() : this;
 
     // Healing done percent
     AuraEffectList const& mHealingDonePct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
@@ -9364,12 +9205,16 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         }
     }
 
+    // Earth Shield, cannot be done other way
+    if (Aura* aura = GetAura(974, GetGUID()))
+        AddPct(DoneTotalMod, aura->GetEffect(EFFECT_1)->GetAmount());
+
     // Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit = SpellBaseHealingBonusDone(spellProto->GetSchoolMask());
+    int32 DoneAdvertisedBenefit = ownerOrSelf->SpellBaseHealingBonusDone(spellProto->GetSchoolMask());
 
     // Check for table values
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
-    float coeff = 0;
+    float coeff = 0.f;
     float factorMod = 1.0f;
     if (bonus)
     {
@@ -9398,10 +9243,8 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     // Default calculation
     if (DoneAdvertisedBenefit)
     {
-        if (!bonus || coeff < 0)
-            coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack) * 1.88f;  // As wowwiki says: C = (Cast Time / 3.5) * 1.88 (for healing spells)
-
-        factorMod *= CalculateLevelPenalty(spellProto) * stack;
+        if (!bonus || !coeff)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         if (Player* modOwner = GetSpellModOwner())
         {
@@ -9410,7 +9253,8 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
             coeff /= 100.0f;
         }
 
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff * factorMod);
+        if (coeff > 0.f)
+            DoneTotal += int32(DoneAdvertisedBenefit * coeff);
     }
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -9457,7 +9301,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     int32 TakenTotal = 0;
 
     // Taken fixed damage bonus auras
-    int32 TakenAdvertisedBenefit = SpellBaseHealingBonusTaken(spellProto->GetSchoolMask());
+    int32 TakenAdvertisedBenefit = 0;//SpellBaseHealingBonusTaken(spellProto->GetSchoolMask());
 
     // Nourish cast
     if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellFamilyFlags[1] & 0x2000000)
@@ -9537,12 +9381,15 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask) const
     // Healing bonus of spirit, intellect and strength
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        if (HasAuraType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT))
+            return floor(ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * (GetTotalAuraMultiplier(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT) - 1.f));
+
         // Base value
         advertisedBenefit += ToPlayer()->GetBaseSpellPowerBonus();
 
         // Check if we are ever using mana - PaperDollFrame.lua
         if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
-            advertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+            advertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)));  // spellpower from intellect
 
         // Healing bonus from stats
         AuraEffectList const& mHealingDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT);
@@ -9772,7 +9619,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                     normalized = true;
                     break;
                 }
-        DoneFlatBenefit += int32(APbonus/14.0f * GetAPMultiplier(attType, normalized));
+        DoneFlatBenefit += int32(APbonus/3.5f * GetAPMultiplier(attType, normalized));
     }
 
     // Done total percent damage auras
@@ -10282,6 +10129,15 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (!(creature->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT))
             Dismount();
     }
+    else if (Player* player = ToPlayer())
+    {
+        if (PvP)
+        {
+            player->SetPvPTimer(15000); // 5 + 10 secs
+            if (!player->IsInPvPCombat() && PvP)
+                player->SetInPvPCombat(true);
+        }
+    }
 
     for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
     {
@@ -10315,8 +10171,8 @@ void Unit::ClearInCombat()
         else if (!IsCharmed())
             return;
     }
-    else
-        ToPlayer()->UpdatePotionCooldown();
+    else if (Player* player = ToPlayer())
+        player->UpdatePotionCooldown();
 
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }
@@ -11841,6 +11697,54 @@ int32 Unit::GetMaxPower(Powers power) const
     return GetInt32Value(UNIT_FIELD_MAX_POWER + powerIndex);
 }
 
+int32 Unit::GetDefaultPower(Powers power) const
+{
+    switch (power)
+    {
+        case POWER_MANA: // no default
+            return GetCreateMana();
+        case POWER_FOCUS:
+        case POWER_ENERGY:
+            return 100;
+        case POWER_SOUL_SHARDS:
+            return 4;
+        case POWER_RAGE:
+        case POWER_RUNIC_POWER:
+        case POWER_HOLY_POWER:
+        case POWER_SHADOW_ORBS:
+            return 0;
+        case POWER_DEMONIC_FURY:
+            return 1000;
+        case POWER_BURNING_EMBERS:
+            return 40;
+
+        // unknown / NYI / unused
+        case POWER_RUNES:
+            return 8;
+        case POWER_CHI:
+            return 4;
+        case POWER_LIGHT_FORCE:
+        case POWER_ECLIPSE:
+        case POWER_DARK_FORCE:
+        case POWER_ALTERNATE_POWER:
+        case POWER_ARCANE_CHARGES:
+        default:
+            return 0;
+    }
+}
+
+bool Unit::IsPermanentPower(Powers power) const
+{
+    switch (power)
+    {
+        case POWER_MANA:
+        case POWER_RAGE:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void Unit::SetPower(Powers power, int32 val)
 {
     uint32 powerIndex = GetPowerIndex(power);
@@ -11858,29 +11762,11 @@ void Unit::SetPower(Powers power, int32 val)
         ObjectGuid guid = GetGUID();
 
         WorldPacket data(SMSG_POWER_UPDATE, 8 + 4 + 1 + 4);
-        data.WriteBit(guid[4]);
-        data.WriteBit(guid[6]);
-        data.WriteBit(guid[7]);
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[2]);
-        data.WriteBit(guid[3]);
-        data.WriteBit(guid[0]);
-        data.WriteBit(guid[1]);
-        data.WriteBits(1, 21); // 1 update
+        data << guid;
+        data << uint32(1);
 
-        data.WriteByteSeq(guid[7]);
-        data.WriteByteSeq(guid[0]);
-        data.WriteByteSeq(guid[5]);
-        data.WriteByteSeq(guid[3]);
-        data.WriteByteSeq(guid[1]);
-        data.WriteByteSeq(guid[2]);
-        data.WriteByteSeq(guid[4]);
-
-        data << uint8(powerIndex);
         data << int32(val);
-
-        data.WriteByteSeq(guid[6]);
-
+        data << uint8(power);
         SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER);
     }
 
@@ -11962,7 +11848,7 @@ int32 Unit::GetCreatePowers(Powers power) const
         case POWER_RUNES:
             return 0;
         case POWER_SOUL_SHARDS:
-            return 3;
+            return 4;
         case POWER_ECLIPSE:
             return 100;
         case POWER_HOLY_POWER:
@@ -11971,6 +11857,12 @@ int32 Unit::GetCreatePowers(Powers power) const
             return 0;
         case POWER_CHI:
             return 4;
+        case POWER_SHADOW_ORBS:
+            return 3;
+        case POWER_DEMONIC_FURY:
+            return 1000;
+        case POWER_BURNING_EMBERS:
+            return 40;
         default:
             break;
     }
@@ -12819,6 +12711,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
             } // for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
         } // if (!handled)
 
+        // Lightning Shield - No other way to do this !!!! - More checks to be done soon - Shouldnt drop charges but has them - damn you blizz
+        if (spellInfo && spellInfo->Id == 324)
+            takeCharges = false;
+
         // Remove charge (aura can be removed by triggers)
         if (prepare && useCharges && takeCharges)
             i->aura->DropCharge();
@@ -13199,6 +13095,59 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply)
         ApplyPercentModFloatValue(UNIT_FIELD_MOD_CASTING_SPEED, -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_MOD_SPELL_HASTE, -val, apply);
     }
+}
+
+
+void Unit::RecalculateAttackAndCastTime()
+{
+    Player* player = ToPlayer();
+
+    if (!player)
+        return;
+
+    SetFloatValue(UNIT_FIELD_MOD_RANGED_HASTE, 1.f);
+    SetFloatValue(UNIT_FIELD_MOD_HASTE, 1.f);
+    SetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED, 1.f);
+    SetFloatValue(UNIT_FIELD_MOD_SPELL_HASTE, 1.f);
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND + i))
+            SetFloatValue(UNIT_FIELD_ATTACK_ROUND_BASE_TIME + i, item->GetTemplate()->Delay);
+        else
+            SetFloatValue(UNIT_FIELD_ATTACK_ROUND_BASE_TIME + i, 2000.f);
+        m_modAttackSpeedPct[i] = 1.f;
+    }
+
+    float val = ((1.f / GetFloatValue(UNIT_FIELD_MOD_HASTE_REGEN)) - 1.f) * 100.f;
+
+    for (int i = 0; i < 3; i++)
+        ApplyAttackTimePercentMod((WeaponAttackType)i, val, true);
+
+    ApplyCastTimePercentMod(val, true);
+
+    ApplyCastTimePercentMod(GetTotalAuraModifier(SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK) + GetTotalAuraModifier(SPELL_AURA_HASTE_SPELLS), true);
+    ApplyAttackTimePercentMod(BASE_ATTACK, GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKSPEED), true);
+    ApplyAttackTimePercentMod(RANGED_ATTACK, GetTotalAuraModifier(SPELL_AURA_MOD_RANGED_HASTE) + GetTotalAuraModifier(SPELL_AURA_HASTE_RANGED) + GetTotalAuraModifier(SPELL_AURA_MOD_RANGED_HASTE_2), true);
+
+    UpdateDamagePhysical(BASE_ATTACK);
+    UpdateDamagePhysical(OFF_ATTACK);
+    UpdateDamagePhysical(RANGED_ATTACK);
+
+
+    AuraEffectList const& auraList = GetAuraEffectsByType(SPELL_AURA_MOD_COOLDOWN_BY_HASTE);
+    //AuraEffectList const& auraList2 = GetAuraEffectsByType(SPELL_AURA_MOD_COOLDOWN_BY_HASTE2);
+
+    for (AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); iter++)
+    {
+        (*iter)->RecalculateAmount();
+    }
+
+    //for (AuraEffectList::const_iterator iter = auraList2.begin(); iter != auraList2.end(); iter++)
+    //{
+    //    (*iter)->RecalculateAmount();
+    //}
+
 }
 
 uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectType damagetype, uint32 CastingTime) const
@@ -14725,7 +14674,7 @@ void Unit::ApplyResilience(Unit const* victim, int32* damage, bool isCrit) const
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
 float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, uint32 spellId) const
 {
-    //calculate miss chance
+    /*//calculate miss chance
     float missChance = victim->GetUnitMissChance(attType);
 
     if (!spellId && haveOffhandWeapon())
@@ -14752,8 +14701,10 @@ float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, u
     if (missChance < 0.0f)
         return 0.0f;
     if (missChance > 60.0f)
-        return 60.0f;
-    return missChance;
+        return 60.0f;*/
+
+    // 100.f % hit chance in WoD
+    return 0.f;
 }
 
 void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
@@ -15253,30 +15204,6 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
 
 uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
 {
-    if (totemType == 3211)
-        totemType = SUMMON_TYPE_TOTEM_FIRE;
-
-    if (totemType == 3403)
-        totemType = SUMMON_TYPE_TOTEM_FIRE;
-
-    if (totemType == 3402)
-        totemType = SUMMON_TYPE_TOTEM_WATER;
-
-    if (totemType == 3406)
-        totemType = SUMMON_TYPE_TOTEM_AIR;
-
-    if (totemType == 3407)
-        totemType = SUMMON_TYPE_TOTEM_AIR;
-
-    if (totemType == 3405)
-        totemType = SUMMON_TYPE_TOTEM_AIR;
-
-    if (totemType == 3399)
-        totemType = SUMMON_TYPE_TOTEM_AIR;
-
-    if (totemType == 3400)
-        totemType = SUMMON_TYPE_TOTEM_EARTH;
-
     switch (getRace())
     {
         case RACE_ORC:
@@ -15366,23 +15293,6 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
                     return 30784;
                 case SUMMON_TYPE_TOTEM_AIR:     // air
                     return 30781;
-            }
-            break;
-        }
-        case RACE_PANDAREN_NEUTRAL:
-        case RACE_PANDAREN_ALLIANCE:
-        case RACE_PANDAREN_HORDE:
-        {
-            switch (totemType)
-            {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
-                    return 41670;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
-                    return 41669;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
-                    return 41671;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
-                    return 41668;
             }
             break;
         }
@@ -15733,6 +15643,13 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             if (hasTransportData)
                 data.WriteByteSeq(tguid[element - MSETransportGuidByte0]);
             break;
+        case MSEGuid128:
+            data << guid;
+            break;
+        case MSETransportGuid128:
+        if (hasTransportData)
+                data << tguid;
+            break;
         case MSEHasCounter:
             data.WriteBit(!m_movementCounter);
             break;
@@ -15768,6 +15685,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
         case MSEHasFallDirection:
             if (hasFallData)
                 data.WriteBit(hasFallDirection);
+            data.FlushBits();
             break;
         case MSEHasSplineElevation:
             data.WriteBit(!hasSplineElevation);
@@ -15776,16 +15694,13 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             data.WriteBit(hasSpline);
             break;
         case MSEMovementFlags:
-            if (hasMovementFlags)
-                data.WriteBits(GetUnitMovementFlags(), 30);
+            data.WriteBits(GetUnitMovementFlags(), 30);
             break;
         case MSEMovementFlags2:
-            if (hasMovementFlags2)
-                data.WriteBits(GetExtraUnitMovementFlags(), 13);
+            data.WriteBits(GetExtraUnitMovementFlags(), 15);
             break;
         case MSETimestamp:
-            if (hasTimestamp)
-                data << getMSTime();
+            data << getMSTime();
             break;
         case MSEPositionX:
             data << GetPositionX();
@@ -15797,12 +15712,10 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
             data << GetPositionZ();
             break;
         case MSEOrientation:
-            if (hasOrientation)
-                data << GetOrientation();
+            data << GetOrientation();
             break;
         case MSETransportPositionX:
-            if (hasTransportData)
-                data << GetTransOffsetX();
+            data << GetTransOffsetX();
             break;
         case MSETransportPositionY:
             if (hasTransportData)
@@ -15833,8 +15746,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
                 data << mi.transport.time3;
             break;
         case MSEPitch:
-            if (hasPitch)
-                data << mi.pitch;
+            data << mi.pitch;
             break;
         case MSEFallTime:
             if (hasFallData)
@@ -15857,16 +15769,13 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
                 data << mi.jump.xyspeed;
             break;
         case MSESplineElevation:
-            if (hasSplineElevation)
-                data << mi.splineElevation;
+            data << mi.splineElevation;
             break;
         case MSEForcesCount:
-            data.WriteBits(0, 22);
+            data << uint32(0);
             break;
         case MSECounter:
-            if (m_movementCounter)
-                data << m_movementCounter;
-            m_movementCounter++;
+            data << m_movementCounter++;
             break;
         case MSEZeroBit:
             data.WriteBit(0);
@@ -15880,11 +15789,14 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
         case MSEUintCount:
             data << uint32(0);
             break;
+        case MSEForces:
+            break;
         default:
             ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
             break;
         }
     }
+    data.FlushBits();
 }
 
 void Unit::SendTeleportPacket(Position& pos)
@@ -15907,56 +15819,18 @@ void Unit::SendTeleportPacket(Position& pos)
     if (GetTypeId() == TYPEID_PLAYER)
     {
         WorldPacket data2(SMSG_MOVE_TELEPORT, 1 + 8 + 1 + 8 + 1 + 4 + 4 + 4 + 4);
-        data2.WriteBit(guid[0]);
-        data2.WriteBit(guid[6]);
-        data2.WriteBit(guid[5]);
-        data2.WriteBit(guid[7]);
-        data2.WriteBit(guid[2]);
-        data2.WriteBit(uint64(transGuid));
-        data2.WriteBit(guid[4]);
-
-        if (transGuid)
-        {
-            data2.WriteBit(transGuid[1]);
-            data2.WriteBit(transGuid[3]);
-            data2.WriteBit(transGuid[6]);
-            data2.WriteBit(transGuid[4]);
-            data2.WriteBit(transGuid[5]);
-            data2.WriteBit(transGuid[2]);
-            data2.WriteBit(transGuid[0]);
-            data2.WriteBit(transGuid[7]);
-        }
-
-        data2.WriteBit(guid[3]);
-        data2.WriteBit(guid[1]);
-        data2.WriteBit(0);
-        data2.FlushBits();
-
-        if (transGuid)
-        {
-            data2.WriteByteSeq(transGuid[4]);
-            data2.WriteByteSeq(transGuid[3]);
-            data2.WriteByteSeq(transGuid[7]);
-            data2.WriteByteSeq(transGuid[1]);
-            data2.WriteByteSeq(transGuid[6]);
-            data2.WriteByteSeq(transGuid[0]);
-            data2.WriteByteSeq(transGuid[2]);
-            data2.WriteByteSeq(transGuid[5]);
-        }
-
-        data2.WriteByteSeq(guid[4]);
-        data2.WriteByteSeq(guid[7]);
-        data2 << float(GetPositionZMinusOffset());
-        data2 << float(GetPositionY());
-        data2.WriteByteSeq(guid[2]);
-        data2.WriteByteSeq(guid[3]);
-        data2.WriteByteSeq(guid[5]);
-        data2 << float(GetPositionX());
+        data2 << guid;
         data2 << uint32(0); // counter
-        data2.WriteByteSeq(guid[0]);
-        data2.WriteByteSeq(guid[6]);
-        data2.WriteByteSeq(guid[1]);
+        data2 << float(GetPositionX());
+        data2 << float(GetPositionY());
+        data2 << float(GetPositionZMinusOffset());
         data2 << float(GetOrientation());
+
+        data2.WriteBit(uint64(transGuid));
+        data2.WriteBit(0);
+
+        if (transGuid)
+            data2 << transGuid;
 
         ToPlayer()->SendDirectMessage(&data2); // Send the SMSG_MOVE_TELEPORT packet to self.
     }

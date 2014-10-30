@@ -93,6 +93,10 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_QUEST_STATUS, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_QUEST_OBJECTIVE_STATUS);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS, stmt);
+
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_DAILYQUESTSTATUS);
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_DAILY_QUEST_STATUS, stmt);
@@ -240,11 +244,8 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
         charCount = uint32(result->GetRowCount());
         dataBuffer.reserve(charCount * 381);
 
-        dataBuffer.WriteBit(1);
-        dataBuffer.WriteBit(0);
-        
-        dataBuffer.FlushBits();
-
+        dataBuffer.WriteBit(1); // Success
+        dataBuffer.WriteBit(0); // IsDeleted
         dataBuffer << uint32(charCount);
         dataBuffer << uint32(0);
 
@@ -254,7 +255,7 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             TC_LOG_INFO("network", "Loading char guid %u from account %u.", guidLow, GetAccountId());
 
-            Player::BuildEnumData(result, &dataBuffer);
+            Player::BuildEnumData(result, &dataBuffer, NULL);
 
             // Do not allow banned characters to log in
             if (!(*result)[20].GetUInt32())
@@ -262,23 +263,23 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             if (!sWorld->HasCharacterNameData(guidLow)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                 sWorld->AddCharacterNameData(guidLow, (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
     }
     else
     {
         dataBuffer.WriteBit(1); // Success
         dataBuffer.WriteBit(0); // IsDeleted
-        dataBuffer.FlushBits();
         dataBuffer << uint32(0);
         dataBuffer << uint32(0);
     }
 
-    WorldPacket data(SMSG_CHAR_ENUM, 7 + dataBuffer.size() + dataBuffer.size());
-
+    WorldPacket data(SMSG_CHAR_ENUM, 7 + dataBuffer.size());
     data.append(dataBuffer);
 
     SendPacket(&data);
 }
+
 
 void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recvData*/)
 {
@@ -301,15 +302,19 @@ void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recvData*/)
 
 void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
 {
-    uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender;
+    uint8 hairStyle, face, facialHair, hairColor, race_, class_, skin, gender, outfitId;
+
+
     uint32 nameLength = recvData.ReadBits(6);
-    uint8 unk = recvData.ReadBit();
+    uint8 hasTempalte = recvData.ReadBit();
 
     recvData >> race_ >> class_ >> gender >> skin;
-    recvData >> face >> hairStyle >> hairColor >> facialHair;
+    recvData >> face >> hairStyle >> hairColor >> facialHair >> outfitId;
 
-    recvData.read_skip(1);
     std::string name = recvData.ReadString(nameLength);
+
+    if (hasTempalte)
+        recvData.read_skip<uint32>();
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
@@ -444,7 +449,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
     }
 
     delete _charCreateCallback.GetParam();  // Delete existing if any, to make the callback chain reset to stage 0
-    _charCreateCallback.SetParam(new CharacterCreateInfo(name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, recvData));
+    _charCreateCallback.SetParam(new CharacterCreateInfo(name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId, recvData));
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHECK_NAME);
     stmt->setString(0, name);
     _charCreateCallback.SetFutureResult(CharacterDatabase.AsyncQuery(stmt));
@@ -731,26 +736,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
 void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
-
-    guid[1] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[5]);
-
-    TC_LOG_DEBUG("network", "Character (Guid: %u) deleted", GUID_LOPART(guid));
+    recvData >> guid;
 
     // can't delete loaded character
     if (ObjectAccessor::FindPlayer(guid))
@@ -827,25 +813,8 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "WORLD: Recvd Player Logon Message");
 
+    recvData >> playerGuid;
     recvData >> unk;
-
-    playerGuid[1] = recvData.ReadBit();
-    playerGuid[4] = recvData.ReadBit();
-    playerGuid[7] = recvData.ReadBit();
-    playerGuid[3] = recvData.ReadBit();
-    playerGuid[2] = recvData.ReadBit();
-    playerGuid[6] = recvData.ReadBit();
-    playerGuid[5] = recvData.ReadBit();
-    playerGuid[0] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(playerGuid[5]);
-    recvData.ReadByteSeq(playerGuid[1]);
-    recvData.ReadByteSeq(playerGuid[0]);
-    recvData.ReadByteSeq(playerGuid[6]);
-    recvData.ReadByteSeq(playerGuid[2]);
-    recvData.ReadByteSeq(playerGuid[4]);
-    recvData.ReadByteSeq(playerGuid[7]);
-    recvData.ReadByteSeq(playerGuid[3]);
 
     //WorldObject* player = ObjectAccessor::GetWorldObject(*GetPlayer(), playerGuid);
     TC_LOG_DEBUG("network", "Character (Guid: %u) logging in", GUID_LOPART(playerGuid));
@@ -910,8 +879,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SendPacket(&data);
 
     // load player specific part before send times
-    LoadAccountData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_DATA), PER_CHARACTER_CACHE_MASK);
-    SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
+    //LoadAccountData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACCOUNT_DATA), 0xFF);
+    LoadGlobalAccountData();
+
+    SendAccountDataTimes();
 
     bool feedbackSystem = true;
     bool excessiveWarning = false;
@@ -999,8 +970,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     data.Initialize(SMSG_PVP_SEASON, 4 + 4);
-    data << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID) - 1); // Old season
     data << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));     // Current season
+    data << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID) - 1); // Old season
     SendPacket(&data);
 
     //QueryResult* result = CharacterDatabase.PQuery("SELECT guildid, rank FROM guild_member WHERE guid = '%u'", pCurrChar->GetGUIDLow());
@@ -1565,24 +1536,38 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     GameObject* go = _player->FindNearestGameObjectOfType(GAMEOBJECT_TYPE_BARBER_CHAIR, 5.0f);
     if (!go)
     {
-        SendBarberShopResult(BARBER_SHOP_NOT_SITTING);
+        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
+        data << uint32(2);
+        SendPacket(&data);
         return;
     }
 
     if (_player->getStandState() != UNIT_STAND_STATE_SIT_LOW_CHAIR + go->GetGOInfo()->barberChair.chairheight)
     {
-        SendBarberShopResult(BARBER_SHOP_NOT_SITTING);
+        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
+        data << uint32(2);
+        SendPacket(&data);
         return;
     }
 
     uint32 cost = _player->GetBarberShopCost(bs_hair->hair_id, Color, bs_facialHair->hair_id, bs_skinColor);
+
+    // 0 - ok
+    // 1, 3 - not enough money
+    // 2 - you have to sit on barber chair
     if (!_player->HasEnoughMoney((uint64)cost))
     {
-        SendBarberShopResult(BARBER_SHOP_NOT_ENOUGH_MONEY);
+        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
+        data << uint32(1);                                  // no money
+        SendPacket(&data);
         return;
     }
-
-    SendBarberShopResult(BARBER_SHOP_SUCCESS);
+    else
+    {
+        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
+        data << uint32(0);                                  // ok
+        SendPacket(&data);
+    }
 
     _player->ModifyMoney(-int64(cost));                     // it isn't free
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_AT_BARBER, cost);
@@ -1596,13 +1581,6 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_VISIT_BARBER_SHOP, 1);
 
     _player->SetStandState(0);                              // stand up
-}
-
-void WorldSession::SendBarberShopResult(BarberShopResult result)
-{
-    WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-    data << uint32(result);
-    SendPacket(&data);
 }
 
 void WorldSession::HandleRemoveGlyph(WorldPacket& recvData)

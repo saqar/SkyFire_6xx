@@ -21,6 +21,8 @@
 #include "Util.h"
 #include "SHA256.h"
 
+#define MAX_PASS_STR 16
+
 AccountOpResult Battlenet::AccountMgr::CreateBattlenetAccount(std::string email, std::string password)
 {
     if (utf8length(email) > MAX_BNET_EMAIL_STR)

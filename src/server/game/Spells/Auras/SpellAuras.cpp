@@ -191,83 +191,29 @@ void AuraApplication::ClientUpdate(bool remove)
         flags |= AFLAG_DURATION;
 
     WorldPacket data(SMSG_AURA_UPDATE);
-    data.WriteBit(targetGuid[7]);
     data.WriteBit(0);                                   // Is AURA_UPDATE_ALL
-    data.WriteBits(1, 24);                              // Aura Count
-    data.WriteBit(targetGuid[6]);
-    data.WriteBit(targetGuid[1]);
-    data.WriteBit(targetGuid[3]);
-    data.WriteBit(targetGuid[0]);
-    data.WriteBit(targetGuid[4]);
-    data.WriteBit(targetGuid[2]);
-    data.WriteBit(targetGuid[5]);
+    data << targetGuid;
+    data << uint32(1);                                  // Aura Count
+    data << uint8(GetSlot());
     data.WriteBit(!remove);                             // Not remove
 
     if (!remove)
     {
+        data << uint32(aura->GetId());
+        data << uint8(flags);
+        data << uint32(GetEffectMask());
+        data << uint16(aura->GetCasterLevel());
+        data << uint8(aura->GetSpellInfo()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
+
+        uint8 effCount = 0;
+
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
-        {
-            uint8 effCount = 0;
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 if (HasEffect(i))
                     effCount++;
 
-            data.WriteBits(effCount, 22);               // Effect Count
-        }
-        else
-            data.WriteBits(0, 22);                      // Effect Count
-
-        data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
-
-        if (!(flags & AFLAG_CASTER))
-        {
-            ObjectGuid casterGuid = aura->GetCasterGUID();
-            data.WriteBit(casterGuid[3]);
-            data.WriteBit(casterGuid[4]);
-            data.WriteBit(casterGuid[6]);
-            data.WriteBit(casterGuid[1]);
-            data.WriteBit(casterGuid[5]);
-            data.WriteBit(casterGuid[2]);
-            data.WriteBit(casterGuid[0]);
-            data.WriteBit(casterGuid[7]);
-        }
-
-        data.WriteBits(0, 22);                          // Unk effect count
-        data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
-        data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
-    }
-
-    data.FlushBits();
-
-    if (!remove)
-    {
-        if (!(flags & AFLAG_CASTER))
-        {
-            ObjectGuid casterGuid = aura->GetCasterGUID();
-            data.WriteByteSeq(casterGuid[3]);
-            data.WriteByteSeq(casterGuid[2]);
-            data.WriteByteSeq(casterGuid[1]);
-            data.WriteByteSeq(casterGuid[6]);
-            data.WriteByteSeq(casterGuid[4]);
-            data.WriteByteSeq(casterGuid[0]);
-            data.WriteByteSeq(casterGuid[5]);
-            data.WriteByteSeq(casterGuid[7]);
-        }
-
-        data << uint8(flags);
-        data << uint16(aura->GetCasterLevel());
-        data << uint32(aura->GetId());
-
-        if (flags & AFLAG_DURATION)
-            data << uint32(aura->GetMaxDuration());
-
-        if (flags & AFLAG_DURATION)
-            data << uint32(aura->GetDuration());
-
-        // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
-        // stack amount has priority over charges (checked on retail with spell 50262)
-        data << uint8(aura->GetSpellInfo()->StackAmount ? aura->GetStackAmount() : aura->GetCharges());
-        data << uint32(GetEffectMask());
+        data << uint32(effCount);
+        data << uint32(0);
 
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
@@ -282,19 +228,23 @@ void AuraApplication::ClientUpdate(bool remove)
                 }
             }
         }
+
+        data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
+        data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
+        data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
+
+        if (!(flags & AFLAG_CASTER))
+        {
+            ObjectGuid casterGuid = aura->GetCasterGUID();
+            data << casterGuid;
+        }
+
+        if (flags & AFLAG_DURATION)
+        {
+            data << uint32(aura->GetMaxDuration());
+            data << uint32(aura->GetDuration());
+        }
     }
-
-    data << uint8(GetSlot());
-
-    data.WriteByteSeq(targetGuid[2]);
-    data.WriteByteSeq(targetGuid[6]);
-    data.WriteByteSeq(targetGuid[7]);
-    data.WriteByteSeq(targetGuid[1]);
-    data.WriteByteSeq(targetGuid[3]);
-    data.WriteByteSeq(targetGuid[4]);
-    data.WriteByteSeq(targetGuid[0]);
-    data.WriteByteSeq(targetGuid[5]);
-
     _target->SendMessageToSet(&data, true);
 }
 
@@ -414,7 +364,7 @@ m_spellInfo(spellproto), m_casterGuid(casterGUID ? casterGUID : caster->GetGUID(
 m_castItemGuid(castItem ? castItem->GetGUID() : 0), m_applyTime(time(NULL)),
 m_owner(owner), m_timeCla(0), m_updateTargetMapInterval(0),
 m_casterLevel(caster ? caster->getLevel() : m_spellInfo->SpellLevel), m_procCharges(0), m_stackAmount(1),
-m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
+m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false), linkedAreaTrigger(NULL)
 {
     if (m_spellInfo->ManaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
@@ -1333,7 +1283,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // Improved Devouring Plague
                     if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3790, 0))
                     {
-                        uint32 damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), GetEffect(0)->GetAmount(), DOT);
+                        uint32 damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), EFFECT_0, GetEffect(EFFECT_0)->GetAmount(), DOT);
                         damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT);
                         int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * int32(damage) / 100;
                         int32 heal = int32(CalculatePct(basepoints0, 15));

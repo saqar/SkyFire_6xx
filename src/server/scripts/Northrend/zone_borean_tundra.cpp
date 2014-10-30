@@ -2083,7 +2083,7 @@ public:
             {
                 Quest const* qInfo = sObjectMgr->GetQuestTemplate(QUEST_YOU_RE_NOT_SO_BIG_NOW);
                 if (qInfo)
-                    player->KilledMonsterCredit(qInfo->RequiredNpcOrGo[0], 0);
+                    player->KilledMonsterCredit(qInfo->GetQuestObjectiveXIndex(0)->ObjectId, 0);
             }
         }
     };
@@ -2347,7 +2347,7 @@ public:
     {
         npc_hidden_cultistAI(Creature* creature) : ScriptedAI(creature)
         {
-           uiEmoteState = creature->GetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE);
+           uiEmoteState = creature->GetUInt32Value(UNIT_FIELD_EMOTE_STATE);
            uiNpcFlags = creature->GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
         }
 
@@ -2362,7 +2362,7 @@ public:
         void Reset() OVERRIDE
         {
             if (uiEmoteState)
-                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, uiEmoteState);
+                me->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, uiEmoteState);
 
             if (uiNpcFlags)
                 me->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, uiNpcFlags);
@@ -2409,7 +2409,7 @@ public:
                         switch (me->GetEntry())
                         {
                             case NPC_SALTY_JOHN_THORPE:
-                                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0);
+                                me->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, 0);
                                 Talk(SAY_HIDDEN_CULTIST_1);
                                 uiEventTimer = 5000;
                                 uiEventPhase = 2;

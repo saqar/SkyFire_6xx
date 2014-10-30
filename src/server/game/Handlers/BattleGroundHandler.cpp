@@ -77,35 +77,16 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
     uint8 asGroup;
     bool isPremade = false;
     Group* grp = NULL;
-    ObjectGuid guid;
-    bool hasRoleMask;
+    uint64 guid;
     uint8 roleMask = 0;
+
+    recvData >> guid;
+    recvData >> roleMask; // Need to set this as group role later
 
     for (int i = 0; i < 2; i++) // blacklistedMapIds
         recvData.read_skip<uint32>();
 
-    guid[1] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
     asGroup = recvData.ReadBit();           // As Group
-    guid[4] = recvData.ReadBit();
-    hasRoleMask = !recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[1]);
-
-    if (hasRoleMask)
-        recvData >> roleMask; // Need to set this as group role later
 
     //extract from guid
     bgTypeId_ = GUID_LOPART(guid);
@@ -408,29 +389,12 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     uint8 action;                       // enter battle 0x1, leave queue 0x0
     ObjectGuid guid;
 
+    recvData >> guid;
+    recvData >> id;
+    recvData >> queueSlot;
+    recvData >> time;
     action = recvData.ReadBit();
 
-    recvData >> queueSlot;
-    recvData >> id;
-    recvData >> time;
-
-    guid[6] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[1]);
 
     if (!_player->InBattlegroundQueue())
     {
@@ -828,17 +792,16 @@ void WorldSession::HandleRequestPvpOptions(WorldPacket& /*recvData*/)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PVP_OPTIONS_ENABLED");
 
+    // All enabled
     /// @Todo: perfome research in this case
     WorldPacket data(SMSG_PVP_OPTIONS_ENABLED, 1);
     data.WriteBit(1);
-    data.WriteBit(1);       // WargamesEnabled
     data.WriteBit(1);
-    data.WriteBit(1);       // RatedBGsEnabled
-    data.WriteBit(1);       // RatedArenasEnabled
-    data.WriteBit(1);       // New WoD
-
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(1);
     data.FlushBits();
-
     SendPacket(&data);
 }
 
@@ -855,15 +818,13 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
 
     WorldPacket data(SMSG_BATTLEFIELD_RATED_INFO, 29);
     data << uint32(0);  // Reward
+    data << uint8(3);   // unk
     data << uint32(0);  // unk
     data << uint32(0);  // unk
+    data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
     data << uint32(0);  // unk
     data << uint32(0);  // unk
-    data << uint32(0);  // unk
-    data << uint32(0);  // unk
-    data << uint32(0);  // unk
-    //data << _player->GetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, true); WoD Depreciated?
-    //data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true); WoD Depreciated?
+    data << _player->GetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, true);
 
     SendPacket(&data);
 }

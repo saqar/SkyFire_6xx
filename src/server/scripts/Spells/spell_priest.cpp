@@ -62,7 +62,12 @@ enum PriestSpells
     SPELL_PRIEST_TWIN_DISCIPLINES_RANK_1            = 47586,
     SPELL_PRIEST_T9_HEALING_2P                      = 67201,
     SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL              = 15290,
-    SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL              = 64085
+    SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL              = 87204,
+    SPELL_PRIEST_MIND_BLAST                         = 8092,
+    SPELL_PRIEST_MIND_BLAST_MARKER                  = 162414,
+    SPELL_PRIEST_GLYPH_OF_MIND_HARVEST              = 162532,
+    SPELL_PRIEST_DEVOURING_PLAGUE_DOT               = 158831,
+    SPELL_PRIEST_DEVOURING_PLAGUE_HEAL              = 127626,
 };
 
 enum PriestSpellIcons
@@ -474,34 +479,6 @@ class spell_pri_lightwell_renew : public SpellScriptLoader
         }
 };
 
-// 8129 - Mana Burn
-class spell_pri_mana_burn : public SpellScriptLoader
-{
-    public:
-        spell_pri_mana_burn() : SpellScriptLoader("spell_pri_mana_burn") { }
-
-        class spell_pri_mana_burn_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pri_mana_burn_SpellScript);
-
-            void HandleAfterHit()
-            {
-                if (Unit* unitTarget = GetHitUnit())
-                    unitTarget->RemoveAurasWithMechanic((1 << MECHANIC_FEAR) | (1 << MECHANIC_POLYMORPH));
-            }
-
-            void Register() OVERRIDE
-            {
-                AfterHit += SpellHitFn(spell_pri_mana_burn_SpellScript::HandleAfterHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_pri_mana_burn_SpellScript;
-        }
-};
-
 // 28305 - Mana Leech (Passive) (Priest Pet Aura)
 class spell_pri_mana_leech : public SpellScriptLoader
 {
@@ -565,7 +542,7 @@ class spell_pri_mind_sear : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
-                unitList.remove_if(Trinity::ObjectGUIDCheck(GetCaster()->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT)));
+                unitList.remove_if(Trinity::ObjectGUIDCheck(GetCaster()->GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT)));
             }
 
             void Register() OVERRIDE
@@ -741,6 +718,8 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                 canBeRecalculated = false;
                 if (Unit* caster = GetCaster())
                 {
+                    // [(((Spell power * 5) + 2) * 1)]
+
                     // +80.68% from sp bonus
                     float bonus = 0.8068f;
 
@@ -856,7 +835,7 @@ class spell_pri_renew : public SpellScriptLoader
                     // Divine Touch
                     if (AuraEffect const* empoweredRenewAurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_DIVINE_TOUCH_TALENT, EFFECT_0))
                     {
-                        uint32 heal = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetAmount(), DOT);
+                        uint32 heal = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), EFFECT_0, aurEff->GetAmount(), DOT);
                         heal = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DOT);
                         int32 basepoints0 = CalculatePct(int32(heal) * aurEff->GetTotalTicks(), empoweredRenewAurEff->GetAmount());
                         caster->CastCustomSpell(GetTarget(), SPELL_PRIEST_DIVINE_TOUCH, &basepoints0, NULL, NULL, true, NULL, aurEff);
@@ -976,10 +955,9 @@ class spell_pri_vampiric_embrace : public SpellScriptLoader
             void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
-                int32 self = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()));
-                int32 team = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount() / 2));
+                int32 heal = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount() / aurEff->GetAmount()));
 
-                GetTarget()->CastCustomSpell((Unit*)NULL, SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL, &team, &self, NULL, true, NULL, aurEff);
+                GetTarget()->CastCustomSpell((Unit*)NULL, SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL, &heal, &heal, NULL, true, NULL, aurEff);
             }
 
             void Register() OVERRIDE
@@ -1034,8 +1012,7 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_GEN_REPLENISHMENT))
+                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL))
                     return false;
                 return true;
             }
@@ -1052,27 +1029,113 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
                         }
             }
 
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                return eventInfo.GetProcTarget() == GetCaster();
-            }
-
-            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                eventInfo.GetProcTarget()->CastSpell((Unit*)NULL, SPELL_GEN_REPLENISHMENT, true, NULL, aurEff);
-            }
-
             void Register() OVERRIDE
             {
                 AfterDispel += AuraDispelFn(spell_pri_vampiric_touch_AuraScript::HandleDispel);
-                DoCheckProc += AuraCheckProcFn(spell_pri_vampiric_touch_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_pri_vampiric_touch_AuraScript::HandleEffectProc, EFFECT_2, SPELL_AURA_DUMMY);
             }
         };
 
         AuraScript* GetAuraScript() const OVERRIDE
         {
             return new spell_pri_vampiric_touch_AuraScript();
+        }
+};
+
+// 8092 - Mind Blast
+class spell_pri_mind_blast : public SpellScriptLoader
+{
+    public:
+        spell_pri_mind_blast() : SpellScriptLoader("spell_pri_mind_blast") { }
+
+        class spell_pri_mind_blast_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_mind_blast_SpellScript);
+
+            void HandleEffectGivePower()
+            {
+                // Glyph of Mind Harvest NYI
+                //if (!GetCaster()->HasAura(SPELL_PRIEST_GLYPH_OF_MIND_HARVEST) || GetHitUnit()->HasAura(SPELL_PRIEST_MIND_BLAST_MARKER))
+                PreventHitDefaultEffect(EFFECT_3);
+            }
+
+            void Register() OVERRIDE
+            {
+                BeforeHit += SpellHitFn(spell_pri_mind_blast_SpellScript::HandleEffectGivePower);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pri_mind_blast_SpellScript();
+        }
+};
+
+// 2944 - Devouring Plague
+class spell_pri_devouring_plague : public SpellScriptLoader
+{
+    public:
+        spell_pri_devouring_plague() : SpellScriptLoader("spell_pri_devouring_plague") { }
+
+        class spell_pri_devouring_plague_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_devouring_plague_SpellScript);
+
+            void HandleDoT(SpellEffIndex /*effIndex*/)
+            {
+                //@fixme: this doesn't set the correct damage
+                GetCaster()->CastSpell(GetHitUnit(), SPELL_PRIEST_DEVOURING_PLAGUE_DOT, true);
+            }
+
+            void HandleHeal(SpellEffIndex /*effIndex*/)
+            {
+                int32 damage = GetHitDamage();
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_DEVOURING_PLAGUE_HEAL, &damage, 0, 0, true);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_devouring_plague_SpellScript::HandleDoT, EFFECT_1, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_pri_devouring_plague_SpellScript::HandleHeal, EFFECT_2, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pri_devouring_plague_SpellScript();
+        }
+};
+
+// 124430 - Shadowy Insight
+class spell_pri_shadowy_insight : public SpellScriptLoader
+{
+    public:
+        spell_pri_shadowy_insight() : SpellScriptLoader("spell_pri_shadowy_insight") { }
+
+        class spell_pri_shadowy_insight_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_shadowy_insight_AuraScript);
+
+            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                    player->RemoveSpellCooldownsByClassMask(GetSpellInfo()->SpellFamilyName, GetSpellInfo()->Effects[EFFECT_1].SpellClassMask, true);
+            }
+
+            void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_pri_shadowy_insight_AuraScript::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectProc += AuraEffectProcFn(spell_pri_shadowy_insight_AuraScript::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_pri_shadowy_insight_AuraScript();
         }
 };
 
@@ -1087,7 +1150,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_guardian_spirit();
     new spell_pri_leap_of_faith_effect_trigger();
     new spell_pri_lightwell_renew();
-    new spell_pri_mana_burn();
     new spell_pri_mana_leech();
     new spell_pri_mind_sear();
     new spell_pri_pain_and_suffering_proc();
@@ -1101,4 +1163,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_vampiric_embrace();
     new spell_pri_vampiric_embrace_target();
     new spell_pri_vampiric_touch();
+    new spell_pri_mind_blast();
+    new spell_pri_devouring_plague();
+    new spell_pri_shadowy_insight();
 }

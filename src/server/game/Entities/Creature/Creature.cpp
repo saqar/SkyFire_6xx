@@ -2060,7 +2060,7 @@ bool Creature::LoadCreaturesAddon(bool reload)
     }
 
     if (cainfo->emote != 0)
-        SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, cainfo->emote);
+        SetUInt32Value(UNIT_FIELD_EMOTE_STATE, cainfo->emote);
 
     //Load Path
     if (cainfo->path_id != 0)
@@ -2574,10 +2574,10 @@ void Creature::SetDisplayId(uint32 modelId)
     }
 }
 
-void Creature::SetTarget(uint64 guid)
+void Creature::SetTarget(ObjectGuid guid)
 {
     if (!_focusSpell)
-        SetUInt64Value(UNIT_FIELD_TARGET, guid);
+        SetGuidValue(UNIT_FIELD_TARGET, guid);
 }
 
 void Creature::FocusTarget(Spell const* focusSpell, WorldObject const* target)
@@ -2587,7 +2587,7 @@ void Creature::FocusTarget(Spell const* focusSpell, WorldObject const* target)
         return;
 
     _focusSpell = focusSpell;
-    SetUInt64Value(UNIT_FIELD_TARGET, target->GetGUID());
+    SetGuidValue(UNIT_FIELD_TARGET, target->GetGUID128());
     if (focusSpell->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_DONT_TURN_DURING_CAST)
         AddUnitState(UNIT_STATE_ROTATING);
 
@@ -2603,9 +2603,9 @@ void Creature::ReleaseFocus(Spell const* focusSpell)
 
     _focusSpell = NULL;
     if (Unit* victim = GetVictim())
-        SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
+        SetGuidValue(UNIT_FIELD_TARGET, victim->GetGUID128());
     else
-        SetUInt64Value(UNIT_FIELD_TARGET, 0);
+        SetGuidValue(UNIT_FIELD_TARGET, 0);
 
     if (focusSpell->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_DONT_TURN_DURING_CAST)
         ClearUnitState(UNIT_STATE_ROTATING);

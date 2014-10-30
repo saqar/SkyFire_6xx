@@ -129,7 +129,7 @@ enum AuraType
     SPELL_AURA_MOD_STALKED                                  = 68,
     SPELL_AURA_SCHOOL_ABSORB                                = 69,
     SPELL_AURA_EXTRA_ATTACKS                                = 70,
-    SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL                 = 71,
+    SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL                 = 71, // Unused 6.0.2
     SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT                    = 72,
     SPELL_AURA_MOD_POWER_COST_SCHOOL                        = 73,
     SPELL_AURA_REFLECT_SPELLS_SCHOOL                        = 74,
@@ -424,7 +424,7 @@ enum AuraType
     SPELL_AURA_MOD_NEXT_SPELL                               = 363,  // Used by 101601 Throw Totem - causes the client to initialize spell cast with specified spell
     SPELL_AURA_364                                          = 364,  // Not used in 4.3.4
     SPELL_AURA_MAX_FAR_CLIP_PLANE                           = 365,  // Overrides client's View Distance setting to max("Fair", current_setting) and turns off terrain display
-    SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT               = 366,  // NYI - Sets spellpower equal to % of attack power, discarding all other bonuses (from gear and buffs)
+    SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT               = 366,  // Sets spellpower equal to % of attack power, discarding all other bonuses (from gear and buffs)
     SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_SPELL               = 367,  // Use spell instead of an autoattack
     SPELL_AURA_368                                          = 368,  // Not used in 4.3.4
     SPELL_AURA_ENABLE_POWER_BAR_TIMER                       = 369,
@@ -454,7 +454,7 @@ enum AuraType
     // 392 unused
     SPELL_AURA_393                                          = 393,
     SPELL_AURA_394                                          = 394,
-    SPELL_AURA_395                                          = 395,
+    SPELL_AURA_AREATRIGGER                                  = 395,
     SPELL_AURA_396                                          = 396,
     SPELL_AURA_397                                          = 397,
     SPELL_AURA_398                                          = 398,
@@ -464,7 +464,7 @@ enum AuraType
     SPELL_AURA_402                                          = 402,
     SPELL_AURA_403                                          = 403,
     SPELL_AURA_404                                          = 404,
-    SPELL_AURA_405                                          = 405,
+    SPELL_AURA_MOD_STAT_GAINED_PCT                          = 405,
     SPELL_AURA_406                                          = 406,
     SPELL_AURA_407                                          = 407,
     SPELL_AURA_408                                          = 408,
@@ -475,8 +475,8 @@ enum AuraType
     SPELL_AURA_413                                          = 413,
     SPELL_AURA_414                                          = 414,
     SPELL_AURA_415                                          = 415,
-    SPELL_AURA_416                                          = 416,
-    SPELL_AURA_417                                          = 417,
+    SPELL_AURA_MOD_COOLDOWN_BY_HASTE                        = 416,
+    SPELL_AURA_MOD_COOLDOWN_BY_HASTE2                       = 417,
     SPELL_AURA_418                                          = 418,
     SPELL_AURA_419                                          = 419,
     SPELL_AURA_MOD_PET_XP_PCT                               = 420, // NYI
@@ -497,7 +497,48 @@ enum AuraType
     // 435 unused
     SPELL_AURA_436                                          = 436,
     SPELL_AURA_437                                          = 437,
-    TOTAL_AURAS                                             = 438   // 5.4.2
+    SPELL_AURA_438                                          = 438,
+    SPELL_AURA_439                                          = 439,
+    SPELL_AURA_440                                          = 440,
+    SPELL_AURA_441                                          = 441,
+    SPELL_AURA_442                                          = 442,
+    SPELL_AURA_443                                          = 443,
+    SPELL_AURA_444                                          = 444,
+    SPELL_AURA_445                                          = 445,
+    SPELL_AURA_446                                          = 446,
+    SPELL_AURA_447                                          = 447,
+    SPELL_AURA_448                                          = 448,
+    SPELL_AURA_449                                          = 449,
+    SPELL_AURA_450                                          = 450,
+    SPELL_AURA_451                                          = 451,
+    SPELL_AURA_452                                          = 452,
+    SPELL_AURA_453                                          = 453,
+    SPELL_AURA_454                                          = 454,
+    SPELL_AURA_455                                          = 455,
+    SPELL_AURA_456                                          = 456,
+    SPELL_AURA_457                                          = 457,
+    SPELL_AURA_458                                          = 458,
+    SPELL_AURA_459                                          = 459,
+    SPELL_AURA_460                                          = 460,
+    SPELL_AURA_461                                          = 461,
+    SPELL_AURA_462                                          = 462,
+    SPELL_AURA_463                                          = 463,
+    SPELL_AURA_464                                          = 464,
+    SPELL_AURA_465                                          = 465,
+    SPELL_AURA_466                                          = 466,
+    SPELL_AURA_467                                          = 467,
+    SPELL_AURA_468                                          = 468,
+    SPELL_AURA_469                                          = 469,
+    SPELL_AURA_470                                          = 470,
+    SPELL_AURA_471                                          = 471,
+    SPELL_AURA_472                                          = 472,
+    SPELL_AURA_473                                          = 473,
+    SPELL_AURA_474                                          = 474,
+    SPELL_AURA_475                                          = 475,
+    SPELL_AURA_476                                          = 476,
+    SPELL_AURA_477                                          = 477,
+    SPELL_AURA_478                                          = 478,
+    TOTAL_AURAS                                             = 479   // 6.0.2 18848
 };
 
 enum AuraObjectType

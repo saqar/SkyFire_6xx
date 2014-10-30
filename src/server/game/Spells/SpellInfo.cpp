@@ -891,6 +891,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     AttributesEx10 = spellMisc ? spellMisc->AttributesEx10 : 0;
     AttributesEx11 = spellMisc ? spellMisc->AttributesEx11 : 0;
     AttributesEx12 = spellMisc ? spellMisc->AttributesEx12 : 0;
+    AttributesEx13 = spellMisc ? spellMisc->AttributesEx13 : 0;
     AttributesCu = 0;
 
     uint32 _castingTimeIndex = spellMisc ? spellMisc->CastingTimeIndex :0;
@@ -912,7 +913,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     Rank = spellEntry->Rank;
     SchoolMask = spellMisc ? spellMisc->SchoolMask : 0;
     RuneCostID = spellEntry->runeCostID;
-    SpellDifficultyId = spellEntry->SpellDifficultyId;
+    SpellDifficultyId = 0;//spellEntry->SpellDifficultyId;
     SpellScalingId = spellEntry->SpellScalingId;
     SpellAuraOptionsId = spellEntry->SpellAuraOptionsId;
     SpellAuraRestrictionsId = spellEntry->SpellAuraRestrictionsId;

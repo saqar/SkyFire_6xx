@@ -921,16 +921,16 @@ public:
         AccountOpResult result = AccountMgr::ChangeRegEmail(targetAccountId, email);
         switch (result)
         {
-            case AccountOpResult::AOR_OK:
+            case AOR_OK:
                 handler->SendSysMessage(LANG_COMMAND_EMAIL);
                 TC_LOG_INFO("entities.player.character", "ChangeRegEmail: Account %s [Id: %u] had it's Registration Email changed to %s.",
                     accountName.c_str(), targetAccountId, email);
                 break;
-            case AccountOpResult::AOR_NAME_NOT_EXIST:
+            case AOR_NAME_NOT_EXIST:
                 handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName.c_str());
                 handler->SetSentErrorMessage(true);
                 return false;
-            case AccountOpResult::AOR_EMAIL_TOO_LONG:
+            case AOR_EMAIL_TOO_LONG:
                 handler->SendSysMessage(LANG_EMAIL_TOO_LONG);
                 handler->SetSentErrorMessage(true);
                 return false;

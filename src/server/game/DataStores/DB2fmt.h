@@ -20,6 +20,7 @@
 #ifndef TRINITY_DB2SFRM_H
 #define TRINITY_DB2SFRM_H
 
+char const AreaPOIEntryfmt[] = "niiiiiiiiiiiffixixxixxx";
 char const BattlePetAbilityfmt[] = "niiixxss";
 char const BattlePetAbilityStatefmt[] = "niii";
 char const BattlePetBreedStatefmt[] = "niii";
@@ -30,15 +31,28 @@ char const BattlePetStatefmt[] = "nxsi";
 char const ItemToBattlePetfmt[] = "ni";
 
 char const BroadcastTextfmt[] ="nxssxxxxxxixx";
-char const Itemfmt[] ="niiiiiii";
+char const Holidaysfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiixxsiix";
+char const Itemfmt[] ="niiiiiiix";
+char const ItemAppearancefmt[] = "nix";
+char const ItemModifiedAppearancefmt[] = "xnxixx";
 char const ItemCurrencyCostfmt[]="xn";
-char const ItemSparsefmt[]="niiiiffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisssssiiiiiiiiiiiiiiiiiiiiiifiiifii";
-char const ItemExtendedCostEntryfmt[]="nxxiiiiiiiiiiiixiiiiiiiiiiiiiii";
+char const ItemSparsefmt[]="niiiiffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifisssssiiiiiiiiiiiiiiiiiiifiiifiix";
+char const ItemExtendedCostEntryfmt[]="nxxiiiiiiiiiiiixiiiiiiiiiiiiii";
+char const OverrideSpellDatafmt[] = "niiiiiiiiiixx";
 char const KeyChainfmt[] = "nbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 char const QuestPackageItemfmt[] = "niiii";
 char const SceneScriptfmt[] = "nssii";
+char const PvpItemfmt[] = "xni";
+char const SpellTotemsEntryfmt[] = "niiii";
+char const SpellPowerEntryfmt[] = "xdxiixiiixfxxx";
+char const SpellClassOptionsEntryfmt[] = "dxiiiii";
+char const SpellAuraRestrictionsEntryfmt[] = "diiiiiiii";
+char const SpellCastingRequirementsEntryfmt[] = "dixxixi";
+char const SpellMiscfmt[] = "niiiiiiiiiiiiiiiiifiiiiix";
 char const SpellReagentsfmt[] = "diiiiiiiiiiiiiiiiii";
+char const SpellRuneCostfmt[] = "niiixi";
+char const TaxiNodesEntryfmt[] = "nifffsiixixx";
+char const TaxiPathEntryfmt[] = "niii";
+char const TaxiPathNodeEntryfmt[] = "diiifffiiii";
 
-char const GarrAbilityfmt[] = "iissiii";
-char const GarrPlotfmt[] = "iiiisiiii";
 #endif

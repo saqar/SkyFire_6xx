@@ -74,14 +74,12 @@ bool Player::UpdateStats(Stats stat)
     {
         case STAT_AGILITY:
             UpdateArmor();
-            UpdateAllCritPercentages();
             UpdateDodgePercentage();
             break;
         case STAT_STAMINA:
             UpdateMaxHealth();
             break;
         case STAT_INTELLECT:
-            UpdateAllSpellCritChances();
             UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT, only armor currently
             break;
         case STAT_SPIRIT:
@@ -120,6 +118,10 @@ void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 {
     apply = _ModifyUInt32(apply, m_baseSpellPower, amount);
 
+    // SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT is handled differently
+    if (HasAuraType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT))
+        return;
+
     // For speed just update for client
     ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, amount, apply);
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
@@ -154,8 +156,7 @@ bool Player::UpdateAllStats()
         UpdateMaxPower(Powers(i));
 
     UpdateAllRatings();
-    UpdateAllCritPercentages();
-    UpdateAllSpellCritChances();
+    UpdateCritPercentage();
     UpdateBlockPercentage();
     UpdateParryPercentage();
     UpdateDodgePercentage();
@@ -164,6 +165,7 @@ bool Player::UpdateAllStats()
     UpdateExpertise(BASE_ATTACK);
     UpdateExpertise(OFF_ATTACK);
     RecalculateRating(CR_ARMOR_PENETRATION);
+
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateResistances(i);
 
@@ -280,13 +282,13 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     }
     else
     {
-        float strengthValue = std::max((GetStat(STAT_STRENGTH) - 10.0f) * entry->APPerStrenth, 0.0f);
-        float agilityValue = std::max((GetStat(STAT_AGILITY) - 10.0f) * entry->APPerAgility, 0.0f);
+        float strengthValue = std::max(GetStat(STAT_STRENGTH) * entry->APPerStrenth, 0.0f);
+        float agilityValue = std::max(GetStat(STAT_AGILITY) * entry->APPerAgility, 0.0f);
 
         SpellShapeshiftFormEntry const* form = sSpellShapeshiftFormStore.LookupEntry(GetShapeshiftForm());
         // Directly taken from client, SHAPESHIFT_FLAG_AP_FROM_STRENGTH ?
         if (form && form->flags1 & 0x20)
-            agilityValue += std::max((GetStat(STAT_AGILITY) - 10.0f) * entry->APPerStrenth, 0.0f);
+            agilityValue += std::max(GetStat(STAT_AGILITY)* entry->APPerStrenth, 0.0f);
 
         val2 = strengthValue + agilityValue;
     }
@@ -321,7 +323,8 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         UpdateDamagePhysical(BASE_ATTACK);
         if (CanDualWield() && haveOffhandWeapon())           //allow update offhand damage only if player knows DualWield Spec and has equipped offhand weapon
             UpdateDamagePhysical(OFF_ATTACK);
-        if (getClass() == CLASS_SHAMAN || getClass() == CLASS_PALADIN)                      // mental quickness
+
+        if (HasAuraType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT))
             UpdateSpellDamageAndHealingBonus();
 
         if (pet && pet->IsPetGhoul()) // At melee attack power change for DK pet
@@ -352,7 +355,7 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
 
     float att_speed = GetAPMultiplier(attType, normalized);
 
-    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAttackPowerValue(attType) / 14.0f * att_speed;
+    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAttackPowerValue(attType) / 3.5f * att_speed;
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = addTotalPct ? GetModifierValue(unitMod, TOTAL_PCT) : 1.0f;
@@ -447,93 +450,108 @@ void Player::UpdateBlockPercentage()
     SetStatFloatValue(PLAYER_FIELD_BLOCK_PERCENTAGE, value);
 }
 
-void Player::UpdateCritPercentage(WeaponAttackType attType)
+void Player::UpdateCritPercentage()
 {
-    BaseModGroup modGroup;
-    uint16 index;
-    CombatRating cr;
-
-    switch (attType)
-    {
-        case OFF_ATTACK:
-            modGroup = OFFHAND_CRIT_PERCENTAGE;
-            index = PLAYER_FIELD_OFFHAND_CRIT_PERCENTAGE;
-            cr = CR_CRIT_MELEE;
-            break;
-        case RANGED_ATTACK:
-            modGroup = RANGED_CRIT_PERCENTAGE;
-            index = PLAYER_FIELD_RANGED_CRIT_PERCENTAGE;
-            cr = CR_CRIT_RANGED;
-            break;
-        case BASE_ATTACK:
-        default:
-            modGroup = CRIT_PERCENTAGE;
-            index = PLAYER_FIELD_CRIT_PERCENTAGE;
-            cr = CR_CRIT_MELEE;
-            break;
-    }
-
-    float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(cr);
-    // Modify crit from weapon skill and maximized defense skill of same level victim difference
-    value += (int32(GetMaxSkillValueForLevel()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+    float meleeValue = GetRatingBonusValue(CR_CRIT_MELEE);
+    float spellValue = GetRatingBonusValue(CR_CRIT_SPELL);
 
     if (sWorld->getBoolConfig(CONFIG_STATS_LIMITS_ENABLE))
-         value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) : value;
+         meleeValue = meleeValue > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) : meleeValue;
 
-    value = value < 0.0f ? 0.0f : value;
-    SetStatFloatValue(index, value);
-}
+    if (sWorld->getBoolConfig(CONFIG_STATS_LIMITS_ENABLE))
+         spellValue = spellValue > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) : spellValue;
 
-void Player::UpdateAllCritPercentages()
-{
-    float value = GetMeleeCritFromAgility();
+    meleeValue += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT); // For All
+    meleeValue += GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
 
-    SetBaseModValue(CRIT_PERCENTAGE, PCT_MOD, value);
-    SetBaseModValue(OFFHAND_CRIT_PERCENTAGE, PCT_MOD, value);
-    SetBaseModValue(RANGED_CRIT_PERCENTAGE, PCT_MOD, value);
+    spellValue += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT); // For All
+    spellValue += GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
 
-    UpdateCritPercentage(BASE_ATTACK);
-    UpdateCritPercentage(OFF_ATTACK);
-    UpdateCritPercentage(RANGED_ATTACK);
+    AddPct(meleeValue, GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_STAT_GAINED_PCT, 1 << CR_CRIT_MELEE | 1 << CR_CRIT_RANGED | 1 << CR_CRIT_SPELL));
+    AddPct(spellValue, GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_STAT_GAINED_PCT, 1 << CR_CRIT_MELEE | 1 << CR_CRIT_RANGED | 1 << CR_CRIT_SPELL));
+
+    for (int i = PLAYER_FIELD_CRIT_PERCENTAGE; i < PLAYER_FIELD_SPELL_CRIT_PERCENTAGE; i++)
+        SetStatFloatValue(i, meleeValue);
+
+    for (int school = 0; school < MAX_SPELL_SCHOOL; school++)
+    {
+        // For normal school set zero crit chance
+        if (school == SPELL_SCHOOL_NORMAL)
+        {
+            SetFloatValue(PLAYER_FIELD_SPELL_CRIT_PERCENTAGE, 0.0f);
+            continue;
+        }
+
+        float spellCrit = spellValue;
+        // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
+        spellCrit += GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
+        // Increase crit by school from SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
+        spellCrit += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, 1<<school);
+        // Store crit value
+        SetFloatValue(PLAYER_FIELD_SPELL_CRIT_PERCENTAGE + school, spellCrit);
+    }
 }
 
 void Player::UpdateMastery()
 {
-    if (!CanUseMastery())
-    {
-        SetFloatValue(PLAYER_FIELD_MASTERY, 0.0f);
-        return;
-    }
-
-    float value = GetTotalAuraModifier(SPELL_AURA_MASTERY);
+    float value = 8.f; // 8 is base
+    value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
     value += GetRatingBonusValue(CR_MASTERY);
+    AddPct(value, GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_STAT_GAINED_PCT, 1 << CR_MASTERY));
     SetFloatValue(PLAYER_FIELD_MASTERY, value);
-    /*
-    TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(GetTalentSpecialization(GetActiveSpec()));
+
+    ChrSpecializationEntry const* talentTab = sChrSpecializationStore.LookupEntry(GetActiveSpecialization());
     if (!talentTab)
         return;
 
-    for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
+    if (Aura* aura = GetAura(talentTab->MasterySpellId))
     {
-        if (!talentTab->MasterySpellId[i])
-            continue;
-
-        if (Aura* aura = GetAura(talentTab->MasterySpellId[i]))
+        for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
         {
-            for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
-            {
-                if (!aura->HasEffect(j))
-                    continue;
+            if (!aura->HasEffect(j))
+                continue;
 
-                float mult = aura->GetSpellInfo()->Effects[j].BonusMultiplier;
-                if (G3D::fuzzyEq(mult, 0.0f))
-                    continue;
+            float mult = aura->GetSpellInfo()->Effects[j].BonusMultiplier;
 
-                aura->GetEffect(j)->ChangeAmount(int32(value * aura->GetSpellInfo()->Effects[j].BonusMultiplier));
-            }
+            if (G3D::fuzzyEq(mult, 0.0f))
+                continue;
+
+            aura->GetEffect(j)->ChangeAmount(int32(value * aura->GetSpellInfo()->Effects[j].BonusMultiplier));
         }
-    }*/
+    }
 }
+
+void Player::UpdateMultistrike()
+{
+    float value = 0.f;//GetTotalAuraModifier(SPELL_AURA);
+    value += GetRatingBonusValue(CR_MULTISTRIKE);
+    AddPct(value, GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_STAT_GAINED_PCT, 1 << CR_MULTISTRIKE));
+    SetFloatValue(PLAYER_FIELD_MULTISTRIKE, value);
+}
+
+void Player::UpdateLeech()
+{
+    float value = 0.f;//GetTotalAuraModifier(SPELL_AURA);
+    value += GetRatingBonusValue(CR_LIFESTEAL);
+    SetFloatValue(PLAYER_FIELD_LIFESTEAL, value);
+}
+
+void Player::UpdateVesatillity()
+{
+    float value = 0.f;//GetTotalAuraModifier(SPELL_AURA);
+    value += GetRatingBonusValue(CR_VERSATILITY_DAMAGE_DONE);
+    value += GetRatingBonusValue(CR_VERSATILITY_DAMAGE_TAKEN);
+    SetFloatValue(PLAYER_FIELD_VERSATILITY, value);
+    SetFloatValue(PLAYER_FIELD_VERSATILITY_BONUS, value);
+}
+
+void Player::UpdateAvoidance()
+{
+    float value = 0.f;//GetTotalAuraModifier(SPELL_AURA);
+    value += GetRatingBonusValue(CR_AVOIDANCE);
+    SetFloatValue(PLAYER_FIELD_AVOIDANCE, value);
+}
+
 
 const float m_diminishing_k[MAX_CLASSES] =
 {
@@ -585,6 +603,8 @@ void Player::UpdateParryPercentage()
 
         value = value < 0.0f ? 0.0f : value;
     }
+
+    AddPct(value, GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_STAT_GAINED_PCT, 1 << CR_PARRY));
     SetStatFloatValue(PLAYER_FIELD_PARRY_PERCENTAGE, value);
 }
 
@@ -622,31 +642,6 @@ void Player::UpdateDodgePercentage()
     SetStatFloatValue(PLAYER_FIELD_DODGE_PERCENTAGE, value);
 }
 
-void Player::UpdateSpellCritChance(uint32 school)
-{
-    // For normal school set zero crit chance
-    if (school == SPELL_SCHOOL_NORMAL)
-    {
-        SetFloatValue(PLAYER_FIELD_SPELL_CRIT_PERCENTAGE, 0.0f);
-        return;
-    }
-    // For others recalculate it from:
-    float crit = 0.0f;
-    // Crit from Intellect
-    crit += GetSpellCritFromIntellect();
-    // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
-    crit += GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
-    // Increase crit from SPELL_AURA_MOD_CRIT_PCT
-    crit += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
-    // Increase crit by school from SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
-    crit += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, 1<<school);
-    // Increase crit from spell crit ratings
-    crit += GetRatingBonusValue(CR_CRIT_SPELL);
-
-    // Store crit value
-    SetFloatValue(PLAYER_FIELD_SPELL_CRIT_PERCENTAGE + school, crit);
-}
-
 void Player::UpdateArmorPenetration(int32 amount)
 {
     // Store Rating Value
@@ -669,12 +664,6 @@ void Player::UpdateSpellHitChances()
 {
     m_modSpellHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
-}
-
-void Player::UpdateAllSpellCritChances()
-{
-    for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
-        UpdateSpellCritChance(i);
 }
 
 void Player::UpdateExpertise(WeaponAttackType attack)
@@ -726,7 +715,7 @@ void Player::UpdateManaRegen()
     // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
     spirit_regen *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_MANA);
 
-    float base_regen = GetMaxPower(POWER_MANA) * 0.004f + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
+    float base_regen = GetMaxPower(POWER_MANA) * 0.04f + GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
 
     // Set regen rate in cast state apply only on spirit based regen
     int32 modManaRegenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
@@ -1221,7 +1210,7 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
 
     float att_speed = float(GetAttackTime(BASE_ATTACK))/1000.0f;
 
-    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAttackPowerValue(attType)/ 14.0f * att_speed  + bonusDamage;
+    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAttackPowerValue(attType)/ 3.5f * att_speed  + bonusDamage;
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = GetModifierValue(unitMod, TOTAL_PCT);

@@ -84,6 +84,7 @@ bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, SpellInfo 
 {
     SetMap(caster->GetMap());
     Relocate(pos);
+
     if (!IsPositionValid())
     {
         TC_LOG_ERROR("misc", "DynamicObject (spell %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", spell->Id, GetPositionX(), GetPositionY());
@@ -93,8 +94,8 @@ bool DynamicObject::CreateDynamicObject(uint32 guidlow, Unit* caster, SpellInfo 
     WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetPhaseMask());
 
     SetEntry(spell->Id);
-    SetObjectScale(1);
-    SetUInt64Value(DYNAMICOBJECT_FIELD_CASTER, caster->GetGUID());
+    SetObjectScale(1.f);
+    SetGuidValue(DYNAMICOBJECT_FIELD_CASTER, caster->GetGUID128());
     SetUInt32Value(DYNAMICOBJECT_FIELD_TYPE_AND_VISUAL_ID, spell->SpellVisual[0] | (type << 28));
     SetUInt32Value(DYNAMICOBJECT_FIELD_SPELL_ID, spell->Id);
     SetFloatValue(DYNAMICOBJECT_FIELD_RADIUS, radius);

@@ -212,7 +212,7 @@ void ChatHandler::SendSysMessage(const char *str)
 
     while (char* line = LineFromMessage(pos))
     {
-        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, NULL, line);
+        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, m_session->GetPlayer(), m_session->GetPlayer(), str);
         m_session->SendPacket(&data);
     }
 
@@ -230,7 +230,7 @@ void ChatHandler::SendGlobalSysMessage(const char *str)
 
     while (char* line = LineFromMessage(pos))
     {
-        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, NULL, line);
+        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, m_session->GetPlayer(), m_session->GetPlayer(), line);
         sWorld->SendGlobalMessage(&data);
     }
 
@@ -248,7 +248,7 @@ void ChatHandler::SendGlobalGMSysMessage(const char *str)
 
     while (char* line = LineFromMessage(pos))
     {
-        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, NULL, line);
+        BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, m_session->GetPlayer(), m_session->GetPlayer(), line);
         sWorld->SendGlobalGMMessage(&data);
      }
     free(buf);
@@ -682,7 +682,7 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
 
         case CHAT_MSG_CHANNEL:
             hasChannelName = channelName.length();
-            hasSenderName = senderName.length();
+            hasSenderName = channelName.length();
             break;
         default:
             if (gmMessage)
@@ -694,152 +694,39 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
         hasPrefix = addonPrefix.length();
 
     Player* sender = sObjectAccessor->FindPlayer(senderGUID);
-
+   
     ObjectGuid guildGUID = hasGuildGUID && sender && sender->GetGuildId() ? MAKE_NEW_GUID(sender->GetGuildId(), 0, HIGHGUID_GUILD) : 0;
     ObjectGuid groupGUID = hasGroupGUID && sender && sender->GetGroup() ? sender->GetGroup()->GetGUID() : 0;
-
+    ObjectGuid unkGuidWod = 0;
 
     data.Initialize(SMSG_MESSAGECHAT);
-    data.WriteBit(!hasSenderName);
-    data.WriteBit(0); // HideInChatLog - only bubble shows
-
-    if (hasSenderName)
-        data.WriteBits(senderName.length(), 11);
-
-    data.WriteBit(0); // Fake Bit
-    data.WriteBit(!hasChannelName);
-    data.WriteBit(0); // Unk
-    data.WriteBit(1); // SendFakeTime - float later
-    data.WriteBit(!chatTag); // ChatFlags
-    data.WriteBit(1); // RealmID ?
-
-    data.WriteBit(groupGUID[0]);
-    data.WriteBit(groupGUID[1]);
-    data.WriteBit(groupGUID[5]);
-    data.WriteBit(groupGUID[4]);
-    data.WriteBit(groupGUID[3]);
-    data.WriteBit(groupGUID[2]);
-    data.WriteBit(groupGUID[6]);
-    data.WriteBit(groupGUID[7]);
-
-     if (chatTag)
-        data.WriteBits(chatTag, 9);
-
-    data.WriteBit(0); // Fake Bit
-
-    data.WriteBit(receiverGUID[7]);
-    data.WriteBit(receiverGUID[6]);
-    data.WriteBit(receiverGUID[1]);
-    data.WriteBit(receiverGUID[4]);
-    data.WriteBit(receiverGUID[0]);
-    data.WriteBit(receiverGUID[2]);
-    data.WriteBit(receiverGUID[3]);
-    data.WriteBit(receiverGUID[5]);
-
-    data.WriteBit(0); // Fake Bit
-    data.WriteBit(!language);
-    data.WriteBit(!hasPrefix);
-
-    data.WriteBit(senderGUID[0]);
-    data.WriteBit(senderGUID[3]);
-    data.WriteBit(senderGUID[7]);
-    data.WriteBit(senderGUID[2]);
-    data.WriteBit(senderGUID[1]);
-    data.WriteBit(senderGUID[5]);
-    data.WriteBit(senderGUID[4]);
-    data.WriteBit(senderGUID[6]);
-
-    data.WriteBit(!hasAchievementId);
-    data.WriteBit(!message.length());
-
-    if (hasChannelName)
-        data.WriteBits(channelName.length(), 7);
-
-    if (message.length())
-        data.WriteBits(message.length(), 12);
-
-    data.WriteBit(!hasReceiverName);
-
-    if (hasPrefix)
-        data.WriteBits(addonPrefix.length(), 5);
-
-    data.WriteBit(1); // RealmID ?
-
-    if (hasReceiverName)
-        data.WriteBits(receiverName.length(), 11);
-
-    data.WriteBit(0); // Fake Bit
-
-    data.WriteBit(guildGUID[2]);
-    data.WriteBit(guildGUID[5]);
-    data.WriteBit(guildGUID[7]);
-    data.WriteBit(guildGUID[4]);
-    data.WriteBit(guildGUID[0]);
-    data.WriteBit(guildGUID[1]);
-    data.WriteBit(guildGUID[3]);
-    data.WriteBit(guildGUID[6]);
-
-    data.WriteByteSeq(guildGUID[4]);
-    data.WriteByteSeq(guildGUID[5]);
-    data.WriteByteSeq(guildGUID[7]);
-    data.WriteByteSeq(guildGUID[3]);
-    data.WriteByteSeq(guildGUID[2]);
-    data.WriteByteSeq(guildGUID[6]);
-    data.WriteByteSeq(guildGUID[0]);
-    data.WriteByteSeq(guildGUID[1]);
-
-    if (hasChannelName)
-        data.WriteString(channelName);
-
-    if (hasPrefix)
-        data.WriteString(addonPrefix);
-
-    // if (hasFakeTime)
-    //     data << float(fakeTime);
-
-    data.WriteByteSeq(senderGUID[4]);
-    data.WriteByteSeq(senderGUID[7]);
-    data.WriteByteSeq(senderGUID[1]);
-    data.WriteByteSeq(senderGUID[5]);
-    data.WriteByteSeq(senderGUID[0]);
-    data.WriteByteSeq(senderGUID[6]);
-    data.WriteByteSeq(senderGUID[2]);
-    data.WriteByteSeq(senderGUID[3]);
-
     data << uint8(chatType);
+    data << uint8(language);
+    data << senderGUID;
+    data << guildGUID;
+    data << receiverGUID;
+    data << groupGUID;
+    data << uint32(realmID);
+    data << uint32(realmID);
+    data << unkGuidWod;
+    data << uint32(achievementId);
+    data << float(0); // TimeOverride
 
-    if (hasAchievementId)
-        data << uint32(achievementId);
+    data.WriteBits(senderName.length(), 11);
+    data.WriteBits(receiverName.length(), 11);
+    data.WriteBits(addonPrefix.length(), 5);
+    data.WriteBits(channelName.length(), 7);
+    data.WriteBits(message.length(), 12);
 
-    data.WriteByteSeq(groupGUID[1]);
-    data.WriteByteSeq(groupGUID[3]);
-    data.WriteByteSeq(groupGUID[4]);
-    data.WriteByteSeq(groupGUID[6]);
-    data.WriteByteSeq(groupGUID[0]);
-    data.WriteByteSeq(groupGUID[2]);
-    data.WriteByteSeq(groupGUID[5]);
-    data.WriteByteSeq(groupGUID[7]);
+    data.WriteBits(chatTag, 10);
+    data.WriteBit(0); // HideInChatLog
+    data.WriteBit(1); // FalseSenderName
 
-    data.WriteByteSeq(receiverGUID[2]);
-    data.WriteByteSeq(receiverGUID[5]);
-    data.WriteByteSeq(receiverGUID[3]);
-    data.WriteByteSeq(receiverGUID[6]);
-    data.WriteByteSeq(receiverGUID[7]);
-    data.WriteByteSeq(receiverGUID[4]);
-    data.WriteByteSeq(receiverGUID[1]);
-    data.WriteByteSeq(receiverGUID[0]);
-
-    if (language)
-        data << uint8(language);
-
-    if (message.length())
-        data.WriteString(message);
-
-    if (hasReceiverName)
-        data.WriteString(receiverName);
-
-    if (hasSenderName)
-        data.WriteString(senderName);
+    data.WriteString(senderName);
+    data.WriteString(receiverName);
+    data.WriteString(addonPrefix);
+    data.WriteString(channelName);
+    data.WriteString(message);
 
     return data.wpos();
 }

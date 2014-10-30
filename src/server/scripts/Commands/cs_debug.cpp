@@ -35,7 +35,8 @@ EndScriptData */
 #include "GossipDef.h"
 #include "Transport.h"
 #include "Language.h"
-
+#include "Item.h"
+#include "ItemPrototype.h"
 #include <fstream>
 
 class debug_commandscript : public CommandScript
@@ -96,6 +97,7 @@ public:
             { "moveflags",     rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS,     false, &HandleDebugMoveflagsCommand,        "", NULL },
             { "transport",     rbac::RBAC_PERM_COMMAND_DEBUG_TRANSPORT,     false, &HandleDebugTransportCommand,        "", NULL },
             { "phase",         rbac::RBAC_PERM_COMMAND_DEBUG_PHASE,         false, &HandleDebugPhaseCommand,            "", NULL },
+            { "scaleitem",     rbac::RBAC_PERM_COMMAND_DEBUG_PHASE,         true,  &HandleDebugScaleItem,               "", NULL },
             { NULL,            0,                                     false, NULL,                                "", NULL }
         };
         static ChatCommand commandTable[] =
@@ -1395,6 +1397,33 @@ public:
             player = unit->ToPlayer();
 
         player->GetPhaseMgr().SendDebugReportToPlayer(handler->GetSession()->GetPlayer());
+        return true;
+    }
+
+    static bool HandleDebugScaleItem(ChatHandler* handler, char const* args)
+    {
+        char* arg1 = strtok((char*)args, " ");
+        char* arg2 = strtok(NULL, " ");
+
+        if (!arg1)
+            return false;
+
+        ItemTemplate const* proto = sObjectMgr->GetItemTemplate(args ? atoi(args) : 0);
+        if (!proto)
+            return false;
+
+        uint32 ilvl = arg2 ? atoi(arg2) : proto->ItemLevel;
+        ilvl = ilvl > 1000 ? 300 : ilvl;
+
+       uint32 minDamage, maxDamage;
+       Item::CalculateMinMaxDamageScaling(proto, ilvl, minDamage, maxDamage);
+       handler->PSendSysMessage("%s(%i): %i", proto->Name1.c_str(), proto->ItemId, ilvl);
+       handler->PSendSysMessage("%i - %i", minDamage, maxDamage);
+       handler->PSendSysMessage("Armor: %i", Item::CalculateArmorScaling(proto, ilvl));
+       for (int i = 0; i < 10; i++)
+        if (proto->ItemStat[i].ItemStatType != -1)
+            handler->PSendSysMessage("Stat(%i): %i", proto->ItemStat[i].ItemStatType, Item::CalculateStatScaling(proto, i, ilvl));
+
         return true;
     }
 };

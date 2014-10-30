@@ -33,10 +33,9 @@ namespace Movement
     enum MonsterMoveType
     {
         MonsterMoveNormal       = 0,
-        MonsterMoveStop         = 1,
-        MonsterMoveFacingPoint  = 2,
-        MonsterMoveFacingTarget = 3,
-        MonsterMoveFacingAngle  = 4
+        MonsterMoveFacingPoint  = 1,
+        MonsterMoveFacingTarget = 2,
+        MonsterMoveFacingAngle  = 3,
     };
 
     class MoveSpline;

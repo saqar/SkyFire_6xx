@@ -62,13 +62,15 @@ void Totem::InitStats(uint32 duration)
     {
         WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
         data << uint8(m_Properties->Slot - 1);
-        data << uint64(GetGUID());
+        data << GetGUID128();
         data << uint32(duration);
         data << uint32(GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL));
         GetOwner()->ToPlayer()->SendDirectMessage(&data);
 
         // set display id depending on caster's race
-        SetDisplayId(GetOwner()->GetModelForTotem(PlayerTotemType(m_Properties->Id)));
+        CreatureTemplate const* creatureTemplate = GetCreatureTemplate();
+        if (creatureTemplate)
+            SetDisplayId(GetOwner()->GetModelForTotem(PlayerTotemType(creatureTemplate->Modelid1)));
     }
 
     Minion::InitStats(duration);
@@ -89,8 +91,10 @@ void Totem::InitSummon()
         CastSpell(this, GetSpell(), true);
 
     // Some totems can have both instant effect and passive spell
+    // Why trigger ????
+
     if (GetSpell(1))
-        CastSpell(this, GetSpell(1), true);
+        CastSpell(this, GetSpell(1), false);
 
     if (m_Properties->Id == SUMMON_TYPE_TOTEM_FIRE && GetOwner()->HasAura(SPELL_TOTEMIC_WRATH_TALENT))
         CastSpell(this, SPELL_TOTEMIC_WRATH, true);

@@ -53,6 +53,7 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Chat.h"
+#include "AreaTrigger.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -103,24 +104,6 @@ WorldObject::~WorldObject()
     }
 }
 
-ObjectGuid Object::GetGuidValue(uint16 index) const
-{
-    return ObjectGuid(GetUInt64Value(index), GetUInt64Value(index + 2));
-}
-
-void Object::SetGuidValue(uint16 index, ObjectGuid& guid)
-{
-    SetUInt64Value(index, guid.GetLoGuid());
-    SetUInt64Value(index + 2, guid.GetHiGuid());
-}
-
-void Object::SetGuidValue(uint16 index, uint64 guid64)
-{
-    ObjectGuid guid(guid64);
-    SetUInt64Value(index, guid.GetLoGuid());
-    SetUInt64Value(index + 2, guid.GetHiGuid());
-}
-
 Object::~Object()
 {
     if (IsInWorld())
@@ -169,8 +152,8 @@ void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
 {
     if (!m_uint32Values) _InitValues();
 
-    uint64 guid = MAKE_NEW_GUID(guidlow, entry, guidhigh);
-    SetUInt64Value(OBJECT_FIELD_GUID, guid);
+    ObjectGuid guid = MAKE_NEW_GUID(guidlow, entry, guidhigh);
+    SetGuidValue(OBJECT_FIELD_GUID, guid);
     SetUInt16Value(OBJECT_FIELD_TYPE, 0, m_objectType);
     m_PackGUID.clear();
     m_PackGUID.appendPackGUID(GetGUID());
@@ -273,7 +256,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
 
     ByteBuffer buf(500);
     buf << uint8(updateType);
-    buf.append(GetPackGUID());
+    buf << GetGUID128();
     buf << uint8(m_objectTypeId);
 
     BuildMovementUpdate(&buf, flags);
@@ -289,6 +272,7 @@ void Object::SendUpdateToPlayer(Player* player)
 
     BuildCreateUpdateBlockForPlayer(&upd, player);
     upd.BuildPacket(&packet);
+
     player->GetSession()->SendPacket(&packet);
 }
 
@@ -297,7 +281,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) c
     ByteBuffer buf(500);
 
     buf << uint8(UPDATETYPE_VALUES);
-    buf.append(GetPackGUID());
+    buf << GetGUID128();
 
     BuildValuesUpdate(UPDATETYPE_VALUES, &buf, target);
 
@@ -306,14 +290,20 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) c
 
 void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
 {
-    data->AddOutOfRangeGUID(GetGUID());
+    data->AddOutOfRangeGUID(GetGUID128());
 }
 
 void Object::DestroyForPlayer(Player* target, bool onDeath) const
 {
     ASSERT(target);
 
-    if (isType(TYPEMASK_UNIT) || isType(TYPEMASK_PLAYER))
+    UpdateData updateData(target->GetMapId());
+    BuildOutOfRangeUpdateBlock(&updateData);
+    WorldPacket packet;
+    updateData.BuildPacket(&packet);
+    target->SendDirectMessage(&packet);
+
+    /*if (isType(TYPEMASK_UNIT) || isType(TYPEMASK_PLAYER))
     {
         if (Battleground* bg = target->GetBattleground())
         {
@@ -327,16 +317,33 @@ void Object::DestroyForPlayer(Player* target, bool onDeath) const
     }
 
     WorldPacket data(SMSG_DESTROY_OBJECT, 2 + 8);
-    ObjectGuid guid(GetGUID128());
+    ObjectGuid guid(GetGUID());
+
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
 
     //! If the following bool is true, the client will call "void CGUnit_C::OnDeath()" for this object.
     //! OnDeath() does for eg trigger death animation and interrupts certain spells/missiles/auras/sounds...
     data.WriteBit(onDeath);
+
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[5]);
     data.FlushBits();
 
-    data << guid;
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[5]);
 
-    target->GetSession()->SendPacket(&data);
+    target->GetSession()->SendPacket(&data);*/
 }
 
 int32 Object::GetInt32Value(uint16 index) const
@@ -383,7 +390,6 @@ uint32 Object::GetDynamicUInt32Value(uint32 tab, uint16 index) const
     return m_dynamicTab[tab][index];
 }
 
-
 void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
     bool hasLiving = flags & UPDATEFLAG_LIVING;
@@ -394,6 +400,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     bool hasTransport = false;//flags & UPDATEFLAG_TRANSPORT;
     bool hasVehicle = false; //flags & UPDATEFLAG_VEHICLE;
     bool hasAnimKits = false; //flags & UPDATEFLAG_ANIMKITS;
+    bool hasAreatrigger = flags & UPDATEFlAG_AREATRIGGER;
 
     bool hasFallData;
     bool hasFallDirection;
@@ -417,7 +424,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     data->WriteBit(hasVehicle);
     data->WriteBit(hasAnimKits);
     data->WriteBit(hasGobjectRotation);
-    data->WriteBit(0); // AreaTrigger
+    data->WriteBit(hasAreatrigger);
     data->WriteBit(0); // GameObject
     data->WriteBit(flags & UPDATEFLAG_SELF);
     data->WriteBit(0); // ReplaceActive
@@ -539,6 +546,36 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
     if (hasGobjectRotation)
         *data << uint64(ToGameObject()->GetRotation());
+
+    if (hasAreatrigger)
+    {
+        AreaTrigger const* areaTrigger = ToAreaTrigger();
+        *data << uint32(0); // Elapsed
+        *data << float(0); // TargetRollPitchYaw X
+        *data << float(0); // TargetRollPitchYaw Y
+        *data << float(0); // TargetRollPitchYaw Z
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(1);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(areaTrigger->GetRadius() != 0.f); // Size has to be sent
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+
+        if (areaTrigger->GetRadius() != 0.f)
+        {
+            *data << float(areaTrigger->GetRadius());
+            *data << float(areaTrigger->GetRadius());
+        }
+    }
 
     data->FlushBits();
 }
@@ -802,6 +839,52 @@ void Object::SetUInt64Value(uint16 index, uint64 value)
             m_objectUpdated = true;
         }
     }
+}
+
+ObjectGuid Object::GetGuidValue(uint16 index) const
+{
+    return ObjectGuid(GetUInt64Value(index), GetUInt64Value(index + 2));
+}
+
+void Object::SetGuidValue(uint16 index, ObjectGuid& guid)
+{
+    SetUInt64Value(index, guid.GetLoGuid());
+    SetUInt64Value(index + 2, guid.GetHiGuid());
+}
+
+void Object::SetGuidValue(uint16 index, uint64 guid64)
+{
+    if (!guid64)
+    {
+        SetUInt64Value(index, 0);
+        SetUInt64Value(index + 2, 0);
+    }
+
+    ObjectGuid guid(guid64);
+    SetUInt64Value(index, guid.GetLoGuid());
+    SetUInt64Value(index + 2, guid.GetHiGuid());
+}
+
+bool Object::AddGuidValue(uint16 index, ObjectGuid& guid)
+{
+    return AddUInt64Value(index, guid.GetLoGuid()) && AddUInt64Value(index + 2, guid.GetHiGuid());
+}
+
+bool Object::AddGuidValue(uint16 index, uint64 guid64)
+{
+    ObjectGuid guid(guid64);
+    return AddUInt64Value(index, guid.GetLoGuid()) && AddUInt64Value(index + 2, guid.GetHiGuid());
+}
+
+bool Object::RemoveGuidValue(uint16 index, ObjectGuid& guid)
+{
+    return RemoveUInt64Value(index, guid.GetLoGuid()) && RemoveUInt64Value(index + 2, guid.GetHiGuid());
+}
+
+bool Object::RemoveGuidValue(uint16 index, uint64 guid64)
+{
+    ObjectGuid guid(guid64);
+    return RemoveUInt64Value(index, guid.GetLoGuid()) && RemoveUInt64Value(index + 2, guid.GetHiGuid());
 }
 
 bool Object::AddUInt64Value(uint16 index, uint64 value)
@@ -1989,13 +2072,26 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
 
 void WorldObject::SendPlaySound(uint32 Sound, bool OnlySelf)
 {
-    ObjectGuid guid = GetGUID128();
+    ObjectGuid guid = GetGUID();
 
     WorldPacket data(SMSG_PLAY_SOUND, 4 + 9);
-
-    data << guid;
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
     data << uint32(Sound);
-
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
     if (OnlySelf && GetTypeId() == TYPEID_PLAYER)
         this->ToPlayer()->GetSession()->SendPacket(&data);
     else
@@ -2179,8 +2275,9 @@ void WorldObject::SendMessageToSet(WorldPacket* data, Player const* skipped_rcvr
 
 void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
 {
+    ObjectGuid objGuid = guid;
     WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
-    data << uint64(guid);
+    data << objGuid;
     SendMessageToSet(&data, true);
 }
 
@@ -2513,13 +2610,6 @@ void WorldObject::GetCreatureListWithEntryInGrid(std::list<Creature*>& creatureL
     TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, GridTypeMapContainer> visitor(searcher);
 
     cell.Visit(pair, visitor, *(this->GetMap()), *this, maxSearchRange);
-}
-
-void WorldObject::GetPlayerListInGrid(std::list<Player*>& playerList, float maxSearchRange) const
-{    
-    Trinity::AnyPlayerInObjectRangeCheck checker(this, maxSearchRange);
-    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, playerList, checker);
-    this->VisitNearbyWorldObject(maxSearchRange, searcher);
 }
 
 /*
@@ -2895,12 +2985,26 @@ bool WorldObject::InSamePhase(WorldObject const* obj) const
 
 void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target /*= NULL*/)
 {
-    ObjectGuid guid = GetGUID128();
+    ObjectGuid guid = GetGUID();
 
     WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4 + 9);
-    
-    data << guid;
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
     data << uint32(sound_id);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
 
     if (target)
         target->SendDirectMessage(&data);
@@ -3043,6 +3147,7 @@ uint64 WorldObject::GetTransGUID() const
         return GetTransport()->GetGUID();
     return 0;
 }
+
 
 ByteBuffer &operator>>(ByteBuffer& buffer, ObjectGuid& value)
 {

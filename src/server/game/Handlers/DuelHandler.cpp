@@ -31,7 +31,6 @@
 void WorldSession::HandleDuelProposedOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
-
     recvPacket >> guid;
 
     if (Player* player = sObjectAccessor->FindPlayer(guid))
@@ -51,6 +50,7 @@ void WorldSession::HandleDuelResponseOpcode(WorldPacket& recvPacket)
     Player* plTarget;
 
     recvPacket >> guid;
+    accepted = recvPacket.ReadBit();
 
     if (!GetPlayer()->duel)                                  // ignore accept from duel-sender
         return;

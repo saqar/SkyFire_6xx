@@ -99,6 +99,8 @@ enum MovementStatusElements
     MSEFallSinAngle,
     MSEFallHorizontalSpeed,
     MSESplineElevation,
+    MSEGuid128,
+    MSETransportGuid128,
 
     MSEUintCount,
 

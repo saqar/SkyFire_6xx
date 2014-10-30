@@ -98,10 +98,9 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
     uint8 boxTextLength = 0;
     std::string code = "";
 
-    recvData >> gossipListId >> menuId;
-    
     recvData >> guid;
-   
+    recvData >> menuId >> gossipListId;
+
     boxTextLength = recvData.ReadBits(8);
 
     if (_player->PlayerTalkClass->IsGossipOptionCoded(gossipListId))
@@ -490,7 +489,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
 {
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_LOGOUT_REQUEST Message, security - %u", GetSecurity());
 
-    if (ObjectGuid lguid = GetPlayer()->GetLootGUID())
+    if (uint64 lguid = GetPlayer()->GetLootGUID())
         DoLootRelease(lguid);
 
     bool instantLogout = (GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && !GetPlayer()->IsInCombat()) ||
@@ -626,9 +625,7 @@ void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 void WorldSession::HandleSetSelectionOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
-
     recvData >> guid;
-
     _player->SetSelection(guid);
 }
 
@@ -677,7 +674,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(PreparedQueryResult result, std
     if (!GetPlayer())
         return;
 
-    ObjectGuid friendGuid;
+    uint64 friendGuid;
     uint32 friendAccountId;
     uint32 team;
     FriendsResult friendResult;
@@ -728,7 +725,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(PreparedQueryResult result, std
 
 void WorldSession::HandleDelFriendOpcode(WorldPacket& recvData)
 {
-    ObjectGuid FriendGUID;
+    uint64 FriendGUID;
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_DEL_FRIEND");
 
@@ -767,7 +764,7 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(PreparedQueryResult result)
     if (!GetPlayer())
         return;
 
-    ObjectGuid IgnoreGuid;
+    uint64 IgnoreGuid;
     FriendsResult ignoreResult;
 
     ignoreResult = FRIEND_IGNORE_NOT_FOUND;
@@ -801,7 +798,7 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(PreparedQueryResult result)
 
 void WorldSession::HandleDelIgnoreOpcode(WorldPacket& recvData)
 {
-    ObjectGuid IgnoreGUID;
+    uint64 IgnoreGUID;
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_DEL_IGNORE");
 
@@ -817,7 +814,7 @@ void WorldSession::HandleDelIgnoreOpcode(WorldPacket& recvData)
 void WorldSession::HandleSetContactNotesOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_SET_CONTACT_NOTES");
-    ObjectGuid guid;
+    uint64 guid;
     std::string note;
     recvData >> guid >> note;
     _player->GetSocial()->SetFriendNote(GUID_LOPART(guid), note);
@@ -856,7 +853,23 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recvData)
 
     ObjectGuid guid;
 
-    recvData >> guid;
+    guid[1] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[3]);
 
     if (GetPlayer()->IsAlive())
         return;
@@ -892,7 +905,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_RESURRECT_RESPONSE");
 
-    ObjectGuid guid;
+    uint64 guid;
     uint8 status;
     recvData >> guid;
     recvData >> status;
@@ -983,7 +996,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
         // rotate the players position instead of rotating the whole cube, that way we can make a simplified
         // is-in-cube check and we have to calculate only one point instead of 4
 
-        // 2PI = 360°, keep in mind that ingame orientation is counter-clockwise
+        // 2PI = 360Â°, keep in mind that ingame orientation is counter-clockwise
         double rotation = 2 * M_PI - atEntry->box_orientation;
         double sinVal = std::sin(rotation);
         double cosVal = std::cos(rotation);
@@ -1151,13 +1164,29 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 
     ObjectGuid guid;
 
-    data << guid;
     data << uint32(size);                                   // decompressed length
     data << uint32(destSize);
     data.append(dest);
     data << uint32(adata->Time);                            // unix time
+    data.WriteBit(guid[7]);
     data.WriteBits(type, 3);                                 // type (0-7)
-    
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[2]);
+
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+
     SendPacket(&data);
 }
 
@@ -1170,12 +1199,11 @@ int32 WorldSession::HandleEnableNagleAlgorithm()
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
 {
-    ObjectGuid buttonStream;
+    uint64 buttonStream;
     uint8 slotId;
 
-    recvData >> slotId;
-
     recvData >> buttonStream;
+    recvData >> slotId;
 
     ActionButtonPACKET* button = reinterpret_cast<ActionButtonPACKET*>(&buttonStream);
 
@@ -1205,7 +1233,23 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recvData)
     uint32 time;
     recvData >> time;
 
-    recvData >> guid;
+    guid[5] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[4]);
 
     //TODO!
 
@@ -1303,7 +1347,6 @@ void WorldSession::HandlePlayedTime(WorldPacket& recvData)
 void WorldSession::HandleInspectOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
-
     recvData >> guid;
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_INSPECT");
@@ -1311,58 +1354,157 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recvData)
     Player* player = ObjectAccessor::FindPlayer(guid);
     if (!player)
     {
-        TC_LOG_DEBUG("network", "CMSG_INSPECT: No player found from GUID: " UI64FMTD, (ObjectGuid)guid);
+        TC_LOG_DEBUG("network", "CMSG_INSPECT: No player found from GUID: " UI64FMTD, (uint64)guid);
         return;
     }
 
-    uint32 talent_points = 41;
-    WorldPacket data(SMSG_INSPECT_TALENT, 8 + 4 + 1 + 1 + talent_points + 8 + 4 + 8 + 4);
-    data << player->GetGUID();
+    uint32 slotCount = 0;
+    uint32 talentCount = 0;
+    uint32 glyphCount = 0;
 
-    if (sWorld->getBoolConfig(CONFIG_TALENTS_INSPECTING) || _player->IsGameMaster())
-        player->BuildPlayerTalentsInfoData(&data);
-    else
+    WorldPacket data(SMSG_INSPECT);
+    data << player->GetGUID128();
+
+    size_t slotPos = data.wpos();
+    data << uint32(slotCount);
+
+    size_t glyphPos = data.wpos();
+    data << uint32(glyphCount);
+
+    size_t talentPos = data.wpos();
+    data << uint32(talentCount);
+
+    data << uint32(player->getClass());
+    data << uint32(player->GetTalentSpecialization(player->GetActiveSpec()));
+    data << uint32(0);
+
+    for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
-        data << uint32(0);                                  // unspentTalentPoints
-        data << uint8(0);                                   // talentGroupCount
-        data << uint8(0);                                   // talentGroupIndex
+        Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+
+        if (!item)
+            continue;
+
+        uint32 enchantCount = 0;
+
+        data << item->GetGuidValue(ITEM_FIELD_CREATOR); // item creator
+        item->WriteData(&data);
+        data << uint8(i);
+
+        size_t enchantPos = data.wpos();
+        data << uint32(enchantCount);                   // enchantmentMask < 0x1000
+
+        for (uint32 j = 0; j < MAX_ENCHANTMENT_SLOT; ++j)
+        {
+            uint32 enchId = item->GetEnchantmentId(EnchantmentSlot(j));
+
+            if (!enchId)
+                continue;
+
+            data << uint32(enchId);                        // enchantmentId?
+            data << uint8(j);
+            enchantCount++;
+        }
+
+        data.WriteBit(1);//player->CanUseItem(item->GetTemplate()));
+        data.FlushBits();
+        data.put(enchantPos, enchantCount);
+        slotCount++;
     }
 
-    player->BuildEnchantmentsInfoData(&data);
-    if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
+    for (int i = 0; i < MAX_GLYPH_SLOT_INDEX; i++)
     {
-        data << uint64(guild->GetGUID());
+        if (uint16 glyph = player->GetGlyph(player->GetActiveSpec(), i))
+        {
+            data << uint16(glyph);
+            glyphCount++;
+        }
+    }
+
+    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
+    {
+        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
+        if (!talentInfo)
+            continue;
+
+        if (talentInfo->playerClass != player->getClass())
+            continue;
+
+        if (!player->HasTalent(talentInfo->SpellId, player->GetActiveSpec()))
+            continue;
+
+        data << uint16(talentInfo->TalentID);  // Talent.dbc
+
+        talentCount++;
+    }
+
+    data.put<uint32>(slotPos, slotCount);
+    data.put<uint32>(glyphPos, glyphCount);
+    data.put<uint32>(talentPos, talentCount);
+
+    Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId());
+    data.WriteBit(guild != NULL);
+
+    if (guild)
+    {
+        data << ObjectGuid(guild->GetGUID());
         data << uint32(guild->GetLevel());
-        data << uint64(0/*guild->GetXP()*/);
         data << uint32(guild->GetMembersCount());
     }
+
     SendPacket(&data);
 }
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
+    guid[2] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
 
-    recvData >> guid;
-
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[7]);
     Player* player = ObjectAccessor::FindPlayer(guid);
 
     if (!player)
     {
-        TC_LOG_DEBUG("network", "CMSG_INSPECT_HONOR_STATS: No player found from GUID: " UI64FMTD, (ObjectGuid)guid);
+        TC_LOG_DEBUG("network", "CMSG_INSPECT_HONOR_STATS: No player found from GUID: " UI64FMTD, (uint64)guid);
         return;
     }
 
-    ObjectGuid playerGuid = player->GetGUID128();
+    ObjectGuid playerGuid = player->GetGUID();
     WorldPacket data(SMSG_INSPECT_HONOR_STATS, 8+1+4+4);
-    
-    data << playerGuid;
-
+    data.WriteBit(playerGuid[4]);
+    data.WriteBit(playerGuid[3]);
+    data.WriteBit(playerGuid[6]);
+    data.WriteBit(playerGuid[2]);
+    data.WriteBit(playerGuid[5]);
+    data.WriteBit(playerGuid[0]);
+    data.WriteBit(playerGuid[7]);
+    data.WriteBit(playerGuid[1]);
     data << uint8(0);                                               // rank
     data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));  // yesterday kills
     data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));  // today kills
+    data.WriteByteSeq(playerGuid[2]);
+    data.WriteByteSeq(playerGuid[0]);
+    data.WriteByteSeq(playerGuid[6]);
+    data.WriteByteSeq(playerGuid[3]);
+    data.WriteByteSeq(playerGuid[4]);
+    data.WriteByteSeq(playerGuid[1]);
+    data.WriteByteSeq(playerGuid[5]);
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
-
+    data.WriteByteSeq(playerGuid[7]);
     SendPacket(&data);
 }
 
@@ -1466,7 +1608,7 @@ void WorldSession::HandleComplainOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: CMSG_COMPLAIN");
 
     uint8 spam_type;                                        // 0 - mail, 1 - chat
-    ObjectGuid spammer_guid;
+    uint64 spammer_guid;
     uint32 unk1 = 0;
     uint32 unk2 = 0;
     uint32 unk3 = 0;
@@ -1779,13 +1921,28 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)
 void WorldSession::HandleQueryInspectAchievements(WorldPacket& recvData)
 {
     ObjectGuid guid;
-    
-    recvData >> guid;
+    guid[2] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+    guid[3] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[5]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[7]);
 
     Player* player = ObjectAccessor::FindPlayer(guid);
     if (!player)
     {
-        TC_LOG_DEBUG("network", "CMSG_QUERY_INSPECT_ACHIEVEMENTS: Inspected Player " UI64FMTD, (ObjectGuid)guid);
+        TC_LOG_DEBUG("network", "CMSG_QUERY_INSPECT_ACHIEVEMENTS: Inspected Player " UI64FMTD, (uint64)guid);
         return;
     }
 
@@ -1809,14 +1966,6 @@ void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& /*recvData*/)
     WorldPacket data(SMSG_WORLD_STATE_UI_TIMER_UPDATE, 4);
     data << uint32(time(NULL));
     SendPacket(&data);
-}
-
-void WorldSession::HandleReadyForAccountDataTimes(WorldPacket& /*recvData*/)
-{
-    // empty opcode
-    TC_LOG_DEBUG("network", "WORLD: CMSG_READY_FOR_ACCOUNT_DATA_TIMES");
-
-    SendAccountDataTimes(GLOBAL_CACHE_MASK);
 }
 
 void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps, std::set<uint32> const& worldMapAreas)
@@ -1873,7 +2022,7 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    ObjectGuid guid;
+    uint64 guid;
     recvData >> guid;
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
@@ -1896,7 +2045,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    ObjectGuid guid;
+    uint64 guid;
     recvData >> guid;
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
@@ -1955,74 +2104,52 @@ void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
 
 void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
 {
-    uint32 type, count;
-    recvPacket >> type;
+    ObjectGuid guid;
+    uint32 tableHash, count, recordId;
 
-    DB2StorageBase const* store = GetDB2Storage(type);
+    recvPacket >> tableHash;
+    recvPacket >> count;
+
+    DB2StorageBase const* store = GetDB2Storage(tableHash);
     if (!store)
     {
-        TC_LOG_ERROR("network", "CMSG_REQUEST_HOTFIX: Received unknown hotfix type: %u", type);
+        TC_LOG_ERROR("network", "CMSG_REQUEST_HOTFIX: Received unknown hotfix type: %u", tableHash);
         recvPacket.rfinish();
         return;
     }
 
-    count = recvPacket.ReadBits(21);
-
-    ObjectGuid* guids = new ObjectGuid[count];
-    for (uint32 i = 0; i < count; ++i)
+    for (uint32 i = 0; i < count; i++)
     {
-        guids[i][6] = recvPacket.ReadBit();
-        guids[i][3] = recvPacket.ReadBit();
-        guids[i][0] = recvPacket.ReadBit();
-        guids[i][1] = recvPacket.ReadBit();
-        guids[i][4] = recvPacket.ReadBit();
-        guids[i][5] = recvPacket.ReadBit();
-        guids[i][7] = recvPacket.ReadBit();
-        guids[i][2] = recvPacket.ReadBit();
-    }
-
-    uint32 entry;
-    for (uint32 i = 0; i < count; ++i)
-    {
-        recvPacket.ReadByteSeq(guids[i][1]);
-        recvPacket >> entry;
-        recvPacket.ReadByteSeq(guids[i][0]);
-        recvPacket.ReadByteSeq(guids[i][5]);
-        recvPacket.ReadByteSeq(guids[i][6]);
-        recvPacket.ReadByteSeq(guids[i][4]);
-        recvPacket.ReadByteSeq(guids[i][7]);
-        recvPacket.ReadByteSeq(guids[i][2]);
-        recvPacket.ReadByteSeq(guids[i][3]);
+        recvPacket >> guid;
+        recvPacket >> recordId;
 
         // temp: this should be moved once broadcast text is properly implemented
-        if (type == DB2_REPLY_BROADCAST)
+        if (tableHash == DB2_REPLY_BROADCAST)
         {
-            SendBroadcastText(entry);
+            SendBroadcastText(recordId);
             continue;
         }
 
-        if (!store->HasRecord(entry))
+        if (!store->HasRecord(recordId))
             continue;
 
         ByteBuffer record;
-        store->WriteRecord(entry, (uint32)GetSessionDbcLocale(), record);
+        store->WriteRecord(recordId, (uint32)GetSessionDbcLocale(), record);
 
-        WorldPacket data(SMSG_DB_REPLY);
-        data << uint32(entry);
+        WorldPacket data(SMSG_DB_REPLY, 4 + 4 + 4 + 4 + record.size());
+        data << uint32(tableHash);
+        data << uint32(recordId);
         data << uint32(time(NULL));
-        data << uint32(type);
         data << uint32(record.size());
         data.append(record);
 
         SendPacket(&data);
 
-        TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", entry, type);
+        TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", recordId, tableHash);
     }
-
-    delete[] guids;
 }
 
-void WorldSession::SendBroadcastText(uint32 entry)
+void WorldSession::SendBroadcastText(uint32 recordId)
 {
     /*
      *  This is a hack fix! Still uses Gossip Id's instead of Broadcast Id's.
@@ -2032,12 +2159,12 @@ void WorldSession::SendBroadcastText(uint32 entry)
     ByteBuffer buffer;
     std::string defaultText = "Greetings, $n";
 
-    GossipText const* pGossip = sObjectMgr->GetGossipText(entry);
+    GossipText const* pGossip = sObjectMgr->GetGossipText(recordId);
 
     uint16 nrmTextLength = pGossip ? pGossip->Options[0].Text_0.length() : defaultText.length();
     uint16 altTextLength = pGossip ? pGossip->Options[0].Text_1.length() : defaultText.length();
 
-    buffer << uint32(entry);
+    buffer << uint32(recordId);
     buffer << uint32(pGossip ? pGossip->Options[0].Language : 0);
     buffer << uint16(nrmTextLength);
 
@@ -2054,10 +2181,10 @@ void WorldSession::SendBroadcastText(uint32 entry)
 
     buffer << uint32(1);
 
-    WorldPacket data(SMSG_DB_REPLY);
-    data << uint32(entry);
-    data << uint32(time(NULL));
+    WorldPacket data(SMSG_DB_REPLY, 4 + 4 + 4 + 4 + buffer.size());
     data << uint32(DB2_REPLY_BROADCAST);
+    data << uint32(recordId);
+    data << uint32(time(NULL));
     data << uint32(buffer.size());
     data.append(buffer);
 
@@ -2068,7 +2195,7 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_UPDATE_MISSILE_TRAJECTORY");
 
-    ObjectGuid guid;
+    uint64 guid;
     uint32 spellId;
     float elevation, speed;
     float curX, curY, curZ;
@@ -2120,10 +2247,26 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
 
-    recvPacket >> guid;
+    guid[3] = recvPacket.ReadBit();
+    guid[5] = recvPacket.ReadBit();
+    guid[6] = recvPacket.ReadBit();
+    guid[0] = recvPacket.ReadBit();
+    guid[1] = recvPacket.ReadBit();
+    guid[2] = recvPacket.ReadBit();
+    guid[7] = recvPacket.ReadBit();
+    guid[4] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(guid[0]);
+    recvPacket.ReadByteSeq(guid[6]);
+    recvPacket.ReadByteSeq(guid[5]);
+    recvPacket.ReadByteSeq(guid[7]);
+    recvPacket.ReadByteSeq(guid[2]);
+    recvPacket.ReadByteSeq(guid[1]);
+    recvPacket.ReadByteSeq(guid[3]);
+    recvPacket.ReadByteSeq(guid[4]);
 
     WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), guid);
-    TC_LOG_ERROR("network", "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", ObjectGuid(guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
+    TC_LOG_ERROR("network", "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", uint64(guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
 
     // If create object failed for current player then client will be stuck on loading screen
     //if (_player->GetGUID() == guid)

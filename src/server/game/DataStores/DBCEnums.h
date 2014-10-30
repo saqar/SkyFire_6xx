@@ -25,7 +25,7 @@ enum LevelLimit
     // Client expected level limitation, like as used in DBC item max levels for "until max player level"
     // use as default max player level, must be fit max level for used client
     // also see MAX_LEVEL and STRONG_MAX_LEVEL define
-    DEFAULT_MAX_LEVEL = 90,
+    DEFAULT_MAX_LEVEL = 100,
 
     // client supported max level for player/pets/etc. Avoid overflow or client stability affected.
     // also see GT_MAX_LEVEL define
@@ -39,11 +39,11 @@ enum LevelLimit
 enum BattlegroundBracketId                                  // bracketId for level ranges
 {
     BG_BRACKET_ID_FIRST          = 0,
-    BG_BRACKET_ID_LAST           = 16
+    BG_BRACKET_ID_LAST           = 18
 };
 
 // must be max value in PvPDificulty slot+1
-#define MAX_BATTLEGROUND_BRACKETS  17
+#define MAX_BATTLEGROUND_BRACKETS  19
 
 enum AreaTeams
 {
@@ -287,7 +287,7 @@ enum AchievementCriteriaTypes
     ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_GUILD_CHALLENGE      = 139  //struct { uint32 count; } Guild Challenge
 };
 
-#define ACHIEVEMENT_CRITERIA_TYPE_TOTAL 163
+#define ACHIEVEMENT_CRITERIA_TYPE_TOTAL 184
 
 enum AreaFlags
 {

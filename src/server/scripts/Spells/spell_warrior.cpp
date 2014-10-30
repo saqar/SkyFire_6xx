@@ -87,14 +87,14 @@ class spell_warr_bloodthirst : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
 
-            void HandleDamage(SpellEffIndex /*effIndex*/)
+            void HandleDamage(SpellEffIndex effIndex)
             {
                 int32 damage = GetEffectValue();
                 ApplyPct(damage, GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK));
 
                 if (Unit* target = GetHitUnit())
                 {
-                    damage = GetCaster()->SpellDamageBonusDone(target, GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
+                    damage = GetCaster()->SpellDamageBonusDone(target, GetSpellInfo(), effIndex, uint32(damage), SPELL_DIRECT_DAMAGE);
                     damage = target->SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
                 }
                 SetHitDamage(damage);
@@ -236,14 +236,14 @@ class spell_warr_deep_wounds : public SpellScriptLoader
                 return true;
             }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            void HandleDummy(SpellEffIndex effIndex)
             {
                 int32 damage = GetEffectValue();
                 Unit* caster = GetCaster();
                 if (Unit* target = GetHitUnit())
                 {
                     // apply percent damage mods
-                    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+                    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), effIndex, damage, SPELL_DIRECT_DAMAGE);
 
                     ApplyPct(damage, 16 * GetSpellInfo()->GetRank());
 

@@ -28,7 +28,7 @@ AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0)
     m_objectType |= TYPEMASK_AREATRIGGER;
     m_objectTypeId = TYPEID_AREATRIGGER;
 
-    m_updateFlag = UPDATEFLAG_STATIONARY_POSITION;
+    m_updateFlag = UPDATEFLAG_STATIONARY_POSITION | UPDATEFlAG_AREATRIGGER;
 
     m_valuesCount = AREATRIGGER_END;
 }
@@ -60,7 +60,7 @@ void AreaTrigger::RemoveFromWorld()
     }
 }
 
-bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* caster, SpellInfo const* spell, Position const& pos)
+bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* caster, SpellInfo const* spell, Position const& pos, float radius, uint32 duration)
 {
     SetMap(caster->GetMap());
     Relocate(pos);
@@ -73,15 +73,16 @@ bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* c
     WorldObject::_Create(guidlow, HIGHGUID_AREATRIGGER, caster->GetPhaseMask());
 
     SetEntry(triggerEntry);
-    SetDuration(spell->GetDuration());
+    SetDuration(duration ? duration : spell->GetDuration());
     SetObjectScale(1);
 
-    SetUInt32Value(DYNAMICOBJECT_FIELD_SPELL_ID, spell->Id);
-    SetUInt32Value(DYNAMICOBJECT_FIELD_TYPE_AND_VISUAL_ID, spell->SpellVisual[0]);
+    SetGuidValue(AREATRIGGER_FIELD_CASTER, caster->GetGUID128());
+    SetUInt32Value(AREATRIGGER_FIELD_SPELL_ID, spell->Id);
+    SetUInt32Value(AREATRIGGER_FIELD_SPELL_VISUAL_ID, spell->SpellVisual[0]);
     SetUInt32Value(AREATRIGGER_FIELD_DURATION, spell->GetDuration());
-    //SetFloatValue(AREATRIGGER_FINAL_POS + 0, pos.GetPositionX());
-    //SetFloatValue(AREATRIGGER_FINAL_POS + 1, pos.GetPositionY());
-    //SetFloatValue(AREATRIGGER_FINAL_POS + 2, pos.GetPositionZ());
+    SetFloatValue(AREATRIGGER_FIELD_EXPLICIT_SCALE, 1.f);
+
+    _radius = radius;
 
     if (!GetMap()->AddToMap(this))
         return false;
@@ -91,7 +92,7 @@ bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* c
 
 void AreaTrigger::Update(uint32 p_time)
 {
-    if (GetDuration() > int32(p_time))
+    if (GetDuration() > p_time)
         _duration -= p_time;
     else
         Remove(); // expired

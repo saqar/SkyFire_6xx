@@ -401,7 +401,7 @@ public:
         {
             if (me->FindNearestCreature(NPC_TALLHORN_STAG, 0.2f))
             {
-                me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING);
+                me->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, EMOTE_STATE_USE_STANDING);
             }
             else
                 _events.ScheduleEvent(EVENT_WOODSMAN_1, 0);
@@ -416,11 +416,11 @@ public:
                 switch (eventId)
                 {
                     case EVENT_WOODSMAN_1:
-                        me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_LOOT);
+                        me->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, EMOTE_STATE_LOOT);
                         _events.ScheduleEvent(EVENT_WOODSMAN_2, 3000);
                         break;
                     case EVENT_WOODSMAN_2:
-                        me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_ONESHOT_ATTACK1H);
+                        me->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, EMOTE_ONESHOT_ATTACK1H);
                         _events.ScheduleEvent(EVENT_WOODSMAN_1, 4000);
                         break;
                     default:

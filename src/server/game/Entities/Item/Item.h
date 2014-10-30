@@ -223,8 +223,8 @@ class Item : public Object
 
         ItemTemplate const* GetTemplate() const;
 
-        uint64 GetOwnerGUID()    const { return GetUInt64Value(ITEM_FIELD_OWNER); }
-        void SetOwnerGUID(uint64 guid) { SetUInt64Value(ITEM_FIELD_OWNER, guid); }
+        ObjectGuid GetOwnerGUID()    const { return GetGuidValue(ITEM_FIELD_OWNER); }
+        void SetOwnerGUID(ObjectGuid guid) { SetGuidValue(ITEM_FIELD_OWNER, guid); }
         Player* GetOwner()const;
 
         void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_SOULBOUND, val); }
@@ -375,8 +375,18 @@ class Item : public Object
 
         static uint32 GetSellPrice(ItemTemplate const* proto, bool& success);
 
-        int32 GetReforgableStat(ItemModType statType) const;
+        static float GetScalingDamageValue(ItemTemplate const* proto, uint32 ilvl);
+        static uint32 GetRandomPointsOffset(ItemTemplate const* proto);
+        static float GetSocketCost(uint32 ilvl);
+        static uint32 CalculateStatScaling(ItemTemplate const* proto, uint32 index, uint32 ilvl);
+        static uint32 CalculateScalingStatDBCValue(ItemTemplate const* proto, uint32 ilvl);
+        static uint32 CalculateArmorScaling(ItemTemplate const* proto, uint32 ilvl);
+        static void CalculateMinMaxDamageScaling(ItemTemplate const* proto, uint32 ilvl, uint32& minDamage, uint32& maxDamage);
 
+        void SetScaleIlvl(uint32 ilvl) { m_scaleLvl = ilvl; }
+        uint32 GetScaleIlvl() const { return m_scaleLvl; }
+
+        void WriteData(WorldPacket* data);
     private:
         std::string m_text;
         uint8 m_slot;
@@ -389,5 +399,6 @@ class Item : public Object
         uint32 m_paidMoney;
         uint32 m_paidExtendedCost;
         AllowedLooterSet allowedGUIDs;
+        uint32 m_scaleLvl;
 };
 #endif

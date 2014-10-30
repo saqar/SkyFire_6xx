@@ -25,6 +25,7 @@
 #include "GridReference.h"
 #include "ObjectDefines.h"
 #include "Map.h"
+#include "Log.h"
 
 #include <set>
 #include <string>
@@ -118,183 +119,201 @@ class WorldObject;
 class WorldPacket;
 class ZoneScript;
 
+class ByteBuffer;
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
 //! Structure to ease conversions from single 64 bit integer guid into individual bytes, for packet sending purposes
 //! Nuke this out when porting ObjectGuid from MaNGOS, but preserve the per-byte storage
 struct ObjectGuid
 {
-public:
-    ObjectGuid() { _data.guid128.hiGuid = UI64LIT(0); _data.guid128.loGuid = UI64LIT(0); }
-    ObjectGuid(uint64 guid) { _data.guid128 = Convert64GuidTo128(guid); }
-    ObjectGuid(Guid128 guid) { _data.guid128 = guid; }
-    ObjectGuid(uint64 lopart, uint64 hipart) { _data.guid128.loGuid = lopart; _data.guid128.hiGuid = hipart; }
-    ObjectGuid(ObjectGuid const& other) { _data = other._data; }
+    public:
+        ObjectGuid() { _data.guid128.hiGuid = UI64LIT(0); _data.guid128.loGuid = UI64LIT(0); }
+        ObjectGuid(uint64 guid) { _data.guid128 = Convert64GuidTo128(guid); }
+        ObjectGuid(Guid128 guid) { _data.guid128 = guid; }
+        ObjectGuid(uint64 lopart, uint64 hipart) { _data.guid128.loGuid = lopart; _data.guid128.hiGuid = hipart; }
+        ObjectGuid(ObjectGuid const& other) { _data = other._data; }
 
-    static uint64 Convert128GuidTo64(Guid128 guid)
-    {
-        uint8 type = guid.hiGuid >> 58 & 0x3F;
-        uint32 entry = guid.hiGuid >> 6 & 0xFFFFFF;
-        uint64 creationBits = guid.loGuid & 0xFFFFFFFFFF;
-        uint32 hi64Guid = creationBits ? GetHiGuidByType(type) : 0;
-        return MAKE_NEW_GUID(creationBits, entry, hi64Guid);
-    }
-
-    static Guid128 Convert64GuidTo128(uint64 guid)
-    {
-        uint32 entry = GUID_ENPART(guid);
-        uint64 creationBits = GUID_LOPART(guid);
-        uint8 type = creationBits ? GetTypeByHiGuid(GUID_HIPART(guid)) : 0;
-        return MAKE_NEW_GUID128(creationBits, entry, type);
-    }
-
-    static uint32 GetHiGuidByType(uint32 type)
-    {
-        switch (type)
+        static uint64 Convert128GuidTo64(Guid128 guid)
         {
-        case GUID_TYPE_ITEM:
-            return HIGHGUID_ITEM; // Also container
-        case GUID_TYPE_PLAYER:
-            return HIGHGUID_PLAYER;
-        case GUID_TYPE_GAMEOBJECT:
-            return HIGHGUID_GAMEOBJECT;
-        case GUID_TYPE_TRANSPORT:
-        case HIGHGUID_MO_TRANSPORT:
-            return HIGHGUID_TRANSPORT;
-        case GUID_TYPE_CREATURE:
-            return HIGHGUID_UNIT;
-        case GUID_TYPE_PET:
-            return HIGHGUID_PET;
-        case GUID_TYPE_VEHICLE:
-            return HIGHGUID_VEHICLE;
-        case GUID_TYPE_DYNAMICOBJECT:
-            return HIGHGUID_DYNAMICOBJECT;
-        case GUID_TYPE_CORPSE:
-            return HIGHGUID_CORPSE;
-        case GUID_TYPE_AREATRIGGER:
-            return HIGHGUID_AREATRIGGER;
-        case GUID_TYPE_PARTY:
-            return HIGHGUID_GROUP;
-        case GUID_TYPE_GUILD:
-            return HIGHGUID_GUILD;
-        case GUID_TYPE_BATTLEGROUND:
-            return HIGHGUID_BATTLEGROUND;
-        default:
-            //ASSERT("No conversion found for type" && false);
-            return 0;
+            uint8 type = guid.hiGuid >> 58 & 0x3F;
+            uint32 entry = guid.hiGuid >> 6 & 0xFFFFFF;
+            uint64 creationBits = guid.loGuid & 0xFFFFFFFFFF;
+            uint32 hi64Guid = creationBits ? GetHiGuidByType(type) : 0;
+            return MAKE_NEW_GUID(creationBits, entry, hi64Guid);
         }
-    }
 
-    static uint32 GetTypeByHiGuid(uint32 hiGuid)
-    {
-        switch (hiGuid)
+        static Guid128 Convert64GuidTo128(uint64 guid)
         {
-        case HIGHGUID_ITEM: // Also container
-            return GUID_TYPE_ITEM;
-        case HIGHGUID_PLAYER:
-            return GUID_TYPE_PLAYER;
-        case HIGHGUID_MO_TRANSPORT:
-        case HIGHGUID_GAMEOBJECT:
-            return GUID_TYPE_GAMEOBJECT;
-        case HIGHGUID_TRANSPORT:
-            return GUID_TYPE_TRANSPORT;
-        case HIGHGUID_UNIT:
-            return GUID_TYPE_CREATURE;
-        case HIGHGUID_PET:
-            return GUID_TYPE_PET;
-        case HIGHGUID_VEHICLE:
-            return GUID_TYPE_VEHICLE;
-        case HIGHGUID_DYNAMICOBJECT:
-            return GUID_TYPE_DYNAMICOBJECT;
-        case HIGHGUID_CORPSE:
-            return GUID_TYPE_CORPSE;
-        case HIGHGUID_AREATRIGGER:
-            return GUID_TYPE_AREATRIGGER;
-        case HIGHGUID_GROUP:
-            return GUID_TYPE_PARTY;
-        case HIGHGUID_GUILD:
-            return GUID_TYPE_GUILD;
-        case HIGHGUID_BATTLEGROUND:
-            return GUID_TYPE_BATTLEGROUND;
-        default:
-            //ASSERT("No conversion found" && false);
-            return 0;
+            uint32 entry = GUID_ENPART(guid);
+            uint64 creationBits = GUID_LOPART(guid);
+            uint8 type = creationBits ? GetTypeByHiGuid(GUID_HIPART(guid)) : 0;
+            return MAKE_NEW_GUID128(creationBits, entry, type);
         }
-    }
 
-    uint8& operator[](uint32 index)
-    {
-        ASSERT(index < sizeof(uint64) * 2);
+        static uint32 GetHiGuidByType(uint32 type)
+        {
+            switch (type)
+            {
+                case GUID_TYPE_ITEM:
+                    return HIGHGUID_ITEM; // Also container
+                case GUID_TYPE_PLAYER:
+                    return HIGHGUID_PLAYER;
+                case GUID_TYPE_GAMEOBJECT:
+                    return HIGHGUID_GAMEOBJECT;
+                case GUID_TYPE_TRANSPORT:
+                case HIGHGUID_MO_TRANSPORT:
+                    return HIGHGUID_TRANSPORT;
+                case GUID_TYPE_CREATURE:
+                    return HIGHGUID_UNIT;
+                case GUID_TYPE_PET:
+                    return HIGHGUID_PET;
+                case GUID_TYPE_VEHICLE:
+                    return HIGHGUID_VEHICLE;
+                case GUID_TYPE_DYNAMICOBJECT:
+                    return HIGHGUID_DYNAMICOBJECT;
+                case GUID_TYPE_CORPSE:
+                    return HIGHGUID_CORPSE;
+                case GUID_TYPE_AREATRIGGER:
+                    return HIGHGUID_AREATRIGGER;
+                case GUID_TYPE_PARTY:
+                    return HIGHGUID_GROUP;
+                case GUID_TYPE_GUILD:
+                    return HIGHGUID_GUILD;
+                case GUID_TYPE_BATTLEGROUND:
+                    return HIGHGUID_BATTLEGROUND;
+                default:
+                    //ASSERT("No conversion found for type" && false);
+                    return 0;
+            }
+        }
+
+        static uint32 GetTypeByHiGuid(uint32 hiGuid)
+        {
+            switch (hiGuid)
+            {
+                case HIGHGUID_ITEM: // Also container
+                    return GUID_TYPE_ITEM;
+                case HIGHGUID_PLAYER:
+                    return GUID_TYPE_PLAYER;
+                case HIGHGUID_MO_TRANSPORT:
+                case HIGHGUID_GAMEOBJECT:
+                    return GUID_TYPE_GAMEOBJECT;
+                case HIGHGUID_TRANSPORT:
+                    return GUID_TYPE_TRANSPORT;
+                case HIGHGUID_UNIT:
+                    return GUID_TYPE_CREATURE;
+                case HIGHGUID_PET:
+                    return GUID_TYPE_PET;
+                case HIGHGUID_VEHICLE:
+                    return GUID_TYPE_VEHICLE;
+                case HIGHGUID_DYNAMICOBJECT:
+                    return GUID_TYPE_DYNAMICOBJECT;
+                case HIGHGUID_CORPSE:
+                    return GUID_TYPE_CORPSE;
+                case HIGHGUID_AREATRIGGER:
+                    return GUID_TYPE_AREATRIGGER;
+                case HIGHGUID_GROUP:
+                    return GUID_TYPE_PARTY;
+                case HIGHGUID_GUILD:
+                    return GUID_TYPE_GUILD;
+                case HIGHGUID_BATTLEGROUND:
+                    return GUID_TYPE_BATTLEGROUND;
+                default:
+                    //ASSERT("No conversion found" && false);
+                    return 0;
+            }
+        }
+
+        uint8& operator[](uint32 index)
+        {
+            ASSERT(index < sizeof(uint64) * 2);
 
 #if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
-        return _data.byte[index];
+            return _data.byte[index];
 #else
-        return _data.byte[15 - index];
+            return _data.byte[15 - index];
 #endif
-    }
+        }
 
-    uint8 const& operator[](uint32 index) const
-    {
-        ASSERT(index < sizeof(uint64) * 2);
+        uint8 const& operator[](uint32 index) const
+        {
+            ASSERT(index < sizeof(uint64) * 2);
 
 #if TRINITY_ENDIAN == TRINITY_LITTLEENDIAN
-        return _data.byte[index];
+            return _data.byte[index];
 #else
-        return _data.byte[15 - index];
+            return _data.byte[15 - index];
 #endif
-    }
+        }
 
-    operator ObjectGuid const&()
-    {
-        return *this;
-    }
+        operator ObjectGuid const&()
+        {
+            return *this;
+        }
 
-    operator Guid128()
-    {
-        return _data.guid128;
-    }
+        operator Guid128()
+        {
+            return _data.guid128;
+        }
 
-    operator uint64()
-    {
-        return Convert128GuidTo64(_data.guid128);
-    }
+        operator uint64()
+        {
+            return Convert128GuidTo64(_data.guid128);
+        }
+
+        /*bool operator==(ObjectGuid const guid)
+        {
+            return (guid.GetHiGuid() == GetHiGuid() && guid.GetLoGuid() == GetLoGuid());
+        }*/
+
+        bool operator>(ObjectGuid const guid) const
+        {
+            if (GetHiGuid() > guid.GetHiGuid())
+                return true;
+            else if (GetHiGuid() != guid.GetHiGuid())
+                return false;
+           return GetLoGuid() > guid.GetLoGuid();
+        }
+
+        bool operator<(ObjectGuid const guid) const
+        {
+            if (GetHiGuid() < guid.GetHiGuid())
+                return true;
+            else if (GetHiGuid() != guid.GetHiGuid())
+                return false;
+            return GetLoGuid() < guid.GetLoGuid();
+        }
 
 
-    ObjectGuid& operator=(uint64 guid)
-    {
-        _data.guid128 = Convert64GuidTo128(guid);
-        return *this;
-    }
+        ObjectGuid& operator=(uint64 guid)
+        {
+            _data.guid128 = Convert64GuidTo128(guid);
+            return *this;
+        }
 
-    ObjectGuid& operator=(Guid128 guid)
-    {
-        _data.guid128 = guid;
-        return *this;
-    }
+        ObjectGuid& operator=(Guid128 guid)
+        {
+            _data.guid128 = guid;
+            return *this;
+        }
 
-    ObjectGuid& operator=(ObjectGuid const& other)
-    {
-        _data = other._data;
-        return *this;
-    }
+        ObjectGuid& operator=(ObjectGuid const& other)
+        {
+            _data = other._data;
+            return *this;
+        }
 
-    ObjectGuid& operator<(ObjectGuid guid) 
-    { 
-        return GetRawValue() < guid.GetRawValue(); 
-    }
+        uint64 GetHiGuid() const { return _data.guid128.hiGuid; };
+        uint64 GetLoGuid() const { return _data.guid128.loGuid; };
+        // For Sience - Hack
+        Guid128& GetRefGuid() const { return const_cast<Guid128&>(_data.guid128); }
 
-    ObjectGuid GetRawValue() const { return _data.guid128; }
-    uint64 GetHiGuid() const { return _data.guid128.hiGuid; };
-    uint64 GetLoGuid() const { return _data.guid128.loGuid; };
-    // For Sience - Hack
-    Guid128& GetRefGuid() const { return const_cast<Guid128&>(_data.guid128); }
-
-private:
-    union
-    {
-        Guid128 guid128;
-        uint8 byte[16];
-    } _data;
+    private:
+        union
+        {
+            Guid128 guid128;
+            uint8 byte[16];
+        } _data;
 };
 
 ByteBuffer &operator>>(ByteBuffer& buffer, ObjectGuid& value);
@@ -309,16 +328,13 @@ class Object
 
         virtual void AddToWorld();
         virtual void RemoveFromWorld();
-        
-        ObjectGuid GetGuidValue(uint16 index) const;
-        void SetGuidValue(uint16 index, ObjectGuid& guid);
-        void SetGuidValue(uint16 index, uint64 guid64);
 
-        uint64 GetGUID() const { return GetUInt64Value(0); }
-        uint32 GetGUIDLow() const { return GUID_LOPART(GetUInt64Value(0)); }
-        uint32 GetGUIDMid() const { return GUID_ENPART(GetUInt64Value(0)); }
-        uint32 GetGUIDHigh() const { return GUID_HIPART(GetUInt64Value(0)); }
+        uint64 GetGUID() const { return GetGUID128(); }
+        uint64 GetGUIDLow() const { return GUID_LOPART(GetGUID()); }
+        uint64 GetGUIDMid() const { return GUID_ENPART(GetGUID()); }
+        uint64 GetGUIDHigh() const { return GUID_HIPART(GetGUID()); }
         ObjectGuid GetGUID128() const { return GetGuidValue(OBJECT_FIELD_GUID); }
+
         const ByteBuffer& GetPackGUID() const { return m_PackGUID; }
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY_ID); }
         void SetEntry(uint32 entry) { SetUInt32Value(OBJECT_FIELD_ENTRY_ID, entry); }
@@ -344,6 +360,7 @@ class Object
         uint8 GetByteValue(uint16 index, uint8 offset) const;
         uint16 GetUInt16Value(uint16 index, uint8 offset) const;
         uint32 GetDynamicUInt32Value(uint32 tab, uint16 index) const;
+        ObjectGuid GetGuidValue(uint16 index) const;
 
         void SetInt32Value(uint16 index, int32 value);
         void SetUInt32Value(uint16 index, uint32 value);
@@ -356,7 +373,13 @@ class Object
         void SetStatFloatValue(uint16 index, float value);
         void SetStatInt32Value(uint16 index, int32 value);
         void SetDynamicUInt32Value(uint32 tab, uint16 index, uint32 value);
+        void SetGuidValue(uint16 index, ObjectGuid& guid);
+        void SetGuidValue(uint16 index, uint64 guid64);
 
+        bool AddGuidValue(uint16 index, ObjectGuid& guid);
+        bool AddGuidValue(uint16 index, uint64 guid64);
+        bool RemoveGuidValue(uint16 index, ObjectGuid& guid);
+        bool RemoveGuidValue(uint16 index, uint64 guid64);
         bool AddUInt64Value(uint16 index, uint64 value);
         bool RemoveUInt64Value(uint16 index, uint64 value);
 
@@ -903,7 +926,6 @@ class WorldObject : public Object, public WorldLocation
 
         void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
         void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
-        void GetPlayerListInGrid(std::list<Player*>& lList, float fMaxSearchRange) const;
 
         void DestroyForNearbyPlayers();
         virtual void UpdateObjectVisibility(bool forced = true);

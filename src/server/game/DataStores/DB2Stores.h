@@ -36,18 +36,36 @@ extern DB2Storage<ItemToBattlePetEntry> sItemToBattlePetStore;
 extern BattlePetBreedSet sBattlePetBreedSet;
 extern BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
-// Garrisons
-extern DB2Storage<GarrAbility> sGarrAbility;
-extern DB2Storage<GarrPlot> sGarrPlot;
-
+extern DB2Storage<AreaPOIEntry>                 sAreaPOIStore;
 extern DB2Storage<BroadcastTextEntry> sBroadcastTextStore;
+extern DB2Storage<HolidaysEntry>                sHolidaysStore;
 extern DB2Storage<ItemEntry> sItemStore;
+extern DB2Storage<ItemAppearanceEntry> sItemAppearanceStore;
+extern DB2Storage<ItemModifiedAppearanceEntry> sItemModifiedAppearanceStore;
 extern DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore;
 extern DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore;
 extern DB2Storage<ItemSparseEntry> sItemSparseStore;
 extern DB2Storage<KeyChainEntry> sKeyChainStore;
 extern DB2Storage<SceneScriptEntry> sSceneScriptStore;
+extern DB2Storage<PvpItemEntry> sPvpItemStore;
+extern DB2Storage<OverrideSpellDataEntry>       sOverrideSpellDataStore;
+extern DB2Storage<SpellRuneCostEntry> sSpellRuneCostStore;
+extern DB2Storage<SpellMiscEntry> sSpellMiscStore;
+extern DB2Storage<SpellAuraRestrictionsEntry> sSpellAuraRestrictionsStore;
+extern DB2Storage<SpellCastingRequirementsEntry> sSpellCastingRequirementsStore;
+extern DB2Storage<SpellClassOptionsEntry> sSpellClassOptionsStore;
+extern DB2Storage<SpellPowerEntry> sSpellPowerStore;
 extern DB2Storage<SpellReagentsEntry> sSpellReagentsStore;
+extern DB2Storage<SpellTotemsEntry> sSpellTotemsStore;
+extern DB2Storage<TaxiNodesEntry> sTaxiNodesStore;
+extern DB2Storage<TaxiPathEntry>  sTaxiPathStore;
+extern TaxiMask sTaxiNodesMask;
+extern TaxiMask sOldContinentsNodesMask;
+extern TaxiMask  sHordeTaxiNodesMask;
+extern TaxiMask  sAllianceTaxiNodesMask;
+extern TaxiMask  sDeathKnightTaxiNodesMask;
+extern TaxiPathSetBySource sTaxiPathSetBySource;
+extern TaxiPathNodesByPath sTaxiPathNodesByPath;
 
 void LoadDB2Stores(std::string const& dataPath);
 

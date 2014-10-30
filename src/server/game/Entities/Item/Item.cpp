@@ -76,7 +76,7 @@ void AddItemsSetItem(Player* player, Item* item)
 
     ++eff->item_count;
 
-    for (uint32 x = 0; x < MAX_ITEM_SET_SPELLS; ++x)
+    /*for (uint32 x = 0; x < MAX_ITEM_SET_SPELLS; ++x)
     {
         if (!set->spells [x])
             continue;
@@ -110,7 +110,7 @@ void AddItemsSetItem(Player* player, Item* item)
                 break;
             }
         }
-    }
+    }*/
 }
 
 void RemoveItemsSetItem(Player*player, ItemTemplate const* proto)
@@ -142,7 +142,7 @@ void RemoveItemsSetItem(Player*player, ItemTemplate const* proto)
 
     --eff->item_count;
 
-    for (uint32 x = 0; x < MAX_ITEM_SET_SPELLS; x++)
+    /*for (uint32 x = 0; x < MAX_ITEM_SET_SPELLS; x++)
     {
         if (!set->spells[x])
             continue;
@@ -161,7 +161,7 @@ void RemoveItemsSetItem(Player*player, ItemTemplate const* proto)
                 break;
             }
         }
-    }
+    }*/
 
     if (!eff->item_count)                                    //all items of a set were removed
     {
@@ -263,6 +263,7 @@ Item::Item()
     m_refundRecipient = 0;
     m_paidMoney = 0;
     m_paidExtendedCost = 0;
+    m_scaleLvl = 0;
 
     m_dynamicTab.resize(ITEM_DYNAMIC_END);
     m_dynamicChange.resize(ITEM_DYNAMIC_END);
@@ -280,8 +281,8 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     SetEntry(itemid);
     SetObjectScale(1.0f);
 
-    SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
-    SetUInt64Value(ITEM_FIELD_CONTAINED_IN, owner ? owner->GetGUID() : 0);
+    SetGuidValue(ITEM_FIELD_OWNER, owner ? owner->GetGUID128() : 0);
+    SetGuidValue(ITEM_FIELD_CONTAINED_IN, owner ? owner->GetGUID128() : 0);
 
     ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(itemid);
     if (!itemProto)
@@ -296,6 +297,7 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 
     SetUInt32Value(ITEM_FIELD_EXPIRATION, itemProto->Duration);
     SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, 0);
+    m_scaleLvl = itemProto->ItemLevel;
     return true;
 }
 
@@ -364,7 +366,7 @@ void Item::SaveToDB(SQLTransaction& trans)
             stmt->setString(++index, ssEnchants.str());
 
             stmt->setInt16 (++index, GetItemRandomPropertyId());
-            stmt->setUInt32(++index, GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0)); // reforge Id
+            index++; // Removed reforge
             stmt->setUInt32(++index, GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1)); // Transmogrification Id
             stmt->setUInt16(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));
@@ -470,11 +472,6 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
     if (GetItemRandomPropertyId() < 0)
         UpdateItemSuffixFactor();
 
-    if (uint32 reforgeEntry = fields[8].GetInt32())
-    {
-        SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0, reforgeEntry);
-        SetFlag(ITEM_FIELD_MODIFIERS_MASK, 1);
-    }
 
     if (uint32 transmogId = fields[9].GetInt32())
     {
@@ -1044,7 +1041,23 @@ void Item::SendTimeUpdate(Player* owner)
     ObjectGuid guid = GetGUID();
 
     WorldPacket data(SMSG_ITEM_TIME_UPDATE, (8+4));
-    data << guid;
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[7]);
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
     data << uint32(duration);
 
     owner->GetSession()->SendPacket(&data);
@@ -1495,49 +1508,6 @@ uint32 Item::GetSpecialPrice(ItemTemplate const* proto, uint32 minimumPrice /*= 
     return cost;
 }
 
-int32 Item::GetReforgableStat(ItemModType statType) const
-{
-    ItemTemplate const* proto = GetTemplate();
-    for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
-        if (ItemModType(proto->ItemStat[i].ItemStatType) == statType)
-            return proto->ItemStat[i].ItemStatValue;
-
-    int32 randomPropId = GetItemRandomPropertyId();
-    if (!randomPropId)
-        return 0;
-
-    if (randomPropId < 0)
-    {
-        ItemRandomSuffixEntry const* randomSuffix = sItemRandomSuffixStore.LookupEntry(-randomPropId);
-        if (!randomSuffix)
-            return 0;
-
-        for (uint32 e = PROP_ENCHANTMENT_SLOT_0; e <= PROP_ENCHANTMENT_SLOT_4; ++e)
-            if (SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(GetEnchantmentId(EnchantmentSlot(e))))
-                for (uint32 f = 0; f < MAX_ITEM_ENCHANTMENT_EFFECTS; ++f)
-                    if (enchant->type[f] == ITEM_ENCHANTMENT_TYPE_STAT && ItemModType(enchant->spellid[f]) == statType)
-                        for (int k = 0; k < 5; ++k)
-                            if (randomSuffix->enchant_id[k] == enchant->ID)
-                                return int32((randomSuffix->prefix[k] * GetItemSuffixFactor()) / 10000);
-    }
-    else
-    {
-        ItemRandomPropertiesEntry const* randomProp = sItemRandomPropertiesStore.LookupEntry(randomPropId);
-        if (!randomProp)
-            return 0;
-
-        for (uint32 e = PROP_ENCHANTMENT_SLOT_0; e <= PROP_ENCHANTMENT_SLOT_4; ++e)
-            if (SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(GetEnchantmentId(EnchantmentSlot(e))))
-                for (uint32 f = 0; f < MAX_ITEM_ENCHANTMENT_EFFECTS; ++f)
-                    if (enchant->type[f] == ITEM_ENCHANTMENT_TYPE_STAT && ItemModType(enchant->spellid[f]) == statType)
-                        for (int k = 0; k < MAX_ITEM_ENCHANTMENT_EFFECTS; ++k)
-                            if (randomProp->enchant_id[k] == enchant->ID)
-                                return int32(enchant->amount[k]);
-    }
-
-    return 0;
-}
-
 void Item::ItemContainerSaveLootToDB()
 {
     // Saves the money and item loot associated with an openable item to the DB
@@ -1716,4 +1686,222 @@ void Item::ItemContainerDeleteLootMoneyAndLootItemsFromDB()
     // Deletes money and items associated with an openable item from the DB
     ItemContainerDeleteLootMoneyFromDB();
     ItemContainerDeleteLootItemsFromDB();
+}
+
+float Item::GetScalingDamageValue(ItemTemplate const* proto, uint32 ilvl)
+{
+    uint32 quality = proto->Quality;
+
+    if (!proto || quality > ITEM_QUALITY_HEIRLOOM)
+        return 0.f;
+
+    ItemDamageEntry const* damageEntry = NULL;
+
+    switch (proto->InventoryType)
+    {
+        case INVTYPE_WEAPON:
+        case INVTYPE_WEAPONMAINHAND:
+        case INVTYPE_WEAPONOFFHAND:
+            if (proto->Flags2 & ITEM_FLAGS_EXTRA_CASTER_WEAPON)
+            {
+                damageEntry =  sItemDamageOneHandCasterStore.LookupEntry(ilvl);
+                break;
+            }
+            damageEntry = sItemDamageOneHandStore.LookupEntry(ilvl);
+            break;
+    case INVTYPE_RANGED:
+    case INVTYPE_THROWN:
+    case INVTYPE_RANGEDRIGHT:
+        if (proto->SubClass < 4)
+        {
+            if (proto->Flags2 & ITEM_FLAGS_EXTRA_CASTER_WEAPON)
+            {
+                damageEntry = sItemDamageTwoHandCasterStore.LookupEntry(ilvl);
+                break;
+            }
+            damageEntry = sItemDamageTwoHandStore.LookupEntry(ilvl);
+            break;
+        }
+        else if (proto->SubClass == 19)
+        {
+            damageEntry = sItemDamageOneHandCasterStore.LookupEntry(ilvl);
+            break;
+        }
+        else
+        {
+            if (proto->Flags2 & ITEM_FLAGS_EXTRA_CASTER_WEAPON)
+            {
+                damageEntry = sItemDamageTwoHandCasterStore.LookupEntry(ilvl);
+                break;
+            }
+            damageEntry = sItemDamageTwoHandStore.LookupEntry(ilvl);
+            break;
+        }
+    case INVTYPE_AMMO:
+        damageEntry = sItemDamageAmmoStore.LookupEntry(ilvl);
+        break;
+    case INVTYPE_2HWEAPON:
+        if (proto->Flags2 & ITEM_FLAGS_EXTRA_CASTER_WEAPON)
+        {
+            damageEntry = sItemDamageTwoHandCasterStore.LookupEntry(ilvl);
+            break;
+        }
+        damageEntry = sItemDamageTwoHandStore.LookupEntry(ilvl);
+        break;
+    default:
+        break;
+    }
+    return damageEntry ? damageEntry->DPS[quality == ITEM_QUALITY_HEIRLOOM ? ITEM_QUALITY_RARE : quality] : 0.f;
+}
+
+uint32 Item::GetRandomPointsOffset(ItemTemplate const* proto)
+{
+    if (!proto)
+        return 0;
+
+    switch (proto->InventoryType)
+    {
+        case INVTYPE_NECK:
+        case INVTYPE_WRISTS:
+        case INVTYPE_FINGER:
+        case INVTYPE_SHIELD:
+        case INVTYPE_CLOAK:
+        case INVTYPE_HOLDABLE:
+            return 2;
+        case INVTYPE_SHOULDERS:
+        case INVTYPE_WAIST:
+        case INVTYPE_FEET:
+        case INVTYPE_HANDS:
+        case INVTYPE_TRINKET:
+            return 1;
+        case INVTYPE_WEAPON:
+        case INVTYPE_WEAPONMAINHAND:
+        case INVTYPE_WEAPONOFFHAND:
+            return 3;
+        case INVTYPE_RANGEDRIGHT:
+            return 3 * (proto->SubClass == 19 ? 1 : 0);
+        case INVTYPE_RELIC:
+            return 4;
+        case INVTYPE_HEAD:
+        case INVTYPE_BODY:
+        case INVTYPE_CHEST:
+        case INVTYPE_LEGS:
+        case INVTYPE_RANGED:
+        case INVTYPE_2HWEAPON:
+        case INVTYPE_ROBE:
+        case INVTYPE_THROWN:
+            return 0;
+        default:
+            return -1;
+    }
+}
+
+uint32 Item::CalculateScalingStatDBCValue(ItemTemplate const* proto, uint32 ilvl)
+{
+    if (!proto)
+        return 0;
+
+    uint32 offset = GetRandomPointsOffset(proto);
+    if (offset == -1)
+        return 0;
+
+    RandomPropertiesPointsEntry const* randProperty = sRandomPropertiesPointsStore.LookupEntry(ilvl);
+
+    if (!randProperty)
+        return 0;
+
+    switch (proto->Quality)
+    {
+        case ITEM_QUALITY_UNCOMMON:
+        return randProperty->UncommonPropertiesPoints[offset];
+        case ITEM_QUALITY_RARE:
+            return randProperty->RarePropertiesPoints[offset];
+        case ITEM_QUALITY_EPIC:
+        case ITEM_QUALITY_HEIRLOOM:
+            return randProperty->EpicPropertiesPoints[offset];
+        default:
+            return 0;
+    }
+}
+
+float Item::GetSocketCost(uint32 ilvl)
+{
+    gtItemSocketCostPerLevelEntry const* socket = sgtItemSocketCostPerLevelStore.LookupEntry(ilvl);
+    return socket ? socket->cost : 0.f;
+}
+
+uint32 Item::CalculateStatScaling(ItemTemplate const* proto, uint32 index, uint32 ilvl)
+{
+    _ItemStat const& itemStat = proto->ItemStat[index];
+    return floor((((float)itemStat.ScalingValue * (float)CalculateScalingStatDBCValue(proto, ilvl) * 0.000099999997f) - (GetSocketCost(ilvl) * itemStat.SocketCostRate)) + 0.5f);
+}
+
+uint32 Item::CalculateArmorScaling(ItemTemplate const* proto, uint32 ilvl)
+{
+    if (!proto)
+        return 0;
+
+    uint32 quality = proto->Quality == ITEM_QUALITY_HEIRLOOM ? ITEM_QUALITY_RARE : proto->Quality;
+    uint32 inventoryType = proto->InventoryType;
+
+    if (proto->Class != ITEM_CLASS_ARMOR || proto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD)
+    {
+        if (inventoryType == 1 || inventoryType == 5 || inventoryType == 3 || inventoryType == 7 || inventoryType == 8 || inventoryType == 9 || inventoryType == 10 || inventoryType == 6 || inventoryType == 16 || inventoryType == 20)
+        {
+            ItemArmorQualityEntry const* armorQuality = sItemArmorQualityStore.LookupEntry(ilvl);
+            ItemArmorTotalEntry const* armorTotal = sItemArmorTotalStore.LookupEntry(ilvl);
+            ArmorLocationEntry const* armorLoc = sArmorLocationStore.LookupEntry(inventoryType == 20 ? 5 : inventoryType);
+
+            if (proto->SubClass == 0 || proto->SubClass > 4)
+                return 0.0f;
+
+            return (int)floor(armorQuality->Value[quality] * armorTotal->Value[proto->SubClass - 1] * armorLoc->Value[proto->SubClass - 1] + 0.5f);
+        }
+        return 0;
+    }
+    else
+    {
+        ItemArmorShieldEntry const* shieldEntry = sItemArmorShieldStore.LookupEntry(ilvl);
+        return shieldEntry->Value[quality];
+    }
+}
+
+void Item::CalculateMinMaxDamageScaling(ItemTemplate const* proto, uint32 ilvl, uint32& minDamage, uint32& maxDamage)
+{
+    minDamage = 0;
+    maxDamage = 0;
+
+    if (!proto)
+        return;
+
+    if (!proto->IsWeapon())
+        return;
+
+    float weaponMinDamageCalc = (float)proto->Delay * GetScalingDamageValue(proto, ilvl) * 0.001f;
+    float weaponMaxDamageCalc = (((proto->StatScalingFactor * 0.5f) + 1.f) * weaponMinDamageCalc) + 0.5f;
+
+    if (proto->Delay != 0)
+    {
+        float delayModifier = 1000.0f / (float)proto->Delay;
+        float midCalc = (delayModifier * ((1.f - (proto->StatScalingFactor * 0.5f)) * weaponMinDamageCalc)) + proto->ArmorDamageModifier;
+        midCalc = midCalc > 1.f ? midCalc : 1.f;
+        float delayCoeff = 1.f / delayModifier;
+        minDamage = floor((delayCoeff * midCalc) + 0.5f);
+        maxDamage = floor((delayCoeff * ((delayModifier * weaponMaxDamageCalc) + proto->ArmorDamageModifier)) + 0.5f);
+    }
+    else
+    {
+        maxDamage = floor(weaponMaxDamageCalc + 0.5f);
+        minDamage = floor(((1.f - (proto->StatScalingFactor * 0.5f)) * weaponMinDamageCalc) + 0.5f);
+    }
+}
+
+void Item::WriteData(WorldPacket* data)
+{
+    *data << uint32(GetEntry());
+    *data << uint32(GetItemSuffixFactor());
+    *data << uint32(GetItemRandomPropertyId());
+    data->WriteBit(0); // Item bonuses
+    data->WriteBit(0); // Modifications
+    data->FlushBits();
 }

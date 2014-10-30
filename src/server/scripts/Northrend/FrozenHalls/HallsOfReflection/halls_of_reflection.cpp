@@ -563,7 +563,7 @@ class npc_jaina_or_sylvanas_hor : public CreatureScript
                     }
                     if (Creature* uther = ObjectAccessor::GetCreature(*me, _utherGUID))
                     {
-                        uther->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_COWER);
+                        uther->SetUInt32Value(UNIT_FIELD_EMOTE_STATE, EMOTE_STATE_COWER);
                         if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                             uther->AI()->Talk(SAY_UTHER_INTRO_A2_9);
                         else

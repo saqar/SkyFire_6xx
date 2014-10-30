@@ -52,6 +52,7 @@ enum OBJECT_UPDATE_FLAGS
     UPDATEFLAG_ANIMKITS              = 0x0800,
     UPDATEFLAG_UNK5                  = 0x1000,
     UPDATEFLAG_UNK6                  = 0x2000,
+    UPDATEFlAG_AREATRIGGER           = 0x4000
 };
 
 class UpdateData

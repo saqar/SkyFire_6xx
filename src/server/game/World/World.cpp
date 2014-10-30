@@ -285,6 +285,7 @@ void World::AddSession_(WorldSession* s)
     s->SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
     s->SendTutorialsData();
     s->SendTimezoneInformation();
+    //s->SendAccountDataTimes(GLOBAL_CACHE_MASK);
 
     UpdateMaxSessionCounters();
 
@@ -380,7 +381,7 @@ bool World::RemoveQueuedPlayer(WorldSession* sess)
         pop_sess->SendAddonsInfo();
 
         pop_sess->SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
-        pop_sess->SendAccountDataTimes(GLOBAL_CACHE_MASK);
+        //pop_sess->SendAccountDataTimes(GLOBAL_CACHE_MASK);
         pop_sess->SendTutorialsData();
         pop_sess->SendTimezoneInformation();
 
@@ -1554,6 +1555,15 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Checking Quest Disables");
     DisableMgr::CheckQuestDisables();                           // must be after loading quests
 
+    TC_LOG_INFO("server.loading", "Loading Quest Objectives...");
+    sObjectMgr->LoadQuestObjectives();
+
+    TC_LOG_INFO("server.loading", "Loading Quest Objective Locales...");
+    sObjectMgr->LoadQuestObjectiveLocales();
+
+    TC_LOG_INFO("server.loading", "Loading Quest Objective Visual Effects...");
+    sObjectMgr->LoadQuestObjectiveVisualEffects();
+
     TC_LOG_INFO("server.loading", "Loading Quest POI");
     sObjectMgr->LoadQuestPOI();
 
@@ -2233,7 +2243,7 @@ namespace Trinity
     {
         public:
             typedef std::vector<WorldPacket*> WorldPacketList;
-            explicit WorldWorldTextBuilder(int32 textId, va_list* args = NULL) : i_textId(textId), i_args(args) { }
+            explicit WorldWorldTextBuilder(int32 textId, Player* player = NULL, va_list* args = NULL) : i_textId(textId), i_args(args), i_player(player) { }
             void operator()(WorldPacketList& data_list, LocaleConstant loc_idx)
             {
                 char const* text = sObjectMgr->GetTrinityString(i_textId, loc_idx);
@@ -2265,29 +2275,31 @@ namespace Trinity
 
                     uint32 lineLength = strlen(line) + 1;
 
-                    ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, NULL, line);
+                    ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, i_player, i_player, line);
                     data_list.push_back(data);
                 }
             }
 
             int32 i_textId;
             va_list* i_args;
+            Player* i_player;
     };
 }                                                           // namespace Trinity
 
 /// Send a System Message to all players (except self if mentioned)
 void World::SendWorldText(int32 string_id, ...)
 {
-    va_list ap;
+    va_list ap, locAp;
     va_start(ap, string_id);
 
-    Trinity::WorldWorldTextBuilder wt_builder(string_id, &ap);
-    Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
             continue;
-
+            
+        va_copy(locAp, ap);
+        Trinity::WorldWorldTextBuilder wt_builder(string_id, itr->second->GetPlayer(), &locAp);
+        Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
         wt_do(itr->second->GetPlayer());
     }
 
@@ -2297,11 +2309,9 @@ void World::SendWorldText(int32 string_id, ...)
 /// Send a System Message to all GMs (except self if mentioned)
 void World::SendGMText(int32 string_id, ...)
 {
-    va_list ap;
+    va_list ap, locAp;
     va_start(ap, string_id);
 
-    Trinity::WorldWorldTextBuilder wt_builder(string_id, &ap);
-    Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         // Session should have permissions to receive global gm messages
@@ -2313,7 +2323,10 @@ void World::SendGMText(int32 string_id, ...)
         Player* player = session->GetPlayer();
         if (!player || !player->IsInWorld())
             continue;
-
+            
+        va_copy(locAp, ap);
+        Trinity::WorldWorldTextBuilder wt_builder(string_id, player, &ap);
+        Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
         wt_do(player);
     }
 
@@ -2672,8 +2685,14 @@ void World::SendServerMessage(ServerMessageType type, const char *text, Player* 
 {
     WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
     data << uint32(type);
+
     if (type <= SERVER_MSG_STRING)
-        data << text;
+    {
+        data.WriteBits(strlen(text), 11);
+        data.WriteString(text);
+    }
+    else
+        data << uint16(0);
 
     if (player)
         player->GetSession()->SendPacket(&data);

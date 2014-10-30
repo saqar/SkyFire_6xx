@@ -108,6 +108,15 @@ class ByteBuffer
             _curbitval = 0;
             _bitpos = 8;
         }
+        
+        void ResetBitPos()
+        {
+            if (_bitpos == 8)
+                return;
+
+            _curbitval = 0;
+            _bitpos = 8;
+        }
 
         bool WriteBit(uint32 bit)
         {
@@ -467,6 +476,7 @@ class ByteBuffer
                 }
             }
         }
+
         std::string ReadString(uint32 length)
         {
             if (!length)
@@ -482,6 +492,7 @@ class ByteBuffer
         //! without null-terminating the string
         void WriteString(std::string const& str)
         {
+            FlushBits();
             if (size_t len = str.length())
                 append(str.c_str(), len);
         }
@@ -499,23 +510,6 @@ class ByteBuffer
             lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
 
             return uint32(mktime(&lt) + timezone);
-        }
-
-        void generatePackGuid(uint64 guid, uint8& mask, uint8* packGUID, size_t& size)
-        {
-            size = 0;
-            mask = 0;
-
-            for (uint8 i = 0; guid != 0; ++i)
-            {
-                if (guid & 0xFF)
-                {
-                    mask |= uint8(1 << i);
-                    packGUID[size++] = uint8(guid & 0xFF);
-                }
-
-                guid >>= 8;
-            }
         }
 
         ByteBuffer& ReadPackedTime(uint32& time)
@@ -603,6 +597,23 @@ class ByteBuffer
                 guid >>= 8;
             }
             append(packGUID, size);
+        }
+
+        void generatePackGuid(uint64 guid, uint8& mask, uint8* packGUID, size_t& size)
+        {
+            size = 0;
+            mask = 0;
+
+            for (uint8 i = 0; guid != 0;++i)
+            {
+                if (guid & 0xFF)
+                {
+                    mask |= uint8(1 << i);
+                    packGUID[size++] =  uint8(guid & 0xFF);
+                }
+
+                guid >>= 8;
+            }
         }
 
         void AppendPackedTime(time_t time)

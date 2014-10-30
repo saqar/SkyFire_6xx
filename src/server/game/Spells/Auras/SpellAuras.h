@@ -239,6 +239,7 @@ class Aura
         AuraScript* GetScriptByName(std::string const& scriptName) const;
 
         std::list<AuraScript*> m_loadedScripts;
+        AreaTrigger* linkedAreaTrigger;
     private:
         void _DeleteRemovedApplications();
     protected:

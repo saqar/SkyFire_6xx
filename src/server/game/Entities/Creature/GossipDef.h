@@ -272,7 +272,7 @@ class PlayerMenu
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
-        void SendQuestGiverStatus(uint32 questStatus, uint64 npcGUID) const;
+        void SendQuestGiverStatus(uint32 questStatus, Object* questGiver) const;
 
         void SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, uint64 npcGUID);
 
@@ -282,6 +282,7 @@ class PlayerMenu
         void SendQuestGiverOfferReward(Quest const* quest, uint64 npcGUID, bool enableNext) const;
         void SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, bool canComplete, bool closeOnCancel) const;
 
+        static void WriteQuestRewardsData(Quest const* quest, ByteBuffer &data, uint32 xpValue);
         static void AddQuestLevelToTitle(std::string &title, int32 level);
 
     private:

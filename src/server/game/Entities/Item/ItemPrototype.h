@@ -25,58 +25,145 @@
 
 enum ItemModType
 {
-    ITEM_MOD_MANA                     = 0,
-    ITEM_MOD_HEALTH                   = 1,
-    ITEM_MOD_AGILITY                  = 3,
-    ITEM_MOD_STRENGTH                 = 4,
-    ITEM_MOD_INTELLECT                = 5,
-    ITEM_MOD_SPIRIT                   = 6,
-    ITEM_MOD_STAMINA                  = 7,
-    ITEM_MOD_DEFENSE_SKILL_RATING     = 12,
-    ITEM_MOD_DODGE_RATING             = 13,
-    ITEM_MOD_PARRY_RATING             = 14,
-    ITEM_MOD_BLOCK_RATING             = 15,
-    ITEM_MOD_HIT_MELEE_RATING         = 16,
-    ITEM_MOD_HIT_RANGED_RATING        = 17,
-    ITEM_MOD_HIT_SPELL_RATING         = 18,
-    ITEM_MOD_CRIT_MELEE_RATING        = 19,
-    ITEM_MOD_CRIT_RANGED_RATING       = 20,
-    ITEM_MOD_CRIT_SPELL_RATING        = 21,
-    ITEM_MOD_HIT_TAKEN_MELEE_RATING   = 22,
-    ITEM_MOD_HIT_TAKEN_RANGED_RATING  = 23,
-    ITEM_MOD_HIT_TAKEN_SPELL_RATING   = 24,
-    ITEM_MOD_CRIT_TAKEN_MELEE_RATING  = 25,
-    ITEM_MOD_CRIT_TAKEN_RANGED_RATING = 26,
-    ITEM_MOD_CRIT_TAKEN_SPELL_RATING  = 27,
-    ITEM_MOD_HASTE_MELEE_RATING       = 28,
-    ITEM_MOD_HASTE_RANGED_RATING      = 29,
-    ITEM_MOD_HASTE_SPELL_RATING       = 30,
-    ITEM_MOD_HIT_RATING               = 31,
-    ITEM_MOD_CRIT_RATING              = 32,
-    ITEM_MOD_HIT_TAKEN_RATING         = 33,
-    ITEM_MOD_CRIT_TAKEN_RATING        = 34,
-    ITEM_MOD_RESILIENCE_RATING        = 35,
-    ITEM_MOD_HASTE_RATING             = 36,
-    ITEM_MOD_EXPERTISE_RATING         = 37,
-    ITEM_MOD_ATTACK_POWER             = 38,
-    ITEM_MOD_RANGED_ATTACK_POWER      = 39,
-    ITEM_MOD_MANA_REGENERATION        = 43,
-    ITEM_MOD_ARMOR_PENETRATION_RATING = 44,
-    ITEM_MOD_SPELL_POWER              = 45,
-    ITEM_MOD_HEALTH_REGEN             = 46,
-    ITEM_MOD_SPELL_PENETRATION        = 47,
-    ITEM_MOD_BLOCK_VALUE              = 48,
-    ITEM_MOD_MASTERY_RATING           = 49,
-    ITEM_MOD_EXTRA_ARMOR              = 50,
-    ITEM_MOD_FIRE_RESISTANCE          = 51,
-    ITEM_MOD_FROST_RESISTANCE         = 52,
-    ITEM_MOD_HOLY_RESISTANCE          = 53,
-    ITEM_MOD_SHADOW_RESISTANCE        = 54,
-    ITEM_MOD_NATURE_RESISTANCE        = 55,
-    ITEM_MOD_ARCANE_RESISTANCE        = 56,
+    ITEM_MOD_MANA                       = 0,
+    ITEM_MOD_HEALTH                     = 1,
+    ITEM_MOD_AGILITY                    = 3,
+    ITEM_MOD_STRENGTH                   = 4,
+    ITEM_MOD_INTELLECT                  = 5,
+    ITEM_MOD_SPIRIT                     = 6,
+    ITEM_MOD_STAMINA                    = 7,
+    ITEM_MOD_DEFENSE_SKILL_RATING       = 12,
+    ITEM_MOD_DODGE_RATING               = 13,
+    ITEM_MOD_PARRY_RATING               = 14,
+    ITEM_MOD_BLOCK_RATING               = 15,
+    ITEM_MOD_HIT_MELEE_RATING           = 16,
+    ITEM_MOD_HIT_RANGED_RATING          = 17,
+    ITEM_MOD_HIT_SPELL_RATING           = 18,
+    ITEM_MOD_CRIT_MELEE_RATING          = 19,
+    ITEM_MOD_CRIT_RANGED_RATING         = 20,
+    ITEM_MOD_CRIT_SPELL_RATING          = 21,
+    ITEM_MOD_HIT_TAKEN_MELEE_RATING     = 22,
+    ITEM_MOD_HIT_TAKEN_RANGED_RATING    = 23,
+    ITEM_MOD_HIT_TAKEN_SPELL_RATING     = 24,
+    ITEM_MOD_CRIT_TAKEN_MELEE_RATING    = 25,
+    ITEM_MOD_CRIT_TAKEN_RANGED_RATING   = 26,
+    ITEM_MOD_CRIT_TAKEN_SPELL_RATING    = 27,
+    ITEM_MOD_HASTE_MELEE_RATING         = 28,
+    ITEM_MOD_HASTE_RANGED_RATING        = 29,
+    ITEM_MOD_HASTE_SPELL_RATING         = 30,
+    ITEM_MOD_HIT_RATING                 = 31,
+    ITEM_MOD_CRIT_RATING                = 32,
+    ITEM_MOD_HIT_TAKEN_RATING           = 33,
+    ITEM_MOD_CRIT_TAKEN_RATING          = 34,
+    ITEM_MOD_RESILIENCE_RATING          = 35,
+    ITEM_MOD_HASTE_RATING               = 36,
+    ITEM_MOD_EXPERTISE_RATING           = 37,
+    ITEM_MOD_ATTACK_POWER               = 38,
+    ITEM_MOD_RANGED_ATTACK_POWER        = 39,
+    ITEM_MOD_VERSATILITY                = 40,
+    ITEM_MOD_SPELL_HEALING_DONE         = 41,
+    ITEM_MOD_SPELL_DAMAGE_DONE          = 42,
+    ITEM_MOD_MANA_REGENERATION          = 43,
+    ITEM_MOD_ARMOR_PENETRATION_RATING   = 44,
+    ITEM_MOD_SPELL_POWER                = 45,
+    ITEM_MOD_HEALTH_REGEN               = 46,
+    ITEM_MOD_SPELL_PENETRATION          = 47,
+    ITEM_MOD_BLOCK_VALUE                = 48,
+    ITEM_MOD_MASTERY_RATING             = 49,
+    ITEM_MOD_EXTRA_ARMOR                = 50,
+    ITEM_MOD_FIRE_RESISTANCE            = 51,
+    ITEM_MOD_FROST_RESISTANCE           = 52,
+    ITEM_MOD_HOLY_RESISTANCE            = 53,
+    ITEM_MOD_SHADOW_RESISTANCE          = 54,
+    ITEM_MOD_NATURE_RESISTANCE          = 55,
+    ITEM_MOD_ARCANE_RESISTANCE          = 56,
+    ITEM_MOD_PVP_POWER                  = 57,
+    ITEM_MOD_CR_AMPLIFY                 = 58,
+    ITEM_MOD_CR_MULTISTRIKE             = 59,
+    ITEM_MOD_CR_READINESS               = 60,
+    ITEM_MOD_CR_SPEED                   = 61,
+    ITEM_MOD_CR_LIFESTEAL               = 62,
+    ITEM_MOD_CR_AVOIDANCE               = 63,
+    ITEM_MOD_CR_STURDINESS              = 64,
+    ITEM_MOD_CR_UNUSED_7                = 65,
+    ITEM_MOD_CR_CLEAVE                  = 66,
+    ITEM_MOD_CR_UNUSED_9                = 67,
+    ITEM_MOD_CR_UNUSED_10               = 68,
+    ITEM_MOD_CR_UNUSED_11               = 69,
+    ITEM_MOD_CR_UNUSED_12               = 70,
+    ITEM_MOD_DYNAMIC_STAT_AGI_STR_INT   = 71,
+    ITEM_MOD_DYNAMIC_STAT_AGI_STR       = 72,
+    ITEM_MOD_DYNAMIC_STAT_AGI_INT       = 73,
+    ITEM_MOD_DYNAMIC_STAT_STR_INT       = 74,
 };
 
-#define MAX_ITEM_MOD                    57
+#define MAX_ITEM_MOD                    75
+
+static int GetPrimaryStatBySpecialization(uint32 spec, uint8 _class)
+{
+    switch (spec)
+    {
+        case SPECIALIZATION_WARRIOR_ARMS:
+        case SPECIALIZATION_WARRIOR_FURY:
+        case SPECIALIZATION_WARRIOR_PROTECTION:
+        case SPECIALIZATION_PALADIN_PROTECTION:
+        case SPECIALIZATION_PALADIN_RETRIBUTION:
+        case SPECIALIZATION_DEATH_KNIGHT_BLOOD:
+        case SPECIALIZATION_DEATH_KNIGHT_FROST:
+        case SPECIALIZATION_DEATH_KNIGHT_UNHOLY:
+            return STAT_STRENGTH;
+        case SPECIALIZATION_PALADIN_HOLY:
+        case SPECIALIZATION_PRIEST_DISCIPLINE:
+        case SPECIALIZATION_PRIEST_HOLY:
+        case SPECIALIZATION_PRIEST_SHADOW:
+        case SPECIALIZATION_SHAMAN_ELEMENTAL:
+        case SPECIALIZATION_SHAMAN_RESTORATION:
+        case SPECIALIZATION_MAGE_ARCANE:
+        case SPECIALIZATION_MAGE_FIRE:
+        case SPECIALIZATION_MAGE_FROST:
+        case SPECIALIZATION_WARLOCK_AFFLICTION:
+        case SPECIALIZATION_WARLOCK_DEMONOLOGY:
+        case SPECIALIZATION_WARLOCK_DESTRUCTION:
+        case SPECIALIZATION_DRUID_BALANCE:
+        case SPECIALIZATION_DRUID_RESTORATION:
+        case SPECIALIZATION_MONK_MISTWEAVER:
+            return STAT_INTELLECT;
+        case SPECIALIZATION_HUNTER_BEAST_MASTERY:
+        case SPECIALIZATION_HUNTER_MARKSMANSHIP:
+        case SPECIALIZATION_HUNTER_SURVIVAL:
+        case SPECIALIZATION_ROGUE_ASSASSINATION:
+        case SPECIALIZATION_ROGUE_COMBAT:
+        case SPECIALIZATION_ROGUE_SUBTLETY:
+        case SPECIALIZATION_SHAMAN_ENHANCEMENT:
+        case SPECIALIZATION_DRUID_FERAL_COMBAT:
+        case SPECIALIZATION_DRUID_GUARDIAN:
+        case SPECIALIZATION_MONK_BREWMASTER:
+        case SPECIALIZATION_MONK_WINDWALKER:
+            return STAT_AGILITY;
+        default:
+        {
+            switch (_class)
+            {
+                case CLASS_WARRIOR:
+                case CLASS_PALADIN:
+                case CLASS_DEATH_KNIGHT:
+                    return STAT_STRENGTH;
+                case CLASS_HUNTER:
+                case CLASS_ROGUE:
+                case CLASS_MONK:
+                    return STAT_AGILITY;
+                case CLASS_PRIEST:
+                case CLASS_SHAMAN:
+                case CLASS_MAGE:
+                case CLASS_WARLOCK:
+                case CLASS_DRUID:
+                    return STAT_INTELLECT;
+                default:
+                    return 0;
+            }
+        }
+    }
+}
 
 enum ItemSpelltriggerType
 {
@@ -605,8 +692,8 @@ struct _ItemStat
 {
     uint32  ItemStatType;
     int32   ItemStatValue;
-    int32   ItemStatUnk1;
-    int32   ItemStatUnk2;
+    int32   ScalingValue;
+    float   SocketCostRate;
 };
 
 struct _Spell
@@ -779,6 +866,8 @@ struct ItemTemplate
                SubClass == ITEM_SUBCLASS_WEAPON_GUN ||
                SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW;
     }
+
+    bool IsWeapon() const { return Class == ITEM_CLASS_WEAPON; }
 };
 
 // Benchmarked: Faster than std::map (insert/find)

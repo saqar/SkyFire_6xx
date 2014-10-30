@@ -123,40 +123,6 @@ struct PlayerTalent
 
 extern uint32 const MasterySpells[MAX_CLASSES];
 
-enum TalentTree // talent tabs
-{
-    TALENT_TREE_WARRIOR_ARMS         = 746,
-    TALENT_TREE_WARRIOR_FURY         = 815,
-    TALENT_TREE_WARRIOR_PROTECTION   = 845,
-    TALENT_TREE_PALADIN_HOLY         = 831,
-    TALENT_TREE_PALADIN_PROTECTION   = 839,
-    TALENT_TREE_PALADIN_RETRIBUTION  = 855,
-    TALENT_TREE_HUNTER_BEAST_MASTERY = 811,
-    TALENT_TREE_HUNTER_MARKSMANSHIP  = 807,
-    TALENT_TREE_HUNTER_SURVIVAL      = 809,
-    TALENT_TREE_ROGUE_ASSASSINATION  = 182,
-    TALENT_TREE_ROGUE_COMBAT         = 181,
-    TALENT_TREE_ROGUE_SUBTLETY       = 183,
-    TALENT_TREE_PRIEST_DISCIPLINE    = 760,
-    TALENT_TREE_PRIEST_HOLY          = 813,
-    TALENT_TREE_PRIEST_SHADOW        = 795,
-    TALENT_TREE_DEATH_KNIGHT_BLOOD   = 398,
-    TALENT_TREE_DEATH_KNIGHT_FROST   = 399,
-    TALENT_TREE_DEATH_KNIGHT_UNHOLY  = 400,
-    TALENT_TREE_SHAMAN_ELEMENTAL     = 261,
-    TALENT_TREE_SHAMAN_ENHANCEMENT   = 263,
-    TALENT_TREE_SHAMAN_RESTORATION   = 262,
-    TALENT_TREE_MAGE_ARCANE          = 799,
-    TALENT_TREE_MAGE_FIRE            = 851,
-    TALENT_TREE_MAGE_FROST           = 823,
-    TALENT_TREE_WARLOCK_AFFLICTION   = 871,
-    TALENT_TREE_WARLOCK_DEMONOLOGY   = 867,
-    TALENT_TREE_WARLOCK_DESTRUCTION  = 865,
-    TALENT_TREE_DRUID_BALANCE        = 752,
-    TALENT_TREE_DRUID_FERAL_COMBAT   = 750,
-    TALENT_TREE_DRUID_RESTORATION    = 748
-};
-
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
@@ -376,7 +342,7 @@ struct PlayerLevelInfo
 {
     PlayerLevelInfo() { for (uint8 i=0; i < MAX_STATS; ++i) stats[i] = 0; }
 
-    uint8 stats[MAX_STATS];
+    uint32 stats[MAX_STATS];
 };
 
 typedef std::list<uint32> PlayerCreateInfoSpells;
@@ -604,6 +570,9 @@ enum AtLoginFlags
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
 typedef std::set<uint32> RewardedQuestSet;
+
+//          objectiveId, amount
+typedef std::map<uint32, uint32> QuestObjectiveStatusMap;
 
 //               quest,  keep
 typedef std::map<uint32, bool> QuestStatusSaveMap;
@@ -894,6 +863,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES            = 35,
     PLAYER_LOGIN_QUERY_LOAD_BATTLE_PETS             = 36,
     PLAYER_LOGIN_QUERY_LOAD_BATTLE_PET_SLOTS        = 37,
+    PLAYER_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS  = 38,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1247,7 +1217,7 @@ class Player : public Unit, public GridObject<Player>
 
         void Update(uint32 time);
 
-        static bool BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer);
+        static bool BuildEnumData(PreparedQueryResult result, ByteBuffer* dataBuffer, ByteBuffer* bitBuffer);
 
         void SetInWater(bool apply);
 
@@ -1494,7 +1464,6 @@ class Player : public Unit, public GridObject<Player>
         void AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 duration);
         void ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false);
         void ApplyEnchantment(Item* item, bool apply);
-        void ApplyReforgeEnchantment(Item* item, bool apply);
         void UpdateSkillEnchantments(uint16 skill_id, uint16 curr_value, uint16 new_value);
         void SendEnchantmentDurations();
         void BuildEnchantmentsInfoData(WorldPacket* data);
@@ -1601,10 +1570,12 @@ class Player : public Unit, public GridObject<Player>
         void MoneyChanged(uint32 value);
         void ReputationChanged(FactionEntry const* factionEntry);
         void ReputationChanged2(FactionEntry const* factionEntry);
+        void ReputationChangedQuestCheck(FactionEntry const* factionEntry);
         bool HasQuestForItem(uint32 itemId) const;
         bool HasQuestForGO(int32 goId) const;
         void UpdateForQuestWorldObjects();
         bool CanShareQuest(uint32 questId) const;
+        void QuestObjectiveSatisfy(uint32 objectId, uint32 amount, uint8 type = 0u, uint64 guid = 0u);
 
         void SendQuestComplete(Quest const* quest);
         void SendQuestReward(Quest const* quest, uint32 XP);
@@ -1613,8 +1584,8 @@ class Player : public Unit, public GridObject<Player>
         void SendCanTakeQuestResponse(QuestFailedReason msg) const;
         void SendQuestConfirmAccept(Quest const* quest, Player* pReceiver);
         void SendPushToPartyResponse(Player* player, uint8 msg);
-        void SendQuestUpdateAddCreatureOrGo(Quest const* quest, uint64 guid, uint32 creatureOrGOIdx, uint16 oldCount, uint16 addCount);
-        void SendQuestUpdateAddPlayer(Quest const* quest, uint16 oldCount, uint16 addCount);
+        void SendQuestUpdateAddCredit(Quest const* quest, QuestObjective const* objective, ObjectGuid guid, uint16 oldCount, uint16 addCount);
+        void SendQuestUpdateAddPlayer(Quest const* quest, QuestObjective const* objective, uint16 oldCount, uint16 addCount);
 
         uint64 GetDivider() const { return m_divider; }
         void SetDivider(uint64 guid) { m_divider = guid; }
@@ -1701,8 +1672,8 @@ class Player : public Unit, public GridObject<Player>
         Unit* GetSelectedUnit() const;
         Player* GetSelectedPlayer() const;
 
-        void SetTarget(uint64 /*guid*/) OVERRIDE { } /// Used for serverside target changes, does not apply to players
-        void SetSelection(uint64 guid) { SetUInt64Value(UNIT_FIELD_TARGET, guid); }
+        void SetTarget(ObjectGuid /*guid*/) OVERRIDE { } /// Used for serverside target changes, does not apply to players
+        void SetSelection(ObjectGuid guid) { SetGuidValue(UNIT_FIELD_TARGET, guid); }
 
         uint8 GetComboPoints() const { return m_comboPoints; }
         uint64 GetComboTarget() const { return m_comboTarget; }
@@ -1823,7 +1794,7 @@ class Player : public Unit, public GridObject<Player>
 
         SpellCooldowns const& GetSpellCooldownMap() const { return m_spellCooldowns; }
 
-        void AddSpellMod(SpellModifier* mod, bool apply);
+        void AddSpellMod(SpellModifier* mod, bool apply, AuraEffect const* aurEff = NULL);
         bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = NULL);
         template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL);
         void RemoveSpellMods(Spell* spell);
@@ -1842,6 +1813,7 @@ class Player : public Unit, public GridObject<Player>
         void SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId = 0, Spell* spell = NULL, bool setCooldown = true);
         void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
         void RemoveSpellCooldown(uint32 spell_id, bool update = false);
+        void RemoveSpellCooldownsByClassMask(uint32 SpellFamilyName, flag128 SpellClassMask, bool update = false);
         void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
         void SendClearCooldown(uint32 spell_id, Unit* target);
         void SendClearAllCooldowns(Unit* target);
@@ -1974,6 +1946,10 @@ class Player : public Unit, public GridObject<Player>
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
         void UpdateMastery();
+        void UpdateMultistrike();
+        void UpdateLeech();
+        void UpdateVesatillity();
+        void UpdateAvoidance();
         bool CanUseMastery() const;
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
@@ -1992,16 +1968,13 @@ class Player : public Unit, public GridObject<Player>
 
         float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const;
         void UpdateBlockPercentage();
-        void UpdateCritPercentage(WeaponAttackType attType);
-        void UpdateAllCritPercentages();
+        void UpdateCritPercentage();
         void UpdateParryPercentage();
         void UpdateDodgePercentage();
         void UpdateMeleeHitChances();
         void UpdateRangedHitChances();
         void UpdateSpellHitChances();
 
-        void UpdateAllSpellCritChances();
-        void UpdateSpellCritChance(uint32 school);
         void UpdateArmorPenetration(int32 amount);
         void UpdateExpertise(WeaponAttackType attType);
         void ApplyManaRegenBonus(int32 amount, bool apply);
@@ -2170,7 +2143,6 @@ class Player : public Unit, public GridObject<Player>
         void ResetAllPowers();
 
         void _ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply);
-        void _ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attackType, AuraEffect const* aura, bool apply);
         void _ApplyWeaponDependentAuraDamageMod(Item* item, WeaponAttackType attackType, AuraEffect const* aura, bool apply);
 
         void _ApplyItemMods(Item* item, uint8 slot, bool apply);
@@ -2178,7 +2150,8 @@ class Player : public Unit, public GridObject<Player>
         void _ApplyAllItemMods();
         void _ApplyAllLevelScaleItemMods(bool apply);
         void _ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply, bool only_level_scale = false);
-        void _ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingStatValuesEntry const* ssv, bool apply);
+        void _ApplyItemScale(ItemTemplate const* proto,  uint8 slot, uint32 ilvl, bool apply);
+        void _ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingStatValuesEntry const* ssv, bool apply, uint32 ilvl = 0);
         bool EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot);
         void ToggleMetaGemsActive(uint8 exceptslot, bool apply);
         void CorrectMetaGemEnchants(uint8 slot, bool apply);
@@ -2534,8 +2507,20 @@ class Player : public Unit, public GridObject<Player>
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
 
         void ReadyCheckComplete();
+        void SetActiveSpecialization(uint32 specializationId, bool resetMods = true);
+        uint32 GetActiveSpecialization() const { return GetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID); }
+
+        void SetInPvPCombat(bool set);
+        bool IsInPvPCombat() const { return m_pvpCombat; }
+        void UpdatePvP(uint32 diff);
+        void SetPvPTimer(uint32 duration) { m_PvPCombatTimer = duration; }
+
+        uint32 GetQuestObjectiveCounter(uint32 objectiveId) const;
 
     protected:
+        void OnEnterPvPCombat();
+        void OnLeavePvPCombat();
+
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
         uint32 m_regenTimerCount;
@@ -2544,6 +2529,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_focusRegenTimerCount;
         float m_powerFraction[MAX_POWERS_PER_CLASS];
         uint32 m_contestedPvPTimer;
+        uint32 m_PvPCombatTimer;
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2593,6 +2579,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadMail();
         void _LoadMailedItems(Mail* mail);
         void _LoadQuestStatus(PreparedQueryResult result);
+        void _LoadQuestObjectiveStatus(PreparedQueryResult result);
         void _LoadQuestStatusRewarded(PreparedQueryResult result);
         void _LoadDailyQuestStatus(PreparedQueryResult result);
         void _LoadWeeklyQuestStatus(PreparedQueryResult result);
@@ -2624,6 +2611,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveVoidStorage(SQLTransaction& trans);
         void _SaveMail(SQLTransaction& trans);
         void _SaveQuestStatus(SQLTransaction& trans);
+        void _SaveQuestObjectiveStatus(SQLTransaction& trans);
         void _SaveDailyQuestStatus(SQLTransaction& trans);
         void _SaveWeeklyQuestStatus(SQLTransaction& trans);
         void _SaveMonthlyQuestStatus(SQLTransaction& trans);
@@ -2701,6 +2689,7 @@ class Player : public Unit, public GridObject<Player>
         int8 m_comboPoints;
 
         QuestStatusMap m_QuestStatus;
+        QuestObjectiveStatusMap m_questObjectiveStatus;
         QuestStatusSaveMap m_QuestStatusSave;
 
         RewardedQuestSet m_RewardedQuests;
@@ -2814,9 +2803,9 @@ class Player : public Unit, public GridObject<Player>
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;
 
         uint8 m_grantableLevels;
+        bool m_pvpCombat;
 
         CUFProfile* _CUFProfiles[MAX_CUF_PROFILES];
-
     private:
         // internal common parts for CanStore/StoreItem functions
         InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
@@ -2927,10 +2916,11 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
                 continue;
 
             // special case (skip > 10sec spell casts for instant cast setting)
-            if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10000) && mod->value <= -100)
+            if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10000) && mod->value >= 100)
                 continue;
 
-            totalmul += CalculatePct(1.0f, mod->value);
+            int32 negate = mod->op == SPELLMOD_COOLDOWN && mod->value > 0 ? -1 : 1;
+            totalmul += CalculatePct(1.0f, mod->value * negate);
         }
 
         DropModCharge(mod, spell);

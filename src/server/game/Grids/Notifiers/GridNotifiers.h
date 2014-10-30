@@ -302,6 +302,22 @@ namespace Trinity
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) { }
     };
 
+    // AreaTrigger seachers
+    template <class Check>
+    struct AreaTriggerListSearcher
+    {
+        uint32 i_phaseMask;
+        std::list<AreaTrigger*> &i_objects;
+        Check& i_check;
+
+        AreaTriggerListSearcher(WorldObject const* searcher, std::list<AreaTrigger*> &objects, Check & check)
+            : i_phaseMask(searcher->GetPhaseMask()), i_objects(objects), i_check(check) { }
+
+        void Visit(AreaTriggerMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) { }
+    };
+
     // Gameobject searchers
 
     template<class Check>
@@ -619,6 +635,30 @@ namespace Trinity
             void operator()(GameObject* u) const { u->Respawn(); }
             void operator()(WorldObject*) const { }
             void operator()(Corpse*) const { }
+    };
+
+    // AreaTrigger checks
+        class NearestAreaTriggerEntryInObjectRangeCheck
+    {
+        public:
+            NearestAreaTriggerEntryInObjectRangeCheck(WorldObject const& obj, uint32 entry, float range) : i_obj(obj), i_entry(entry), i_range(range) { }
+            bool operator()(WorldObject* go)
+            {
+                if (go->GetEntry() == i_entry && i_obj.IsWithinDistInMap(go, i_range))
+                {
+                    i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
+                    return true;
+                }
+                return false;
+            }
+            float GetLastRange() const { return i_range; }
+        private:
+            WorldObject const& i_obj;
+            uint32 i_entry;
+            float  i_range;
+
+            // prevent clone this object
+            NearestAreaTriggerEntryInObjectRangeCheck(NearestAreaTriggerEntryInObjectRangeCheck const&);
     };
 
     // GameObject checks

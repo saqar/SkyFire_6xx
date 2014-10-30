@@ -49,23 +49,23 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
     if (code == AUTH_OK)
     {
         packet << uint32(realmID);
-        packet << uint32(realmNamesToSend.size());     
+        packet << uint32(realmNamesToSend.size());     // Send current realmId
         packet << uint32(0);
         packet << uint32(0);
         packet << uint32(0);
-        packet << uint8(Expansion()); // box level
-        packet << uint8(Expansion()); // box level
+        packet << uint8(Expansion());
+        packet << uint8(Expansion());
         packet << uint32(0);
         packet << uint32(raceResult->GetRowCount());
         packet << uint32(classResult->GetRowCount());
         packet << uint32(0);
-        packet << uint32(0);
+        packet << uint32(0); // Currency ???
 
-        // Templates avail. races and classes
         for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); itr++)
         {
             packet << uint32(itr->first);
-            packet.WriteBit(itr->first == realmID);
+            packet.WriteBit(itr->first == realmID); // Home realm
+            packet.WriteBit(0); // Unk 18967
             packet.WriteBits(itr->second.size(), 8);
             packet.WriteBits(itr->second.size(), 8);
             packet.FlushBits();
@@ -79,7 +79,8 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
             packet << fields[0].GetUInt8();
             packet << fields[1].GetUInt8();
-        } while (raceResult->NextRow());
+        }
+        while (raceResult->NextRow());
 
         do
         {
@@ -87,18 +88,19 @@ void WorldSession::SendAuthResponse(uint8 code, bool queued, uint32 queuePos)
 
             packet << fields[0].GetUInt8();
             packet << fields[1].GetUInt8();
-        } while (classResult->NextRow());
+        }
+        while (classResult->NextRow());
 
+        packet.WriteBit(0); // Trial
+        packet.WriteBit(0); // ForTemplate
         packet.WriteBit(0);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
-        packet.WriteBit(0);
+        packet.WriteBit(0); // IsVeteranTrial
     }
 
     if (queued)
     {
-        packet << uint32(0);                            // Unk
-        packet.WriteBit(1);                             // Unk
+        packet << uint32(0);                            // Unknown
+        packet.WriteBit(1);                             // Unknown
     }
 
     packet.FlushBits();

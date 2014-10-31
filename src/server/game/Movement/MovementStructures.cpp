@@ -5029,8 +5029,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //    return MovementUpdateWalkSpeed;
         //case SMSG_SPLINE_MOVE_SET_WALK_SPEED:
         //    return SplineMoveSetWalkSpeed;
-        case SMSG_SPLINE_MOVE_SET_RUN_SPEED:
-            return SplineMoveSetRunSpeed;
+        //case SMSG_SPLINE_MOVE_SET_RUN_SPEED:
+        //    return SplineMoveSetRunSpeed;
         //case SMSG_SPLINE_MOVE_SET_RUN_BACK_SPEED:
         //    return SplineMoveSetRunBackSpeed;
         //case SMSG_SPLINE_MOVE_SET_SWIM_SPEED:

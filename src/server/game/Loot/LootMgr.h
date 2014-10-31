@@ -159,7 +159,7 @@ struct LootItem
 
     // Write packet data
     void WriteBitDataPart(uint8 permission, bool hasSlotType, ByteBuffer* buff);
-    void WriteBasicDataPart(uint8 slotType, uint8 slot, ByteBuffer* buff);
+    void WriteBasicDataPart(uint8 permission, uint8 slotType, uint8 slot, ByteBuffer* buff);
 };
 
 struct QuestItem

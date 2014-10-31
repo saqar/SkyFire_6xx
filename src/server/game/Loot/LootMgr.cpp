@@ -849,111 +849,64 @@ bool Loot::hasOverThresholdItem() const
 
 void LootItem::WriteBitDataPart(uint8 permission, bool hasSlotType, ByteBuffer* buff)
 {
-    buff->WriteBits(permission, 3);
-    buff->WriteBit(0); // canTradeToTapList
-    buff->WriteBit(!hasSlotType);
-    buff->WriteBit(0); // Contains Slot - Always sent
-    buff->WriteBits(0, 2); // Unk 2 bits
 }
 
-void LootItem::WriteBasicDataPart(uint8 slotType, uint8 slot, ByteBuffer* buff)
+void LootItem::WriteBasicDataPart(uint8 permission, uint8 slotType, uint8 slot, ByteBuffer* buff)
 {
-    *buff << uint32(randomSuffix);
+    slotType = slotType == LOOT_SLOT_TYPE_OWNER ? LOOT_SLOT_TYPE_ALLOW_LOOT : slotType;
+    permission = permission == OWNER_PERMISSION ? ALL_PERMISSION : permission;
+
+    buff->WriteBits(0, 2); // Unk 2 bits
+    buff->WriteBits(slotType, 3);
+    buff->WriteBit(0); // canTradeToTapList
     *buff << uint32(count);
-    *buff << uint32(itemid);
-    *buff << uint32(4); // Send situ size
-    *buff << uint32(0); // Blizz always send 0 uint32 as situ (read in packet handler)
-
-    if (slotType)
-        *buff << uint8(slotType);
-
-    *buff << uint32(randomPropertyId);
+    *buff << uint8(permission);
     *buff << uint8(slot);
-    *buff << uint32(sObjectMgr->GetItemTemplate(itemid)->DisplayInfoID);
+    *buff << uint32(itemid);
+    *buff << uint32(randomPropertyId);
+    *buff << uint32(randomSuffix);
+    buff->WriteBit(0);
+    buff->WriteBit(0);
+    buff->FlushBits();
+    //*buff << uint32(sObjectMgr->GetItemTemplate(itemid)->DisplayInfoID);
 }
 
 void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
 {
     ObjectGuid lootGuid = viewer->GetLootGUID();
+    *data << guid;
+    *data << guid;
 
     if (permission == NONE_PERMISSION)
     {
-        data->WriteBit(1); // Missing unk8
-        data->WriteBit(0); // lootType present
-        data->WriteBit(guid[4]);
-        data->WriteBits(0, 20);
-        data->WriteBit(lootGuid[2]);
-        data->WriteBit(lootGuid[3]);
-        data->WriteBit(lootGuid[7]);
-        data->WriteBit(lootGuid[1]);
-        data->WriteBit(guid[6]);
-        data->WriteBit(guid[7]);
-        data->WriteBit(1);
-        data->WriteBit(1); // isPersonalLooting
-        data->WriteBit(1); // Missing unk8
-        data->WriteBit(0); // isAoELooting
-        data->WriteBit(guid[5]);
-        data->WriteBit(lootGuid[6]);
-        data->WriteBit(guid[1]);
-        data->WriteBit(guid[0]);
-        data->WriteBit(lootGuid[5]);
-        data->WriteBit(guid[3]);
-        data->WriteBit(lootGuid[4]);
-        data->WriteBit(1); // Missing unk8
-        data->WriteBit(guid[2]);
-        data->FlushBits();
-        data->WriteByteSeq(lootGuid[2]);
-        data->WriteByteSeq(lootGuid[7]);
-        data->WriteByteSeq(guid[5]);
-        data->WriteByteSeq(lootGuid[3]);
-        data->WriteByteSeq(lootGuid[4]);
-        *data << uint8(lootType);
-        data->WriteByteSeq(guid[4]);
-        data->WriteByteSeq(lootGuid[5]);
-        data->WriteByteSeq(guid[2]);
-        data->WriteByteSeq(guid[3]);
-        data->WriteByteSeq(lootGuid[1]);
-        data->WriteByteSeq(guid[0]);
-        data->WriteByteSeq(lootGuid[0]);
-        data->WriteByteSeq(guid[6]);
-        data->WriteByteSeq(guid[7]);
-        data->WriteByteSeq(guid[1]);
-        data->WriteByteSeq(lootGuid[6]);
+        *data << uint8(0);
+        *data << uint8(0);
+        *data << uint8(0);
+        *data << uint8(0);
+        *data << uint32(0);
+        *data << uint32(0);
+        *data << uint32(0);
         return;
     }
 
+    *data << uint8(0);
+    *data << uint8(lootType);
+    *data << uint8(0);
+    *data << uint8(0);
+
+    *data << uint32(loot.gold);
+    size_t itemPos = data->wpos();
+    *data << uint32(0);
+    size_t currencyPos = data->wpos();
+    *data << uint32(0);
+
     uint8 itemsShown = 0;
     uint8 currenciesShown = 0;
+
     ByteBuffer itemBuff;
     ByteBuffer currencyBuff;
 
-    data->WriteBit(1); // Missing unk8
-    data->WriteBit(0); // lootType present
-    data->WriteBit(guid[4]);
-
-    size_t currencyCountPos = data->bitwpos();
-    data->WriteBits(0, 20);
-
-    data->WriteBit(lootGuid[2]);
-    data->WriteBit(lootGuid[3]);
-    data->WriteBit(lootGuid[7]);
-    data->WriteBit(lootGuid[1]);
-    data->WriteBit(guid[6]);
-    data->WriteBit(guid[7]);
-    data->WriteBit(!loot.gold);
-    data->WriteBit(1); // isPersonalLooting
-    data->WriteBit(1); // Missing unk8
-    data->WriteBit(0); // isAoELooting
-    data->WriteBit(guid[5]);
-    data->WriteBit(lootGuid[6]);
-
-    size_t itemCountPos = data->bitwpos();
-    data->WriteBits(0, 19);
-
-    data->WriteBit(lootGuid[0]);
-
     bool hasPermission = true;
-
     switch (permission)
     {
         case GROUP_PERMISSION:
@@ -979,7 +932,7 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
                         continue; // item shall not be displayed.
 
                     loot.items[i].WriteBitDataPart(permission, slotType, data);
-                    loot.items[i].WriteBasicDataPart(slotType, i, &itemBuff);
+                    loot.items[i].WriteBasicDataPart(permission, slotType, i, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -996,7 +949,7 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
                         continue;
 
                     loot.items[i].WriteBitDataPart(permission, true, data);
-                    loot.items[i].WriteBasicDataPart(LOOT_SLOT_TYPE_ALLOW_LOOT, i, &itemBuff);
+                    loot.items[i].WriteBasicDataPart(permission, LOOT_SLOT_TYPE_ALLOW_LOOT, i, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1024,7 +977,7 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
                 if (!loot.items[i].is_looted && !loot.items[i].freeforall && loot.items[i].conditions.empty() && loot.items[i].AllowedForPlayer(viewer))
                 {
                     loot.items[i].WriteBitDataPart(permission, slotType, data);
-                    loot.items[i].WriteBasicDataPart(slotType, i, &itemBuff);
+                    loot.items[i].WriteBasicDataPart(permission, slotType, i, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1071,7 +1024,7 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
                     }
 
                     item.WriteBitDataPart(permission, finalSlotType, data);
-                    item.WriteBasicDataPart(finalSlotType, index, &itemBuff);
+                    item.WriteBasicDataPart(permission, finalSlotType, index, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1088,7 +1041,7 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
                 if (!fi->is_looted && !item.is_looted)
                 {
                     item.WriteBitDataPart(OWNER_PERMISSION, slotType, data);
-                    item.WriteBasicDataPart(slotType, fi->index, &itemBuff);
+                    item.WriteBasicDataPart(permission, slotType, fi->index, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1126,56 +1079,23 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data)
                     }
 
                     item.WriteBitDataPart(permission, slotType, data);
-                    item.WriteBasicDataPart(slotType, ci->index, &itemBuff);
+                    item.WriteBasicDataPart(permission, slotType, ci->index, &itemBuff);
                     ++itemsShown;
                 }
             }
         }
     }
 
-    data->WriteBit(guid[1]);
-    data->WriteBit(guid[0]);
-
-    // currency permission loop
-
-    data->WriteBit(lootGuid[5]);
-    data->WriteBit(guid[3]);
-    data->WriteBit(lootGuid[4]);
-    data->WriteBit(1); // Missing unk8
-    data->WriteBit(guid[2]);
-
-    data->FlushBits();
-
     //update number of items and currencies shown
-    data->PutBits(itemCountPos, itemsShown, 19);
-    data->PutBits(currencyCountPos, currenciesShown, 20);
+    data->put(itemPos, itemsShown);
+    data->put(currencyPos, currenciesShown);
 
     data->append(itemBuff);
-
-    data->WriteByteSeq(lootGuid[2]);
-
-    if (loot.gold)
-        *data << uint32(loot.gold);
-
-    data->WriteByteSeq(lootGuid[7]);
-    data->WriteByteSeq(guid[5]);
-    data->WriteByteSeq(lootGuid[3]);
-    data->WriteByteSeq(lootGuid[4]);
-    *data << uint8(lootType);
-    data->WriteByteSeq(guid[4]);
-    data->WriteByteSeq(lootGuid[5]);
-
     data->append(currencyBuff);
 
-    data->WriteByteSeq(guid[2]);
-    data->WriteByteSeq(guid[3]);
-    data->WriteByteSeq(lootGuid[1]);
-    data->WriteByteSeq(guid[0]);
-    data->WriteByteSeq(lootGuid[0]);
-    data->WriteByteSeq(guid[6]);
-    data->WriteByteSeq(guid[7]);
-    data->WriteByteSeq(guid[1]);
-    data->WriteByteSeq(lootGuid[6]);
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBit(0);
 }
 
 //

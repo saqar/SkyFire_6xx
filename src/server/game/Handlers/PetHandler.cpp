@@ -766,7 +766,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_PET_CAST_SPELL");
 
-    uint64 guid;
+    ObjectGuid guid;
     uint8  castCount;
     uint32 spellId;
     uint8  castFlags;

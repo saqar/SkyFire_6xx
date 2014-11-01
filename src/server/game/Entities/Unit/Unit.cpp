@@ -15928,13 +15928,18 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
 
         TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_HIGHEST_THREAT_UPDATE Message");
         WorldPacket data(SMSG_HIGHEST_THREAT_UPDATE, 8 + 8 + count * 8);
-        data.append(GetPackGUID());
-        data.appendPackGUID(pHostileReference->getUnitGuid());
+        ObjectGuid guid;
+        ObjectGuid guid1;
+
+        data << guid;
+        data << guid1;
         data << uint32(count);
+
         ThreatContainer::StorageType const &tlist = getThreatManager().getThreatList();
         for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
-            data.appendPackGUID((*itr)->getUnitGuid());
+            ObjectGuid guid2;
+            data << guid2;
             data << uint32((*itr)->getThreat());
         }
         SendMessageToSet(&data, false);
@@ -15945,7 +15950,10 @@ void Unit::SendClearThreatListOpcode()
 {
     TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_CLEAR Message");
     WorldPacket data(SMSG_THREAT_CLEAR, 8);
-    data.append(GetPackGUID());
+    ObjectGuid guid;
+
+    data << guid;
+
     SendMessageToSet(&data, false);
 }
 

@@ -984,6 +984,22 @@ class WorldSession
         void HandleBattlePetSetFlags(WorldPacket& recvData);
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
 
+        // Garrisons
+        void HandleGarrRemoveFollower(WorldPacket& recvData);
+        void HandleGarrRecruitFollower(WorldPacket& recvData);
+        void HandleGarrCompleteMission(WorldPacket& recvData);
+        void HandleGarrSetBuildingActive(WorldPacket& recvData);
+        void HandleGarrGenerateRecruits(WorldPacket& recvData);
+        void HandleGarrPurchaseBuilding(WorldPacket& recvData);
+        void HandleGarrUpgrade(WorldPacket& recvData);
+        void HandleGarrGetInfo(WorldPacket& recvData);
+        void HandleGarrAssignFollower(WorldPacket& recvData);
+        void HandleGarrSwapBuildings(WorldPacket& recvData);
+        void HandleGarrMissionBonusRoll(WorldPacket& recvData);
+        void HandleGarrStartMission(WorldPacket& recvData);
+        void HandleGarrRequestBlueprintData(WorldPacket& recvData);
+
+
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();

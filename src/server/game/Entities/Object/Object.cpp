@@ -569,13 +569,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(0);
         data->WriteBit(0);
         data->WriteBit(0);
-        *data << float(0);
-        *data << float(0);
-        *data << float(0);
-        *data << uint32(0);
-        *data << uint32(0);
-        *data << uint32(0);
-        *data << uint32(0);
 
         if (areaTrigger->GetRadius() != 0.f)
         {

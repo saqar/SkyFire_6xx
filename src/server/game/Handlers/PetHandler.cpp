@@ -61,7 +61,7 @@ void WorldSession::HandlePetAction(WorldPacket& recvData) //  sub_68C8FD [5.4.8 
 {
     ObjectGuid guid1;
     ObjectGuid guid2;
-    uint32 data;
+    uint32 data; // action
     float x, y, z;
 
     // Data Comes Single
@@ -123,7 +123,7 @@ void WorldSession::HandlePetAction(WorldPacket& recvData) //  sub_68C8FD [5.4.8 
 
 void WorldSession::HandlePetStopAttack(WorldPacket &recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
     recvData >> guid;
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_PET_STOP_ATTACK for GUID " UI64FMTD "", guid);
@@ -723,7 +723,7 @@ void WorldSession::HandlePetAbandon(WorldPacket& recvData)
 void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
 {
     TC_LOG_INFO("network", "CMSG_PET_SPELL_AUTOCAST");
-    uint64 guid;
+    ObjectGuid guid;
     uint32 spellid;
     uint8  state;                                           //1 for on, 0 for off
     recvPacket >> guid >> spellid >> state;

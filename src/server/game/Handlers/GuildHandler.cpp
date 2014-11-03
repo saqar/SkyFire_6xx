@@ -601,14 +601,14 @@ void WorldSession::HandleAutoDeclineGuildInvites(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recvPacket)
 {
-    recvPacket.read_skip<uint32>(); // Unk
-
     if (sGuildMgr->GetGuildById(_player->GetGuildId()))
     {
         std::vector<GuildReward> const& rewards = sGuildMgr->GetGuildRewards();
 
         WorldPacket data(SMSG_GUILD_REWARDS_LIST, 3 + rewards.size() * (4 + 4 + 4 + 8 + 4 + 4));
-        data.WriteBits(rewards.size(), 19);
+
+        data << uint32(time(NULL));
+        data << uint32(0);                                              // Unknown
 
         for (uint32 i = 0; i < rewards.size(); i++)
             data.WriteBits(rewards[i].Achievements.size(), 22);
@@ -618,16 +618,16 @@ void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recvPacket)
         for (uint32 i = 0; i < rewards.size(); i++)
         {
             for (uint32 j = 0; j < rewards[i].Achievements.size(); j++)
-                data << uint32(rewards[i].Achievements[j]);
+                data << uint32(rewards[i].Achievements[j]);             // AchievementsRequired
 
-            data << int32(rewards[i].Racemask);
-            data << uint32(rewards[i].Entry);
-            data << uint32(0); // minGuildLevel
-            data << uint32(rewards[i].Standing);
-            data << uint64(rewards[i].Price);
+            data << int32(rewards[i].Racemask);                         // RaceMask
+            data << uint32(rewards[i].Entry);                           // ItemID
+            data << uint32(0);                                          // minGuildLevel
+            data << uint32(rewards[i].Standing);                        // Unk
+            data << uint64(rewards[i].Price);                           // Cost
         }
 
-        data << uint32(time(NULL));
+        data.WriteBits(rewards.size(), 19);
         SendPacket(&data);
     }
 }
@@ -670,8 +670,8 @@ void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
 void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
 {
     WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED, 4 * 6 * 5);
-    for (int i = 0; i < 6; i++)
-        data << uint32(GuildChallengeWeeklyMaximum[i]);
+    /*for (int i = 0; i < 6; i++)
+        data << uint32(GuildChallengeWeeklyMaximum[i]);*/
 
     for (int i = 0; i < 6; i++)
         data << uint32(GuildChallengeGoldReward[i]);

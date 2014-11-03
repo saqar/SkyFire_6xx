@@ -893,25 +893,10 @@ void AchievementMgr<Guild>::SendAchievementEarned(AchievementEntry const* achiev
     ObjectGuid guid = GetOwner()->GetGUID();
 
     WorldPacket data(SMSG_GUILD_ACHIEVEMENT_EARNED, 8+4+8);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
-
-    data.WriteByteSeq(guid[2]);
+    
+    data << guid;
     data.AppendPackedTime(time(NULL));
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
     data << uint32(achievement->ID);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[6]);
 
     SendPacket(&data);
 }
@@ -950,47 +935,17 @@ void AchievementMgr<Guild>::SendCriteriaUpdate(CriteriaEntry const* entry, Crite
     ObjectGuid counter = progress->counter; // for accessing every byte individually
     ObjectGuid guid = progress->CompletedGUID;
 
-    data.WriteBits(1, 21);
-    data.WriteBit(counter[4]);
-    data.WriteBit(counter[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(counter[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(counter[5]);
-    data.WriteBit(counter[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(counter[2]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(counter[6]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(counter[7]);
-    data.WriteBit(guid[4]);
+    // From CriteriaUpdate
+    data << uint32(0);                   // Unk
 
-    data.FlushBits();
-
-    data.WriteByteSeq(guid[5]);
-    data << uint32(progress->date);      // unknown date
-    data.WriteByteSeq(counter[3]);
-    data.WriteByteSeq(counter[7]);
-    data << uint32(progress->date);      // unknown date
-    data.WriteByteSeq(counter[6]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(counter[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(counter[0]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(counter[1]);
-    data.WriteByteSeq(guid[6]);
-    data << uint32(progress->date);      // last update time (not packed!)
-    data << uint32(entry->ID);
-    data.WriteByteSeq(counter[5]);
-    data << uint32(0);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(counter[2]);
-    data.WriteByteSeq(guid[0]);
+    // EarnedAchievement
+    data << counter;                     // Guid
+    data << guid;                        // Guid
+    data << uint32(progress->date);      // DateCreated
+    data << uint32(progress->date);      // DateStarted
+    data << uint32(progress->date);      // DateUpdated
+    data << uint32(entry->ID);           // CriteriaID
+    data << uint32(0);                   // Flags
 
     SendPacket(&data);
 }
@@ -1998,14 +1953,20 @@ void AchievementMgr<Guild>::SendAllAchievementData(Player* receiver) const
 {
     VisibleAchievementPred isVisible;
     WorldPacket data(SMSG_GUILD_ACHIEVEMENT_DATA, m_completedAchievements.size() * (4 + 4) + 3);
-    data.WriteBits(std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible), 23);
+    ObjectGuid guid;
+
+    data << uint32(0);
+    data.WriteBits(std::count_if(m_completedAchievements.begin(), m_completedAchievements.end(), isVisible), 19);
+
     for (CompletedAchievementMap::const_iterator itr = m_completedAchievements.begin(); itr != m_completedAchievements.end(); ++itr)
     {
         if (!isVisible(*itr))
             continue;
-
-        data.AppendPackedTime(itr->second.date);
         data << uint32(itr->first);
+        data.AppendPackedTime(itr->second.date);
+        data << guid;
+        data << uint32(0);                          // RealmID
+        data << uint32(0);                          // RealmID
     }
 
     receiver->GetSession()->SendPacket(&data);

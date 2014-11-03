@@ -407,6 +407,7 @@ class WorldSession
         void HandleRandomizeCharNameOpcode(WorldPacket& recvData);
         void HandleReorderCharacters(WorldPacket& recvData);
         void HandleOpeningCinematic(WorldPacket& recvData);
+        void HandleDBQueryBulk(WorldPacket& recvPacket);
 
         // played time
         void HandlePlayedTime(WorldPacket& recvPacket);
@@ -985,7 +986,7 @@ class WorldSession
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
 
         // Garrisons
-        void HandleGarrRemoveFollower(WorldPacket& recvData);
+        /*void HandleGarrRemoveFollower(WorldPacket& recvData);
         void HandleGarrRecruitFollower(WorldPacket& recvData);
         void HandleGarrCompleteMission(WorldPacket& recvData);
         void HandleGarrSetBuildingActive(WorldPacket& recvData);
@@ -997,7 +998,7 @@ class WorldSession
         void HandleGarrSwapBuildings(WorldPacket& recvData);
         void HandleGarrMissionBonusRoll(WorldPacket& recvData);
         void HandleGarrStartMission(WorldPacket& recvData);
-        void HandleGarrRequestBlueprintData(WorldPacket& recvData);
+        void HandleGarrRequestBlueprintData(WorldPacket& recvData);*/
 
 
     private:

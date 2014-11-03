@@ -1276,7 +1276,7 @@ void GameObject::Use(Unit* user)
                 if (info->goober.pageId)                    // show page...
                 {
                     WorldPacket data(SMSG_GAMEOBJECT_PAGETEXT, 8);
-                    data << GetGUID();
+                    data << GetGUID128();
                     player->SendDirectMessage(&data);
                 }
                 else if (info->goober.gossipID)

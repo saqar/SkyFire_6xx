@@ -203,11 +203,11 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
 
     ObjectGuid guid;
     uint32 flags, time;
+
+    recvPacket >> guid;
     recvPacket >> time >> flags;
 
-    data >> guid;
-
-    TC_LOG_DEBUG("network", "Guid " UI64FMTD, uint64(guid));
+    TC_LOG_DEBUG("network", "Guid " UI64FMTD, ObjectGuid(guid));
     TC_LOG_DEBUG("network", "Flags %u, time %u", flags, time/IN_MILLISECONDS);
 
     Player* plMover = _player->m_mover->ToPlayer();

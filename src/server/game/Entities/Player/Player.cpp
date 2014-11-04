@@ -14665,15 +14665,15 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
 
     uint32 itemSlot = (item->GetCount() == count) ? item->GetSlot() : -1;
 
-    BattlePet* bpet;
+    BattlePet* bpet = NULL;
     ObjectGuid playerGuid = GetGUID();
     ObjectGuid itemGuid = item->GetGUID();
 
     WorldPacket data(SMSG_ITEM_PUSH_RESULT, 1 + 8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4);
     
     data << itemGuid;                                           // ItemGUID
-    data << uint8(itemSlot);                                    // Slot
-    data << uint32(item->GetBagSlot);                           // SlotInBag
+    data << uint8(item->GetSlot());                             // Slot
+    data << uint32(item->GetBagSlot());                         // SlotInBag
 
     // ItemInstance
     data << uint32(item->GetEntry());                           // ItemID
@@ -14684,10 +14684,10 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
 
     data << uint32(GetItemCount(item->GetEntry()));             // QuantityInInventory
     data << uint32(0);                                          // Quantity
-    data << uint32(bpet->GetBreed);                             // BattlePetBreedID
-    data << uint32(bpet->GetSpecies);                           // BattlePetSpeciesID
-    data << uint32(bpet->GetLevel);                             // BattlePetLevel
-    data << uint32(bpet->GetQuality);                           // BattlePetBreedQuality
+    data << uint32(bpet->GetBreed());                           // BattlePetBreedID
+    data << uint32(bpet->GetSpecies());                         // BattlePetSpeciesID
+    data << uint32(bpet->GetLevel());                           // BattlePetLevel
+    data << uint32(bpet->GetQuality());                         // BattlePetBreedQuality
     data << uint32(0);                                          // Unknown
     data << playerGuid;                                         // PlayerGUID
     data.WriteBit(0);                                           // Pushed
@@ -22080,7 +22080,7 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
 
         WorldPacket data(SMSG_BUY_ITEM, 1 + 8 + 4 + 4 + 4);
         
-        data << guid;
+        data << vGuid;
         data << uint32(count);
         data << int32(crItem->maxcount > 0 ? new_count : 0xFFFFFFFF);
         data << uint32(vendorslot + 1);                   // numbered from 1 at client

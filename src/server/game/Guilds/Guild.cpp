@@ -1420,32 +1420,42 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         ObjectGuid guid = member->GetGUID();
 
         // ClientGuildRosterMemberData
+        // One of these uint32's no longer exists. Which one, I'm unsure.
+        // Also, not sure about the uint64's, as I'm not seeing them anymore. 
+        // Commenting out what may not be needed.
         memberData << guid;                                                             // Guid
-        memberData << uint64(member->GetWeekActivity());                                // WeeklyXP
-        memberData << uint64(member->GetTotalActivity());                               // TotalXP
+        //memberData << uint64(member->GetWeekActivity());                              // WeeklyXP
+        //memberData << uint64(member->GetTotalActivity());                             // TotalXP
         memberData << uint32(member->GetRankId());                                      // RankID
         memberData << uint32(member->GetZoneId());                                      // AreaID
         memberData << uint32(member->GetAchievementPoints());                           // PersonalAchievementPoints
         memberData << uint32(member->GetTotalReputation());                             // GuildReputation
-        memberData << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP) - member->GetWeekReputation()); // GuildRepToCap
+        //memberData << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP) - member->GetWeekReputation()); // GuildRepToCap
         memberData << float(member->IsOnline() ? 0.0f : float(::time(NULL) - member->GetLogoutTime()) / DAY);  // LastSave
         memberData << uint32(realmID);                                                  // VirtualRealmAddress
         memberData << uint8(member->GetFlags());                                        // Status
         memberData << uint8(member->GetLevel());                                        // Level
         memberData << uint8(member->GetClass());                                        // ClassID
         memberData << uint8(0);                                                         // Gender
-        memberData << uint32(0) << uint32(0) << uint32(0);                              // ClientGuildRosterProfessionData
-        memberData << uint32(0) << uint32(0) << uint32(0);                              // ClientGuildRosterProfessionData
+
+        // ClientGuildRosterProfessionData
+        for (int i = 0; i < 2; i++)
+        {
+            memberData << uint32(0) << uint32(0) << uint32(0);                          // ClientGuildRosterProfessionData
+            memberData << uint32(0) << uint32(0) << uint32(0);                          // ClientGuildRosterProfessionData
+        }
+        
+        // ClientGuildRosterMemberData
         memberData.WriteString(member->GetPublicNote());                                // Note
         memberData.WriteString(member->GetName());                                      // Name
         memberData.WriteString(member->GetOfficerNote());                               // OfficerNote
 
+        // ClientGuildRoster
         data.WriteBits(member->GetName().length(), 6);                                  // NameLen
         data.WriteBits(offNoteLength, 8);                                               // OfficerNoteLen
         data.WriteBits(pubNoteLength, 8);                                               // NoteLen
         data.WriteBit(0);                                                               // Authenticated
         data.WriteBit(0);                                                               // SorEligible
-
     }
 
     data.WriteBits(m_members.size(), 17);                                               // WelcomeTextLen
@@ -1475,77 +1485,43 @@ void Guild::HandleQuery(WorldSession* session)
 
     WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200);      // Guess size
 
-    data.WriteBit(guid[5]);
+    data << guid;
     data.WriteBit(1); // HasData
 
-    // if (hasData)
+    // if (CliGuildInfoRank)
     {
         data.WriteBits(_GetRanksSize(), 21);
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[1]);
-        data.WriteBit(guid[4]);
-        data.WriteBit(guid[7]);
 
         for (uint8 i = 0; i < _GetRanksSize(); i++)
             data.WriteBits(m_ranks[i].GetName().length(), 7);
 
-        data.WriteBit(guid[3]);
-        data.WriteBit(guid[2]);
-        data.WriteBit(guid[0]);
-        data.WriteBit(guid[6]);
         data.WriteBits(m_name.length(), 7);
     }
 
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
-
     data.FlushBits();
 
-    //if (hasData)
+    //if (CliGuildInfo)
     {
-        data << uint32(m_emblemInfo.GetBorderStyle());
-        data << uint32(m_emblemInfo.GetStyle());
-
-        data.WriteByteSeq(guid[2]);
-        data.WriteByteSeq(guid[7]);
-
-        data << uint32(m_emblemInfo.GetColor());
-        data << uint32(realmID);
+        data << guid;
+        data << uint32(m_emblemInfo.GetBorderStyle());                      // BorderStyle
+        data << uint32(m_emblemInfo.GetStyle());                            // EmblemStyle
+        data << uint32(m_emblemInfo.GetColor());                            // EmblemColor
+        data << uint32(realmID);                                            // VirtualRealmAddress
+        data << uint32(m_emblemInfo.GetBorderColor());                      // BorderColor
+        data << uint32(m_emblemInfo.GetBackgroundColor());                  // BackgroundColor
+        data << uint32(0);                                                  // Unk
 
         for (uint8 i = 0; i < _GetRanksSize(); i++)
         {
-            data << uint32(i);
             data << uint32(m_ranks[i].GetId());
+            data << uint32(i);
+            data.WriteBits(0, 7);
             data.WriteString(m_ranks[i].GetName());
         }
 
+        data.WriteBits(0, 7);
         data.WriteString(m_name);
-        data << uint32(m_emblemInfo.GetBorderColor());
-
-        data.WriteByteSeq(guid[5]);
-        data.WriteByteSeq(guid[4]);
-
-        data << uint32(m_emblemInfo.GetBackgroundColor());
-
-        data.WriteByteSeq(guid[1]);
-        data.WriteByteSeq(guid[6]);
-        data.WriteByteSeq(guid[0]);
-        data.WriteByteSeq(guid[3]);
     }
-
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
 
     session->SendPacket(&data);
     TC_LOG_DEBUG("guild", "SMSG_GUILD_QUERY_RESPONSE [%s]", session->GetPlayerInfo().c_str());

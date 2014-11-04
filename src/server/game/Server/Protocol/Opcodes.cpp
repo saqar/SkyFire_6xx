@@ -231,16 +231,16 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GAMEOBJ_USE,                        0x0B19, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGameObjectUseOpcode          ); // 6.0.3 19103
     //DEFINE_OPCODE_HANDLER(CMSG_GARR_REMOVE_FOLLOWER_FROM_BUILDING, 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrRemoveFollower           ); // 6.0.3 19103
     //DEFINE_OPCODE_HANDLER(CMSG_GARR_RECRUIT_FOLLOWER,              0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrRecruitFollower          ); // 6.0.3 19103
-    //DEFINE_OPCODE_HANDLER(CMSG_GARR_COMPLETE_MISSION,              0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrCompleteMission          ); // 6.0.3 19103
-    //DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_BUILDING_ACTIVE,           0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrSetBuildingActive        ); // 6.0.3 19103
-    //DEFINE_OPCODE_HANDLER(CMSG_GARR_GENERATE_RECRUITS,             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrGenerateRecruits         ); // 6.0.3 19103
-    //DEFINE_OPCODE_HANDLER(CMSG_GARR_PURCHASE_BUILDING,             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrPurchaseBuilding         ); // 6.0.3 19103
-    //DEFINE_OPCODE_HANDLER(CMSG_GARR_UPGRADE,                       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrUpgrade                  ); // 6.0.3 19103
-    //DEFINE_OPCODE_HANDLER(CMSG_GARR_GET_INFO,                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrGetInfo                  ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_COMPLETE_MISSION,              0x02C2, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrCompleteMission          ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_BUILDING_ACTIVE,           0x041A, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrSetBuildingActive        ); // 6.0.3 19103
+    //DEFINE_OPCODE_HANDLER(CMSG_GARR_GENERATE_RECRUITS,             0x0472, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrGenerateRecruits         ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_PURCHASE_BUILDING,             0x04A2, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrPurchaseBuilding         ); // 6.0.3 19103
+    //DEFINE_OPCODE_HANDLER(CMSG_GARR_UPGRADE,                       0x0526, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrUpgrade                  ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_GET_INFO,                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19103
     //DEFINE_OPCODE_HANDLER(CMSG_GARR_ASSIGN_FOLLOWER_TO_BUILDING,   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrAssignFollower           ); // 6.0.3 19103
     //DEFINE_OPCODE_HANDLER(CMSG_GARR_SWAP_BUILDINGS,                0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrSwapBuildings            ); // 6.0.3 19103
     //DEFINE_OPCODE_HANDLER(CMSG_GARR_MISSION_BONUS_ROLL,            0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrMissionBonusRoll         ); // 6.0.3 19103
-    //DEFINE_OPCODE_HANDLER(CMSG_GARR_START_MISSION,                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrStartMission             ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_START_MISSION,                 0x1624, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrStartMission             ); // 6.0.3 19103
     //DEFINE_OPCODE_HANDLER(CMSG_GARR_REQUEST_BLUEPRINT_SPEC_DATA,   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleGarrRequestBlueprintData     ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_GET_MAIL_LIST,                      0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGetMailList                  );
     DEFINE_OPCODE_HANDLER(CMSG_GET_MIRRORIMAGE_DATA,               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMirrorImageDataRequest       );
@@ -920,7 +920,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_GUILD_NEWS_UPDATE,                  0x0000, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_GUILD_PARTY_STATE_RESPONSE,         0x1225, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_GUILD_PERMISSIONS_QUERY_RESULTS,    0x1827, STATUS_NEVER    ); // 6.0.3 19103
-    DEFINE_OPCODE_HANDLER(SMSG_GUILD_QUERY_RESPONSE,               0x0000, STATUS_NEVER    );
+    DEFINE_OPCODE_HANDLER(SMSG_GUILD_QUERY_RESPONSE,               0x1046, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_GUILD_RANK,                         0x1218, STATUS_NEVER    ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(SMSG_GUILD_RANKS_UPDATE,                 0x0000, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_GUILD_RECIPES,                      0x0000, STATUS_UNHANDLED);

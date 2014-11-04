@@ -14665,7 +14665,6 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
 
     uint32 itemSlot = (item->GetCount() == count) ? item->GetSlot() : -1;
 
-    BattlePet* bpet = NULL;
     ObjectGuid playerGuid = GetGUID();
     ObjectGuid itemGuid = item->GetGUID();
 
@@ -14679,15 +14678,15 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
     data << uint32(item->GetEntry());                           // ItemID
     data << uint32(0);                                          // RandomPropertiesSeed
     data << uint32(item->GetItemRandomPropertyId());            // RandomPropertiesId
-    data.WriteBit(0);                                           // Unk
-    data.WriteBit(0);                                           // Unk
+    //data.WriteBit(0);                                           // Unk
+    //data.WriteBit(0);                                           // Unk
 
     data << uint32(GetItemCount(item->GetEntry()));             // QuantityInInventory
     data << uint32(0);                                          // Quantity
-    data << uint32(bpet->GetBreed());                           // BattlePetBreedID
-    data << uint32(bpet->GetSpecies());                         // BattlePetSpeciesID
-    data << uint32(bpet->GetLevel());                           // BattlePetLevel
-    data << uint32(bpet->GetQuality());                         // BattlePetBreedQuality
+    data << uint32(0);                                          // BattlePetBreedID
+    data << uint32(0);                                          // BattlePetSpeciesID
+    data << uint32(0);                                          // BattlePetLevel
+    data << uint32(0);                                          // BattlePetBreedQuality
     data << uint32(0);                                          // Unknown
     data << playerGuid;                                         // PlayerGUID
     data.WriteBit(0);                                           // Pushed
@@ -21069,12 +21068,12 @@ void Player::PetSpellInitialize()
     CharmInfo* charmInfo = pet->GetCharmInfo();
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
-    data << uint64(pet->GetGUID());
+    data << ObjectGuid(pet->GetGUID());
     data << uint16(pet->GetCreatureTemplate()->family);         // creature family (required for pet talents)
+    data << uint16(0);                                          // Specialization
     data << uint32(pet->GetDuration());
-    data << uint8(pet->GetReactState());
-    data << uint8(charmInfo->GetCommandState());
-    data << uint16(0); // Flags, mostly unknown
+    data << uint32(0);
+    data << uint32(0);
 
     // action bar loop
     charmInfo->BuildActionBar(&data);

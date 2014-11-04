@@ -118,23 +118,7 @@ void WorldSession::SendShowBank(ObjectGuid guid)
 {
     WorldPacket data(SMSG_SHOW_BANK, 1 + 8);
 
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[0]);
-
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[2]);
+    data << guid;
 
     SendPacket(&data);
 }
@@ -143,23 +127,7 @@ void WorldSession::HandleTrainerListOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
 
-    guid[0] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[4]);
+    recvData >> guid;
 
     SendTrainerList(guid);
 }
@@ -204,22 +172,6 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
     ObjectGuid oGuid = guid;
 
     WorldPacket data(SMSG_TRAINER_LIST, 1 + 8 + 4 + (trainer_spells->spellList.size() * 30) + 4 + 4 + strTitle.size());
-    data.WriteBit(oGuid[4]);
-    data.WriteBit(oGuid[5]);
-
-    size_t count_pos = data.bitwpos();
-    data.WriteBits(0, 19);                  // placeholder
-
-    data.WriteBits(strTitle.size(), 11);
-    data.WriteBit(oGuid[6]);
-    data.WriteBit(oGuid[2]);
-    data.WriteBit(oGuid[7]);
-    data.WriteBit(oGuid[1]);
-    data.WriteBit(oGuid[3]);
-    data.WriteBit(oGuid[0]);
-    data.FlushBits();
-
-    data.WriteByteSeq(oGuid[4]);
 
     // reputation discount
     float fDiscountMod = _player->GetReputationPriceDiscount(unit);
@@ -278,18 +230,13 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         ++count;
     }
 
+    data << guid;                                           // NPCGuid
+    data << uint32(1);                                      // TrainerID
+    data << uint32(trainer_spells->trainerType);            // TrainerType
+    data.WriteBits(strTitle.size(), 11);                    // Greeting
     data.WriteString(strTitle);
-    data.WriteByteSeq(oGuid[6]);
-    data.WriteByteSeq(oGuid[7]);
-    data.WriteByteSeq(oGuid[1]);
-    data.WriteByteSeq(oGuid[3]);
-    data << uint32(1);                      // different value for each trainer, also found in CMSG_TRAINER_BUY_SPELL
-    data.WriteByteSeq(oGuid[5]);
-    data.WriteByteSeq(oGuid[0]);
-    data.WriteByteSeq(oGuid[2]);
-    data << uint32(trainer_spells->trainerType);
 
-    data.PutBits(count_pos, count, 19);
+    //data.PutBits(count_pos, count, 19);
     SendPacket(&data);
 }
 
@@ -301,23 +248,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
 
     recvData >> spellId >> trainerId;
 
-    guid[1] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[2]);
+    recvData >> guid;
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_TRAINER_BUY_SPELL NpcGUID=%u, learn spell id is: %u", uint32(GUID_LOPART(guid)), spellId);
 
@@ -978,42 +909,10 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: CMSG_REPAIR_ITEM");
 
     ObjectGuid npcGuid, itemGuid;
-    bool guildBank;                                         // new in 2.3.2, bool that means from guild bank money
+    bool guildBank = true;                                         // new in 2.3.2, bool that means from guild bank money
 
-    itemGuid[2] = recvData.ReadBit();
-    itemGuid[5] = recvData.ReadBit();
-    npcGuid[3] = recvData.ReadBit();
-    guildBank = recvData.ReadBit();
-    npcGuid[7] = recvData.ReadBit();
-    itemGuid[4] = recvData.ReadBit();
-    npcGuid[2] = recvData.ReadBit();
-    itemGuid[0] = recvData.ReadBit();
-    itemGuid[3] = recvData.ReadBit();
-    npcGuid[6] = recvData.ReadBit();
-    npcGuid[1] = recvData.ReadBit();
-    npcGuid[4] = recvData.ReadBit();
-    itemGuid[6] = recvData.ReadBit();
-    npcGuid[5] = recvData.ReadBit();
-    npcGuid[0] = recvData.ReadBit();
-    itemGuid[7] = recvData.ReadBit();
-    itemGuid[1] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(itemGuid[2]);
-    recvData.ReadByteSeq(npcGuid[1]);
-    recvData.ReadByteSeq(itemGuid[1]);
-    recvData.ReadByteSeq(npcGuid[4]);
-    recvData.ReadByteSeq(npcGuid[7]);
-    recvData.ReadByteSeq(npcGuid[3]);
-    recvData.ReadByteSeq(npcGuid[2]);
-    recvData.ReadByteSeq(itemGuid[7]);
-    recvData.ReadByteSeq(npcGuid[5]);
-    recvData.ReadByteSeq(npcGuid[0]);
-    recvData.ReadByteSeq(itemGuid[5]);
-    recvData.ReadByteSeq(itemGuid[3]);
-    recvData.ReadByteSeq(itemGuid[4]);
-    recvData.ReadByteSeq(itemGuid[6]);
-    recvData.ReadByteSeq(npcGuid[6]);
-    recvData.ReadByteSeq(itemGuid[0]);
+    recvData >> npcGuid;
+    recvData >> itemGuid;
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_REPAIR);
     if (!unit)

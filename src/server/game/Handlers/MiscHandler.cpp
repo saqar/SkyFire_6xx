@@ -390,27 +390,13 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         ObjectGuid accountId = target->GetSession()->GetAccountId();
         ObjectGuid guildGuid = target->GetGuild() ? target->GetGuild()->GetGUID() : 0;
 
-        data.WriteBit(accountId[2]);
-        data.WriteBit(playerGuid[2]);
-        data.WriteBit(accountId[7]);
-        data.WriteBit(guildGuid[5]);
+        
+        data << playerGuid;
+        data << accountId;
+        data << guildGuid;
         data.WriteBits(gname.size(), 7);
-        data.WriteBit(accountId[1]);
-        data.WriteBit(accountId[5]);
-        data.WriteBit(guildGuid[7]);
-        data.WriteBit(playerGuid[5]);
         data.WriteBit(false);
-        data.WriteBit(guildGuid[1]);
-        data.WriteBit(playerGuid[6]);
-        data.WriteBit(guildGuid[2]);
-        data.WriteBit(playerGuid[4]);
-        data.WriteBit(guildGuid[0]);
-        data.WriteBit(guildGuid[3]);
-        data.WriteBit(accountId[6]);
         data.WriteBit(false);
-        data.WriteBit(playerGuid[1]);
-        data.WriteBit(guildGuid[4]);
-        data.WriteBit(accountId[0]);
 
         if (DeclinedName const* names = itr->second->GetDeclinedNames())
         {
@@ -423,51 +409,21 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
                 data.WriteBits(0, 7);
         }
 
-        data.WriteBit(playerGuid[3]);
-        data.WriteBit(guildGuid[6]);
-        data.WriteBit(playerGuid[0]);
-        data.WriteBit(accountId[4]);
-        data.WriteBit(accountId[3]);
-        data.WriteBit(playerGuid[7]);
         data.WriteBits(pname.size(), 6);
 
-        bytesData.WriteByteSeq(playerGuid[1]);
         bytesData << uint32(realmID);
-        bytesData.WriteByteSeq(playerGuid[7]);
         bytesData << uint32(realmID);
-        bytesData.WriteByteSeq(playerGuid[4]);
         bytesData.WriteString(pname);
-        bytesData.WriteByteSeq(guildGuid[1]);
-        bytesData.WriteByteSeq(playerGuid[0]);
-        bytesData.WriteByteSeq(guildGuid[2]);
-        bytesData.WriteByteSeq(guildGuid[0]);
-        bytesData.WriteByteSeq(guildGuid[4]);
-        bytesData.WriteByteSeq(playerGuid[3]);
-        bytesData.WriteByteSeq(guildGuid[6]);
         bytesData << uint32(target->GetSession()->GetAccountId());
         bytesData.WriteString(gname);
-        bytesData.WriteByteSeq(guildGuid[3]);
-        bytesData.WriteByteSeq(accountId[4]);
         bytesData << uint8(class_);
-        bytesData.WriteByteSeq(accountId[7]);
-        bytesData.WriteByteSeq(playerGuid[6]);
-        bytesData.WriteByteSeq(playerGuid[2]);
 
         if (DeclinedName const* names = itr->second->GetDeclinedNames())
             for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
                 bytesData.WriteString(names->name[i]);
 
-        bytesData.WriteByteSeq(accountId[2]);
-        bytesData.WriteByteSeq(accountId[3]);
         bytesData << uint8(race);
-        bytesData.WriteByteSeq(guildGuid[7]);
-        bytesData.WriteByteSeq(accountId[1]);
-        bytesData.WriteByteSeq(accountId[5]);
-        bytesData.WriteByteSeq(accountId[6]);
-        bytesData.WriteByteSeq(playerGuid[5]);
-        bytesData.WriteByteSeq(accountId[0]);
         bytesData << uint8(gender);
-        bytesData.WriteByteSeq(guildGuid[5]);
         bytesData << uint8(level);
         bytesData << int32(zoneId);
 
@@ -1216,25 +1172,9 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recvData)
 
     ObjectGuid guid;
     uint32 time;
+
+    recvData >> guid;
     recvData >> time;
-
-    guid[5] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[4]);
 
     //TODO!
 
@@ -1470,26 +1410,12 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
 
     ObjectGuid playerGuid = player->GetGUID();
     WorldPacket data(SMSG_INSPECT_HONOR_STATS, 8+1+4+4);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(playerGuid[3]);
-    data.WriteBit(playerGuid[6]);
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(playerGuid[5]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(playerGuid[1]);
+
+    data << playerGuid;
     data << uint8(0);                                               // rank
     data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));  // yesterday kills
     data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));  // today kills
-    data.WriteByteSeq(playerGuid[2]);
-    data.WriteByteSeq(playerGuid[0]);
-    data.WriteByteSeq(playerGuid[6]);
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(playerGuid[4]);
-    data.WriteByteSeq(playerGuid[1]);
-    data.WriteByteSeq(playerGuid[5]);
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
-    data.WriteByteSeq(playerGuid[7]);
     SendPacket(&data);
 }
 
@@ -1906,23 +1832,8 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)
 void WorldSession::HandleQueryInspectAchievements(WorldPacket& recvData)
 {
     ObjectGuid guid;
-    guid[2] = recvData.ReadBit();
-    guid[5] = recvData.ReadBit();
-    guid[0] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[5]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[1]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[7]);
+    
+    recvData >> guid;
 
     Player* player = ObjectAccessor::FindPlayer(guid);
     if (!player)
@@ -1958,32 +1869,16 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     ObjectGuid guid = _player->GetGUID();
 
     WorldPacket data(SMSG_SET_PHASE_SHIFT, 1 + 8 + 2 * phaseIds.size() + 4 + 2 * worldMapAreas.size() + 2 * terrainswaps.size() + 4);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
-
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
+    
+    data << guid;
 
     data << uint32(phaseIds.size()) * 2;        // Phase.dbc ids
     for (std::set<uint32>::const_iterator itr = phaseIds.begin(); itr != phaseIds.end(); ++itr)
         data << uint16(*itr);
 
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[6]);
-
     data << uint32(0);                          // Inactive terrain swaps
     //for (uint8 i = 0; i < inactiveSwapsCount; ++i)
     //    data << uint16(0);
-
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[7]);
 
     data << uint32(worldMapAreas.size()) * 2;     // WorldMapArea.dbc id (controls map display)
     for (std::set<uint32>::const_iterator itr = worldMapAreas.begin(); itr != worldMapAreas.end(); ++itr)
@@ -1992,8 +1887,6 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     data << uint32(terrainswaps.size()) * 2;    // Active terrain swaps
     for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
         data << uint16(*itr);
-
-    data.WriteByteSeq(guid[5]);
 
     data << uint32(phaseIds.size() ? 0 : 8);  // flags (not phasemask)
 

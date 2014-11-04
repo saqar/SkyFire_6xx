@@ -702,7 +702,7 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
 
 void WorldSession::HandlePetAbandon(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
     recvData >> guid;                                      //pet guid
     TC_LOG_INFO("network", "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid));
 

@@ -25495,7 +25495,6 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
 
     WorldPacket data(SMSG_TITLE_EARNED, 4 + 4);
     data << uint32(title->bit_index);
-    data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
     GetSession()->SendPacket(&data);
 }
 

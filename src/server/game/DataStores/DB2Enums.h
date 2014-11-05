@@ -69,4 +69,33 @@ enum GarrPlotCategory
     GARR_PLOT_PET_MENAGERIE                 = 6
 };
 
+enum GarrMissionCategory
+{
+    GARR_MISSION_COMBAT                     = 0,
+    GARR_MISSION_GENERIC                    = 1,
+    GARR_MISSION_SALVAGE                    = 2,
+    GARR_MISSION_LOGISTICS                  = 3,
+    GARR_MISSION_WILDLIFE                   = 4,
+    GARR_MISSION_TRADING                    = 5,
+    GARR_MISSION_CONSTRUCTION               = 6,
+    GARR_MISSION_PROVISION                  = 7,
+    GARR_MISSION_RECRUITMENT                = 8,
+    GARR_MISSION_TRAINING                   = 9,
+    GARR_MISSION_PATROL                     = 10,
+    GARR_MISSION_RESEARCH                   = 11,
+    GARR_MISSION_DEFENSE                    = 12,
+    GARR_MISSION_EXPLORATION                = 13,
+    GARR_MISSION_SIEGE                      = 14,
+    GARR_MISSION_ALCHEMY                    = 15,
+    GARR_MISSION_BLACKSMITHING              = 16,
+    GARR_MISSION_ENCHANTING                 = 17,
+    GARR_MISSION_ENGINEERING                = 18,
+    GARR_MISSION_INSRIPTION                 = 19,
+    GARR_MISSION_JEWELCRAFTING              = 20,
+    GARR_MISSION_LEATHERWORKING             = 21,
+    GARR_MISSION_TAILORING                  = 22,
+    GARR_MISSION_TREASURE                   = 23,
+    GARR_MISSION_PET_BATTLE                 = 24
+};
+
 #endif

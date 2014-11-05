@@ -135,6 +135,12 @@ struct GarrAbilityEntry
     uint32 Category;                                        // Ability's category
 };
 
+struct GarrAbilityCategoryEntry
+{
+    uint32 ID;                                              // Category ID
+    std::string Name;                                       // Category Name
+};
+
 struct GarrBuildingEntry
 {
     uint32 ID;                                              // Building's entry ID
@@ -163,6 +169,106 @@ struct GarrBuildingEntry
     uint32 GoldCost;                                        // Building's gold cost
 };
 
+struct GarrClassSpecEntry
+{
+    uint32 ID;                                              // EntryID
+    std::string Name;                                       // Name
+    uint32 Data0;                                           // Unknown
+    uint32 Data1;                                           // Unknown
+    uint32 ClassID;                                         // ClassID
+    uint32 SpecID;                                          // SpecID
+};
+
+struct GarrEncounterEntry
+{
+    uint32 ID;                                              // Encounter ID
+    uint32 CreatureID;                                      // Creature ID
+    std::string Name;                                       // Encounter Name
+    float Data0;                                            // Unknown
+    float Data1;                                            // Unknown
+    uint32 Data2;                                           // Unknown
+};
+
+struct GarrFollItemSetEntry
+{
+    uint32 ID;                                              // ID
+};
+
+struct GarrFollowerEntry
+{
+    uint32 ID;                                              // ID
+    uint32 DisplayIDH;                                      // Horde Display ID
+    uint32 DisplayIDA;                                      // Alliance Display ID
+    uint32 ClassH;                                          // Class Horde
+    uint32 ClassA;                                          // Class Aliance
+    uint32 Quality;                                         // Followe Quality
+    uint32 SpecH;                                           // Spec Horde
+    uint32 SpecA;                                           // Spec Alliance
+    uint32 Data0;                                           // Unknown H
+    uint32 Data1;                                           // Unknown A
+    uint32 Level;                                           // Follower Level
+    uint32 ItemLevelH;                                      // Follower Item Level Horde
+    uint32 ItemLevelA;                                      // Follower Item Level Alliance
+    uint32 Data2;                                           // Unknown
+    uint32 Data3;                                           // Unknown
+    std::string GossipH;                                    // Gossip for Horde, includes Quests, achievements, and vendors. Not really sure.
+    std::string GossipA;                                    // Gossip for Alliance, includes Quests, achievements, and verndors. Again, not sure.
+    uint32 Data4;                                           // Unknown most -1 H
+    uint32 Data5;                                           // Unknown most -1 A
+    uint32 UnkIDH;                                          // Unknown H ID, has a slot in most entries.
+    uint32 UnkIDA;                                          // Unknown A ID, has a slot in most entries.
+};
+
+struct GarrFollowerLevelXPEntry
+{
+    uint32 ID;                                              // EntryID
+    uint32 Level;                                           // Level
+    uint32 XPRequired;                                      // Required experience for level
+};
+
+struct GarrFollowerQualityEntry
+{
+    uint32 ID;                                              // ID
+    uint32 QualityID;                                       // QualityID
+    uint32 Quality;                                         // Quality
+};
+
+struct GarrMissionEntry
+{
+    uint32 ID;                                              // EntryID
+    uint32 Level;                                           // Required Level
+    uint32 ItemLevel;                                       // Required Item Level
+    uint32 Type;                                            // Mission Type
+    uint32 Followers;                                       // Max followers
+    uint32 Data0;                                           // Unknown
+    uint32 Time;                                            // Time for completion
+    uint32 Data1;                                           // Unknown
+    uint32 Data2;                                           // Unknown 
+    uint32 Category;                                        // Mission Category
+    std::string Name;                                       // Mission Name
+    std::string Description;                                // Mission Description
+    std::string Location;                                   // Mission Location
+    uint32 Data3;                                           // Unknown
+    uint32 Resources;                                       // Garrison Resources awarded
+    uint32 BonusReward;                                     // Has bonus reward?
+    uint32 Experience;                                      // Experience awarded
+    uint32 BonusChance;                                     // Percentage of chance for bonus reward
+};
+
+struct GarrMissionTypeEntry
+{
+    uint32 ID;                                              // EntryID
+    std::string Name;                                       // Mission type name
+    uint32 MissionData;                                     // Uknown data, really should know this.
+};
+
+struct GarrMechanicEntry
+{
+    uint32 ID;                                              // ID
+    uint32 Data0;                                           // Unknown
+    float Data1;                                            // Probably mechanic coefficient
+};
+
 struct GarrPlotEntry
 {
     uint32 ID;                                              // PlotTypeID
@@ -178,9 +284,29 @@ struct GarrPlotEntry
 
 struct GarrPlotBuildingEntry
 {
-    uint32 ID;                              // ID
-    uint32 PlotType;                        // PlotTypeID
-    uint32 BuildingId;                      // BuildingID
+    uint32 ID;                                              // ID
+    uint32 PlotType;                                        // PlotTypeID
+    uint32 BuildingId;                                      // BuildingID
+};
+
+struct GarrPlotUICategoryEntry
+{
+    uint32 ID;                                              // PlotID
+    std::string Name;                                       // Plot Size Name
+    uint32 Data;                                            // Unknown
+};
+
+struct GarrSpecializationEntry
+{
+    uint32 ID;                                              // ID
+    uint32 SpecializationID;                                // Specialization ID
+    uint32 Data0;                                           // Unknown
+    uint32 Data1;                                           // Unknown 
+    uint32 Data2;                                           // Unknown
+    float Data3;                                            // Unknown
+    uint32 Data4;                                           // Unknown
+    std::string Name;                                       // Specialization Name
+    std::string Description;                                // Specialization Description
 };
 
 struct ItemEntry

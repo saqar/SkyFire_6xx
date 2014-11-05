@@ -17,5 +17,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
  
- #include "GarrisonMgr.h"
- 
+#include "GarrisonMgr.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"

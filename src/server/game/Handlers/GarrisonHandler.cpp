@@ -38,16 +38,21 @@ void WorldSession::HandleGarrSetBuildingActive(WorldPacket& recvData)
     uint32 PlotInstanceID;
     recvData >> PlotInstanceID;
 
-    WorldPacket data(SMSG_GARRISON_BUILDING_ACTIVATED);
-    GarrisonBuildingInfo* _building = NULL;
+    WorldPacket data(SMSG_GARR_BUILDING_ACTIVATED);
 
-    data << uint32(_building->ID);
+    data << uint32(0);                              // BuildingID
 
     SendPacket(&data);
 }
 
 void WorldSession::HandleGarrGenerateRecruits(WorldPacket& recvData)
 {
+    ObjectGuid guid;
+    uint32 unk1, unk2;
+
+    recvData >> guid;
+    recvData >> unk1;
+    recvData >> unk2;
 }
 
 void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
@@ -62,14 +67,91 @@ void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
 
     // Functions for
     // sGarrisonMgr(garr->PurchaseBuilding);
+
+    WorldPacket data(SMSG_GARR_PLOT_PLACED);
+    data << uint32(0);
+    data << float(0);
+    data << float(0);
+    data << float(0);
+    data << uint32(0);
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
 {
+    ObjectGuid guid;
+
+    recvData >> guid;
 }
 
 void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
 {
+    WorldPacket data(SMSG_GET_GARR_INFO_RESULT);
+    ObjectGuid guid;
+    bool active;
+
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // GarrSiteID
+    data << uint32(0);                              // FactionIndex
+    data << uint32(0);                              // GarrSiteLevelID
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // Unk
+
+    //GarrisonMission
+    data << uint64(0);                              // DBID
+    data << uint32(0);                              // MissionRecID
+    data << uint32(0);                              // OfferTime
+    data << uint32(0);                              // OfferDuration
+    data << uint32(0);                              // StartTime
+    data << uint32(0);                              // TravelDuration
+    data << uint32(0);                              // MissionDuration
+    data << uint32(0);                              // MissionState
+
+    // GarrisonBuildingInfo
+    data << uint32(0);                              // GarrPlotInstanceID
+    //data << float(0);                             // PositionX
+    //data << float(0);                             // PositionY
+    //data << float(0);                             // PositionZ
+    data << uint32(0);
+    data << uint32(0); 
+    data << uint32(0);
+    data << uint32(0);                              // GarrBuildingID
+    active = data.WriteBit(0);                      // Active
+
+    //GarrisonFollower
+    data << uint64(0);                              // DBID
+    data << uint32(0);                              // GarrFollowerID
+    data << uint32(0);                              // CreatureID
+    data << uint32(0);                              // Gender
+    data << uint32(0);                              // Spec
+    data << uint32(0);                              // Race
+    data << uint32(0);                              // Quality
+    data << uint32(0);                              // FollowerLevel
+    data << uint32(0);                              // ItemLevelWeapon
+    data << uint32(0);                              // ItemLevelArmor
+    data << uint32(0);                              // Xp
+
+    uint32 abilityID = 0;
+    for (uint32 i = 0; i < abilityID; i++)
+        uint32(0);                                  // AbilityID
+
+    // GarrisonPlotInfo
+    data << uint32(0);                              // GarrPlotInstanceID
+    data << float(0);                               // PositionX
+    data << float(0);                               // PositionY
+    data << float(0);                               // PositionZ
+    data << uint32(0);                              // PlotType
+
+    uint32 archivedMissions = 0;
+    for (uint32 i = 0; i < archivedMissions; i++)
+        uint32(0);                                  // ArchivedMissions
+
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
@@ -85,4 +167,11 @@ void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
         recvData >> uint64(FollowerDBIDs);
 
     // Garrison function to start mission
+
+    WorldPacket data(SMSG_GARR_OPEN_ARCHITECT);
+    ObjectGuid guid;
+
+    data << guid;
+
+    SendPacket(&data);
 }

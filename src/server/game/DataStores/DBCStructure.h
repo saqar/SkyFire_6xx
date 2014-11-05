@@ -1389,6 +1389,33 @@ struct FactionTemplateEntry
     bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) != 0; }
 };
 
+struct GarrUiAnimClassInfoEntry
+{
+    uint32 ID;                                              // 0
+    uint32 GarrClassSpecID;                                 // 1
+    uint32 SpellVisualID;                                   // 2
+    uint32 MovementType;                                    // 3
+    float ImpactDelaySecs;                                  // 4
+};
+
+struct GarrUiAnimRaceInfoEntry
+{
+    uint32 ID;                                              // 0
+    uint32 ChrRaceID;                                       // 1
+    float Scale;                                            // 2
+    float Height;                                           // 3
+    float SingleModelScale;                                 // 4
+    float SingleModelHeight;                                // 5
+    float Data0;                                            // 6
+    float Data1;                                            // 7
+    float Data2;                                            // 8
+    float Data3;                                            // 9
+    float Data4;                                            // 10
+    float Data5;                                            // 11
+    float Data6;                                            // 12
+    float Data7;                                            // 13
+};
+
 struct GameObjectDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0        m_ID
@@ -2605,26 +2632,24 @@ struct WorldStateSounds
 };
 */
 
-/*
-struct WorldStateUI
-{
-    uint32    ID;                                           // 0
-    uint32    map_id;                                       // 1        Can be -1 to show up everywhere.
-    uint32    zone;                                         // 2        Can be zero for "everywhere".
-    uint32    phaseMask;                                    // 3        Phase this WorldState is avaliable in
-    uint32    icon;                                         // 4        The icon that is used in the interface.
-    char*     textureFilename;                              // 5
-    char*     text;                                         // 6-21     The worldstate text
-    char*     description;                                  // 22-38    Text shown when hovering mouse on icon
-    uint32    worldstateID;                                 // 39       This is the actual ID used
-    uint32    type;                                         // 40       0 = unknown, 1 = unknown, 2 = not shown in ui, 3 = wintergrasp
-    uint32    unk1;                                         // 41
-    uint32    unk2;                                         // 43
-    uint32    unk3;                                         // 44-58
-    uint32    unk4;                                         // 59-61    Used for some progress bars.
-    uint32    unk7;                                         // 62       Unused in 3.3.5a
-};
-*/
+//struct WorldStateUI
+//{
+//    uint32 ID;
+//    uint32 MapID;
+//    uint32 AreaID;
+//    uint32 PhaseUseFlags;
+//    uint32 PhaseID;
+//    uint32 PhaseGroupID;
+//    std::string Icon;
+//    std::string StringLang;
+//    std::string TooltipLang;
+//    uint32 StateVariable;
+//    uint32 Type;
+//    std::string DynamicIcon;
+//    std::string DynamicTooltipLang;
+//    std::string ExtendedUI;
+//    uint32 ExtendedUIStateVariable[3];
+//};
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
 #if defined(__GNUC__)

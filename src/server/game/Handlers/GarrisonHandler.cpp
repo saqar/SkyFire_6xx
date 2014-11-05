@@ -67,6 +67,15 @@ void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
 
     // Functions for
     // sGarrisonMgr(garr->PurchaseBuilding);
+
+    WorldPacket data(SMSG_GARR_PLOT_PLACED);
+    data << uint32(0);
+    data << float(0);
+    data << float(0);
+    data << float(0);
+    data << uint32(0);
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
@@ -82,7 +91,7 @@ void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
     ObjectGuid guid;
     bool active;
 
-    data << uint32(0);                              // ArchivedMissions
+    data << uint32(0);                              // Unk
     data << uint32(0);                              // GarrSiteID
     data << uint32(0);                              // FactionIndex
     data << uint32(0);                              // GarrSiteLevelID
@@ -126,9 +135,9 @@ void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
     data << uint32(0);                              // ItemLevelArmor
     data << uint32(0);                              // Xp
 
-    GarrAbilityEntry* ability;
-    for (uint32 i = 0; i < ability->ID; i++)
-        uint32(ability->SpellID);                   // AbilityID
+    uint32 abilityID = 0;
+    for (uint32 i = 0; i < abilityID; i++)
+        uint32(0);                                  // AbilityID
 
     // GarrisonPlotInfo
     data << uint32(0);                              // GarrPlotInstanceID
@@ -137,11 +146,12 @@ void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
     data << float(0);                               // PositionZ
     data << uint32(0);                              // PlotType
 
+    uint32 archivedMissions = 0;
+    for (uint32 i = 0; i < archivedMissions; i++)
+        uint32(0);                                  // ArchivedMissions
 
-    data << uint32(0);                              // Unk
 
     SendPacket(&data);
-
 }
 
 void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
@@ -157,4 +167,11 @@ void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
         recvData >> uint64(FollowerDBIDs);
 
     // Garrison function to start mission
+
+    WorldPacket data(SMSG_GARR_OPEN_ARCHITECT);
+    ObjectGuid guid;
+
+    data << guid;
+
+    SendPacket(&data);
 }

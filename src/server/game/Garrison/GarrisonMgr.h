@@ -31,27 +31,25 @@
 #define MAX_GARRISON_LEVEL 3
 #define MAX_RESOURCES      10000
 
-class Garrison
-{
-    public : class GarrisonBuilding
-    {
-    public:
-        void Reset();
-        static void DeleteFromDB(uint32 lowguid);
-        void LoadFromDB(PreparedQueryResult garrisonResult);
-        void SaveToDB(SQLTransaction& trans);
-
-    private:
-        GarrAbilityEntry* _category;
-        GarrBuildingEntry* _buildingInfo;
-    };
-};
-
 class GarrisonMgr
 {
 public:
     GarrisonMgr();
     ~GarrisonMgr();
+
+    Player* GetOwner() const { return m_owner; }
+
+    void Reset();
+    static void DeleteFromDB(uint32 lowguid);
+    void LoadFromDB(PreparedQueryResult garrisonResult) {};
+    void SaveToDB(SQLTransaction& trans);
+
+    // Garrison functions
+    void PlaceBuilding(uint32 GarrPlotInstanceID);
+    void OpenArchitect(ObjectGuid npcGuid);
+
+private:
+    Player* m_owner;
 };
 
 #endif

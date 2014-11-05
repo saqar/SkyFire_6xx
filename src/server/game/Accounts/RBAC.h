@@ -682,6 +682,9 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_WP_SHOW                                = 774,
     RBAC_PERM_COMMAND_MODIFY_CURRENCY                        = 775, // only 4.3.4
     RBAC_PERM_COMMAND_DEBUG_PHASE                            = 776, // Only 4.3.4
+    RBAC_PERM_COMMAND_GARRISON                               = 777, // 603
+    RBAC_PERM_COMMAND_GARRISON_ARCHITECT                     = 778, // 603
+    RBAC_PERM_COMMAND_GARRISON_GET_INFO                      = 779, // 603
 
     // custom permissions 1000+
     RBAC_PERM_MAX

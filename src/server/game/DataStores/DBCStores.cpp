@@ -100,6 +100,9 @@ static FactionTeamMap sFactionTeamMap;
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
 DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
 
+DBCStorage <GarrUiAnimClassInfoEntry> sGarrUiAnimClassInfoEntryStore(GarrUiAnimClassInfoEntryfmt);
+DBCStorage <GarrUiAnimRaceInfoEntry> sGarrUiAnimraceInfoEntryStore(GarrUiAnimRaceInfoEntryfmt);
+
 DBCStorage <GameObjectDisplayInfoEntry> sGameObjectDisplayInfoStore(GameObjectDisplayInfofmt);
 DBCStorage <GemPropertiesEntry> sGemPropertiesStore(GemPropertiesEntryfmt);
 DBCStorage <GlyphPropertiesEntry> sGlyphPropertiesStore(GlyphPropertiesfmt);

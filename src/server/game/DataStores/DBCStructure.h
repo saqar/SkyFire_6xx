@@ -1389,6 +1389,33 @@ struct FactionTemplateEntry
     bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) != 0; }
 };
 
+struct GarrUiAnimClassInfoEntry
+{
+    uint32 ID;                                              // 0
+    uint32 GarrClassSpecID;                                 // 1
+    uint32 SpellVisualID;                                   // 2
+    uint32 MovementType;                                    // 3
+    float ImpactDelaySecs;                                  // 4
+};
+
+struct GarrUiAnimRaceInfoEntry
+{
+    uint32 ID;                                              // 0
+    uint32 ChrRaceID;                                       // 1
+    float Scale;                                            // 2
+    float Height;                                           // 3
+    float SingleModelScale;                                 // 4
+    float SingleModelHeight;                                // 5
+    float Data0;                                            // 6
+    float Data1;                                            // 7
+    float Data2;                                            // 8
+    float Data3;                                            // 9
+    float Data4;                                            // 10
+    float Data5;                                            // 11
+    float Data6;                                            // 12
+    float Data7;                                            // 13
+};
+
 struct GameObjectDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0        m_ID

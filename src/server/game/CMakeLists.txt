@@ -26,6 +26,7 @@ file(GLOB_RECURSE sources_DataStores DataStores/*.cpp DataStores/*.h)
 file(GLOB_RECURSE sources_DungeonFinding DungeonFinding/*.cpp DungeonFinding/*.h)
 file(GLOB_RECURSE sources_Entities Entities/*.cpp Entities/*.h)
 file(GLOB_RECURSE sources_Events Events/*.cpp Events/*.h)
+file(GLOB_RECURSE sources_Garrison Garrison/*.cpp Garrison/*.h)
 file(GLOB_RECURSE sources_Globals Globals/*.cpp Globals/*.h)
 file(GLOB_RECURSE sources_Grids Grids/*.cpp Grids/*.h)
 file(GLOB_RECURSE sources_Groups Groups/*.cpp Groups/*.h)
@@ -71,6 +72,7 @@ source_group(DataStores FILES ${sources_DataStores})
 source_group(DungeonFinding FILES ${sources_DungeonFinding})
 source_group(Entities FILES ${sources_Entities})
 source_group(Events FILES ${sources_Events})
+source_group(Garrison FILES ${sources_Garrison})
 source_group(Globals FILES ${sources_Globals})
 source_group(Grids FILES ${sources_Grids})
 source_group(Groups FILES ${sources_Groups})
@@ -123,6 +125,7 @@ set(game_STAT_SRCS
   ${sources_DungeonFinding}
   ${sources_Entities}
   ${sources_Events}
+  ${sources_Garrison}
   ${sources_Globals}
   ${sources_Grids}
   ${sources_Groups}
@@ -213,6 +216,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Vehicle
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Transport
   ${CMAKE_CURRENT_SOURCE_DIR}/Events
+  ${CMAKE_CURRENT_SOURCE_DIR}/Garrison
   ${CMAKE_CURRENT_SOURCE_DIR}/Globals
   ${CMAKE_CURRENT_SOURCE_DIR}/Grids/Cells
   ${CMAKE_CURRENT_SOURCE_DIR}/Grids/Notifiers

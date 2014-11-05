@@ -788,17 +788,10 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     ObjectGuid guid1 = guid;
     ObjectGuid guid2 = gguid;
 
-    data.WriteBit(guid2[4]);
-    data.WriteBit(guid1[3]);
-    data.WriteBit(guid1[7]);
-    data.WriteBit(guid1[0]);
-    data.WriteBit(guid2[1]);
+    data << guid;
+    data << gguid;
     data.WriteBit(silent);
-    data.WriteBit(guid1[4]);
-    data.WriteBit(guid1[5]);
-    data.WriteBit(guid2[3]);
     data.WriteBits(proposal.players.size(), 23);
-    data.WriteBit(guid2[7]);
 
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
@@ -820,37 +813,11 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
         data.WriteBit(it->first == guid);
     }
 
-    data.WriteBit(guid2[5]);
-    data.WriteBit(guid1[6]);
-    data.WriteBit(guid2[2]);
-    data.WriteBit(guid2[6]);
-    data.WriteBit(guid1[2]);
-    data.WriteBit(guid1[1]);
-    data.WriteBit(guid2[0]);
-
-    data.WriteByteSeq(guid1[5]);
-    data.WriteByteSeq(guid2[3]);
-    data.WriteByteSeq(guid2[6]);
-    data.WriteByteSeq(guid1[6]);
-    data.WriteByteSeq(guid1[0]);
-    data.WriteByteSeq(guid2[5]);
-    data.WriteByteSeq(guid1[1]);
-
     for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
         lfg::LfgProposalPlayer const& player = it->second;
         data << uint32(player.role);
     }
-
-    data.WriteByteSeq(guid2[7]);
-    data.WriteByteSeq(guid1[4]);
-    data.WriteByteSeq(guid2[0]);
-    data.WriteByteSeq(guid2[1]);
-    data.WriteByteSeq(guid1[2]);
-    data.WriteByteSeq(guid1[7]);
-    data.WriteByteSeq(guid2[2]);
-    data.WriteByteSeq(guid1[3]);
-    data.WriteByteSeq(guid2[4]);
 
     SendPacket(&data);
 }

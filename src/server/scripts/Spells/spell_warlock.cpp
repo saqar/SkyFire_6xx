@@ -48,11 +48,14 @@ enum WarlockSpells
     SPELL_WARLOCK_DEMON_SOUL_FELGUARD               = 79452,
     SPELL_WARLOCK_DEMON_SOUL_SUCCUBUS               = 79453,
     SPELL_WARLOCK_DEMON_SOUL_VOIDWALKER             = 79454,
+    SPELL_WARLOCK_DRAIN_LIFE_HEAL                   = 89653,
     SPELL_WARLOCK_FEL_SYNERGY_HEAL                  = 54181,
+    SPELL_WARLOCK_FIRE_AND_BRIMSTONE                = 108683,
     SPELL_WARLOCK_GLYPH_OF_SHADOWFLAME              = 63311,
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 63106,
     SPELL_WARLOCK_GLYPH_OF_SOUL_SWAP                = 56226,
     SPELL_WARLOCK_GLYPH_OF_SUCCUBUS                 = 56250,
+    SPELL_WARLOCK_HARVEST_LIFE_HEAL                 = 125314,
     SPELL_WARLOCK_HAUNT                             = 48181,
     SPELL_WARLOCK_HAUNT_HEAL                        = 48210,
     SPELL_WARLOCK_IMMOLATE                          = 348,
@@ -64,12 +67,15 @@ enum WarlockSpells
     SPELL_WARLOCK_IMPROVED_SOUL_FIRE_STATE          = 85385,
     SPELL_WARLOCK_LIFE_TAP_ENERGIZE                 = 31818,
     SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2               = 32553,
+    SPELL_WARLOCK_MOLTEN_CORE                       = 122355,
+    SPELL_WARLOCK_MOLTEN_CORE_AURA                  = 122351,
     SPELL_WARLOCK_NETHER_WARD                       = 91711,
     SPELL_WARLOCK_NETHER_TALENT                     = 91713,
     SPELL_WARLOCK_RAIN_OF_FIRE                      = 42223,
     SPELL_WARLOCK_SHADOW_TRANCE                     = 17941,
     SPELL_WARLOCK_SIPHON_LIFE_HEAL                  = 63106,
     SPELL_WARLOCK_SHADOW_WARD                       = 6229,
+    SPELL_WARLOCK_SHADOWBURN_ENERGIZE               = 125882,
     SPELL_WARLOCK_SOULSHATTER                       = 32835,
     SPELL_WARLOCK_SOUL_SWAP_CD_MARKER               = 94229,
     SPELL_WARLOCK_SOUL_SWAP_OVERRIDE                = 86211,
@@ -1433,31 +1439,328 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
         }
 };
 
+// Drain Life - 689
+class spell_warl_drain_life : public SpellScriptLoader
+{
+public:
+    spell_warl_drain_life() : SpellScriptLoader("spell_warl_drain_life") { }
+    class spell_warl_drain_life_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_drain_life_AuraScript);
+        void OnTick(AuraEffect const* aurEff)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                Player* _player = GetCaster()->ToPlayer();
+                if (!_player)
+                    return;
+                // Restoring 2% of the caster's total health every 1s
+                int32 basepoints = _player->GetMaxHealth() / 50;
+                // In Demonology spec : Generates 10 Demonic Fury per second
+                _player->EnergizeBySpell(_player, 689, 10, POWER_DEMONIC_FURY);
+                _player->CastCustomSpell(_player, SPELL_WARLOCK_DRAIN_LIFE_HEAL, &basepoints, NULL, NULL, true);
+            }
+        }
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_drain_life_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_drain_life_AuraScript();
+    }
+};
+
+// Harvest Life - 108371
+class spell_warl_harvest_life : public SpellScriptLoader
+{
+public:
+    spell_warl_harvest_life() : SpellScriptLoader("spell_warl_harvest_life") { }
+    class spell_warl_harvest_life_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_harvest_life_AuraScript);
+        void OnTick(AuraEffect const* aurEff)
+        {
+            if (!GetCaster())
+                return;
+            if (Player* _player = GetCaster()->ToPlayer())
+            {
+                // Restoring 3-4.5% of the caster's total health every 1s - With 33% bonus
+                int32 basepoints = int32(frand(0.03f, 0.045f) * _player->GetMaxHealth());
+                AddPct(basepoints, 33);
+                if (!_player->HasSpellCooldown(SPELL_WARLOCK_HARVEST_LIFE_HEAL))
+                {
+                    _player->CastCustomSpell(_player, SPELL_WARLOCK_HARVEST_LIFE_HEAL, &basepoints, NULL, NULL, true);
+                    // prevent the heal to proc off for each targets
+                    _player->AddSpellCooldown(SPELL_WARLOCK_HARVEST_LIFE_HEAL, 0, time(NULL) + 1);
+                }
+                _player->EnergizeBySpell(_player, aurEff->GetSpellInfo()->Id, 4, POWER_DEMONIC_FURY);
+            }
+        }
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_harvest_life_AuraScript::OnTick, EFFECT_2, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_harvest_life_AuraScript();
+    }
+};
+
+// Called by Shadowflame - 47960
+// Molten Core - 122351
+class spell_warl_molten_core_dot : public SpellScriptLoader
+{
+public:
+    spell_warl_molten_core_dot() : SpellScriptLoader("spell_warl_molten_core_dot") { }
+    class spell_warl_molten_core_dot_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_molten_core_dot_AuraScript);
+        void OnTick(AuraEffect const* aurEff)
+        {
+            if (GetCaster())
+            {
+                if (GetCaster()->HasAura(SPELL_WARLOCK_MOLTEN_CORE_AURA) && GetCaster()->getLevel() >= 69)
+                    if (roll_chance_i(8))
+                        GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_MOLTEN_CORE, true);
+                GetCaster()->EnergizeBySpell(GetCaster(), aurEff->GetSpellInfo()->Id, 2, POWER_DEMONIC_FURY);
+            }
+        }
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_molten_core_dot_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_molten_core_dot_AuraScript();
+    }
+};
+
+// Immolation Aura - 104025
+class spell_warl_immolation_aura : public SpellScriptLoader
+{
+public:
+    spell_warl_immolation_aura() : SpellScriptLoader("spell_warl_immolation_aura") { }
+    class spell_warl_immolation_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_immolation_aura_AuraScript);
+        void OnTick(AuraEffect const* aurEff)
+        {
+            if (GetCaster())
+                GetCaster()->EnergizeBySpell(GetCaster(), GetSpellInfo()->Id, -25, POWER_DEMONIC_FURY);
+        }
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_immolation_aura_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_immolation_aura_AuraScript();
+    }
+};
+// Hellfire - 5857
+class spell_warl_hellfire : public SpellScriptLoader
+{
+public:
+    spell_warl_hellfire() : SpellScriptLoader("spell_warl_hellfire") { }
+    class spell_warl_hellfire_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_hellfire_SpellScript);
+        void HandleOnHit()
+        {
+            if (Player* _player = GetCaster()->ToPlayer())
+                if (Unit* target = GetHitUnit())
+                    _player->EnergizeBySpell(_player, GetSpellInfo()->Id, 4, POWER_DEMONIC_FURY);
+        }
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_warl_hellfire_SpellScript::HandleOnHit);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_hellfire_SpellScript();
+    }
+};
+// 108686 - Immolate effect for WARLOCK_FIRE_AND_BRIMSTONE
+class spell_warl_immolate : public SpellScriptLoader
+{
+public:
+    spell_warl_immolate() : SpellScriptLoader("spell_warl_immolate") { }
+    class spell_warl_immolate_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_immolate_SpellScript);
+        void HandleOnHit()
+        {
+            if (Player* _player = GetCaster()->ToPlayer())
+                if (Unit* target = GetHitUnit())
+                    if (_player->HasAura(SPELL_WARLOCK_FIRE_AND_BRIMSTONE))
+                        _player->RemoveAura(SPELL_WARLOCK_FIRE_AND_BRIMSTONE);
+        }
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_warl_immolate_SpellScript::HandleOnHit);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_immolate_SpellScript();
+    }
+};
+// 114654 - Incinerate effect for WARLOCK_FIRE_AND_BRIMSTONE
+class spell_warl_incinerate : public SpellScriptLoader
+{
+public:
+    spell_warl_incinerate() : SpellScriptLoader("spell_warl_incinerate") { }
+    class spell_warl_incinerate_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_incinerate_SpellScript);
+        void HandleOnHit()
+        {
+            if (Player* _player = GetCaster()->ToPlayer())
+                if (Unit* target = GetHitUnit())
+                    if (_player->HasAura(SPELL_WARLOCK_FIRE_AND_BRIMSTONE))
+                        _player->RemoveAura(SPELL_WARLOCK_FIRE_AND_BRIMSTONE);
+        }
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_warl_incinerate_SpellScript::HandleOnHit);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_incinerate_SpellScript();
+    }
+};
+// 108685 - conflagrate effect for WARLOCK_FIRE_AND_BRIMSTONE
+class spell_warl_conflagrate_and_brimstone : public SpellScriptLoader
+{
+public:
+    spell_warl_conflagrate_and_brimstone() : SpellScriptLoader("spell_warl_conflagrate_and_brimstone") { }
+    class spell_warl_conflagrate_and_brimstone_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_conflagrate_and_brimstone_SpellScript);
+        void HandleOnHit()
+        {
+            if (Player* _player = GetCaster()->ToPlayer())
+                if (Unit* target = GetHitUnit())
+                    if (_player->HasAura(SPELL_WARLOCK_FIRE_AND_BRIMSTONE))
+                        _player->RemoveAura(SPELL_WARLOCK_FIRE_AND_BRIMSTONE);
+        }
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_warl_conflagrate_and_brimstone_SpellScript::HandleOnHit);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_conflagrate_and_brimstone_SpellScript();
+    }
+};
+
+// Called By : Incinerate - 29722 and Incinerate (Fire and Brimstone) - 114654
+// Conflagrate - 17962 and Conflagrate (Fire and Brimstone) - 108685
+// Burning Embers generate
+class spell_warl_burning_embers : public SpellScriptLoader
+{
+public:
+    spell_warl_burning_embers() : SpellScriptLoader("spell_warl_burning_embers") { }
+    class spell_warl_burning_embers_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_burning_embers_SpellScript);
+        void HandleOnHit()
+        {
+            if (Player* _player = GetCaster()->ToPlayer())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    /*if (GetSpell()->(target))
+                        _player->SetPower(POWER_BURNING_EMBERS, _player->GetPower(POWER_BURNING_EMBERS) + 2);
+                    else*/
+                        _player->SetPower(POWER_BURNING_EMBERS, _player->GetPower(POWER_BURNING_EMBERS) + 1);
+                }
+            }
+        }
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_warl_burning_embers_SpellScript::HandleOnHit);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_burning_embers_SpellScript();
+    }
+};
+
+// Shadowburn - 29341
+class spell_warl_shadowburn : public SpellScriptLoader
+{
+public:
+    spell_warl_shadowburn() : SpellScriptLoader("spell_warl_shadowburn") { }
+    class spell_warl_shadowburn_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_shadowburn_AuraScript);
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+        {
+            if (GetCaster())
+            {
+                AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
+                if (removeMode == AURA_REMOVE_BY_DEATH)
+                    GetCaster()->SetPower(POWER_BURNING_EMBERS, GetCaster()->GetPower(POWER_BURNING_EMBERS) + 20); // Give 2 Burning Embers
+                else if (removeMode == AURA_REMOVE_BY_EXPIRE)
+                    GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_SHADOWBURN_ENERGIZE, true);
+            }
+        }
+        void Register()
+        {
+            OnEffectRemove += AuraEffectApplyFn(spell_warl_shadowburn_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_shadowburn_AuraScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_aftermath();
     new spell_warl_bane_of_doom();
     new spell_warl_banish();
+    new spell_warl_burning_embers();
     new spell_warl_conflagrate();
+    new spell_warl_conflagrate_and_brimstone();
     new spell_warl_create_healthstone();
     new spell_warl_demonic_circle_summon();
     new spell_warl_demonic_circle_teleport();
     new spell_warl_demonic_empowerment();
     new spell_warl_demon_soul();
+    new spell_warl_drain_life();
     new spell_warl_everlasting_affliction();
     new spell_warl_fel_flame();
     new spell_warl_fel_synergy();
     new spell_warl_glyph_of_shadowflame();
+    new spell_warl_harvest_life();
     new spell_warl_haunt();
     new spell_warl_health_funnel();
     new spell_warl_healthstone_heal();
+    new spell_warl_hellfire();
     new spell_warl_improved_soul_fire();
+    new spell_warl_immolation_aura();
+    new spell_warl_immolate();
+    new spell_warl_incinerate();
     new spell_warl_life_tap();
+    new spell_warl_molten_core_dot();
     new spell_warl_nether_ward_overrride();
     new spell_warl_seduction();
     new spell_warl_seed_of_corruption();
     new spell_warl_shadow_trance_proc();
     new spell_warl_shadow_ward();
+    new spell_warl_shadowburn();
     new spell_warl_soul_leech();
     new spell_warl_soul_swap();
     new spell_warl_soul_swap_dot_marker();

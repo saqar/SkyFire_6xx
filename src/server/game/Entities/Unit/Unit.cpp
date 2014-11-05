@@ -8399,34 +8399,13 @@ void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powe
 
     WorldPacket data(SMSG_SPELLENERGIZELOG, (8+8+4+4+4+1));
 
-    data.WriteBit(victimGuid[7]);
-    data.WriteBit(victimGuid[3]);
-    data.WriteBit(casterGuid[1]);
-    data.WriteBit(victimGuid[4]);
-    data.WriteBit(victimGuid[2]);
-    data.WriteBit(casterGuid[3]);
-    data.WriteBit(victimGuid[5]);
+    data << victimGuid;
+    data << casterGuid;
 
     data.WriteBit(0); // hasPower
 
-    data.WriteBit(casterGuid[7]);
-    data.WriteBit(casterGuid[0]);
-    data.WriteBit(casterGuid[2]);
-
     //if (hasPower)
     //    data.WriteBits(count, 21);
-
-    data.WriteBit(casterGuid[4]);
-    data.WriteBit(casterGuid[6]);
-    data.WriteBit(victimGuid[6]);
-    data.WriteBit(victimGuid[1]);
-    data.WriteBit(victimGuid[0]);
-    data.WriteBit(casterGuid[5]);
-
-
-    data.WriteByteSeq(victimGuid[0]);
-    data.WriteByteSeq(casterGuid[5]);
-    data.WriteByteSeq(victimGuid[6]);
 
     /*if (hasPower)
     {
@@ -8440,22 +8419,9 @@ void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powe
         data << Int32();
         data << Int32();
     }*/
-    data.WriteByteSeq(casterGuid[6]);
-    data.WriteByteSeq(victimGuid[2]);
-    data.WriteByteSeq(casterGuid[0]);
-    data.WriteByteSeq(victimGuid[1]);
+ 
     data << int32(damage);
-    data.WriteByteSeq(victimGuid[4]);
-    data.WriteByteSeq(casterGuid[1]);
-    data.WriteByteSeq(casterGuid[7]);
-    data.WriteByteSeq(victimGuid[5]);
-    data.WriteByteSeq(casterGuid[2]);
-    data.WriteByteSeq(casterGuid[3]);
-    data.WriteByteSeq(victimGuid[7]);
-    data.WriteByteSeq(casterGuid[4]);
-    data.WriteByteSeq(victimGuid[3]);
     data << uint32(spellId);
-
     data << uint32(powerType);
 
     SendMessageToSet(&data, true);
@@ -14623,26 +14589,11 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     ObjectGuid guid = GetGUID();
 
     WorldPacket data(SMSG_PLAY_SPELL_VISUAL_KIT, 4 + 4+ 4 + 8);
+
+    data << guid;
     data << uint32(0);
     data << uint32(id);     // SpellVisualKit.dbc index
     data << uint32(unkParam);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-    data.FlushBits();
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
     SendMessageToSet(&data, true);
 }
 
@@ -14781,34 +14732,13 @@ void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float 
 {
     ObjectGuid guid = GetGUID();
     WorldPacket data(SMSG_MOVE_KNOCK_BACK, (1+8+4+4+4+4+4));
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-
-    data.WriteByteSeq(guid[1]);
-
+   
+    data << guid;
     data << float(vsin);
     data << uint32(0);
-
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
-
     data << float(speedXY);
-
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
-
     data << float(speedZ);
     data << float(vcos);
-
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[0]);
 
     player->GetSession()->SendPacket(&data);
 }
@@ -15908,12 +15838,16 @@ void Unit::SendThreatListUpdate()
 
         TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_UPDATE Message");
         WorldPacket data(SMSG_THREAT_UPDATE, 8 + count * 8);
-        data.append(GetPackGUID());
+        ObjectGuid guid;
+        ObjectGuid guid2;
+
+        data << guid;
         data << uint32(count);
         ThreatContainer::StorageType const &tlist = getThreatManager().getThreatList();
         for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
-            data.appendPackGUID((*itr)->getUnitGuid());
+            data << guid;
+            data << guid2;
             data << uint32((*itr)->getThreat()*100);
         }
         SendMessageToSet(&data, false);
@@ -16384,24 +16318,10 @@ void Unit::SendSetPlayHoverAnim(bool enable)
 {
     ObjectGuid guid = GetGUID();
     WorldPacket data(SMSG_SET_PLAY_HOVER_ANIM, 10);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(enable);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[6]);
 
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
+    data << guid;
+    data.WriteBit(enable);
+
 
     SendMessageToSet(&data, true);
 }

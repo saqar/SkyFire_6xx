@@ -1305,29 +1305,14 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     ObjectGuid Guid = GetGUID();
 
     WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, 9 + 1 + 4 + 1 + 4 + 4);
-    data.WriteBit(Guid[5]);
-    data.WriteBit(Guid[7]);
-    data.WriteBit(Guid[1]);
-    data.WriteBit(Guid[4]);
-    data.WriteBit(Guid[2]);
-    data.WriteBit(Guid[0]);
-    data.WriteBit(0); // Power Data
-    data.WriteBit(Guid[6]);
-    data.WriteBit(Guid[3]);
-
+    
+    data << Guid;
     data << uint32(damage);
-    data.WriteByteSeq(Guid[0]);
-    data.WriteByteSeq(Guid[7]);
     data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
-    data.WriteByteSeq(Guid[6]);
-    data.WriteByteSeq(Guid[3]);
-    data.WriteByteSeq(Guid[5]);
     data << uint32(absorb);
-    data.WriteByteSeq(Guid[1]);
-    data.WriteByteSeq(Guid[2]);
-    data.WriteByteSeq(Guid[4]);
     data << uint32(resist);
     SendMessageToSet(&data, true);
+    data.WriteBit(0); // Power Data
 
     uint32 final_damage = DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
@@ -3049,30 +3034,13 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool re
     ObjectGuid guid = victim ? victim->GetGUID() : 0;
 
     WorldPacket data(SMSG_LOG_XPGAIN, 1 + 1 + 8 + 4 + 4 + 4 + 1);
-    data.WriteBit(0);                                       // has XP
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(0);                                       // has group bonus
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(0);                                       // unknown
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[4]);
 
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[2]);
-    data << float(1);                                       // 1 - none 0 - 100% group bonus output
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data << uint32(GivenXP);                                // experience without bonus
-    data << uint32(GivenXP + BonusXP);                      // given experience
-    data.WriteByteSeq(guid[0]);
-    data << uint8(recruitAFriend ? 1 : 0);                  // does the GivenXP include a RaF bonus?
+    data << guid;                                           // Victim
+    data << uint32(GivenXP);                                // Original
+    data << uint8(0);                                       // Reason
+    data << uint32(GivenXP + BonusXP);                      // Amount
+    data << float(1);                                       // GroupBonus
+    data.WriteBit(0);                                       // ReferAFriend
 
     GetSession()->SendPacket(&data);
 }
@@ -10450,24 +10418,9 @@ void Player::SetBindPoint(uint64 guid)
     ObjectGuid ikGuid = guid;
 
     WorldPacket data(SMSG_BINDER_CONFIRM, 9);
-    data.WriteBit(ikGuid[4]);
-    data.WriteBit(ikGuid[6]);
-    data.WriteBit(ikGuid[2]);
-    data.WriteBit(ikGuid[1]);
-    data.WriteBit(ikGuid[5]);
-    data.WriteBit(ikGuid[3]);
-    data.WriteBit(ikGuid[0]);
-    data.WriteBit(ikGuid[7]);
-    data.FlushBits();
 
-    data.WriteByteSeq(ikGuid[6]);
-    data.WriteByteSeq(ikGuid[2]);
-    data.WriteByteSeq(ikGuid[5]);
-    data.WriteByteSeq(ikGuid[0]);
-    data.WriteByteSeq(ikGuid[4]);
-    data.WriteByteSeq(ikGuid[7]);
-    data.WriteByteSeq(ikGuid[1]);
-    data.WriteByteSeq(ikGuid[3]);
+    data << guid;
+    
     GetSession()->SendPacket(&data);
 }
 
@@ -14019,25 +13972,11 @@ void Player::SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32
     ObjectGuid guid = creature ? creature->GetGUID() : 0;
 
     WorldPacket data(SMSG_BUY_FAILED, 1 + 8 + 1 + 4);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[7]);
+    
+    data << guid;
 
-    data << uint8(msg);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[7]);
-    data << uint32(item);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[0]);
+    data << uint8(msg);                 // Reason
+    data << uint32(item);               // ID
 
     GetSession()->SendPacket(&data);
 }
@@ -14050,41 +13989,11 @@ void Player::SendSellError(SellResult msg, Creature* creature, uint64 guid)
     ObjectGuid itemGuid = guid;
 
     WorldPacket data(SMSG_SELL_ITEM, 1 + 8 + 1 + 8 + 1);
-    data.WriteBit(itemGuid[2]);
-    data.WriteBit(npcGuid[4]);
-    data.WriteBit(itemGuid[5]);
-    data.WriteBit(itemGuid[4]);
-    data.WriteBit(npcGuid[3]);
-    data.WriteBit(npcGuid[5]);
-    data.WriteBit(itemGuid[3]);
-    data.WriteBit(npcGuid[6]);
-    data.WriteBit(npcGuid[0]);
-    data.WriteBit(npcGuid[2]);
-    data.WriteBit(itemGuid[1]);
-    data.WriteBit(itemGuid[7]);
-    data.WriteBit(npcGuid[1]);
-    data.WriteBit(itemGuid[0]);
-    data.WriteBit(itemGuid[6]);
-    data.WriteBit(npcGuid[7]);
-
-    data.WriteByteSeq(itemGuid[4]);
-    data.WriteByteSeq(itemGuid[1]);
-    data << uint8(msg);
-    data.WriteByteSeq(itemGuid[2]);
-    data.WriteByteSeq(npcGuid[4]);
-    data.WriteByteSeq(npcGuid[0]);
-    data.WriteByteSeq(npcGuid[5]);
-    data.WriteByteSeq(npcGuid[2]);
-    data.WriteByteSeq(itemGuid[0]);
-    data.WriteByteSeq(npcGuid[3]);
-    data.WriteByteSeq(itemGuid[5]);
-    data.WriteByteSeq(itemGuid[6]);
-    data.WriteByteSeq(itemGuid[7]);
-    data.WriteByteSeq(npcGuid[6]);
-    data.WriteByteSeq(npcGuid[1]);
-    data.WriteByteSeq(itemGuid[3]);
-    data.WriteByteSeq(npcGuid[7]);
-
+    
+    data << npcGuid;
+    data << itemGuid;
+    data << uint8(msg);             // Amount
+   
     GetSession()->SendPacket(&data);
 }
 
@@ -14760,55 +14669,30 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
     ObjectGuid itemGuid = item->GetGUID();
 
     WorldPacket data(SMSG_ITEM_PUSH_RESULT, 1 + 8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4);
-    data.WriteBit(itemGuid[2]);
-    data.WriteBit(playerGuid[4]);
-    data.WriteBit(itemGuid[5]);
-    data.WriteBit(1);                                       // display in chat
-    data.WriteBit(playerGuid[1]);
-    data.WriteBit(received);                                // 0 = looted, 1 = npc
-    data.WriteBit(itemGuid[4]);
-    data.WriteBit(playerGuid[6]);
-    data.WriteBit(playerGuid[5]);
-    data.WriteBit(playerGuid[7]);
-    data.WriteBit(playerGuid[0]);
-    data.WriteBit(itemGuid[0]);
-    data.WriteBit(itemGuid[7]);
-    data.WriteBit(playerGuid[2]);
-    data.WriteBit(itemGuid[6]);
-    data.WriteBit(0);                                       // bonus loot
-    data.WriteBit(playerGuid[3]);
-    data.WriteBit(itemGuid[1]);
-    data.WriteBit(created);                                 // 0 = received. 1 = created
-    data.WriteBit(itemGuid[3]);
-    data.FlushBits();
+    
+    data << itemGuid;                                           // ItemGUID
+    data << uint8(item->GetSlot());                             // Slot
+    data << uint32(item->GetBagSlot());                         // SlotInBag
 
-    data.WriteByteSeq(playerGuid[1]);
-    data.WriteByteSeq(itemGuid[1]);
-    data << uint32(0);                                      // battle pet species
-    data.WriteByteSeq(itemGuid[0]);
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(playerGuid[2]);
-    data << uint32(item->GetItemSuffixFactor());            // suffix factor
-    data.WriteByteSeq(itemGuid[7]);
-    data << uint32(0);                                      // battle pet quality
-    data << uint32(item->GetEntry());                       // item id
-    data << int32(item->GetItemRandomPropertyId());         // random item property id
-    data.WriteByteSeq(itemGuid[6]);
-    data << uint32(0);                                      // battle pet breed
-    data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory
-    data.WriteByteSeq(itemGuid[2]);
-    data.WriteByteSeq(playerGuid[0]);
-    data << uint32(count);                                  // count of items
-    data.WriteByteSeq(playerGuid[5]);
-    data.WriteByteSeq(itemGuid[5]);
-    data.WriteByteSeq(playerGuid[4]);
-    data << uint8(item->GetBagSlot());                      // bag slot
-    data << uint32(itemSlot);                               // item slot, but when added to stack: 0xFFFFFFFF
-    data.WriteByteSeq(playerGuid[3]);
-    data.WriteByteSeq(playerGuid[6]);
-    data << uint32(0);                                      // battle pet level
-    data.WriteByteSeq(itemGuid[3]);
-    data.WriteByteSeq(itemGuid[4]);
+    // ItemInstance
+    data << uint32(item->GetEntry());                           // ItemID
+    data << uint32(0);                                          // RandomPropertiesSeed
+    data << uint32(item->GetItemRandomPropertyId());            // RandomPropertiesId
+    //data.WriteBit(0);                                           // Unk
+    //data.WriteBit(0);                                           // Unk
+
+    data << uint32(GetItemCount(item->GetEntry()));             // QuantityInInventory
+    data << uint32(0);                                          // Quantity
+    data << uint32(0);                                          // BattlePetBreedID
+    data << uint32(0);                                          // BattlePetSpeciesID
+    data << uint32(0);                                          // BattlePetLevel
+    data << uint32(0);                                          // BattlePetBreedQuality
+    data << uint32(0);                                          // Unknown
+    data << playerGuid;                                         // PlayerGUID
+    data.WriteBit(0);                                           // Pushed
+    data.WriteBit(0);                                           // Created
+    data.WriteBit(0);                                           // IsBonusRoll
+    data.WriteBit(0);                                           // DisplayText
 
     if (broadcast && GetGroup())
         GetGroup()->BroadcastPacket(&data, true);
@@ -21184,12 +21068,12 @@ void Player::PetSpellInitialize()
     CharmInfo* charmInfo = pet->GetCharmInfo();
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
-    data << uint64(pet->GetGUID());
+    data << ObjectGuid(pet->GetGUID());
     data << uint16(pet->GetCreatureTemplate()->family);         // creature family (required for pet talents)
+    data << uint16(0);                                          // Specialization
     data << uint32(pet->GetDuration());
-    data << uint8(pet->GetReactState());
-    data << uint8(charmInfo->GetCommandState());
-    data << uint16(0); // Flags, mostly unknown
+    data << uint32(0);
+    data << uint32(0);
 
     // action bar loop
     charmInfo->BuildActionBar(&data);
@@ -22194,25 +22078,10 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
         ObjectGuid vGuid = pVendor->GetGUID();
 
         WorldPacket data(SMSG_BUY_ITEM, 1 + 8 + 4 + 4 + 4);
-        data.WriteBit(vGuid[3]);
-        data.WriteBit(vGuid[4]);
-        data.WriteBit(vGuid[7]);
-        data.WriteBit(vGuid[6]);
-        data.WriteBit(vGuid[0]);
-        data.WriteBit(vGuid[2]);
-        data.WriteBit(vGuid[1]);
-        data.WriteBit(vGuid[5]);
-
-        data.WriteByteSeq(vGuid[6]);
-        data.WriteByteSeq(vGuid[7]);
+        
+        data << vGuid;
         data << uint32(count);
-        data.WriteByteSeq(vGuid[1]);
-        data.WriteByteSeq(vGuid[3]);
-        data.WriteByteSeq(vGuid[5]);
-        data.WriteByteSeq(vGuid[2]);
         data << int32(crItem->maxcount > 0 ? new_count : 0xFFFFFFFF);
-        data.WriteByteSeq(vGuid[0]);
-        data.WriteByteSeq(vGuid[4]);
         data << uint32(vendorslot + 1);                   // numbered from 1 at client
 
         GetSession()->SendPacket(&data);

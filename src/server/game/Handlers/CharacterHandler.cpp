@@ -887,38 +887,48 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     bool feedbackSystem = true;
     bool excessiveWarning = false;
 
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 4 + 4 + 4 + 1 + 4 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
-    data << uint32(0);                  // Scroll of Resurrection per day?
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 1 + 4 + 4 + 4 + 4 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 4);
+    data << uint8(2);                   // feedback system status
     data << uint32(0);                  // Scroll of Resurrection current
-    data << uint32(0);
-    data << uint8(2);
-    data << uint32(0);
+    data << uint32(0);                  // Scroll of Resurrection per day
+    data << uint32(0);                  // realm Id
+    data << uint32(0);                  // realm Id
 
-    data.WriteBit(1);
-    data.WriteBit(1);                   // ingame shop status (0 - "The Shop is temporarily unavailable.")
-    data.WriteBit(1);
-    data.WriteBit(0);                   // Recruit a Friend button
     data.WriteBit(0);                   // server supports voice chat
-    data.WriteBit(1);                   // show ingame shop icon
-    data.WriteBit(0);                   // Scroll of Resurrection button
-    data.WriteBit(excessiveWarning);    // excessive play time warning
-    data.WriteBit(0);                   // ingame shop parental control (1 - "Feature has been disabled by Parental Controls.")
     data.WriteBit(feedbackSystem);      // feedback system (bug, suggestion and report systems)
+    data.WriteBit(0);                   // Scroll of Resurrection button
+    data.WriteBit(1);                   // Battle Pay icon
+    data.WriteBit(1);                   // Battle Pay status (0 - "The Shop is temporarily unavailable.")
+    data.WriteBit(0);                   // Battle Pay parental control (1 - "Feature has been disabled by Parental Controls.")
+    data.WriteBit(0);                   // item restoration button
+    data.WriteBit(0);                   // broswer enabled
+    data.WriteBit(excessiveWarning);    // excessive play time warning
+    data.WriteBit(0);                   // Recruit a Friend button
+    data.WriteBit(0);                   // restore character
+    data.WriteBit(0);                   // ?
+    data.WriteBit(0);                   // ?
+    data.WriteBit(0);                   // ?
     data.FlushBits();
-
-    if (excessiveWarning)
-    {
-        data << uint32(0);              // excessive play time warning after period(in seconds)
-        data << uint32(0);
-        data << uint32(0);
-    }
 
     if (feedbackSystem)
     {
-        data << uint32(0);
-        data << uint32(1);
-        data << uint32(10);
-        data << uint32(60000);
+        data.WriteBit(1);               // submit ticket and account security button
+        data.WriteBit(1);               // submit bug button
+        data.WriteBit(1);               // report player button
+        data.WriteBit(1);               // submit suggestion button
+        data.FlushBits();
+
+        data << uint32(10);             // max submits
+        data << uint32(60000);          // timeout between submits (in miliseconds)
+        data << uint32(0);              // counter
+        data << uint32(0);              // last reset time
+    }
+
+    if (excessiveWarning)
+    {
+        data << uint32(0);              // excessive play time warning after period (in seconds)
+        data << uint32(0);              // duration of excessive play time dialog (in seconds)
+        data << uint32(0);              // display time
     }
 
     SendPacket(&data);

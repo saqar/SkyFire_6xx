@@ -28,6 +28,8 @@
 
 #define MAX_BUILDING_PLOTS 3
 #define MAX_FOLLOWER_SLOTS 5
+#define MAX_GARRISON_LEVEL 3
+#define MAX_RESOURCES      10000
 
 class Garrison
 {
@@ -40,8 +42,8 @@ class Garrison
         void SaveToDB(SQLTransaction& trans);
 
     private:
-        AbilityCategory* _category;
-        GarrisonBuildingInfo* _buildingInfo;
+        GarrAbilityEntry* _category;
+        GarrBuildingEntry* _buildingInfo;
     };
 };
 

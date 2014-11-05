@@ -17,15 +17,33 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "GarrisonMgr.h"
+
 #include "WorldSession.h"
 #include "WorldPacket.h"
 
 void WorldSession::HandleGarrCompleteMission(WorldPacket& recvData)
 {
+    ObjectGuid npcGuid;
+    uint32 MissionRecID;
+
+    recvData >> MissionRecID;
+
+    //sGarrisonMgr(garr->MissionFunct);
 }
 
 void WorldSession::HandleGarrSetBuildingActive(WorldPacket& recvData)
 { 
+    TC_LOG_ERROR("network", "SENDING CMSG_GARR_SET_BUILDING_ACTIVE");
+    uint32 PlotInstanceID;
+    recvData >> PlotInstanceID;
+
+    WorldPacket data(SMSG_GARRISON_BUILDING_ACTIVATED);
+    GarrisonBuildingInfo* _building = NULL;
+
+    data << uint32(_building->ID);
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleGarrGenerateRecruits(WorldPacket& recvData)
@@ -34,6 +52,16 @@ void WorldSession::HandleGarrGenerateRecruits(WorldPacket& recvData)
 
 void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
 {
+    ObjectGuid npcGuid;
+    uint32 BuildingID;
+    uint32 PlotInstanceID;
+
+    recvData >> npcGuid;
+    recvData >> BuildingID;
+    recvData >> PlotInstanceID;
+
+    // Functions for
+    // sGarrisonMgr(garr->PurchaseBuilding);
 }
 
 void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
@@ -46,4 +74,15 @@ void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
 
 void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
 {
+    ObjectGuid npcGuid;
+    uint32 MissionRecID;
+    uint64 FollowerDBIDs;
+
+    recvData >> npcGuid;
+    recvData >> MissionRecID;
+
+    for (uint64 i = 0; i < MAX_FOLLOWER_SLOTS; i++)
+        recvData >> uint64(FollowerDBIDs);
+
+    // Garrison function to start mission
 }

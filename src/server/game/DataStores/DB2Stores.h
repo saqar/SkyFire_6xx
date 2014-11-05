@@ -38,6 +38,10 @@ extern BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
 extern DB2Storage<AreaPOIEntry>                 sAreaPOIStore;
 extern DB2Storage<BroadcastTextEntry> sBroadcastTextStore;
+extern DB2Storage<GarrAbilityEntry> sGarrAbilityStore;
+extern DB2Storage<GarrBuildingEntry> sGarrBuildingStore;
+extern DB2Storage<GarrPlotEntry> sGarrPlotStore;
+extern DB2Storage<GarrPlotBuildingEntry> sGarrPlotBuildingStore;
 extern DB2Storage<HolidaysEntry>                sHolidaysStore;
 extern DB2Storage<ItemEntry> sItemStore;
 extern DB2Storage<ItemAppearanceEntry> sItemAppearanceStore;

@@ -29,8 +29,11 @@ char const BattlePetSpeciesStatefmt[] = "niii";
 char const BattlePetSpeciesXAbilityfmt[] = "niiii";
 char const BattlePetStatefmt[] = "nxsi";
 char const ItemToBattlePetfmt[] = "ni";
-
-char const BroadcastTextfmt[] ="nxssxxxxxxixx";
+char const BroadcastTextfmt[] = "nxssxxxxxxixx";
+char const GarrAbilityEntryfmt[] = "iissiii";
+char const GarrBuildingEntryfmt[] = "iiiiiissssiiiiiiiiiiiiii";
+char const GarrPlotEntryfmt[] = "iiiisiiii";
+char const GarrPlotBuildingEntryfmt[] = "iii";
 char const Holidaysfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiixxsiix";
 char const Itemfmt[] ="niiiiiiix";
 char const ItemAppearancefmt[] = "nix";

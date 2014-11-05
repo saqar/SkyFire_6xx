@@ -124,6 +124,65 @@ struct BroadcastTextEntry
     //uint32   Unk8;                                         // 12
 };
 
+struct GarrAbilityEntry
+{
+    uint32 ID;                                              // AbilityID
+    uint32 Type;                                            // Type 1 - Trait, 2 - Spell
+    std::string Name;                                       // Ability's name
+    std::string Description;                                // Ability's description
+    uint32 SpellID;                                         // Ability's spellID for ingame use
+    uint32 Data0;                                           // Unknown
+    uint32 Category;                                        // Ability's category
+};
+
+struct GarrBuildingEntry
+{
+    uint32 ID;                                              // Building's entry ID
+    uint32 SpawnIDH;                                        // Building's spawn ID Horde
+    uint32 SpawnIDA;                                        // Building's spawn ID Alliance
+    uint32 Data0;                                           // 3 - Unknown, all are 0
+    uint32 Data1;                                           // 4 - Unknown, all ranks of one building type share this ID. Probably something important.
+    uint32 BuildingRank;                                    // Building's Rank. 1 - Small, 2 - Medium, 3 - Large.
+    std::string BuildingNameH;                              // Building's name Horde
+    std::string BuildingNameA;                              // Building's name Alliance
+    std::string Description;                                // Description of the building
+    std::string Effect;                                     // Building's bonus effect
+    uint32 BuildTime;                                       // Building's required build time
+    uint32 Data2;                                           // 11 - Unknown all are 824. Maybe experience relted.
+    uint32 ResourcesCost;                                   // Building's cost of Garrison Resources.
+    uint32 Data3;                                           // 13 - Unknown
+    uint32 Data4;                                           // 14 - Unknown 
+    uint32 DisplayID;                                       // Building's DisplayID
+    uint32 Data6;                                           // 16 - Unknown
+    uint32 Data7;                                           // 17 - Unknown, may relate to default buildings
+    uint32 Data8;                                           // 18 - Unknown
+    uint32 Data9;                                           // 19 - Unknown 
+    uint32 WorkOrders;                                      // Building's number of work orders
+    uint32 Data10;                                          // 21 - Unknown
+    uint32 Data11;                                          // 22 - Unknown, all 0
+    uint32 GoldCost;                                        // Building's gold cost
+};
+
+struct GarrPlotEntry
+{
+    uint32 ID;                                              // PlotTypeID
+    uint32 PlotSize;                                        // PlotSize
+    uint32 EntryID;                                         // EntryID
+    uint32 Data0;                                           // Unknown, all 0.
+    std::string PlotType;                                   // PlotType
+    uint32 Data1;                                           // Unknown
+    uint32 Data2;                                           // Unknown
+    uint32 Data3;                                           // Unknown
+    uint32 Data4;                                           // Unknown
+};
+
+struct GarrPlotBuildingEntry
+{
+    uint32 ID;                              // ID
+    uint32 PlotType;                        // PlotTypeID
+    uint32 BuildingId;                      // BuildingID
+};
+
 struct ItemEntry
 {
     uint32   ID;                                             // 0

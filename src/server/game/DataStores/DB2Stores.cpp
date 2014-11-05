@@ -40,6 +40,10 @@ BattlePetBreedSet sBattlePetBreedSet;
 BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
 DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt/*, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply*/);
+DB2Storage<GarrAbilityEntry> sGarrAbilityStore(GarrAbilityEntryfmt);
+DB2Storage<GarrBuildingEntry> sGarrBuildingStore(GarrBuildingEntryfmt);
+DB2Storage<GarrPlotEntry> sGarrPlotStore(GarrPlotEntryfmt);
+DB2Storage<GarrPlotBuildingEntry> sGarrPlotBuildingStore(GarrPlotBuildingEntryfmt);
 DB2Storage<HolidaysEntry> sHolidaysStore(Holidaysfmt);
 DB2Storage<ItemEntry> sItemStore(Itemfmt, &DB2Utilities::HasItemEntry, &DB2Utilities::WriteItemDbReply);
 DB2Storage<ItemAppearanceEntry> sItemAppearanceStore(ItemAppearancefmt);

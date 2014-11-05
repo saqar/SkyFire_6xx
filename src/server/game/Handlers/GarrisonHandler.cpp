@@ -38,16 +38,21 @@ void WorldSession::HandleGarrSetBuildingActive(WorldPacket& recvData)
     uint32 PlotInstanceID;
     recvData >> PlotInstanceID;
 
-    WorldPacket data(SMSG_GARRISON_BUILDING_ACTIVATED);
-    GarrisonBuildingInfo* _building = NULL;
+    WorldPacket data(SMSG_GARR_BUILDING_ACTIVATED);
 
-    data << uint32(_building->ID);
+    data << uint32(0);                              // BuildingID
 
     SendPacket(&data);
 }
 
 void WorldSession::HandleGarrGenerateRecruits(WorldPacket& recvData)
 {
+    ObjectGuid guid;
+    uint32 unk1, unk2;
+
+    recvData >> guid;
+    recvData >> unk1;
+    recvData >> unk2;
 }
 
 void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
@@ -66,10 +71,77 @@ void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
 
 void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
 {
+    ObjectGuid guid;
+
+    recvData >> guid;
 }
 
 void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
 {
+    WorldPacket data(SMSG_GET_GARR_INFO_RESULT);
+    ObjectGuid guid;
+    bool active;
+
+    data << uint32(0);                              // ArchivedMissions
+    data << uint32(0);                              // GarrSiteID
+    data << uint32(0);                              // FactionIndex
+    data << uint32(0);                              // GarrSiteLevelID
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // Unk
+    data << uint32(0);                              // Unk
+
+    //GarrisonMission
+    data << uint64(0);                              // DBID
+    data << uint32(0);                              // MissionRecID
+    data << uint32(0);                              // OfferTime
+    data << uint32(0);                              // OfferDuration
+    data << uint32(0);                              // StartTime
+    data << uint32(0);                              // TravelDuration
+    data << uint32(0);                              // MissionDuration
+    data << uint32(0);                              // MissionState
+
+    // GarrisonBuildingInfo
+    data << uint32(0);                              // GarrPlotInstanceID
+    //data << float(0);                             // PositionX
+    //data << float(0);                             // PositionY
+    //data << float(0);                             // PositionZ
+    data << uint32(0);
+    data << uint32(0); 
+    data << uint32(0);
+    data << uint32(0);                              // GarrBuildingID
+    active = data.WriteBit(0);                      // Active
+
+    //GarrisonFollower
+    data << uint64(0);                              // DBID
+    data << uint32(0);                              // GarrFollowerID
+    data << uint32(0);                              // CreatureID
+    data << uint32(0);                              // Gender
+    data << uint32(0);                              // Spec
+    data << uint32(0);                              // Race
+    data << uint32(0);                              // Quality
+    data << uint32(0);                              // FollowerLevel
+    data << uint32(0);                              // ItemLevelWeapon
+    data << uint32(0);                              // ItemLevelArmor
+    data << uint32(0);                              // Xp
+
+    GarrAbilityEntry* ability;
+    for (uint32 i = 0; i < ability->ID; i++)
+        uint32(ability->SpellID);                   // AbilityID
+
+    // GarrisonPlotInfo
+    data << uint32(0);                              // GarrPlotInstanceID
+    data << float(0);                               // PositionX
+    data << float(0);                               // PositionY
+    data << float(0);                               // PositionZ
+    data << uint32(0);                              // PlotType
+
+
+    data << uint32(0);                              // Unk
+
+    SendPacket(&data);
+
 }
 
 void WorldSession::HandleGarrStartMission(WorldPacket& recvData)

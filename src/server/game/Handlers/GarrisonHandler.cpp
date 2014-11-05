@@ -150,7 +150,6 @@ void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
     for (uint32 i = 0; i < archivedMissions; i++)
         uint32(0);                                  // ArchivedMissions
 
-
     SendPacket(&data);
 }
 

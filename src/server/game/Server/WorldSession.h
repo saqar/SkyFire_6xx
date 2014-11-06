@@ -968,6 +968,8 @@ class WorldSession
         void HandleViolenceLevel(WorldPacket& recvPacket);
         void HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket);
         void HandleRequestCategoryCooldowns(WorldPacket& recvPacket);
+        void HandleSortBagsOpcode(WorldPacket& recvPacket);
+        void HandleSortBankBagsOpcode(WorldPacket& recvPacket);
 
         void SendBroadcastText(uint32 entry);
 
@@ -986,20 +988,27 @@ class WorldSession
         void HandleBattlePetSummonCompanion(WorldPacket& recvData);
 
         // Garrisons
-        //void HandleGarrRemoveFollower(WorldPacket& recvData);
-        //void HandleGarrRecruitFollower(WorldPacket& recvData);
+        void HandleGarrRemoveFollower(WorldPacket& recvData);
+        void HandleGarrRecruitFollower(WorldPacket& recvData);
         void HandleGarrCompleteMission(WorldPacket& recvData);
         void HandleGarrSetBuildingActive(WorldPacket& recvData);
         void HandleGarrGenerateRecruits(WorldPacket& recvData);
         void HandleGarrPurchaseBuilding(WorldPacket& recvData);
         void HandleGarrUpgrade(WorldPacket& recvData);
         void HandleGarrGetInfo(WorldPacket& recvData);
-        //void HandleGarrAssignFollower(WorldPacket& recvData);
-        //void HandleGarrSwapBuildings(WorldPacket& recvData);
-        //void HandleGarrMissionBonusRoll(WorldPacket& recvData);
+        void HandleGarrAssignFollower(WorldPacket& recvData);
+        void HandleGarrSwapBuildings(WorldPacket& recvData);
+        void HandleGarrMissionBonusRoll(WorldPacket& recvData);
         void HandleGarrStartMission(WorldPacket& recvData);
-        //void HandleGarrRequestBlueprintData(WorldPacket& recvData);
+        void HandleGarrRequestBlueprintData(WorldPacket& recvData);
 
+        // Shipments
+        void HandleOpenShipmentNpc(WorldPacket& recvData);
+        void HandleGetShipmentInfo(WorldPacket& recvData);
+        void HandleGetShipmentOfType(WorldPacket& recvData);
+        void HandleCreateShipment(WorldPacket& recvData);
+        void HandleCompleteShipment(WorldPacket& recvData);
+        void HandleCompleteAllReadyShipment(WorldPacket& recvData);
 
     private:
         void InitializeQueryCallbackParameters();

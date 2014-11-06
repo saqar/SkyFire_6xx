@@ -174,3 +174,27 @@ void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
 
     SendPacket(&data);
 }
+
+void WorldSession::HandleGarrRequestBlueprintData(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleGarrMissionBonusRoll(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleGarrSwapBuildings(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleGarrAssignFollower(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleGarrRecruitFollower(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleGarrRemoveFollower(WorldPacket& recvData)
+{
+}

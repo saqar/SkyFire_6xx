@@ -253,6 +253,11 @@ void WorldSession::HandleLootOpcode(WorldPacket& recvData)
     // interrupt cast
     if (GetPlayer()->IsNonMeleeSpellCasted(false))
         GetPlayer()->InterruptNonMeleeSpells(false);
+
+    WorldPacket data(SMSG_LOOT_AE_TARGETS);
+
+    data << uint32(0);                          // Loot
+    SendPacket(&data);
 }
 
 void WorldSession::HandleLootReleaseOpcode(WorldPacket& recvData)

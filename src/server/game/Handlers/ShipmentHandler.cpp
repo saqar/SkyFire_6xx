@@ -19,3 +19,39 @@
 
 #include "ShipmentMgr.h"
 #include "WorldPacket.h"
+#include "WorldSession.h"
+
+void WorldSession::HandleOpenShipmentNpc(WorldPacket& recvData)
+{
+    ObjectGuid npcGuid;
+
+    recvData >> npcGuid;
+
+    WorldPacket data(SMSG_OPEN_SHIPMENT_NPC_RESULT);
+    ObjectGuid guid;
+    
+    data << guid;                           // NpcGUID
+    data << uint32(0);                      // CharShipmentContainerID
+
+    SendPacket(&data);
+}
+
+void WorldSession::HandleGetShipmentInfo(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleGetShipmentOfType(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleCreateShipment(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleCompleteShipment(WorldPacket& recvData)
+{
+}
+
+void WorldSession::HandleCompleteAllReadyShipment(WorldPacket& recvData)
+{
+}

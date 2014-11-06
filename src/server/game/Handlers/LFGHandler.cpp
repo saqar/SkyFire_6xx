@@ -92,21 +92,28 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         return;
     }
 
-    uint32 roles, unk1, needs;
+    uint32 roles, slots, needs, unknown;
     bool QueueAsGroup;
     uint8 PartyIndex;
 
-    uint32 commentLen = recvData.ReadBits(8);
     QueueAsGroup = recvData.ReadBit();                          // QueueAsGroup
+    recvData.ReadString(0);                                     // Unk
+    uint32 commentLen = recvData.ReadBits(8);
+
+    recvData.FlushBits();
 
     recvData >> PartyIndex;
     recvData >> roles;
-    recvData >> unk1;
+    recvData >> unknown;
+
+    recvData >> slots;
+
+    std::string comment = recvData.ReadString(commentLen);
 
     for (int32 i = 0; i < 3; ++i)
         recvData >> needs;
 
-    uint32 numDungeons = recvData.ReadBits(22);
+    uint32 numDungeons = 0;
 
     if (!numDungeons)
     {
@@ -114,8 +121,6 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         recvData.rfinish();
         return;
     }
-
-    std::string comment = recvData.ReadString(commentLen);
 
     lfg::LfgDungeonSet newDungeons;
     for (uint32 i = 0; i < numDungeons; ++i)

@@ -409,6 +409,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MAIL_DELETE,                        0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailDelete                   );
     DEFINE_OPCODE_HANDLER(CMSG_MAIL_MARK_AS_READ,                  0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailMarkAsRead               );
     DEFINE_OPCODE_HANDLER(CMSG_MAIL_RETURN_TO_SENDER,              0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailReturnToSender           );
+    DEFINE_OPCODE_HANDLER(CMSG_QUERY_SCENARIO_POI,                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_ITEM,                     0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeItem                 );
     DEFINE_OPCODE_HANDLER(CMSG_MAIL_TAKE_MONEY,                    0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMailTakeMoney                );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_BATTLEGROUND,     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
@@ -553,6 +554,14 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_RETURN_TO_GRAVEYARD,                0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReturnToGraveyard            );
     DEFINE_OPCODE_HANDLER(CMSG_ROLE_POLL_BEGIN,                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_SAVE_CUF_PROFILES,                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleSaveCUFProfiles              );
+    DEFINE_OPCODE_HANDLER(CMSG_SCENARIO_SHUTDOWN,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SCENARIO_ADVANCE_STEP,              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SCENARIO_SET_STEP,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SCENARIO_COMPLETE,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SCENARIO_RESTART,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SCENARIO_START,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SCENARIO_PAUSE,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SCENARIO_RESUME,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );   
     DEFINE_OPCODE_HANDLER(CMSG_SELF_RES,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSelfResOpcode                );
     DEFINE_OPCODE_HANDLER(CMSG_SELL_ITEM,                          0x0351, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSellItemOpcode               ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_SEND_MAIL,                          0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSendMail                     );
@@ -611,7 +620,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TELEPORT_TO_UNIT,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                         0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_TIME_ADJUSTMENT_RESPONSE,           0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP,                     0x0000, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleTimeSyncResp                 );
+    DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP,                     0x0003, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleTimeSyncResp                 ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP_FAILED,              0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_TOGGLE_PVP,                         0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTogglePvP                    );
     DEFINE_OPCODE_HANDLER(CMSG_TOTEM_DESTROYED,                    0x000D, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTotemDestroyed               ); // 6.0.3 19103
@@ -1307,6 +1316,11 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_RESYNC_RUNES,                       0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ROLE_POLL_BEGIN,                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_RWHOIS,                             0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_SCENARIO_STATE,                     0x0000, STATUS_NEVER    );
+    DEFINE_OPCODE_HANDLER(SMSG_SCENARIO_PROGRESS_UPDATE,           0x0000, STATUS_NEVER    );
+    DEFINE_OPCODE_HANDLER(SMSG_SCENARIO_POIS,                      0x0000, STATUS_NEVER    );
+    DEFINE_OPCODE_HANDLER(SMSG_SCENARIO_BOOT,                      0x0000, STATUS_NEVER    );
+    DEFINE_OPCODE_HANDLER(SMSG_SCENARIO_OUT_OF_BOUNDS,             0x0000, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_SELL_ITEM,                          0x1352, STATUS_NEVER    ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(SMSG_SEND_MAIL_RESULT,                   0x0000, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_SEND_UNLEARN_SPELLS,                0x0000, STATUS_NEVER    );

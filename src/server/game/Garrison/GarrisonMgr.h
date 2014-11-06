@@ -29,6 +29,8 @@
 #include "DB2Enums.h"
 #include "Garrison.h"
 
+typedef std::set<Garrison*> GarrisonSet;
+
 #define MAX_BUILDING_PLOTS 3
 #define MAX_FOLLOWER_SLOTS 5
 #define MAX_GARRISON_LEVEL 3
@@ -44,7 +46,7 @@ public:
 
     void Reset();
     static void DeleteFromDB(uint32 lowguid);
-    void LoadFromDB(PreparedQueryResult garrisonResult) {};
+    void LoadFromDB(PreparedQueryResult result) {};
     void SaveToDB(SQLTransaction& trans);
 
     // Garrison functions
@@ -53,6 +55,8 @@ public:
 
 private:
     Player* m_owner;
+
+    GarrisonSet m_GarrisonSet;
 };
 
 #endif

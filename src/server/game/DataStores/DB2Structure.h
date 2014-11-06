@@ -201,7 +201,7 @@ struct GarrFollowerEntry
     uint32 DisplayIDA;                                      // Alliance Display ID
     uint32 ClassH;                                          // Class Horde
     uint32 ClassA;                                          // Class Aliance
-    uint32 Quality;                                         // Followe Quality
+    uint32 Quality;                                         // Follower Quality
     uint32 SpecH;                                           // Spec Horde
     uint32 SpecA;                                           // Spec Alliance
     uint32 Data0;                                           // Unknown H

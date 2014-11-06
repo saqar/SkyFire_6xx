@@ -24,6 +24,7 @@
 
 void WorldSession::HandleGarrCompleteMission(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_COMPLETE_MISSION");
     ObjectGuid npcGuid;
     uint32 MissionRecID;
 
@@ -34,7 +35,7 @@ void WorldSession::HandleGarrCompleteMission(WorldPacket& recvData)
 
 void WorldSession::HandleGarrSetBuildingActive(WorldPacket& recvData)
 { 
-    TC_LOG_ERROR("network", "SENDING CMSG_GARR_SET_BUILDING_ACTIVE");
+    TC_LOG_ERROR("network", "World: Received CMSG_GARR_SET_BUILDING_ACTIVE");
     uint32 PlotInstanceID;
     recvData >> PlotInstanceID;
 
@@ -47,6 +48,7 @@ void WorldSession::HandleGarrSetBuildingActive(WorldPacket& recvData)
 
 void WorldSession::HandleGarrGenerateRecruits(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_GENERATE_RECRUITS");
     ObjectGuid guid;
     uint32 unk1, unk2;
 
@@ -57,6 +59,7 @@ void WorldSession::HandleGarrGenerateRecruits(WorldPacket& recvData)
 
 void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_PURCHASE_BUILDING");
     ObjectGuid npcGuid;
     uint32 BuildingID;
     uint32 PlotInstanceID;
@@ -80,6 +83,7 @@ void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
 
 void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_UPGRADE_GARR");
     ObjectGuid guid;
 
     recvData >> guid;
@@ -87,6 +91,7 @@ void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
 
 void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Sent SMSG_GET_GARR_INFO_RESULT");
     WorldPacket data(SMSG_GET_GARR_INFO_RESULT);
     ObjectGuid guid;
     bool active;
@@ -155,6 +160,7 @@ void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
 
 void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_START_MISSION");
     ObjectGuid npcGuid;
     uint32 MissionRecID;
     uint64 FollowerDBIDs;
@@ -177,24 +183,58 @@ void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
 
 void WorldSession::HandleGarrRequestBlueprintData(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_REQUEST_BLUEPRINT_AND_SPECIALIZATION_DATA");
 }
 
 void WorldSession::HandleGarrMissionBonusRoll(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_MISSION_BONUS_ROLL");
+    ObjectGuid guid;
+    uint32 unk;
+
+    recvData >> guid;
+    recvData >> unk;
 }
 
 void WorldSession::HandleGarrSwapBuildings(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_SWAP_BUILDING");
+    ObjectGuid guid;
+    uint32 unk1, unk2;
+
+    recvData >> guid;
+    recvData >> unk1;
+    recvData >> unk2;
 }
 
 void WorldSession::HandleGarrAssignFollower(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_ASSIGN_FOLLOWER_TO_BUILDING");
+    ObjectGuid NpcGUID;
+    uint32 PlotInstanceID;
+    uint64 NpcDBID;
+
+    recvData >> NpcGUID;
+    recvData >> PlotInstanceID;
+    recvData >> NpcDBID;
 }
 
 void WorldSession::HandleGarrRecruitFollower(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_RECRUIT_FOLLOWER");
+    ObjectGuid npcGuid;
+    uint32 unk;
+
+    recvData >> npcGuid;
+    recvData >> unk;
 }
 
 void WorldSession::HandleGarrRemoveFollower(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "World: Received CMSG_GARR_REMOVE_FOLLOWER_FROM_BUILDING");
+    ObjectGuid npcGuid;
+    uint64 FollowerDBID = 0;
+
+    recvData >> npcGuid;
+    recvData >> FollowerDBID;
 }

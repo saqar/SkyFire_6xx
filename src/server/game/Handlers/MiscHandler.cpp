@@ -2285,3 +2285,17 @@ void WorldSession::SendLoadCUFProfiles()
     data.append(byteBuffer);
     SendPacket(&data);
 }
+
+void WorldSession::HandleSortBagsOpcode(WorldPacket& recvData)
+{
+    TC_LOG_DEBUG("network", "World: Received CMSG_SORT_BAGS");
+
+}
+
+void WorldSession::HandleSortBankBagsOpcode(WorldPacket& recvData)
+{
+    TC_LOG_DEBUG("network", "World: Received CMSG_SORT_BANK_BAGS");
+    ObjectGuid guid;
+
+    recvData >> guid;
+}

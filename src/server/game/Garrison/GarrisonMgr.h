@@ -27,37 +27,37 @@
 #include "DB2Structure.h"
 #include "DB2Stores.h"
 #include "DB2Enums.h"
-#include "Garrison.h"
+#include "Garrisons.h"
 
-//typedef std::set<Garrison*> GarrisonSet;
-//
-//#define MAX_BUILDING_PLOTS 3
+typedef std::set<Garrisons*> GarrisonSet;
+
+#define MAX_BUILDING_PLOTS 3
 #define MAX_FOLLOWER_SLOTS 5
-//#define MAX_GARRISON_LEVEL 3
-//#define MAX_RESOURCES      10000
-//
-//class GarrisonMgr
-//{
-//public:
-//    GarrisonMgr();
-//    ~GarrisonMgr();
-//
-//    Player* GetOwner() const { return m_owner; }
-//
-//    void Reset();
-//    static void DeleteFromDB(uint32 lowguid);
-//    void LoadFromDB(PreparedQueryResult result) {};
-//    void SaveToDB(SQLTransaction& trans);
-//
-//    // Garrison functions
-//    void PlaceBuilding(uint32 GarrPlotInstanceID);
-//    void OpenArchitect(ObjectGuid npcGuid);
-//
-//private:
-//    Player* m_owner;
-//    GarrisonSet m_garrisonSet;
-//
-//
-//};
+#define MAX_GARRISON_LEVEL 3
+#define MAX_RESOURCES      10000
+
+class GarrisonMgr
+{
+public:
+    GarrisonMgr();
+    ~GarrisonMgr();
+
+    Player* GetOwner() const { return m_owner; }
+
+    void Reset();
+    static void DeleteFromDB(uint32 lowguid);
+    void LoadFromDB(PreparedQueryResult result) {};
+    void SaveToDB(SQLTransaction& trans);
+
+    // Garrison functions
+    void PlaceBuilding(uint32 GarrPlotInstanceID);
+    void OpenArchitect(ObjectGuid npcGuid);
+
+private:
+    Player* m_owner;
+    GarrisonSet m_garrisonSet;
+
+
+};
 
 #endif

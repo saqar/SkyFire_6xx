@@ -55,8 +55,9 @@ public:
 
 private:
     Player* m_owner;
+    GarrisonSet m_garrisonSet;
 
-    GarrisonSet m_GarrisonSet;
+
 };
 
 #endif

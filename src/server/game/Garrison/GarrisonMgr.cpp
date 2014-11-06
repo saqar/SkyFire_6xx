@@ -31,10 +31,10 @@
 
 GarrisonMgr::~GarrisonMgr()
 {
-    for (GarrisonSet::iterator itr = m_GarrisonSet.begin(); itr != m_GarrisonSet.end(); itr++)
+    for (GarrisonSet::const_iterator itr = m_garrisonSet.begin(); itr != m_garrisonSet.end(); itr++)
         delete *itr;
 
-    m_GarrisonSet.clear();
+    m_garrisonSet.clear();
 }
 
 void GarrisonMgr::LoadFromDB(PreparedQueryResult result)
@@ -81,11 +81,11 @@ void GarrisonMgr::SaveToDB(SQLTransaction& trans)
 {
     // SaveFollowerSlots to DB
 
-    if (m_GarrisonSet.empty())
+    if (m_garrisonSet.empty())
         return;
 
-    GarrisonSet::iterator itr = m_GarrisonSet.begin();
-    while (itr != m_GarrisonSet.end())
+    GarrisonSet::const_iterator itr = m_garrisonSet.begin();
+    while (itr != m_garrisonSet.end())
     {
         Garrison* garr = *itr++; // Why is pointer giving error?
         switch (garr->GetDBState())
@@ -98,7 +98,7 @@ void GarrisonMgr::SaveToDB(SQLTransaction& trans)
                 stmt->setUInt64(0, garr->GetId());
                 trans->Append(stmt);
 
-                m_GarrisonSet.erase(itr);
+                m_garrisonSet.erase(itr);
                 delete garr;
 
                 break;
@@ -115,7 +115,7 @@ void GarrisonMgr::SaveToDB(SQLTransaction& trans)
                 stmt->setUInt32(2, garr->GetGarrisonId());
                 stmt->setUInt32(3, garr->GetGarrisonLevel());
                 stmt->setUInt32(4, garr->GetResources());
-                stmt->setUInt8(5, garr->GetGarrisonSpec());
+                stmt->setUInt8(5,  garr->GetGarrisonSpec());
                 stmt->setUInt32(6, garr->GetGarrisonBuildings());
                 stmt->setUInt32(7, garr->GetGarrisonFollowers());
                 stmt->setUInt32(8, garr->GetWorkOrders());

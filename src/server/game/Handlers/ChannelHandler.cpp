@@ -27,19 +27,25 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
     uint32 channelId;
     uint32 channelLength, passLength;
     std::string channelName, password;
+    bool CreateVoiceSession;
+    bool Internal;
 
     recvPacket >> channelId;
 
-    uint8 unknown1 = recvPacket.ReadBit();                  // unknown bit
-    channelLength = recvPacket.ReadBits(7);
-    passLength = recvPacket.ReadBits(7);
-    uint8 unknown2 = recvPacket.ReadBit();                  // unknown bit
+    CreateVoiceSession = recvPacket.WriteBit(0);            // CreateVoiceSession
+    Internal = recvPacket.WriteBit(0);                      // Internal
 
+    recvPacket.WriteString(0);                              // Password
+    passLength = recvPacket.ReadBits(7);                    // PasswordLen
+    recvPacket.WriteString(0);                              // ChannelName
+    channelLength = recvPacket.ReadBits(7);                 // ChannelNameLen
+
+    recvPacket.FlushBits();
     channelName = recvPacket.ReadString(channelLength);
     password = recvPacket.ReadString(passLength);
 
     TC_LOG_DEBUG("chat.system", "CMSG_JOIN_CHANNEL %s Channel: %u, unk1: %u, unk2: %u, channel: %s, password: %s",
-        GetPlayerInfo().c_str(), channelId, unknown1, unknown2, channelName.c_str(), password.c_str());
+        GetPlayerInfo().c_str(), channelId, channelName.c_str(), password.c_str());
 
     if (channelId)
     {

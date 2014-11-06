@@ -265,12 +265,14 @@ struct ScriptedAI : public CreatureAI
     //   - for raid in mode 25-heroic
     // DO NOT USE to check raid in mode 25-normal.
     bool IsHeroic() const { return _isHeroic; }
+    bool IsMythic() const { return _isMythic; }
 
     // return the dungeon or raid difficulty
     Difficulty GetDifficulty() const { return _difficulty; }
 
     // return true for 25 man or 25 man heroic mode
     bool Is25ManRaid() const { return _difficulty & RAID_DIFFICULTY_MASK_25MAN; }
+    //bool IsFlexibleRaid() const { return _difficulty & MIN_PLAYERS_FLEXIBLE_RAID; }
 
     template<class T> inline
     const T& DUNGEON_MODE(const T& normal5, const T& heroic10) const
@@ -313,9 +315,9 @@ struct ScriptedAI : public CreatureAI
                 return normal10;
             case RAID_DIFFICULTY_25MAN_NORMAL:
                 return normal25;
-            case RAID_DIFFICULTY_10MAN_FLEX:
+            case RAID_DIFFICULTY_NORMAL:
                 return flex;
-            case RAID_DIFFICULTY_25MAN_LFR:
+            case RAID_DIFFICULTY_LFR:
                 return lfr;
             default:
                 break;
@@ -325,7 +327,8 @@ struct ScriptedAI : public CreatureAI
     }
 
     template<class T> inline
-        const T& RAID_MODE(const T& normal10, const T& normal25, const T& heroic10, const T& heroic25, const T& flex, const T& lfr) const
+        const T& RAID_MODE(const T& normal10, const T& normal25, const T& heroic10, const T& heroic25, const T& lfr,
+        const T& normal, const T& heroic, const T& mythic, const T& raid40, const T& event40, const T& raidfinder) const
     {
         switch (_difficulty)
         {
@@ -337,10 +340,20 @@ struct ScriptedAI : public CreatureAI
                 return heroic10;
             case RAID_DIFFICULTY_25MAN_HEROIC:
                 return heroic25;
-            case RAID_DIFFICULTY_10MAN_FLEX:
-                return flex;
-            case RAID_DIFFICULTY_25MAN_LFR:
+            case RAID_DIFFICULTY_NORMAL:
+                return normal;
+            case RAID_DIFFICULTY_LFR:
                 return lfr;
+            case RAID_DIFFICULTY_HEROIC:
+                return heroic;
+            case RAID_DIFFICULTY_MYTHIC:
+                return mythic;
+            case RAID_DIFFICULTY_40MAN:
+                return raid40;
+            case RAID_DIFFICULTY_EVENT:
+                return event40;
+            case RAID_DIFFICULTY_RAID_FINDER:
+                return raidfinder;
             default:
                 break;
         }
@@ -353,6 +366,7 @@ struct ScriptedAI : public CreatureAI
         uint32 _evadeCheckCooldown;
         bool _isCombatMovementAllowed;
         bool _isHeroic;
+        bool _isMythic;
 };
 
 class BossAI : public ScriptedAI

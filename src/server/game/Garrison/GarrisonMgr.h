@@ -22,9 +22,12 @@
 
 #include "SharedDefines.h"
 #include "Common.h"
+
+
 #include "DB2Structure.h"
 #include "DB2Stores.h"
 #include "DB2Enums.h"
+#include "Garrison.h"
 
 #define MAX_BUILDING_PLOTS 3
 #define MAX_FOLLOWER_SLOTS 5

@@ -106,7 +106,8 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     recvData >> roles;
     recvData >> unknown;
 
-    recvData >> slots;
+    for (uint32 i = 0; i < 4; i++)
+        recvData >> slots;
 
     std::string comment = recvData.ReadString(commentLen);
 
@@ -161,23 +162,27 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
 {
     uint32 proposalID;  // Proposal ID
+    uint32 Id, Type, Time;
+    uint64 InstanceID;
     bool accept;
 
     ObjectGuid guid1;
     ObjectGuid guid2;
 
+    // RideTicket
     recvData >> guid1;
-    recvData >> proposalID;
-    recvData.read_skip<uint32>();
-    recvData.read_skip<uint32>();
-    recvData.read_skip<uint32>();
+    recvData >> Id;
+    recvData >> Type;
+    recvData >> Time;
 
+    // UserClientDFProposalResponse
+    recvData >> InstanceID;
+    recvData >> proposalID;
     accept = recvData.ReadBit();
-    recvData >> guid2;
 
     TC_LOG_DEBUG("lfg", "CMSG_LFG_PROPOSAL_RESULT %s proposal: %u accept: %u",
         GetPlayerInfo().c_str(), proposalID, accept ? 1 : 0);
-    sLFGMgr->UpdateProposal(proposalID, GetPlayer()->GetGUID(), accept);
+    sLFGMgr->UpdateProposal(proposalID, GetPlayer()->GetGUID128(), accept);
 }
 
 void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recvData)
@@ -185,10 +190,10 @@ void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recvData)
     uint8 roles;
     uint32 roldesDesired;
 
-    recvData >> roles;                                     // Player Group Roles
     recvData >> roldesDesired;
+    recvData >> roles;                                     // Player Group Roles
 
-    ObjectGuid guid = GetPlayer()->GetGUID();
+    ObjectGuid guid = GetPlayer()->GetGUID128();
     Group* group = GetPlayer()->GetGroup();
 
     if (!group)
@@ -230,7 +235,7 @@ void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recvData)
 void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recvData)
 {
     bool out;
-    recvData >> out;
+    out = recvData.ReadBit();
 
     TC_LOG_DEBUG("lfg", "CMSG_LFG_TELEPORT %s out: %u",
         GetPlayerInfo().c_str(), out ? 1 : 0);

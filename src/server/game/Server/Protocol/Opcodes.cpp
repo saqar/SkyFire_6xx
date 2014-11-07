@@ -376,11 +376,11 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_PREVIEW_TALENTS_PET,          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLearnPreviewTalentsPet       );
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_TALENT,                       0x0BB6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLearnTalentOpcode            ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_LEAVE_CHANNEL,                      0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLeaveChannel                 ); // 6.0.3 19103
-    DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_JOIN,                      0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
-    DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_UPDATE_REQUEST,            0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
-    DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_LEAVE,                     0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
-    DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_GET_STATUS,                0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
-    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_LFG_LIST_BLACKLIST,         0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_JOIN,                      0x0B84, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_UPDATE_REQUEST,            0x07BD, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_LEAVE,                     0x0DA9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_GET_STATUS,                0x0B17, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
+    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_LFG_LIST_BLACKLIST,         0x149B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_SET_LFG_FAST_LAUNCH,                0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_SET_TIME_WALKER_DUNGEON,            0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_LFG_GET_STATUS,                     0x1BA4, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleLfgGetStatus                 ); // 6.0.3 19103

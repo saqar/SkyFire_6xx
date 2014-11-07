@@ -2498,3 +2498,36 @@ void WorldSession::HandleOpeningCinematic(WorldPacket& /*recvData*/)
             _player->SendCinematicStart(raceEntry->CinematicSequence);
     }
 }
+
+void WorldSession::HandleCharUndeleteOpcode(WorldPacket& recvPacket)
+{
+    TC_LOG_DEBUG("network", "World: Received CMSG_CHAR_UNDELETE");
+    ObjectGuid charGuid;
+    uint32 ClientToken;
+
+    recvPacket >> charGuid;
+    recvPacket >> ClientToken;
+
+    WorldPacket data(SMSG_CHAR_UNDELETE_RESPONSE);
+    uint32 result = 0;
+
+    data << charGuid;
+    data << ClientToken;
+    data << result;
+
+    SendPacket(&data);
+}
+
+void WorldSession::HandleCharUndeleteCooldownOpcode(WorldPacket& recvPacket)
+{
+    TC_LOG_DEBUG("network", "World: Received CMSG_CHAR_UNDELETE_COOLDOWN");
+
+    WorldPacket data(SMSG_CHAR_UNDELETE_COOLDOWN_RESPONSE);
+    bool onCooldown;
+
+    onCooldown = data.WriteBit(0);
+    data << uint32(0);
+    data << uint32(0);
+
+    SendPacket(&data);
+}

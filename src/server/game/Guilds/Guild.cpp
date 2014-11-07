@@ -1395,38 +1395,29 @@ void Guild::HandleQuery(WorldSession* session)
 {
     ObjectGuid guid = GetGUID();
 
-    WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200);      // Guess size
+    WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200);              // Guess size
+    bool hasValue;
 
     data << guid;
-    data.WriteBit(1); // HasData
-
-    // if (CliGuildInfoRank)
-    {
-        data.WriteBits(_GetRanksSize(), 21);
-
-        for (uint8 i = 0; i < _GetRanksSize(); i++)
-            data.WriteBits(m_ranks[i].GetName().length(), 7);
-
-        data.WriteBits(m_name.length(), 7);
-    }
-
+    hasValue = data.WriteBit(1);                                            // Value
     data.FlushBits();
 
-    //if (CliGuildInfo)
+    if (hasValue)
     {
         data << guid;
-        data << uint32(m_emblemInfo.GetBorderStyle());                      // BorderStyle
+        data << uint32(realmID);                                            // VirtualRealmAddress
+        data << uint32(0);                                                  // Unk
         data << uint32(m_emblemInfo.GetStyle());                            // EmblemStyle
         data << uint32(m_emblemInfo.GetColor());                            // EmblemColor
-        data << uint32(realmID);                                            // VirtualRealmAddress
+        data << uint32(m_emblemInfo.GetBorderStyle());                      // BorderStyle
         data << uint32(m_emblemInfo.GetBorderColor());                      // BorderColor
         data << uint32(m_emblemInfo.GetBackgroundColor());                  // BackgroundColor
-        data << uint32(0);                                                  // Unk
 
         for (uint8 i = 0; i < _GetRanksSize(); i++)
         {
             data << uint32(m_ranks[i].GetId());
             data << uint32(i);
+
             data.WriteBits(0, 7);
             data.WriteString(m_ranks[i].GetName());
         }
@@ -1434,6 +1425,7 @@ void Guild::HandleQuery(WorldSession* session)
         data.WriteBits(0, 7);
         data.WriteString(m_name);
     }
+    data.FlushBits();
 
     session->SendPacket(&data);
     TC_LOG_DEBUG("guild", "SMSG_GUILD_QUERY_RESPONSE [%s]", session->GetPlayerInfo().c_str());

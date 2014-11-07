@@ -13638,8 +13638,8 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     if (isRewardAllowed && player && player != victim)
     {
         WorldPacket data(SMSG_PARTYKILLLOG, (8+8)); // send event PARTY_KILL
-        data << uint64(player->GetGUID()); // player with killing blow
-        data << uint64(victim->GetGUID()); // victim
+        data << ObjectGuid(player->GetGUID()); // player with killing blow
+        data << ObjectGuid(victim->GetGUID()); // victim
 
         Player* looter = player;
 
@@ -13674,9 +13674,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
             if (creature)
             {
                 WorldPacket data2(SMSG_LOOT_LIST, 8 + 1 + 1);
-                data2 << uint64(creature->GetGUID());
-                data2 << uint8(0); // unk1
-                data2 << uint8(0); // no group looter
+                ObjectGuid guid, guid2;
+                data2 << ObjectGuid(creature->GetGUID128());
+                data2 << guid;
+                data2 << guid2;
                 player->SendMessageToSet(&data2, true);
             }
         }

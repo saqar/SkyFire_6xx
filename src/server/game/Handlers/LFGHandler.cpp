@@ -92,27 +92,31 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         return;
     }
 
-    uint32 roles, slots, needs, unknown;
+    uint32 roles, slots, needs;
     bool QueueAsGroup;
     uint8 PartyIndex;
 
     QueueAsGroup = recvData.ReadBit();                          // QueueAsGroup
     recvData.ReadString(0);                                     // Unk
-    uint32 commentLen = recvData.ReadBits(8);
+    recvData.ReadBits(8);
 
     recvData.FlushBits();
 
     recvData >> PartyIndex;
     recvData >> roles;
-    recvData >> unknown;
+    recvData >> needs;
 
-    for (uint32 i = 0; i < 4; i++)
+    for (uint32 i = 0; i < QueueAsGroup; i++)
         recvData >> slots;
 
-    std::string comment = recvData.ReadString(commentLen);
+    std::string comment = recvData.ReadString(0);
+    recvData.append(comment);
 
-    for (int32 i = 0; i < 3; ++i)
-        recvData >> needs;
+    if (needs)
+    {
+        for (int32 i = 0; i < 3; ++i)
+            recvData >> needs;
+    }
 
     uint32 numDungeons = 0;
 
@@ -796,8 +800,8 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + proposal.players.size() * (4 + 1 + 1 + 1 + 1 +1));
 
     //CliRideTicket
-    ObjectGuid guid;
-    data << guid;                                           // RequesterGuid
+    ObjectGuid requester;
+    data << requester;                                      // RequesterGuid
     data << uint32(0);                                      // ID
     data << uint32(0);                                      // Type
     data << uint32(0);                                      // UnixTime
@@ -877,3 +881,14 @@ void WorldSession::SendLfrUpdateListOpcode(uint32 dungeonEntry)
     SendPacket(&data);
 }
 */
+
+void WorldSession::HandleLfgGetSystemInfo(WorldPacket& recvData)
+{
+    TC_LOG_DEBUG("network", "World: Receiving CMSG_LFG_GET_SYSTEM_INFO");
+
+    uint8 partyIndex;
+    bool player;
+
+    player = recvData.ReadBit();
+    recvData >> partyIndex;
+}

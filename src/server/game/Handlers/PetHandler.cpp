@@ -423,7 +423,7 @@ void WorldSession::HandlePetNameQuery(WorldPacket& recvData)
     TC_LOG_INFO("network", "HandlePetNameQuery. CMSG_PET_NAME_QUERY");
 
     ObjectGuid petGuid;
-    ObjectGuid petNumber;
+    uint32 petNumber;
 
     recvData >> petGuid;
     recvData >> petNumber;
@@ -446,9 +446,18 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
     }
 
     WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 5 + pet->GetName().size() + 4));
-    data.WriteBit(1);                               // has data
+    ObjectGuid guid;
+    bool Allow;
+    bool HasDecline;
 
+    data << guid;
+    HasDecline = data.WriteBit(1);                               // HasDecline
+
+    Allow = data.WriteBit(0);                                    // Allow
+    data.WriteBits(pet->GetName().size(), 8);
     bool declinedNames = pet->IsPet() && ((Pet*)pet)->GetDeclinedNames();
+
+    data.FlushBits();
 
     for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
     {
@@ -458,17 +467,12 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
             data.WriteBits(0, 7);
     }
 
-    data.WriteBit(0);                               // unknown
-    data.WriteBits(pet->GetName().size(), 8);
-    data.FlushBits();
-
     if (declinedNames)
         for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
             data.WriteString(((Pet*)pet)->GetDeclinedNames()->name[i]);
 
-    data.WriteString(pet->GetName());
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
-    data << uint64(petNumber);
+    data.WriteString(pet->GetName());
 
     _player->GetSession()->SendPacket(&data);
 }

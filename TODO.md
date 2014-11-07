@@ -1,32 +1,49 @@
-## To-do list (Try to keep the order by importance)
-* Bank / Guild Bank
-* Reputations
-* Achievements / Guild Acievements / Implement acc achievements
-* Update ingame damage / stats calculation, (including newest formulas from paper doll)
-* Implement dynamic update fieldss
-* Implement PvP Power / Update resil
-* Battlegrounds
-* Implement Premade characters
-* Instance Locking
-* Professions
-* Void Storage
-* Calendair & Events
-* Arenas - needs full rewrite O.o
-* Pets / Pet Battles
-* Scenarios
-* Ingame Shop
-* Archaeology
-* Rated Battlegrounds
-* Dungeon Finder
-* Guild Finder
-* Raid Finder
-* Implement char boost
+## To-do list (Try to keep the order by importance):
 
-## Finished Stuff
+* Account Wide features (THIS IS VERY IMPORTANT). 
+* Creature Data bruteforced from client. (This would help our waypoint issue).
+* Waypoints
+* Garrisons
+* Guilds (includes bank).
+* Professions (This is a big deal for 6xx, because it plays in to the garrison system).
+* Reputation (also a big deal for 6xx)
+* Auctions
+* Item Upgrades (Wonder if this is in 6xx later patches. I'll bet it is).
+* Phases
+* Gossip
+* Text system
+* Dungeon Finder/Raid Finder
+* In Game Shop
+* Scenarios
+* Implement PvP Power / Update resil
+* Mail
+* Rated BGs
+* Archaeology
+* Guild Finder
+* Character Boost
+* RaF
+* Calendar
+* Void Storage
+
+## Things that aren't done, but are close:
+* Achievements/Guild Achievements
+* Pet Battle update (already done, just needs touchups). 
+* Quest update (already done, just needs touchups). 
+* Arenas
+* Battlegrounds
+* Spell scripts
+* Object Update
+* Groups 
+
+## Finished Stuff:
 * Auth
 * Char Enum
 * World Login
 * Talents / Known spells
+* Items
+* Stat system
+* Battlegrounds
+* Mastery
 * Char name / Realm queries
 * Messagechat
 * Basic player movement
@@ -41,12 +58,7 @@
 * Auras
 * Creature / Gameobject gossips (including vendors and trainers)
 * Glyphs
-* Properly finish living part of object update
 * XP Related Stuff
 * Loot
-* Groups (Parties / Raids)
 * Mounts
-* Guilds
-* Quests
-* Mail
-* Auction House
+* Update Fields

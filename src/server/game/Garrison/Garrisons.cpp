@@ -1,11 +1,11 @@
 #include "Garrisons.h"
 #include "GarrisonMgr.h"
 
-Garrisons::Garrisons()
+void Garrisons::SendArchitectWindow(ObjectGuid npcGuid)
 {
 }
 
+void Garrisons::HandleGarrisonMissionType(PreparedQueryResult result)
+{ 
 
-Garrisons::~Garrisons()
-{
 }

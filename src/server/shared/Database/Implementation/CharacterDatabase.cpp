@@ -648,5 +648,5 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_ACCOUNT_BATTLE_PET_SLOTS, "INSERT INTO account_battle_pet_slots (accountId, slot1, slot2, slot3, flags) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 
     PrepareStatement(CHAR_DEL_GARRISON, "DELETE FROM garrison WHERE id = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_INS_GARRISON, "INSERT INTO garrison (id, accountId, garrisonId, garrisonLevel, currentResources, specialization, buildings, followers, workOrders) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_GARRISON, "INSERT INTO garrison (garrisonId, accountId, characterId, garrisonLevel, currentResources, specialization, buildings, workOrders) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }

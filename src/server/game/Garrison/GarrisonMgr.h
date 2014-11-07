@@ -43,21 +43,38 @@ public:
     ~GarrisonMgr();
 
     Player* GetOwner() const { return m_owner; }
+    Garrisons* GetGarrison(uint32 garrisonId) const;
+    void GarrisonCreate()
 
     void Reset();
     static void DeleteFromDB(uint32 lowguid);
     void LoadFromDB(PreparedQueryResult result) {};
     void SaveToDB(SQLTransaction& trans);
 
-    // Garrison functions
-    void PlaceBuilding(uint32 GarrPlotInstanceID);
-    void OpenArchitect(ObjectGuid npcGuid);
+    static void DeleteFollowerFromDB(uint32 garrId);
+    void SaveFollowerToDB(SQLTransaction& trans);
+    void LoadFollowerFromDB(PreparedQueryResult result) {};
+
+    CreatureTemplate* GetCreatureTemplate() const { return m_creature; }
+
+    // Garrison Functions
+    GarrMissionCategory* GetMissionCategory() const { return m_category; }
+    GarrMissionEntry* GetMission() const { return m_garrMission; }
+    GarrAbilityEntry* GetAbility() const { return m_garrAbility; }
+
+    uint8 GarrisonGetFollowerSlots(uint32 garrisonId);
+    uint8 GetFollowerSlot(uint32 followerId);
 
 private:
     Player* m_owner;
+    Unit* m_unit;
+
+    CreatureTemplate* m_creature;
+    GarrAbilityEntry* m_garrAbility;
+    GarrMissionEntry* m_garrMission;
+    GarrMissionCategory* m_category;
+
     GarrisonSet m_garrisonSet;
-
-
 };
 
 #endif

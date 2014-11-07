@@ -63,39 +63,18 @@ boost::asio::deadline_timer _dbPingTimer(_ioService);
 uint32 _dbPingInterval;
 LoginDatabaseWorkerPool LoginDatabase;
 
-/// Print out the usage string for this program on the console.
-void usage(const char* prog)
-{
-    TC_LOG_INFO("server.authserver", "Usage: \n %s [<options>]\n"
-        "    -c config_file           use config_file as configuration file\n\r",
-        prog);
-}
-
 int main(int argc, char** argv)
 {
-    // Command line parsing to get the configuration file name
-    char const* configFile = _TRINITY_REALM_CONFIG;
-    int count = 1;
-    while (count < argc)
-    {
-        if (strcmp(argv[count], "-c") == 0)
-        {
-            if (++count >= argc)
-            {
-                printf("Runtime-Error: -c option requires an input argument\n");
-                usage(argv[0]);
-                return 1;
-            }
-            else
-                configFile = argv[count];
-        }
-        ++count;
-    }
+    std::string configFile = _TRINITY_REALM_CONFIG;
+    auto vm = GetConsoleArguments(argc, argv, configFile);
+    // exit if help is enabled
+    if (vm.count("help"))
+        return 0;
 
-    if (!sConfigMgr->LoadInitial(configFile))
+    std::string configError;
+    if (!sConfigMgr->LoadInitial(configFile, configError))
     {
-        printf("Invalid or missing configuration file : %s\n", configFile);
-        printf("Verify that the file exists and has \'[authserver]\' written in the top of the file!\n");
+        printf("Error in config file: %s\n", configError.c_str());
         return 1;
     }
 

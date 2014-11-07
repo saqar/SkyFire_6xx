@@ -31,7 +31,7 @@ std::map<Battlenet::PacketHeader, Battlenet::Session::PacketHandler> InitHandler
 {
     std::map<Battlenet::PacketHeader, Battlenet::Session::PacketHandler> handlers;
 
-    handlers[Battlenet::PacketHeader(Battlenet::CMSG_INFORMATION_REQUEST, Battlenet::AUTHENTICATION)] = &Battlenet::Session::HandleAuthChallenge;
+    handlers[Battlenet::PacketHeader(Battlenet::CMSG_AUTH_CHALLENGE, Battlenet::AUTHENTICATION)] = &Battlenet::Session::HandleAuthChallenge;
     handlers[Battlenet::PacketHeader(Battlenet::CMSG_AUTH_RECONNECT, Battlenet::AUTHENTICATION)] = &Battlenet::Session::HandleAuthReconnect;
     handlers[Battlenet::PacketHeader(Battlenet::CMSG_AUTH_PROOF_RESPONSE, Battlenet::AUTHENTICATION)] = &Battlenet::Session::HandleAuthProofResponse;
 
@@ -58,8 +58,8 @@ Battlenet::Session::ModuleHandler const Battlenet::Session::ModuleHandlers[MODUL
 };
 
 Battlenet::Session::Session(tcp::socket&& socket) : Socket(std::move(socket), std::size_t(BufferSizes::Read)), _accountId(0), _accountName(), _locale(),
-_os(), _build(0), _gameAccountId(0), _gameAccountName(), _accountSecurityLevel(SEC_PLAYER), I(), s(), v(), b(), B(), K(),
-_reconnectProof(), _crypt(), _authed(false)
+    _os(), _build(0), _gameAccountId(0), _gameAccountName(), _accountSecurityLevel(SEC_PLAYER), I(), s(), v(), b(), B(), K(),
+    _reconnectProof(), _crypt(), _authed(false)
 {
     static uint8 const N_Bytes[] =
     {
@@ -130,13 +130,13 @@ bool Battlenet::Session::HandleAuthChallenge(PacketHeader& header, BitStream& pa
     AuthChallenge info(header, packet);
     info.Read();
 
-    /*if (info.Program != "WoW")
+    if (info.Program != "WoW")
     {
         AuthComplete* complete = new AuthComplete();
         complete->SetAuthResult(AUTH_INVALID_PROGRAM);
         AsyncWrite(complete);
         return true;
-    }*/
+    }
 
     if (!sBattlenetMgr->HasPlatform(info.Platform))
     {
@@ -162,13 +162,10 @@ bool Battlenet::Session::HandleAuthChallenge(PacketHeader& header, BitStream& pa
             if (!sBattlenetMgr->HasProgram(component.Program))
                 complete->SetAuthResult(AUTH_INVALID_PROGRAM);
             else if (!sBattlenetMgr->HasPlatform(component.Platform))
-            {
                 complete->SetAuthResult(AUTH_INVALID_OS);
-                TC_LOG_DEBUG("server.battlenet", "INVALID PLATFORM");
-            }
             else
             {
-                if (component.Program != "WoWB" /*|| AuthHelper::IsBuildSupportingBattlenet(component.Build)*/)
+                if (component.Program != "WoW" || AuthHelper::IsBuildSupportingBattlenet(component.Build))
                     complete->SetAuthResult(AUTH_REGION_BAD_VERSION);
                 else
                     complete->SetAuthResult(AUTH_USE_GRUNT_LOGON);
@@ -456,6 +453,9 @@ bool Battlenet::Session::HandleRealmUpdateSubscribe(PacketHeader& /*header*/, Bi
 
         uint32 flag = realm.flag;
         RealmBuildInfo const* buildInfo = AuthHelper::GetBuildInfo(realm.gamebuild);
+
+    #ifndef IGNORE_WOW_VERSION
+
         if (realm.gamebuild != _build)
         {
             if (!buildInfo)
@@ -466,6 +466,7 @@ bool Battlenet::Session::HandleRealmUpdateSubscribe(PacketHeader& /*header*/, Bi
 
         if (!buildInfo)
             flag &= ~REALM_FLAG_SPECIFYBUILD;
+    #endif
 
         RealmUpdate* update = new RealmUpdate();
         update->Timezone = realm.timezone;
@@ -529,8 +530,6 @@ bool Battlenet::Session::HandleRealmJoinRequest(PacketHeader& header, BitStream&
     hmac2.Finalize();
 
     memcpy(sessionKey + hmac.GetLength(), hmac2.GetDigest(), hmac2.GetLength());
-
-    TC_LOG_DEBUG("network", "Header: ", header.ToString().c_str());
 
     LoginDatabase.DirectPExecute("UPDATE account SET sessionkey = '%s', last_ip = '%s', last_login = NOW(), locale = %u, failed_logins = 0, os = '%s' WHERE id = %u",
         ByteArrayToHexStr(sessionKey, 40, true).c_str(), GetRemoteIpAddress().to_string().c_str(), GetLocaleByName(_locale), _os.c_str(), _gameAccountId);
@@ -609,7 +608,6 @@ void Battlenet::Session::AsyncWrite(ServerPacket* packet)
     packet->Write();
 
     std::lock_guard<std::mutex> guard(_writeLock);
-
     _crypt.EncryptSend(packet->GetData(), packet->GetSize());
 
     bool needsWriteStart = _writeQueue.empty();

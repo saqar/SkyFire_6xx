@@ -81,6 +81,10 @@ void BattlenetMgr::LoadModules()
 
 bool BattlenetMgr::HasComponent(Battlenet::Component const* component) const
 {
+#ifdef IGNORE_WOW_VERSION
+    return true;
+#endif
+
     for (Battlenet::Component const* c : _components)
         if (component->Program == c->Program && component->Platform == c->Platform && component->Build == c->Build)
             return true;
@@ -90,7 +94,7 @@ bool BattlenetMgr::HasComponent(Battlenet::Component const* component) const
 
 Battlenet::ModuleInfo* BattlenetMgr::CreateModule(std::string const& os, std::string const& name) const
 {
-    Battlenet::ModuleKey key{ os, name };
+    Battlenet::ModuleKey key { os, name };
     ASSERT(_modules.count(key));
 
     return new Battlenet::ModuleInfo(*_modules.at(key));

@@ -27,10 +27,10 @@ namespace Battlenet
 {
     class PacketCrypt : public ::PacketCrypt
     {
-    public:
-        PacketCrypt();
+        public:
+            PacketCrypt();
 
-        void Init(BigNumber* K) override;
+            void Init(BigNumber* K) override;
     };
 }
 

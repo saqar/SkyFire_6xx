@@ -23,6 +23,7 @@
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio/ip/address.hpp>
+#include "Log.h"
 
 std::string Battlenet::PacketHeader::ToString() const
 {
@@ -118,10 +119,11 @@ Battlenet::ProofRequest::~ProofRequest()
 void Battlenet::ProofRequest::Write()
 {
     _stream.Write(Modules.size(), 3);
+
     for (ModuleInfo const* info : Modules)
     {
         _stream.WriteBytes(info->Type.c_str(), 4);
-        _stream.WriteFourCC(info->Region);
+        _stream.WriteFourCC(info->Region); // Should be sent like this
         _stream.WriteBytes(info->ModuleId, 32);
         _stream.Write(info->DataSize, 10);
         _stream.WriteBytes(info->Data, info->DataSize);
@@ -202,20 +204,21 @@ void Battlenet::AuthComplete::Write()
             }
         }
 
+        _stream.Write(0, 1);
+
         _stream.WriteString(FirstName, 8); // First name
         _stream.WriteString(LastName, 8); // Last name - not set for WoW
 
         _stream.Write(AccountId, 32);
-
         _stream.Write(Region, 8);
         _stream.Write(0, 64);
-        _stream.Write(GameAccountRegion, 8);
 
+        _stream.Write(GameAccountRegion, 8);
         _stream.WriteString(GameAccountName, 5, -1);
         _stream.Write(GameAccountFlags, 64);
 
         _stream.Write(0, 32);
-        _stream.Write(0, 1);
+        _stream.Write(0, 8);
     }
     else
     {
@@ -226,8 +229,6 @@ void Battlenet::AuthComplete::Write()
             _stream.WriteBytes(info->Type.c_str(), 4);
             _stream.WriteFourCC(info->Region);
             _stream.WriteBytes(info->ModuleId, 32);
-            _stream.Write(info->DataSize, 10);
-            _stream.WriteBytes(info->Data, info->DataSize);
         }
 
         _stream.Write(ErrorType, 2);
@@ -370,16 +371,22 @@ std::string Battlenet::RealmCharacterCounts::ToString() const
 
 void Battlenet::RealmUpdate::Write()
 {
+    bool hasVersion = !Version.empty();
+
+    #ifdef IGNORE_WOW_VERSION
+        hasVersion = 0;
+    #endif
+
     _stream.Write(true, 1);     // Success
     _stream.Write(Timezone, 32);
     _stream.WriteFloat(Population);
     _stream.Write(Lock, 8);
-    _stream.Write(0, 19);
-    _stream.Write(Type + std::numeric_limits<int32>::min(), 32);
+    _stream.Write(Index, 19);
+    _stream.Write(Type + -std::numeric_limits<int32>::min(), 32);
     _stream.WriteString(Name, 10);
 
-    _stream.Write(!Version.empty(), 1);
-    if (!Version.empty())
+    _stream.Write(hasVersion, 1);
+    if (hasVersion)
     {
         _stream.WriteString(Version, 5);
         _stream.Write(Build, 32);
@@ -390,15 +397,17 @@ void Battlenet::RealmUpdate::Write()
         EndianConvertReverse(ip);
         EndianConvertReverse(port);
 
-        _stream.WriteBytes(&ip, 4);
+        _stream.WriteBytes(ip.data(), 4);
         _stream.WriteBytes(&port, 2);
     }
+
 
     _stream.Write(Flags, 8);
     _stream.Write(Region, 8);
     _stream.Write(0, 12);
     _stream.Write(Battlegroup, 8);
     _stream.Write(Index, 32);
+
 }
 
 std::string Battlenet::RealmUpdate::ToString() const
@@ -416,9 +425,9 @@ std::string Battlenet::RealmUpdate::ToString() const
 void Battlenet::RealmJoinRequest::Read()
 {
     ClientSeed = _stream.Read<uint32>(32);
-    Unknown = _stream.Read<uint32>(20);
+    _stream.Read<uint32>(20);
     Realm.Region = _stream.Read<uint8>(8);
-    _stream.Read<uint16>(12);
+    _stream.Read<uint32>(12);
     Realm.Battlegroup = _stream.Read<uint8>(8);
     Realm.Index = _stream.Read<uint32>(32);
 }
@@ -434,20 +443,30 @@ void Battlenet::RealmJoinResult::Write()
 {
     _stream.Write(0, 1);    // Fail
     _stream.Write(ServerSeed, 32);
+
     _stream.Write(IPv4.size(), 5);
+    for (tcp::endpoint const& addr : IPv4)
+    {
+        boost::asio::ip::address_v4::bytes_type ip = addr.address().to_v4().to_bytes();
+        uint16 port = addr.port();
+        EndianConvertReverse(port);
+
+        _stream.WriteBytes(ip.data(), 4);
+        _stream.WriteBytes(&port, 2);
+    }
+
+    _stream.Write(IPv6.size(), 5);
     for (tcp::endpoint const& addr : IPv6)
     {
         boost::asio::ip::address_v6::bytes_type ip = addr.address().to_v6().to_bytes();
         uint16 port = addr.port();
 
-        EndianConvertReverse(ip);
         EndianConvertReverse(port);
 
-        _stream.WriteBytes(&ip, 4);
+        _stream.WriteBytes(ip.data(), 16);
         _stream.WriteBytes(&port, 2);
     }
 
-    _stream.Write(0, 5);            // IPv6 addresses
 }
 
 std::string Battlenet::RealmJoinResult::ToString() const

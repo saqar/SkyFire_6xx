@@ -816,7 +816,7 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
     m_HomebindTimer = 0;
     m_InstanceValid = true;
     m_dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
-    m_raidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
+    m_raidDifficulty = RAID_DIFFICULTY_NORMAL;          // Updated in 6xx
 
     m_lastPotionId = 0;
     _talentMgr = new PlayerTalentInfo();
@@ -17481,7 +17481,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         dungeonDiff = DUNGEON_DIFFICULTY_NORMAL;
     uint32 raidDiff = (fields[39].GetUInt8() >> 4) & 0x0F;
     if (raidDiff >= MAX_RAID_DIFFICULTY)
-        raidDiff = RAID_DIFFICULTY_10MAN_NORMAL;
+        raidDiff = RAID_DIFFICULTY_NORMAL;                  // Updated in 6xx
     SetDungeonDifficulty(Difficulty(dungeonDiff));          // may be changed in _LoadGroup
     SetRaidDifficulty(Difficulty(raidDiff));                // may be changed in _LoadGroup
 
@@ -19219,7 +19219,7 @@ void Player::SendRaidInfo()
             if (itr->second.perm)
             {
                 InstanceSave* save = itr->second.save;
-                bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
+                bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_HEROIC;
                 uint32 completedEncounters = 0;
                 if (Map* map = sMapMgr->FindMap(save->GetMapId(), save->GetInstanceId()))
                     if (InstanceScript* instanceScript = ((InstanceMap*)map)->GetInstanceScript())

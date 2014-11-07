@@ -179,9 +179,9 @@ struct LfgUpdateData
 struct LfgQueueStatusData
 {
     LfgQueueStatusData(uint8 _queueId = 0, uint32 _dungeonId = 0, time_t _joinTime = 0, int32 _waitTime = -1, int32 _waitTimeAvg = -1, int32 _waitTimeTank = -1, int32 _waitTimeHealer = -1,
-        int32 _waitTimeDps = -1, uint32 _queuedTime = 0, uint8 _tanks = 0, uint8 _healers = 0, uint8 _dps = 0) :
+        int32 _waitTimeDps = -1, uint32 _queuedTime = 0, uint8 _tanks = 0, uint8 _healers = 0, uint8 _dps = 0, int32 _waitTimeRole = -1) :
         queueId(_queueId), dungeonId(_dungeonId), joinTime(_joinTime), waitTime(_waitTime), waitTimeAvg(_waitTimeAvg), waitTimeTank(_waitTimeTank),
-        waitTimeHealer(_waitTimeHealer), waitTimeDps(_waitTimeDps), queuedTime(_queuedTime), tanks(_tanks), healers(_healers), dps(_dps) { }
+        waitTimeHealer(_waitTimeHealer), waitTimeDps(_waitTimeDps), queuedTime(_queuedTime), tanks(_tanks), healers(_healers), dps(_dps), waitTimeRole(_waitTimeRole) { }
 
     uint8 queueId;
     uint32 dungeonId;
@@ -195,6 +195,8 @@ struct LfgQueueStatusData
     uint8 tanks;
     uint8 healers;
     uint8 dps;
+
+    int32 waitTimeRole;
 };
 
 struct LfgPlayerRewardData

@@ -1387,7 +1387,7 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
 {
     WorldPacket data(SMSG_EMOTE, 4 + 8);
     data << uint32(anim_id);
-    data << uint64(GetGUID());
+    data << ObjectGuid(GetGUID128());
     SendMessageToSet(&data, true);
 }
 

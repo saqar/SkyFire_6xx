@@ -31,12 +31,14 @@ enum DBStateFollowers
 class Garrisons
 {
 public:
-    Garrisons(uint32 garrisonId, uint32 accountId, uint32 characterId, uint32 garrisonLevel, uint32 currentResources, uint8 specialization,
+    Garrisons(uint64 garrisonId, uint32 accountId, uint32 characterId, uint32 garrisonLevel, uint32 currentResources, uint8 specialization,
         uint32 garrisonBuildings, uint32 garrisonWorkOrders) : m_garrId(garrisonId), m_accountId(accountId), m_charId(characterId), m_garrLevel(garrisonLevel),
         m_currentResources(currentResources), m_specialization(specialization), m_buildings(garrisonBuildings), m_workOrders(garrisonWorkOrders) { }
     ~Garrisons();
 
-    uint32 GetGarrisonId() const { return m_garrId; }
+    Player* GetOwner() const { return m_owner; }
+
+    uint64 GetGarrisonId() const { return m_garrId; }
     uint32 GetAccountId() const { return m_accountId; }
     uint32 GetCharacterId() const { return m_charId; }
     uint32 GetGarrisonLevel() const { return m_garrLevel; }
@@ -52,6 +54,8 @@ public:
     void SendArchitectWindow(ObjectGuid npcGuid);
     void SendGarrisonUpgrade();
     void SendGarrisonLevelUp();  
+
+    uint32 GetGarrisonPlot() const { return m_plot; }
 
     void CreateGarrison();
     void DeleteGarrison();
@@ -72,7 +76,7 @@ public:
     void HandleGarrisonFollowerLevel();
     void HandleGarrisonFollowerItemLevelChange();
     uint32 GetFollowerAbility() const { return m_followerAbility; }
-    GarrFollowerEntry* GetFollowerId() const { return m_garrFollower; }
+    uint32 GetFollowerId() const { return m_garrFollower; }
 
     // Mission functions
     void SendGarrCompleteMission();
@@ -84,8 +88,10 @@ public:
     void HandleGarrisonMissionType(PreparedQueryResult result);
 
 private:
+    Player* m_owner;
+
     // Struct of garrison table
-    uint32 m_garrId;
+    uint64 m_garrId;
     uint32 m_accountId;
     uint32 m_charId;
     uint32 m_garrLevel;
@@ -95,12 +101,13 @@ private:
     uint32 m_workOrders;
 
     uint32 m_followerAbility;
+    uint32 m_plot;
 
     CreatureTemplate* m_creature;
     GarrAbilityEntry* m_garrAbility;
     GarrMissionEntry* m_garrMission;
     GarrMissionCategory* m_category;
-    GarrFollowerEntry* m_garrFollower;
+    uint32 m_garrFollower;
 
     DBStateGarr m_dbState;
 };

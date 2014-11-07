@@ -7,5 +7,4 @@ void Garrisons::SendArchitectWindow(ObjectGuid npcGuid)
 
 void Garrisons::HandleGarrisonMissionType(PreparedQueryResult result)
 { 
-
 }

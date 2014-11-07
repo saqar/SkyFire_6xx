@@ -53,7 +53,7 @@ public:
 
     Player* GetOwner() const { return m_owner; }
     Garrisons* GetGarrison(uint64 garrisonId) const;
-    void GarrisonCreate()
+    void GarrisonCreate();
 
     void Reset();
     static void DeleteFromDB(uint32 lowguid);

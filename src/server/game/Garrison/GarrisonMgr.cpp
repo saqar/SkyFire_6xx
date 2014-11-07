@@ -20,6 +20,7 @@
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "DB2Enums.h"
+#include "Field.h"
 #include "GarrisonMgr.h"
 #include "Garrisons.h"
 #include "ObjectMgr.h"
@@ -37,28 +38,31 @@ GarrisonMgr::~GarrisonMgr()
     m_garrisonSet.clear();
 }
 
-void GarrisonMgr::LoadFromDB(PreparedQueryResult result)
-{
-    if (!result)
-        return;
-    
-    do
-    {
-        Field* field = result->Fetch();
-
-        uint64 garrisonId = field[0].GetUInt64;
-        uint32 accountId = field[1].GetUInt32;
-        uint32 characterId = field[2].GetUInt32;
-        uint32 garrisonLevel = field[3].GetUInt32;
-        uint32 currentResources = field[4].GetUInt32;
-        uint8  specialization = field[5].GetUInt8;
-        uint32 buildings = field[6].GetUInt32;
-        uint32 workOrders = field[7].GetUInt32;
-
-        Garrisons* garrison = new Garrisons(garrisonId, accountId, characterId, garrisonLevel, currentResources,
-            specialization, buildings, workOrders);
-    } while (result->NextRow());
-}
+//void GarrisonMgr::LoadFromDB(PreparedQueryResult result)
+//{
+//    if (!result)
+//        return;
+//    
+//    do
+//    {
+//        Field* fields = result->Fetch();
+//
+//        uint64 garrisonId = fields[0].&Field::GetUInt64;
+//        uint32 accountId = fields[1].GetUInt32;
+//        uint32 characterId = fields[2].GetUInt32;
+//        uint32 garrisonLevel = fields[3].GetUInt32;
+//        uint32 currentResources = fields[4].GetUInt32;
+//        uint8  specialization = fields[5].GetUInt8;
+//        uint32 buildings = fields[6].GetUInt32;
+//        uint32 workOrders = fields[7].GetUInt32;
+//
+//        Garrisons* garrison = new Garrisons(garrisonId, accountId, characterId, garrisonLevel, currentResources,
+//            specialization, buildings, workOrders);
+//
+//        m_garrisonSet.insert(garrison);
+//
+//    } while (result->NextRow());
+//}
 
 void GarrisonMgr::SaveToDB(SQLTransaction& trans)
 {
@@ -112,36 +116,36 @@ void GarrisonMgr::SaveToDB(SQLTransaction& trans)
     }
 }
 
-void GarrisonMgr::LoadFollowerFromDB(PreparedQueryResult result)
-{
-    if (!result)
-        return;
-
-    do
-    {
-        Field* field = result->Fetch();
-
-        uint64 garrisonId = field[0].GetUInt64();
-        uint32 followerSlot1 = field[1].GetUInt32();
-        uint32 followerSlot2 = field[2].GetUInt32();
-        uint32 followerSlot3 = field[3].GetUInt32();
-        uint32 followerSlot4 = field[4].GetUInt32();
-        uint32 followerSlot5 = field[5].GetUInt32();
-        uint32 slot1Level    = field[6].GetUInt32();
-        uint32 slot2Level = field[7].GetUInt32();
-        uint32 slot3Level = field[8].GetUInt32();
-        uint32 slot4Level = field[9].GetUInt32();
-        uint32 slot5Level = field[10].GetUInt32();
-        uint32 slot1XpToLevel = field[11].GetUInt32();
-        uint32 slot2XpToLevel = field[12].GetUInt32();
-        uint32 slot3XpToLevel = field[13].GetUInt32();
-        uint32 slot4XpToLevel = field[14].GetUInt32();
-        uint32 slot5XpToLevel = field[15].GetUInt32();
-
-        Followers* follower = new Followers(garrisonId, followerSlot1, followerSlot2, followerSlot3, followerSlot4, followerSlot5,
-            slot1Level, slot2Level, slot3Level, slot4Level, slot5Level, slot1XpToLevel, slot2XpToLevel, slot3XpToLevel, slot4XpToLevel, slot5XpToLevel);
-    } while (result->NextRow());
-}
+//void GarrisonMgr::LoadFollowerFromDB(PreparedQueryResult result)
+//{
+//    if (!result)
+//        return;
+//
+//    do
+//    {
+//        Field* field = result->Fetch();
+//
+//        uint64 garrisonId = field[0].GetUInt64();
+//        uint32 followerSlot1 = field[1].GetUInt32();
+//        uint32 followerSlot2 = field[2].GetUInt32();
+//        uint32 followerSlot3 = field[3].GetUInt32();
+//        uint32 followerSlot4 = field[4].GetUInt32();
+//        uint32 followerSlot5 = field[5].GetUInt32();
+//        uint32 slot1Level    = field[6].GetUInt32();
+//        uint32 slot2Level = field[7].GetUInt32();
+//        uint32 slot3Level = field[8].GetUInt32();
+//        uint32 slot4Level = field[9].GetUInt32();
+//        uint32 slot5Level = field[10].GetUInt32();
+//        uint32 slot1XpToLevel = field[11].GetUInt32();
+//        uint32 slot2XpToLevel = field[12].GetUInt32();
+//        uint32 slot3XpToLevel = field[13].GetUInt32();
+//        uint32 slot4XpToLevel = field[14].GetUInt32();
+//        uint32 slot5XpToLevel = field[15].GetUInt32();
+//
+//        Followers* follower = new Followers(garrisonId, followerSlot1, followerSlot2, followerSlot3, followerSlot4, followerSlot5,
+//            slot1Level, slot2Level, slot3Level, slot4Level, slot5Level, slot1XpToLevel, slot2XpToLevel, slot3XpToLevel, slot4XpToLevel, slot5XpToLevel);
+//    } while (result->NextRow());
+//}
 
 Garrisons* GarrisonMgr::GetGarrison(uint64 garrisonId) const
 {
@@ -158,7 +162,7 @@ uint8 GarrisonMgr::GarrisonGetFollowerSlots(uint64 garrisonId)
         if (GetFollowerSlot(i) == garrisonId)
             return i;
 
-    return;
+    return 0;
 }
 
 void GarrisonMgr::SendGarrisonGetInfo()
@@ -167,6 +171,9 @@ void GarrisonMgr::SendGarrisonGetInfo()
     WorldPacket data(SMSG_GET_GARR_INFO_RESULT);
     ObjectGuid guid;
     bool active;
+
+    Unit const* m_unit = 0;
+    GarrPlotEntry const* plotEntry = 0;
 
     data << uint32(0);                              // Unk
     data << uint32(0);                              // GarrSiteID
@@ -178,50 +185,25 @@ void GarrisonMgr::SendGarrisonGetInfo()
     data << uint32(0);                              // Unk
     data << uint32(0);                              // Unk
 
-    for (GarrisonSet::const_iterator itr = m_garrisonSet.begin; itr != m_garrisonSet.end; itr++)
-    {
-        Garrisons const* garrison = *itr;
 
-        GarrMissionEntry const* mission = GarrisonMgr::GetMission();
-        if (!mission)
-            continue;
-
-        data << uint64(mission->ID);                              // DBID
+        data << uint64(0);                              // DBID
         data << uint32(0);                                        // MissionRecID
         data << uint32(0);                                        // OfferTime
         data << uint32(0);                                        // OfferDuration
         data << uint32(0);                                        // StartTime
         data << uint32(0);                                        // TravelDuration
-        data << uint32(mission->Time);                            // MissionDuration
-        data << uint32(mission->Type);                            // MissionState
-    }
-
-    for (GarrisonSet::const_iterator itr = m_garrisonSet.begin; itr != m_garrisonSet.end; itr++)
-    {
-        Garrisons const* garrison = *itr;
-
-        GameObjectTemplate const* gobTemplate = sObjectMgr->GetGameObjectTemplate(sGarrBuildingStore.LookupEntry(garrison->GetGarrisonBuildings())->ID);
-        if (!gobTemplate)
-            continue;
+        data << uint32(0);                                          // MissionDuration
+        data << uint32(0);                            // MissionState
 
         data << uint32(0);                              // GarrPlotInstanceID
         data << uint32(0);
         data << uint32(0);
         data << uint32(0);
-        data << uint32(garrison->GetGarrisonBuildings); // GarrBuildingID
+        data << uint32(0);                               // GarrBuildingID
         active = data.WriteBit(0);                      // Active
-    }
 
-    for (GarrisonSet::const_iterator itr = m_garrisonSet.begin; itr != m_garrisonSet.end; itr++)
-    {
-        Garrisons const* garrison = *itr;
-
-        CreatureTemplate const* creatureTemplate = sObjectMgr->GetCreatureTemplate(sGarrFollowerStore.LookupEntry(garrison->GetFollowerId())->ID);
-        if (!creatureTemplate)
-            continue;
-
-        data << uint64(garrison->GetGarrisonId());        // DBID
-        data << uint32(garrison->GetFollowerId());      // GarrFollowerID
+        data << uint64(0);        // DBID
+        data << uint32(0);      // GarrFollowerID
         data << uint32(0);                              // CreatureID
         data << uint32(0);                              // Gender
         data << uint32(0);                              // Spec
@@ -235,25 +217,12 @@ void GarrisonMgr::SendGarrisonGetInfo()
         uint32 abilityID = 0;
         for (uint32 i = 0; i < abilityID; i++)
             uint32(0);                                  // AbilityID
-    }
-
-    for (GarrisonSet::const_iterator itr = m_garrisonSet.begin; itr != m_garrisonSet.end; itr++)
-    {
-        Garrisons const* plot = *itr;
-        Unit const* m_unit = 0;
-        GameObjectTemplate const* gobTemplate = sObjectMgr->GetGameObjectTemplate(sGarrPlotStore.LookupEntry(plot->GetGarrisonPlot())->ID);
-        if (!gobTemplate)
-            continue;
-
-        GarrPlotEntry const* plotEntry = 0;
 
         data << uint32(plotEntry->ID);                  // GarrPlotInstanceID
         data << float(m_unit->GetPositionX());          // PositionX
         data << float(m_unit->GetPositionY());          // PositionY
         data << float(m_unit->GetPositionZ());          // PositionZ
         data << uint32(plotEntry->PlotSize);            // PlotType
-
-    }
 
     uint32 archivedMissions = 0;
     for (uint32 i = 0; i < archivedMissions; i++)

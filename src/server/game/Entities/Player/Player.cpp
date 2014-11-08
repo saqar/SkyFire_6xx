@@ -21088,10 +21088,10 @@ void Player::PetSpellInitialize()
     data << uint32(spellHistoryCount);
 
 
-    for (int i = 0; i < actionsCount; i++)
+    for (int32 i = 0; i < actionsCount; i++)
         data << uint32(0);                          // Actions
 
-    for (int i = 0; i < cooldownsCount; i++)
+    for (uint32 i = 0; i < cooldownsCount; i++)
     {
         data << uint32(0);                          // SpellID
         data << uint32(0);                          // Duration
@@ -21099,7 +21099,7 @@ void Player::PetSpellInitialize()
         data << uint16(0);                          // Category
     }
     
-    for (int i = 0; i < spellHistoryCount; i++)
+    for (uint32 i = 0; i < spellHistoryCount; i++)
     {
         data << uint32(0);                          // CategoryID
         data << uint32(0);                          // RecoveryTime

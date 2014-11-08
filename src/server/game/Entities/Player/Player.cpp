@@ -21058,6 +21058,7 @@ void Player::SendOnCancelExpectedVehicleRideAura()
 
 void Player::PetSpellInitialize()
 {
+    #define MAX_CREATURE_SPELLS 10
     Pet* pet = GetPet();
 
     if (!pet)
@@ -21068,71 +21069,41 @@ void Player::PetSpellInitialize()
     CharmInfo* charmInfo = pet->GetCharmInfo();
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
-    data << ObjectGuid(pet->GetGUID());
+    data << ObjectGuid(pet->GetGUID128());
     data << uint16(pet->GetCreatureTemplate()->family);         // creature family (required for pet talents)
     data << uint16(0);                                          // Specialization
-    data << uint32(pet->GetDuration());
-    data << uint32(0);
-    data << uint32(0);
+    data << uint32(pet->GetDuration());                         // Time Limit
+    data << uint32(0);                                          // PetModeAndOrders
 
     // action bar loop
-    charmInfo->BuildActionBar(&data);
+    for (int i = 0; i < MAX_CREATURE_SPELLS; i++)
+        data << uint32(0);                          // maxCreatureSpells
+    
+    int32 actionsCount = 0;
+    uint32 cooldownsCount = 0;
+    uint32 spellHistoryCount = 0;
 
-    size_t spellsCountPos = data.wpos();
+    data << int32(actionsCount);
+    data << uint32(cooldownsCount);
+    data << uint32(spellHistoryCount);
 
-    // spells count
-    uint8 addlist = 0;
-    data << uint8(addlist);                                 // placeholder
 
-    if (pet->IsPermanentPetFor(this))
+    for (int i = 0; i < actionsCount; i++)
+        data << uint32(0);                          // Actions
+
+    for (int i = 0; i < cooldownsCount; i++)
     {
-        // spells loop
-        for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
-        {
-            if (itr->second.state == PETSPELL_REMOVED)
-                continue;
-
-            data << uint32(MAKE_UNIT_ACTION_BUTTON(itr->first, itr->second.active));
-            ++addlist;
-        }
+        data << uint32(0);                          // SpellID
+        data << uint32(0);                          // Duration
+        data << uint32(0);                          // CategoryDuration
+        data << uint16(0);                          // Category
     }
-
-    data.put<uint8>(spellsCountPos, addlist);
-
-    uint8 cooldownsCount = pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
-    data << uint8(cooldownsCount);
-
-    time_t curTime = time(NULL);
-
-    for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
+    
+    for (int i = 0; i < spellHistoryCount; i++)
     {
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-        if (!spellInfo)
-        {
-            data << uint32(0);
-            data << uint16(0);
-            data << uint32(0);
-            data << uint32(0);
-            continue;
-        }
-
-        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
-        data << uint32(itr->first);                 // spell ID
-
-        CreatureSpellCooldowns::const_iterator categoryitr = pet->m_CreatureCategoryCooldowns.find(spellInfo->GetCategory());
-        if (categoryitr != pet->m_CreatureCategoryCooldowns.end())
-        {
-            time_t categoryCooldown = (categoryitr->second > curTime) ? (categoryitr->second - curTime) * IN_MILLISECONDS : 0;
-            data << uint16(spellInfo->GetCategory());   // spell category
-            data << uint32(cooldown);                   // spell cooldown
-            data << uint32(categoryCooldown);           // category cooldown
-        }
-        else
-        {
-            data << uint16(0);
-            data << uint32(cooldown);
-            data << uint32(0);
-        }
+        data << uint32(0);                          // CategoryID
+        data << uint32(0);                          // RecoveryTime
+        data << uint8(0);                           // ConsumedCharges
     }
 
     GetSession()->SendPacket(&data);

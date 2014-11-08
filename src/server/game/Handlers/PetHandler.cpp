@@ -448,24 +448,21 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
     WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 5 + pet->GetName().size() + 4));
     ObjectGuid guid;
     bool Allow;
-    bool HasDecline;
+    bool hasDecline, hasData;
 
     data << guid;
-    HasDecline = data.WriteBit(1);                               // HasDecline
 
-    Allow = data.WriteBit(0);                                    // Allow
+    hasData = data.WriteBit(1);                                  // HasData
+    if (hasData)
+        return;
+
     data.WriteBits(pet->GetName().size(), 8);
     bool declinedNames = pet->IsPet() && ((Pet*)pet)->GetDeclinedNames();
 
     data.FlushBits();
 
     for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-    {
-        if (declinedNames)
             data.WriteBits(((Pet*)pet)->GetDeclinedNames()->name[i].size(), 7);
-        else
-            data.WriteBits(0, 7);
-    }
 
     if (declinedNames)
         for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)

@@ -2,6 +2,7 @@
 
 * Account Wide features (THIS IS VERY IMPORTANT). 
 * Creature Data bruteforced from client. (This would help our waypoint issue).
+* Pets
 * Waypoints
 * Garrisons
 * Guilds (includes bank).

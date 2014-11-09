@@ -447,8 +447,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
 
     WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 5 + pet->GetName().size() + 4));
     ObjectGuid guid;
-    bool Allow;
-    bool hasDecline, hasData;
+    bool hasData;
 
     data << guid;
 
@@ -768,85 +767,10 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     TC_LOG_DEBUG("network", "WORLD: CMSG_PET_CAST_SPELL");
 
     ObjectGuid guid;
-    uint8  castCount;
-    uint32 spellId;
-    uint8  castFlags;
+	WorldSession* session = 0;
 
-    recvPacket >> guid >> castCount >> spellId >> castFlags;
-
-    TC_LOG_DEBUG("network", "WORLD: CMSG_PET_CAST_SPELL, guid: " UI64FMTD ", castCount: %u, spellId %u, castFlags %u", guid, castCount, spellId, castFlags);
-
-    // This opcode is also sent from charmed and possessed units (players and creatures)
-    if (!_player->GetGuardianPet() && !_player->GetCharm())
-        return;
-
-    Unit* caster = ObjectAccessor::GetUnit(*_player, guid);
-
-    if (!caster || (caster != _player->GetGuardianPet() && caster != _player->GetCharm()))
-    {
-        TC_LOG_ERROR("network", "HandlePetCastSpellOpcode: Pet %u isn't pet of player %s (GUID: %u).", uint32(GUID_LOPART(guid)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
-        return;
-    }
-
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-    if (!spellInfo)
-    {
-        TC_LOG_ERROR("network", "WORLD: unknown PET spell id %i", spellId);
-        return;
-    }
-
-    // do not cast not learned spells
-    if (!caster->HasSpell(spellId) || spellInfo->IsPassive())
-        return;
-
-    SpellCastTargets targets;
-    targets.Read(recvPacket, caster);
-    HandleClientCastFlags(recvPacket, castFlags, targets);
-
-    caster->ClearUnitState(UNIT_STATE_FOLLOW);
-
-    Spell* spell = new Spell(caster, spellInfo, TRIGGERED_NONE);
-    spell->m_cast_count = castCount;                    // probably pending spell cast
-    spell->m_targets = targets;
-
-    SpellCastResult result = spell->CheckPetCast(NULL);
-
-    if (result == SPELL_CAST_OK)
-    {
-        if (Creature* creature = caster->ToCreature())
-        {
-            creature->AddCreatureSpellCooldown(spellId);
-            if (Pet* pet = creature->ToPet())
-            {
-                // 10% chance to play special pet attack talk, else growl
-                // actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                if (pet->getPetType() == SUMMON_PET && (urand(0, 100) < 10))
-                    pet->SendPetTalk(PET_TALK_SPECIAL_SPELL);
-                else
-                    pet->SendPetAIReaction(guid);
-            }
-        }
-
-        spell->prepare(&(spell->m_targets));
-    }
-    else
-    {
-        spell->SendPetCastResult(result);
-
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (!caster->ToPlayer()->HasSpellCooldown(spellId))
-                GetPlayer()->SendClearCooldown(spellId, caster);
-        }
-        else
-        {
-            if (!caster->ToCreature()->HasSpellCooldown(spellId))
-                GetPlayer()->SendClearCooldown(spellId, caster);
-        }
-
-        spell->finish(false);
-        delete spell;
-    }
+	recvPacket >> guid;
+	session->HandleCastSpellOpcode(recvPacket);
 }
 
 void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName)

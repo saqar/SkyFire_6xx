@@ -15867,15 +15867,13 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
         ObjectGuid guid1;
 
         data << guid;
-        data << guid1;
-        data << uint32(count);
+        data << uint32(count);					    // Targets
 
         ThreatContainer::StorageType const &tlist = getThreatManager().getThreatList();
         for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
-            ObjectGuid guid2;
-            data << guid2;
-            data << uint32((*itr)->getThreat());
+            data << guid1;
+            data << uint32((*itr)->getThreat());	// Threat
         }
         SendMessageToSet(&data, false);
     }

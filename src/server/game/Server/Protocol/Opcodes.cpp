@@ -191,7 +191,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CHAR_ENUM,                          0x0918, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleCharEnumOpcode               ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_CHAR_FACTION_CHANGE,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCharFactionOrRaceChange      );
     DEFINE_OPCODE_HANDLER(CMSG_CHAR_RACE_CHANGE,                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCharFactionOrRaceChange      );
-    DEFINE_OPCODE_HANDLER(CMSG_CHAR_RENAME,                        0x0000, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleCharRenameOpcode             );
+    DEFINE_OPCODE_HANDLER(CMSG_CHAR_RENAME,                        0x038B, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleCharRenameOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_CHAR_UNDELETE,                      0x0D99, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCharUndeleteOpcode           ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_CHAR_UNDELETE_COOLDOWN,             0x19A9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCharUndeleteCooldownOpcode   ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_CHAT_FILTERED,                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );

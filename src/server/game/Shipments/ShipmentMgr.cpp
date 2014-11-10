@@ -20,3 +20,5 @@
 #include "ShipmentMgr.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+
+ShipmentMgr::ShipmentMgr() { };

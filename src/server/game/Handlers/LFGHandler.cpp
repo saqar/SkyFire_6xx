@@ -42,7 +42,7 @@ void BuildPartyLockDungeonBlock(WorldPacket& data, lfg::LfgLockPartyMap const& l
     data << uint8(lockMap.size());
     for (lfg::LfgLockPartyMap::const_iterator it = lockMap.begin(); it != lockMap.end(); ++it)
     {
-        data << uint64(it->first);                         // Player guid
+        data << ObjectGuid(it->first);                         // Player guid
         BuildPlayerLockDungeonBlock(data, it->second);
     }
 }
@@ -50,34 +50,22 @@ void BuildPartyLockDungeonBlock(WorldPacket& data, lfg::LfgLockPartyMap const& l
 void BuildQuestReward(WorldPacket& data, Quest const* quest, Player* player)
 {
     //LFGPlayerRewards
-    uint8 rewCount = quest->GetRewItemsCount() + quest->GetRewCurrencyCount();
+    uint32 rewCount = 0;
 
-    data << uint32(quest->GetRewMoney());
-    data << uint32(quest->XPValue(player));
-    data << uint8(rewCount);
+    data << uint32(quest->GetRewMoney());				// RewardMoney
+	data << uint32(0);									// QueuedSlot
+    data << uint32(quest->XPValue(player));				// AddedXP
+	data << uint32(0);									// ActualSlot
+    data << uint32(rewCount);							// Not actually sure what this is.
+
     if (rewCount)
     {
-        for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+        for (uint32 i = 0; i < 4; ++i)
         {
-            if (uint32 currencyId = quest->RewardCurrencyId[i])
-            {
-                data << uint32(currencyId);
-                data << uint32(0);
+                data << uint32(0);											// BonusCurrency
+				data << uint32(quest->RewardItemIdCount[i]);
                 data << uint32(quest->RewardCurrencyCount[i]);
-                data << uint8(1);                                           // Is currency
-            }
-        }
-
-        for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        {
-            if (uint32 itemId = quest->RewardItemId[i])
-            {
-                ItemTemplate const* item = sObjectMgr->GetItemTemplate(itemId);
-                data << uint32(itemId);
-                data << uint32(item ? item->DisplayInfoID : 0);
-                data << uint32(quest->RewardItemIdCount[i]);
-                data << uint8(0);                                           // Is currency
-            }
+				data.WriteBit(1);                                           // Is currency
         }
     }
 }
@@ -713,24 +701,9 @@ void WorldSession::SendLfgPlayerReward(lfg::LfgPlayerRewardData const& rewardDat
     TC_LOG_DEBUG("lfg", "SMSG_LFG_PLAYER_REWARD %s rdungeonEntry: %u, sdungeonEntry: %u, done: %u",
         GetPlayerInfo().c_str(), rewardData.rdungeonEntry, rewardData.sdungeonEntry, rewardData.done);
 
-    uint8 itemNum = rewardData.quest->GetRewItemsCount() + rewardData.quest->GetRewCurrencyCount();
+    WorldPacket data(SMSG_LFG_PLAYER_REWARD, 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 * (4 + 4 + 4));
 
-    WorldPacket data(SMSG_LFG_PLAYER_REWARD, 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 + itemNum * (4 + 4 + 4));
-    bool isCurrency;
-
-    data << uint32(0);                                                  // RewardMoney
-    data << uint32(0);                                                  // QueuedSlot
-    data << uint32(0);                                                  // AddedXP
-    data << uint32(0);                                                  // ActualSlot
-
-    // LFGPlayerRewards until I update BuildRewardBlock
-    for (int i = 0; i < 4; i++)
-    {
-        data << uint32(rewardData.quest->RewardItemId);                 // RewardItem
-        data << uint32(rewardData.quest->RewardChoiceItemCount);        // RewardItemQuantity
-        data << uint32(0);                                              // BonusCurrency
-        isCurrency = data.WriteBit(0);                                  // IsCurrency
-    }
+	BuildQuestReward(data, rewardData.quest, GetPlayer());
 
     SendPacket(&data);
 }

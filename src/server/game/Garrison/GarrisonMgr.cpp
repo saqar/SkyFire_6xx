@@ -164,6 +164,7 @@
 //    return 0;
 //}
 //
+
 void GarrisonMgr::SendGarrisonGetInfo()
 {
     TC_LOG_DEBUG("network", "World: Sent SMSG_GET_GARR_INFO_RESULT");
@@ -174,58 +175,7 @@ void GarrisonMgr::SendGarrisonGetInfo()
     Unit const* m_unit = 0;
     GarrPlotEntry const* plotEntry = 0;
 
-    data << uint32(0);                              // Unk
-    data << uint32(0);                              // GarrSiteID
-    data << uint32(0);                              // FactionIndex
-    data << uint32(0);                              // GarrSiteLevelID
-    data << uint32(0);                              // Unk
-    data << uint32(0);                              // Unk
-    data << uint32(0);                              // Unk
-    data << uint32(0);                              // Unk
-    data << uint32(0);                              // Unk
-
-
-        data << uint64(0);                              // DBID
-        data << uint32(0);                                        // MissionRecID
-        data << uint32(0);                                        // OfferTime
-        data << uint32(0);                                        // OfferDuration
-        data << uint32(0);                                        // StartTime
-        data << uint32(0);                                        // TravelDuration
-        data << uint32(0);                                          // MissionDuration
-        data << uint32(0);                            // MissionState
-
-        data << uint32(0);                              // GarrPlotInstanceID
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);                               // GarrBuildingID
-        active = data.WriteBit(0);                      // Active
-
-        data << uint64(0);        // DBID
-        data << uint32(0);      // GarrFollowerID
-        data << uint32(0);                              // CreatureID
-        data << uint32(0);                              // Gender
-        data << uint32(0);                              // Spec
-        data << uint32(0);                              // Race
-        data << uint32(0);                              // Quality
-        data << uint32(0);                              // FollowerLevel
-        data << uint32(0);                              // ItemLevelWeapon
-        data << uint32(0);                              // ItemLevelArmor
-        data << uint32(0);                              // Xp
-
-        uint32 abilityID = 0;
-        for (uint32 i = 0; i < abilityID; i++)
-            uint32(0);                                  // AbilityID
-
-        data << uint32(plotEntry->ID);                  // GarrPlotInstanceID
-        data << float(m_unit->GetPositionX());          // PositionX
-        data << float(m_unit->GetPositionY());          // PositionY
-        data << float(m_unit->GetPositionZ());          // PositionZ
-        data << uint32(plotEntry->PlotSize);            // PlotType
-
-    uint32 archivedMissions = 0;
-    for (uint32 i = 0; i < archivedMissions; i++)
-        uint32(0);                                  // ArchivedMissions
+	// Struct goes here
 
     m_owner->GetSession()->SendPacket(&data);
 }

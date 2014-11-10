@@ -79,42 +79,30 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         recvData.rfinish();
         return;
     }
-
-    uint32 roles, slots, needs;
+ 
+    uint32 roles;
+    uint32 numDungeons;
     bool QueueAsGroup;
     uint8 PartyIndex;
-
-    QueueAsGroup = recvData.ReadBit();                          // QueueAsGroup
-    recvData.ReadString(0);                                     // Unk
-    recvData.ReadBits(8);
-
-    recvData.FlushBits();
-
+ 
+    QueueAsGroup = recvData.ReadBit();
+    uint32 commentLen = recvData.ReadBits(8);
     recvData >> PartyIndex;
     recvData >> roles;
-    recvData >> needs;
-
-    for (uint32 i = 0; i < QueueAsGroup; i++)
-        recvData >> slots;
-
-    std::string comment = recvData.ReadString(0);
-    recvData.append(comment);
-
-    if (needs)
-    {
-        for (int32 i = 0; i < 3; ++i)
-            recvData >> needs;
-    }
-
-    uint32 numDungeons = 0;
-
+ 
+    for (int32 i = 0; i < 3; ++i)
+        recvData.read_skip<uint32>(); // Needs
+   
+    recvData >> numDungeons;
+    std::string comment = recvData.ReadString(commentLen);
+   
     if (!numDungeons)
     {
         TC_LOG_DEBUG("lfg", "CMSG_LFG_JOIN %s no dungeons selected", GetPlayerInfo().c_str());
         recvData.rfinish();
         return;
     }
-
+ 
     lfg::LfgDungeonSet newDungeons;
     for (uint32 i = 0; i < numDungeons; ++i)
     {
@@ -122,13 +110,12 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         recvData >> dungeon;
         newDungeons.insert((dungeon & 0x00FFFFFF));        // remove the type from the dungeon entry
     }
-
+ 
     TC_LOG_DEBUG("lfg", "CMSG_LFG_JOIN %s roles: %u, Dungeons: %u, Comment: %s",
         GetPlayerInfo().c_str(), roles, uint8(newDungeons.size()), comment.c_str());
-
+ 
     sLFGMgr->JoinLfg(GetPlayer(), uint8(roles), newDungeons, comment);
 }
-
 void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 {
     ObjectGuid leaveGuid;
@@ -623,38 +610,34 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
         GetPlayerInfo().c_str(), joinData.result, joinData.state);
 
     WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size);
+	uint32 blacklistCount = 0;
 
+	// RideTicket
+	data << guid;
+	data << uint32(0);									// ID
+	data << uint32(0);								    // Type
+	data << uint32(0);								    // Time
 
-    data << uint8(joinData.result);                        // Result
-    data << uint8(joinData.state);                         // ResultDetail
+	data << uint8(joinData.result);						// Result
+	data << uint8(joinData.state);						// ResultDetail
 
-    // LFG Blacklist
-    bool hasPlayerGuid = true;
-    ObjectGuid playerGuid;
+	//data << uint32(blacklistCount);						// BlacklistCount
 
-    for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
-    {
-        hasPlayerGuid = data.WriteBit(0);                      // HasPlayerGuid
-        data << uint32(0);                                     // LFGBlackListCount
-    }
+	for (uint32 i = 0; i < blacklistCount; i++)
+	{
+		uint32 slotsCount = 0;
 
-    if (hasPlayerGuid)
-        data << playerGuid;
+		data << guid;
+		data << slotsCount;
 
-    for (int i = 0; i < 24; i++)
-    {
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-    }
-
-    //CliRideTicket
-    ObjectGuid requesterGuid;
-    data << requesterGuid;
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
+		for (uint32 j = 0; j < slotsCount; i++)
+		{
+			data << uint32(0);							// Slot
+			data << uint32(0);							// Reason
+			data << uint32(0);							// SubReason1
+			data << uint32(0);							// SubReason2
+		}
+	}
 
     SendPacket(&data);
 }

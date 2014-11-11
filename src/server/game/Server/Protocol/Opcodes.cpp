@@ -66,7 +66,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_ACTIVATETAXIEXPRESS,                0x0000, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleActivateTaxiExpressOpcode    );
     DEFINE_OPCODE_HANDLER(CMSG_ADDON_REGISTERED_PREFIXES,          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonRegisteredPrefixesOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_ADD_FRIEND,                         0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAddFriendOpcode              );
-    DEFINE_OPCODE_HANDLER(CMSG_ADD_IGNORE,                         0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAddIgnoreOpcode              );
+    DEFINE_OPCODE_HANDLER(CMSG_ADD_IGNORE,                         0x1321, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAddIgnoreOpcode              ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_ADD_VOICE_IGNORE,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_ALTER_APPEARANCE,                   0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAlterAppearance              );
     DEFINE_OPCODE_HANDLER(CMSG_AREATRIGGER,                        0x01B4, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAreaTriggerOpcode            ); // 6.0.3 19103
@@ -560,7 +560,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TAXINODE_STATUS_QUERY,              0x0000, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleTaxiNodeStatusQueryOpcode    );
     DEFINE_OPCODE_HANDLER(CMSG_TAXIQUERYAVAILABLENODES,            0x0000, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleTaxiQueryAvailableNodes      );
     DEFINE_OPCODE_HANDLER(CMSG_TELEPORT_TO_UNIT,                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                         0x0000, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              );
+    DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                         0x0518, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_TIME_ADJUSTMENT_RESPONSE,           0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP,                     0x0003, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleTimeSyncResp                 ); // 6.0.3 19103
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP_FAILED,              0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );

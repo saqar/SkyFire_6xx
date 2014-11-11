@@ -78,23 +78,8 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
         {
             static MovementStatusElements const accessoryGuid[] =
             {
-                MSEExtraInt8,
-                MSEHasGuidByte2,
-                MSEHasGuidByte4,
-                MSEHasGuidByte7,
-                MSEHasGuidByte6,
-                MSEHasGuidByte5,
-                MSEHasGuidByte0,
-                MSEHasGuidByte1,
-                MSEHasGuidByte3,
-                MSEGuidByte6,
-                MSEGuidByte1,
-                MSEGuidByte2,
-                MSEGuidByte5,
-                MSEGuidByte3,
-                MSEGuidByte0,
-                MSEGuidByte4,
-                MSEGuidByte7,
+                MSEGuid128,
+                MSEEnd
             };
 
             Movement::ExtraMovementStatusElement extra(accessoryGuid);

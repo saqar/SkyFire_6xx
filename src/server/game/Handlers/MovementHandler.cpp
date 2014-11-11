@@ -36,13 +36,13 @@
 
 #define MOVEMENT_PACKET_TIME_DELAY 0
 
-void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandleWorldportrResponse(WorldPacket & /*recvData*/)
 {
-    TC_LOG_DEBUG("network", "WORLD: got MSG_MOVE_WORLDPORT_ACK.");
-    HandleMoveWorldportAckOpcode();
+    TC_LOG_DEBUG("network", "WORLD: got CMSG_WORLDPORT_RESPONSE.");
+    HandleWorldportrResponse();
 }
 
-void WorldSession::HandleMoveWorldportAckOpcode()
+void WorldSession::HandleWorldportrResponse()
 {
     // ignore unexpected far teleports
     if (!GetPlayer()->IsBeingTeleportedFar())
@@ -262,7 +262,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
     Player* plrMover = mover->ToPlayer();
 
-    // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
+    // ignore, waiting processing in WorldSession::HandleWorldportrResponse and WorldSession::HandleMoveTeleportAck
     if (plrMover && plrMover->IsBeingTeleported())
     {
         recvPacket.rfinish();                     // prevent warnings spam
@@ -348,7 +348,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     }
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-    if (opcode == MSG_MOVE_FALL_LAND && plrMover && !plrMover->IsInFlight())
+    if (opcode == CMSG_MOVE_FALL_LAND && plrMover && !plrMover->IsInFlight())
         plrMover->HandleFall(movementInfo);
 
     if (plrMover && ((movementInfo.flags & MOVEMENTFLAG_SWIMMING) != 0) != plrMover->IsInWater())

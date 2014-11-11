@@ -2716,7 +2716,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
 
     {
         TRINITY_GUARD(ACE_Thread_Mutex, Lock);
-        // Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
+        // Check moved to void WorldSession::HandleWorldportrResponse()
         //if (!CanEnter(player))
             //return false;
 
@@ -3064,7 +3064,7 @@ bool BattlegroundMap::AddPlayerToMap(Player* player)
 {
     {
         TRINITY_GUARD(ACE_Thread_Mutex, Lock);
-        //Check moved to void WorldSession::HandleMoveWorldportAckOpcode()
+        //Check moved to void WorldSession::HandleWorldportrResponse()
         //if (!CanEnter(player))
             //return false;
         // reset instance validity, battleground maps do not homebind

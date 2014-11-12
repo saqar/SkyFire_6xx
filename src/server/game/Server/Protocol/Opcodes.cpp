@@ -929,7 +929,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_LIST_INVENTORY,                                  0x0940, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_LOAD_CUF_PROFILES,                               0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_LOGIN_SETTIMESPEED,                              0x09AA, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_LOGIN_VERIFY_WORLD,                              0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_LOGIN_VERIFY_WORLD,                              0x0B19, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_LOGOUT_CANCEL_ACK,                               0x0FAD, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_LOGOUT_COMPLETE,                                 0x0B21, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_LOGOUT_RESPONSE,                                 0x052D, STATUS_NEVER    ); // 6.0.3 19116

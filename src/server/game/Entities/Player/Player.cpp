@@ -23487,27 +23487,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendTalentsInfoData();
 
-    data.Initialize(SMSG_WORLD_SERVER_INFO, 4 + 4 + 1 + 1);
-    // Bitfields have wrong order
-    data.WriteBit(0);                                               // IneligibleForLoot
-    data.WriteBit(0);                                               // HasRestrictedLevel
-    data.WriteBit(0);                                               // HasRestrictedMoney
-    data.WriteBit(0);                                               // HasGroupSize
-    data.FlushBits();
-
-    data << uint8(0);                                               // IsOnTournamentRealm
-    data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
-    data << uint32(GetMap()->GetDifficulty());
-
-    //if (HasGroupSize)
-    //    data << uint32(0);
-    //if (HasRestrictedLevel)
-    //    data << uint32(20);                                       // RestrictedLevel (starter accounts)
-    //if (IneligibleForLoot)
-    //    data << uint32(0);                                        // EncounterMask
-    //if (HasRestrictedMoney)
-    //    data << uint32(100000);                                   // RestrictedMoney (starter accounts)
-    GetSession()->SendPacket(&data);
+    // SMSG_WORLD_SERVER_INFO
+    GetSession()->SendServerWorldInfo();
 
     SendInitialSpells();
 

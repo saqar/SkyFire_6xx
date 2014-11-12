@@ -31,6 +31,7 @@
 #    CURRENCIES SETTINGS
 #    BATTLE PET SETTINGS
 #    PACKET SPOOF PROTECTION SETTINGS
+#    TOURNAMENT REALM SETTINGS
 #
 ###################################################################################################
 
@@ -2960,6 +2961,19 @@ PacketSpoof.BanMode = 0
 #
 
 PacketSpoof.BanDuration = 86400
+
+#
+###################################################################################################
+
+###################################################################################################
+# TOURNAMENT REALM SETTINGS
+#
+#    RealmServerInfo.IsTournament
+#        Description: is realm for tournament ?
+#        Default:     0 - Disabled
+#                     1 - Enabled
+
+RealmServerInfo.IsTournament = 0
 
 #
 ###################################################################################################

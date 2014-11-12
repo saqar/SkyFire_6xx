@@ -2300,3 +2300,36 @@ void WorldSession::HandleSortBankBagsOpcode(WorldPacket& recvData)
 
     recvData >> guid;
 }
+
+void WorldSession::SendServerWorldInfo()
+{
+    size_t maxsize = (4 + 1 + 4 + 1 + 1 + 1 + 1 +
+        HasIneligibleForLootMask ? 4 : 0 + HasInstanceGroupSize ? 4 : 0 + HasRestrictedAccountMaxLevel ? 4 : 0 + HasRestrictedAccountMaxMoney ? 4 : 0);
+
+    WorldPacket data(SMSG_WORLD_SERVER_INFO, maxsize);
+
+    data << uint32(GetPlayer()->GetMap()->GetDifficulty());
+    data << uint8(sWorld->getBoolConfig(CONFIG_IS_TOURNAMENT_REALM));
+    data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);
+
+    data.WriteBit(HasIneligibleForLootMask);
+    data.WriteBit(HasInstanceGroupSize);
+    data.WriteBit(HasRestrictedAccountMaxLevel);
+    data.WriteBit(HasRestrictedAccountMaxMoney);
+
+    data.FlushBits();
+
+    if (HasIneligibleForLootMask)
+        data << uint32(0);
+
+    if (HasInstanceGroupSize)
+        data << uint32(0);
+
+    if (HasRestrictedAccountMaxLevel)
+        data << uint32(0);
+
+    if (HasRestrictedAccountMaxMoney)
+        data << uint32(100000); // RestrictedMoney (starter accounts)
+
+    GetPlayer()->GetSession()->SendPacket(&data);
+}

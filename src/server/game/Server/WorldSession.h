@@ -1014,6 +1014,10 @@ class WorldSession
         void HandleCompleteShipment(WorldPacket& recvData);
         void HandleCompleteAllReadyShipment(WorldPacket& recvData);
 
+        // Battle Pay
+        void HandleBaattlePayProductListQuery(WorldPacket& recvData);
+        void HandletBattlePayGetProductListResponse();
+
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();

@@ -25,6 +25,37 @@ class BattlePayMgr
 public:
     BattlePayMgr();
     ~BattlePayMgr();
+
+    void GetBattlePayProduct(WorldPacket& data);
+    void HandletBattlePayGetProductListResponse();
+    void ReadBattlepayDisplayInfo(WorldPacket& data);
+
+private:
+    uint32 BattlePayDistributionObjectCount;
+    uint32 BattlePayProductGroupCount;
+    uint32 BattlePayShopEntryCount;
+    uint32 BattlepayProductItemCount;
+    uint64 NormalPriceFixedPoint;
+    uint64 CurrentPriceFixedPoint;
+
+    uint32 Ordering;
+    uint32 IconFileDataID;
+    uint32 EntryID;
+    uint32 GroupID;
+    uint32 ProductID;
+    uint8 DisplayType;
+    uint8 Type;
+    uint32 Flags;
+    uint8 NameSize;
+    uint8 BannerType;
+    uint32 CreatureDisplayInfoID;
+    uint32 FileDataID;
+    bool HasFileDataID;
+    bool HasFlags;
+    bool HasPet;
+    bool HasBattlepayDisplayInfo;
+    bool HasBATTLEPETRESULT;
+    bool HasCreatureDisplayInfoID;
 };
 
 #endif

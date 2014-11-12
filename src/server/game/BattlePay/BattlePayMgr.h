@@ -17,6 +17,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Opcodes.h"
+#include "WorldSession.h"
+
 #ifndef BATTLE_PAY_MGR_H
 #define BATTLE_PAY_MGR_H
 
@@ -27,7 +30,6 @@ public:
     ~BattlePayMgr();
 
     void GetBattlePayProduct(WorldPacket& data);
-    void HandletBattlePayGetProductListResponse();
     void ReadBattlepayDisplayInfo(WorldPacket& data);
 
 private:

@@ -18,11 +18,24 @@
  */
 
 #include "BattlePayMgr.h"
-#include "WorldPacket.h"
 
-void BattlePayMgr::HandletBattlePayGetProductListResponse()
+void WorldSession::HandletBattlePayGetProductListResponseData()
 {
-    TC_LOG_DEBUG("network", "WORLD: Received SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE");
+    uint32 BattlePayDistributionObjectCount;
+    uint32 BattlePayProductGroupCount;
+    uint32 BattlePayShopEntryCount;
+
+    uint32 Ordering;
+    uint32 IconFileDataID;
+    uint32 EntryID;
+    uint32 GroupID;
+    uint32 ProductID;
+    uint8 DisplayType;
+    uint32 Flags;
+    uint8 NameSize;
+    uint8 BannerType;
+    bool HasBattlepayDisplayInfo;
+    bool HasCreatureDisplayInfoID;
 
     WorldPacket data(SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE, 250); // TODO: fix this shit :S
 
@@ -33,10 +46,10 @@ void BattlePayMgr::HandletBattlePayGetProductListResponse()
     data << BattlePayProductGroupCount;
     data << BattlePayShopEntryCount;
 
-    for (uint8 i = 0; i < BattlePayDistributionObjectCount; i++)
-        BattlePayMgr::GetBattlePayProduct(data);
+    //for (uint8 i = 0; i < BattlePayDistributionObjectCount; i++)
+    //    BattlePayMgr::GetBattlePayProduct(data);
 
-    for (int i = 0; i < BattlePayProductGroupCount; i++)
+    for (uint8 i = 0; i < BattlePayProductGroupCount; i++)
     {
         data << GroupID;
         data << IconFileDataID;
@@ -55,8 +68,8 @@ void BattlePayMgr::HandletBattlePayGetProductListResponse()
         data << Flags;
         data << BannerType;
         data.WriteBit(HasBattlepayDisplayInfo);
-        if (HasBattlepayDisplayInfo)
-            BattlePayMgr::ReadBattlepayDisplayInfo(data);
+        //if (HasBattlepayDisplayInfo)
+        //    BattlePayMgr::ReadBattlepayDisplayInfo(data);
     }
 }
 

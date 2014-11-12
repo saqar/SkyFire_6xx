@@ -951,6 +951,10 @@ class WorldSession
         void HandleBlackMarketBidOpcode(WorldPacket& recvData);
         void SendBlackMarketBidResult();
 
+        // BattlePay
+        void HandletBattlePayGetProductListResponse();
+        void HandletBattlePayGetProductListResponseData();
+
         // Miscellaneous
         void HandleSpellClick(WorldPacket& recvData);
         void HandleMirrorImageDataRequest(WorldPacket& recvData);

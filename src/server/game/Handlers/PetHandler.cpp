@@ -423,45 +423,45 @@ void WorldSession::HandlePetNameQuery(WorldPacket& recvData)
     TC_LOG_INFO("network", "HandlePetNameQuery. CMSG_PET_NAME_QUERY");
 
     ObjectGuid petGuid;
-    uint32 petNumber;
 
     recvData >> petGuid;
-    recvData >> petNumber;
 
-    SendPetNameQuery(petGuid, petNumber);
+    SendPetNameQuery(petGuid);
 }
 
-void WorldSession::SendPetNameQuery(ObjectGuid petGuid, uint64 petNumber)
+void WorldSession::SendPetNameQuery(ObjectGuid petGuid)
 {
-    Creature* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, petGuid);
+    Creature* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, uint64(petGuid));
     if (!pet)
     {
         WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (8 + 1));
+        data << ObjectGuid(0);
         data.WriteBit(0);
         data.FlushBits();
-        data << uint64(petNumber);
 
         _player->GetSession()->SendPacket(&data);
         return;
     }
 
+    TC_LOG_INFO("network", "SendPetNameQuery. SMSG_PET_NAME_QUERY_RESPONSE");
+
     WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 5 + pet->GetName().size() + 4));
-    ObjectGuid guid;
-    bool hasData;
+    
+    data << petGuid;
 
-    data << guid;
-
-    hasData = data.WriteBit(1);                                  // HasData
-    if (hasData)
-        return;
-
+    data.WriteBit(1);                                  // HasData
     data.WriteBits(pet->GetName().size(), 8);
+
     bool declinedNames = pet->IsPet() && ((Pet*)pet)->GetDeclinedNames();
+    for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+    {
+        if (declinedNames)
+            data.WriteBits(((Pet*)pet)->GetDeclinedNames()->name[i].size(), 7);
+        else
+            data.WriteBits(0, 7);
+    }
 
     data.FlushBits();
-
-    for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data.WriteBits(((Pet*)pet)->GetDeclinedNames()->name[i].size(), 7);
 
     if (declinedNames)
         for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
@@ -786,12 +786,41 @@ void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, Dec
     SendPacket(&data);
 }
 
-void WorldSession::HandlePetLearnTalent(WorldPacket& recvData)
+void WorldSession::HandeLearnPetSpecializationGroup(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_PET_LEARN_TALENT");
-}
+    TC_LOG_DEBUG("network", "CMSG_LEARN_PET_SPECIALIZATION_GROUP");
 
-void WorldSession::HandleLearnPreviewTalentsPet(WorldPacket& recvData)
-{
-    TC_LOG_DEBUG("network", "CMSG_LEARN_PREVIEW_TALENTS_PET");
+    ObjectGuid petGUID;
+    uint32 specGroupIndex;
+
+    recvData >> petGUID >> specGroupIndex;
+
+    if (_player->GetPet()->GetGUID128() != petGUID)
+    {
+        TC_LOG_DEBUG("network", "HandeLearnPetSpecializationGroup: Received wrong Pet GUID (%u) from Player %s (GUID: %u)", GUID_LOPART(petGUID), _player->GetName().c_str(), _player->GetGUID());
+        return;
+    }
+
+    Pet* pet = _player->GetPet();
+    if (!pet)
+        return;
+
+    if (_player->IsInCombat() || pet->getLevel() < 15)
+        return;
+
+    if (specGroupIndex >= MAX_TALENT_TABS)
+        return;
+
+    uint32 specId;
+    switch (specGroupIndex)
+    {
+        case 0: specId = SPECIALIZATION_PET_FEROCITY; break;
+        case 1: specId = SPECIALIZATION_PET_TENACITY; break;
+        case 2: specId = SPECIALIZATION_PET_CUNNING;  break;
+        default: break;
+    }
+
+    TC_LOG_DEBUG("network", "HandeLearnPetSpecializationGroup: Pet GUID (%u) from Player %s (GUID: %u) wants to learn specialization %u", GUID_LOPART(petGUID), _player->GetName().c_str(), _player->GetGUID(), specId);
+
+    pet->UpdateSpecialization(specId, true);
 }

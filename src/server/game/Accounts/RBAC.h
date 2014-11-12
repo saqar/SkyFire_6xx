@@ -326,7 +326,7 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_LEARN_ALL                              = 418,
     RBAC_PERM_COMMAND_LEARN_ALL_MY                           = 419,
     RBAC_PERM_COMMAND_LEARN_ALL_MY_CLASS                     = 420,
-    RBAC_PERM_COMMAND_LEARN_ALL_MY_PETTALENTS                = 421,
+    // 421 - reuse
     RBAC_PERM_COMMAND_LEARN_ALL_MY_SPELLS                    = 422,
     RBAC_PERM_COMMAND_LEARN_ALL_MY_TALENTS                   = 423,
     RBAC_PERM_COMMAND_LEARN_ALL_GM                           = 424,

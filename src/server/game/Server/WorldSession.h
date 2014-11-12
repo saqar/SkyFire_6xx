@@ -305,7 +305,7 @@ class WorldSession
         void HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets & targets);
 
         // Pet
-        void SendPetNameQuery(ObjectGuid guid, uint64 petNumber);
+        void SendPetNameQuery(ObjectGuid guid);
         void SendStablePet(uint64 guid);
         void SendStablePetCallback(PreparedQueryResult result, uint64 guid);
         void SendStableResult(uint8 guid);
@@ -772,8 +772,7 @@ class WorldSession
         void HandlePetCancelAuraOpcode(WorldPacket& recvPacket);
         void HandlePetSpellAutocastOpcode(WorldPacket& recvPacket);
         void HandlePetCastSpellOpcode(WorldPacket& recvPacket);
-        void HandlePetLearnTalent(WorldPacket& recvPacket);
-        void HandleLearnPreviewTalentsPet(WorldPacket& recvPacket);
+        void HandeLearnPetSpecializationGroup(WorldPacket& recvPacket);
 
         void HandleSetActionBarToggles(WorldPacket& recvData);
 

@@ -1847,12 +1847,6 @@ public:
                     player->PlayerTalkClass->SendGossipMenu(TEXT_CONFIRM, creature->GetGUID());
                 }
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 3:
-                {
-                    player->ResetPetTalents();
-                    player->CLOSE_GOSSIP_MENU();
-                }
-                break;
         }
         return true;
     }

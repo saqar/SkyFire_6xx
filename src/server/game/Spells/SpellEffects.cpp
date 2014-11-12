@@ -2826,8 +2826,6 @@ void Spell::EffectTameCreature(SpellEffIndex /*effIndex*/)
     // caster have pet now
     m_caster->SetMinion(pet, true);
 
-    pet->InitTalentForLevel();
-
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
@@ -2938,7 +2936,7 @@ void Spell::EffectLearnPetSpell(SpellEffIndex effIndex)
     if (!learn_spellproto)
         return;
 
-    pet->learnSpell(learn_spellproto->Id);
+    pet->LearnSpell(learn_spellproto->Id);
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     pet->GetOwner()->PetSpellInitialize();
 }
@@ -5444,8 +5442,6 @@ void Spell::EffectCreateTamedPet(SpellEffIndex effIndex)
 
     // unitTarget has pet now
     unitTarget->SetMinion(pet, true);
-
-    pet->InitTalentForLevel();
 
     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
     {

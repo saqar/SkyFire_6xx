@@ -113,29 +113,36 @@ class Pet : public Guardian
         void _LoadSpells();
         void _SaveSpells(SQLTransaction& trans);
 
-        bool addSpell(uint32 spellId, ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
-        bool learnSpell(uint32 spell_id);
+        bool AddSpell(uint32 spellId, ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
+        bool LearnSpell(uint32 spell_id);
+        void LearnSpells(std::list<uint32> learnSpells);
         void learnSpellHighRank(uint32 spellid);
         void InitLevelupSpellsForLevel();
-        bool unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
-        bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        bool UnlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        void UnlearnSpells(std::list<uint32> unlearnSpells, bool clear_ab = true);
+        bool RemoveSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         void CleanupActionBar();
         virtual void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
+
+        uint8 GetActiveSpecialization() const { return _activeSpecialization; }
+        void SetActiveSpecialization(uint8 spec){ _activeSpecialization = spec; }
+        uint8 GetSpecializationCount() const { return _specializationCount; }
+        void SetSpecializationCount(uint8 count) { _specializationCount = count; }
+
+        uint32 GetSpecialization() { return GetSpecialization(GetActiveSpecialization()); }
+        uint32 GetSpecialization(uint8 specIdx) { return _specializations[specIdx]; }
+        void SetSpecialization(uint32 specGroup) { _specializations[GetActiveSpecialization()] = specGroup; };
+        void SetSpecialization(uint8 specIdx, uint32 specGroup) { _specializations[specIdx] = specGroup; };
+
+        void SendPetSpecialization();
+        void LearnSpecializationSpells();
+        void UnlearnSpecializationSpells();
+        void UpdateSpecialization(uint32 specGroup, bool updateDb);
 
         PetSpellMap     m_spells;
         AutoSpellList   m_autospells;
 
         void InitPetCreateSpells();
-
-        bool resetTalents();
-        static void resetTalentsForAllPetsOf(Player* owner, Pet* online_pet = NULL);
-        void InitTalentForLevel();
-
-        uint8 GetMaxTalentPointsForLevel(uint8 level);
-        uint8 GetFreeTalentPoints() { return GetByteValue(UNIT_FIELD_ANIM_TIER, 1); }
-        void SetFreeTalentPoints(uint8 points) { SetByteValue(UNIT_FIELD_ANIM_TIER, 1, points); }
-
-        uint32  m_usedTalentCount;
 
         uint64 GetAuraUpdateMaskForRaid() const { return m_auraRaidUpdateMask; }
         void SetAuraUpdateMaskForRaid(uint8 slot) { m_auraRaidUpdateMask |= (uint64(1) << slot); }
@@ -153,6 +160,9 @@ class Pet : public Guardian
         uint64  m_auraRaidUpdateMask;
         bool    m_loading;
         uint32  m_regenTimer;
+        uint8   _specializationCount;
+        uint8   _activeSpecialization;
+        uint32  _specializations[MAX_TALENT_SPECS];
 
         DeclinedName *m_declinedname;
 

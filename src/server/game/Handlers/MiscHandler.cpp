@@ -1901,10 +1901,10 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    uint64 guid;
-    recvData >> guid;
+    uint64 HealerGuid;
+    recvData >> HealerGuid;
 
-    Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
+    Creature* unit = GetPlayer()->GetMap()->GetCreature(HealerGuid);
     if (!unit)
         return;
 
@@ -1912,10 +1912,10 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
         return;
 
     if (bg)
-        sBattlegroundMgr->SendAreaSpiritHealerQueryOpcode(_player, bg, guid);
+        sBattlegroundMgr->SendAreaSpiritHealerQueryOpcode(_player, bg, HealerGuid);
 
     if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
-        bf->SendAreaSpiritHealerQueryOpcode(_player, guid);
+        bf->SendAreaSpiritHealerQueryOpcode(_player, HealerGuid);
 }
 
 void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData)
@@ -1924,21 +1924,21 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    uint64 guid;
-    recvData >> guid;
+    uint64 HealerGuid;
+    recvData >> HealerGuid;
 
-    Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
+    Creature* unit = GetPlayer()->GetMap()->GetCreature(HealerGuid);
     if (!unit)
         return;
 
     if (!unit->IsSpiritService())                            // it's not spirit service
         return;
-
+    
     if (bg)
-        bg->AddPlayerToResurrectQueue(guid, _player->GetGUID());
+        bg->AddPlayerToResurrectQueue(HealerGuid, _player->GetGUID());
 
     if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
-        bf->AddPlayerToResurrectQueue(guid, _player->GetGUID());
+        bf->AddPlayerToResurrectQueue(HealerGuid, _player->GetGUID());
 }
 
 void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)

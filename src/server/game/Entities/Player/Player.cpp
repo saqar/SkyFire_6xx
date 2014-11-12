@@ -7320,84 +7320,40 @@ void Player::_SaveCurrency(SQLTransaction& trans)
     }
 }
 
-void Player::SendNewCurrency(uint32 id) const
-{
-    PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
-    if (itr == _currencyStorage.end())
-        return;
-
-    ByteBuffer currencyData;
-    WorldPacket packet(SMSG_INIT_CURRENCY, 3 + 1 + 4 + 4 + 4 + 4);
-    packet.WriteBits(1, 21);
-
-    CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(id);
-    if (!entry) // should never happen
-        return;
-
-    uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-    uint32 weekCount = itr->second.weekCount / precision;
-    uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
-    uint32 seasonCount = 0;
-
-    packet.WriteBit(seasonCount);
-    packet.WriteBits(0, 5); // some flags
-    packet.WriteBit(weekCap);
-    packet.WriteBit(weekCount);
-
-    if (weekCount)
-        currencyData << uint32(weekCount);
-
-    currencyData << uint32(entry->ID);
-
-    if (seasonCount)
-        currencyData << uint32(seasonCount);
-
-    currencyData << uint32(itr->second.totalCount / precision);
-
-    if (weekCap)
-        currencyData << uint32(weekCap);
-
-    packet.FlushBits();
-    packet.append(currencyData);
-    GetSession()->SendPacket(&packet);
-}
-
 void Player::SendCurrencies() const
 {
     ByteBuffer currencyData;
     WorldPacket packet(SMSG_INIT_CURRENCY, 3 + (_currencyStorage.size() * (1 + 4 + 4 + 4 + 4)));
-    size_t count_pos = packet.bitwpos();
-    packet.WriteBits(_currencyStorage.size(), 21);
+    size_t count_pos = packet.wpos();
+    packet << uint32(0);
 
     size_t count = 0;
-    for (PlayerCurrenciesMap::const_iterator itr = _currencyStorage.begin(); itr != _currencyStorage.end(); ++itr)
+    for (auto itr : _currencyStorage)
     {
-        CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(itr->first);
+        CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(itr.first);
 
         // not send init meta currencies.
         if (!entry || entry->Category == CURRENCY_CATEGORY_META_CONQUEST)
             continue;
 
         uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-        uint32 weekCount = itr->second.weekCount / precision;
+        uint32 weekCount = itr.second.weekCount / precision;
         uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
-        uint32 seasonCount = 0;
+        uint32 WeekMaxCount = 0;
 
-        packet.WriteBit(seasonCount);
-        packet.WriteBits(0, 5); // some flags
-        packet.WriteBit(weekCap);
+        currencyData << uint32(entry->ID);
+        currencyData << uint32(itr.second.totalCount / precision);
         packet.WriteBit(weekCount);
+        packet.WriteBit(WeekMaxCount);
+        packet.WriteBit(weekCap);
+        packet.WriteBits(0, 5); // some flags
 
         if (weekCount)
             currencyData << uint32(weekCount);
 
-        currencyData << uint32(entry->ID);
-
-        if (seasonCount)
-            currencyData << uint32(seasonCount);
-
-        currencyData << uint32(itr->second.totalCount / precision);
-
+        if (WeekMaxCount)
+            currencyData << uint32(WeekMaxCount);
+        
         if (weekCap)
             currencyData << uint32(weekCap);
 
@@ -7406,7 +7362,7 @@ void Player::SendCurrencies() const
 
     packet.FlushBits();
     packet.append(currencyData);
-    packet.PutBits(count_pos, count, 21);
+    packet.put(count_pos, count);
     GetSession()->SendPacket(&packet);
 }
 

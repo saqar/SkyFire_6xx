@@ -1383,8 +1383,6 @@ class Player : public Unit, public GridObject<Player>
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
-        /// send initialization of new currency for client
-        void SendNewCurrency(uint32 id) const;
         /// send full data about all currencies to client
         void SendCurrencies() const;
         /// send conquest currency points and their cap week/arena

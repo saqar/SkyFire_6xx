@@ -908,7 +908,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_HOTFIX_NOTIFY,                                   0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_INITIALIZE_FACTIONS,                             0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_INITIAL_SPELLS,                                  0x0A81, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_INIT_CURRENCY,                                   0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_INIT_CURRENCY,                                   0x0B06, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_INIT_WORLD_STATES,                               0x0B04, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_INSPECT,                                         0x052E, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_INSPECT_HONOR_STATS,                             0x0000, STATUS_UNHANDLED);
@@ -1099,7 +1099,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_THREAT_REMOVE,                                   0x0F3D, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_THREAT_UPDATE,                                   0x03A9, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_TIME_ADJUSTMENT,                                 0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_TIME_SYNC_REQ,                                   0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_TIME_SYNC_REQ,                                   0x03B1, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_TITLE_EARNED,                                    0x1324, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_TOGGLE_XP_GAIN,                                  0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_TOTEM_CREATED,                                   0x0352, STATUS_NEVER    ); // 6.0.3 19116

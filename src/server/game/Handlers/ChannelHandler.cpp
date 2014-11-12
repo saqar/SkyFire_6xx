@@ -32,15 +32,12 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
 
     recvPacket >> channelId;
 
-    CreateVoiceSession = recvPacket.WriteBit(0);            // CreateVoiceSession
-    Internal = recvPacket.WriteBit(0);                      // Internal
+    CreateVoiceSession = recvPacket.ReadBit();              // CreateVoiceSession
+    Internal = recvPacket.ReadBit();                        // Internal
 
-    recvPacket.WriteString(0);                              // Password
-    passLength = recvPacket.ReadBits(7);                    // PasswordLen
-    recvPacket.WriteString(0);                              // ChannelName
     channelLength = recvPacket.ReadBits(7);                 // ChannelNameLen
+    passLength = recvPacket.ReadBits(7);                    // PasswordLen
 
-    recvPacket.FlushBits();
     channelName = recvPacket.ReadString(channelLength);
     password = recvPacket.ReadString(passLength);
 

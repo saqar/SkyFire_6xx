@@ -66,7 +66,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_ACTIVATETAXIEXPRESS,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleActivateTaxiExpressOpcode    );
     DEFINE_OPCODE_HANDLER(CMSG_ADDON_REGISTERED_PREFIXES,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonRegisteredPrefixesOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_ADD_FRIEND,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddFriendOpcode              );
-    DEFINE_OPCODE_HANDLER(CMSG_ADD_IGNORE,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddIgnoreOpcode              );
+    DEFINE_OPCODE_HANDLER(CMSG_ADD_IGNORE,                                          0x1321, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAddIgnoreOpcode              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_ALTER_APPEARANCE,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAlterAppearance              );
     DEFINE_OPCODE_HANDLER(CMSG_AREATRIGGER,                                         0x01B4, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAreaTriggerOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_AREA_SPIRIT_HEALER_QUERY,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueryOpcode  );
@@ -286,7 +286,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_TAXINODE_STATUS_QUERY,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleTaxiNodeStatusQueryOpcode    );
     DEFINE_OPCODE_HANDLER(CMSG_TAXIQUERYAVAILABLENODES,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleTaxiQueryAvailableNodes      );
     DEFINE_OPCODE_HANDLER(CMSG_TELEPORT_TO_UNIT,                                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              );
+    DEFINE_OPCODE_HANDLER(CMSG_TEXT_EMOTE,                                          0x0518, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleTextEmoteOpcode              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_TIME_ADJUSTMENT_RESPONSE,                            0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP,                                      0x0003, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleTimeSyncResp                 ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_TIME_SYNC_RESP_FAILED,                               0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -343,7 +343,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_ITEM_REFUND_INFO,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefundInfoRequest        );
     DEFINE_OPCODE_HANDLER(CMSG_ITEM_TEXT_QUERY,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleItemTextQuery                );
     DEFINE_OPCODE_HANDLER(CMSG_OPEN_ITEM,                                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleOpenItemOpcode               );
-    DEFINE_OPCODE_HANDLER(CMSG_READ_ITEM,                                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleReadItem                     );
+    DEFINE_OPCODE_HANDLER(CMSG_READ_ITEM,                                           0x08F6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReadItem                     ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_REPAIR_ITEM,                                         0x0B54, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRepairItemOpcode             ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_SELL_ITEM,                                           0x0351, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSellItemOpcode               ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_SPLIT_ITEM,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSplitItemOpcode              );
@@ -506,12 +506,12 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_ROLL,                                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLootRoll                     );
 
     ///< Battle Pet & Pet
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_DELETE_PET,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetDelete              );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_MODIFY_NAME,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetModifyName          );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_QUERY_NAME,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetQueryName           );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SET_BATTLE_SLOT,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSetBattleSlot       );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SET_FLAGS,                                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSetFlags            );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SUMMON_COMPANION,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSummonCompanion     );
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_DELETE_PET,                               0x07B9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetDelete              ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_MODIFY_NAME,                              0x03A9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetModifyName          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_QUERY_NAME,                               0x041C, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetQueryName           ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SET_BATTLE_SLOT,                          0x120B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSetBattleSlot       ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SET_FLAGS,                                0x0BA2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSetFlags            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SUMMON_COMPANION,                         0x0B38, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSummonCompanion     ); // 6.0.3 19116
    
     DEFINE_OPCODE_HANDLER(CMSG_PET_ABANDON,                                         0x0005, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetAbandon                   ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_PET_ACTION,                                          0x133A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetAction                    ); // 6.0.3 19116
@@ -949,7 +949,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_MONEY_NOTIFY,                                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MOTD,                                            0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MOUNTRESULT,                                     0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_MOUNTSPECIAL_ANIM,                               0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_MOUNTSPECIAL_ANIM,                               0x159F, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_MULTIPLE_PACKETS,                                0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_NAME_QUERY_RESPONSE,                             0x0828, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_REALM_NAME_QUERY_RESPONSE,                       0x0000, STATUS_UNHANDLED);
@@ -1323,13 +1323,13 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_START_ROLL,                                 0x0000, STATUS_UNHANDLED);
 
     ///< Battle Pet & Pet
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_DELETED,                              0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL,                              0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_DELETED,                              0x0138, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL,                              0x19A2, STATUS_UNHANDLED); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL_LOCK_ACQUIRED,                0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL_LOCK_DENINED,                 0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_QUERY_NAME_RESPONSE,                  0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL_LOCK_DENINED,                 0x1BEC, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_QUERY_NAME_RESPONSE,                  0x09EC, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_SLOT_UPDATE,                          0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_UPDATE,                               0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_UPDATE,                               0x0354, STATUS_NEVER    ); // 6.0.3 19116
 
     DEFINE_OPCODE_HANDLER(SMSG_PET_ACTION_FEEDBACK,                             0x0D9E, STATUS_UNHANDLED); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_PET_ACTION_SOUND,                                0x0D39, STATUS_UNHANDLED); // 6.0.3 19116

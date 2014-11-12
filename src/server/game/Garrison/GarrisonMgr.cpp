@@ -170,7 +170,6 @@ void GarrisonMgr::SendGarrisonGetInfo()
     TC_LOG_DEBUG("network", "World: Sent SMSG_GET_GARR_INFO_RESULT");
     WorldPacket data(SMSG_GET_GARR_INFO_RESULT);
     ObjectGuid guid;
-    bool active;
 
     Unit const* m_unit = 0;
     GarrPlotEntry const* plotEntry = 0;

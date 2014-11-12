@@ -321,23 +321,8 @@ void WorldSession::HandleReadItem(WorldPacket& recvData)
     uint8 bag, slot;
     recvData >> bag >> slot;
 
-Guid[2] = recvData.ReadBit();
-    Guid[1] = recvData.ReadBit();
-    Guid[3] = recvData.ReadBit();
-    Guid[7] = recvData.ReadBit();
-    Guid[6] = recvData.ReadBit();
-    Guid[4] = recvData.ReadBit();
-    Guid[0] = recvData.ReadBit();
-    Guid[5] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(Guid[0]);
-    recvData.ReadByteSeq(Guid[6]);
-    recvData.ReadByteSeq(Guid[3]);
-    recvData.ReadByteSeq(Guid[5]);
-    recvData.ReadByteSeq(Guid[1]);
-    recvData.ReadByteSeq(Guid[7]);
-    recvData.ReadByteSeq(Guid[4]);
-    recvData.ReadByteSeq(Guid[2]);
+	recvData >> Guid;
+	recvData >> slot;
 
     Item* pItem = _player->GetItemByPos(bag, slot);
 

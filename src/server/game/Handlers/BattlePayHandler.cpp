@@ -46,8 +46,8 @@ void WorldSession::HandletBattlePayGetProductListResponseData()
     data << BattlePayProductGroupCount;
     data << BattlePayShopEntryCount;
 
-    //for (uint8 i = 0; i < BattlePayDistributionObjectCount; i++)
-    //    BattlePayMgr::GetBattlePayProduct(data);
+    for (uint8 i = 0; i < BattlePayDistributionObjectCount; i++)
+        BattlePayMgr::GetBattlePayProduct;
 
     for (uint8 i = 0; i < BattlePayProductGroupCount; i++)
     {
@@ -68,14 +68,16 @@ void WorldSession::HandletBattlePayGetProductListResponseData()
         data << Flags;
         data << BannerType;
         data.WriteBit(HasBattlepayDisplayInfo);
-        //if (HasBattlepayDisplayInfo)
-        //    BattlePayMgr::ReadBattlepayDisplayInfo(data);
+        if (HasBattlepayDisplayInfo)
+            BattlePayMgr::ReadBattlepayDisplayInfo;
     }
 }
 
-void BattlePayMgr::GetBattlePayProduct(WorldPacket& data)
+void BattlePayMgr::GetBattlePayProduct()
 {
-    data << ProductID;
+	WorldPacket data;
+
+	data << ProductID;
     data << NormalPriceFixedPoint;
     data << CurrentPriceFixedPoint;
     data << BattlepayProductItemCount;
@@ -93,17 +95,20 @@ void BattlePayMgr::GetBattlePayProduct(WorldPacket& data)
         if (HasBATTLEPETRESULT)
             data.WriteBits(0, 4); // PetResult
         if (HasBattlepayDisplayInfo)
-            BattlePayMgr::ReadBattlepayDisplayInfo(data);
+            BattlePayMgr::ReadBattlepayDisplayInfo;
     }
 
     data.WriteBits(0, 2); // ChoiceType
     data.WriteBit(HasBattlepayDisplayInfo);
     if (HasBattlepayDisplayInfo)
-        BattlePayMgr::ReadBattlepayDisplayInfo(data);
+        BattlePayMgr::ReadBattlepayDisplayInfo;
 }
 
-void BattlePayMgr::ReadBattlepayDisplayInfo(WorldPacket& data)
+void BattlePayMgr::ReadBattlepayDisplayInfo()
 {
+
+	WorldPacket data;
+
     data.WriteBit(HasCreatureDisplayInfoID);
     data.WriteBit(HasFileDataID);
     data.WriteBits(0, 10); // bits16

@@ -29,8 +29,8 @@ public:
     BattlePayMgr();
     ~BattlePayMgr();
 
-    void GetBattlePayProduct(WorldPacket& data);
-    void ReadBattlepayDisplayInfo(WorldPacket& data);
+	void GetBattlePayProduct();
+	void ReadBattlepayDisplayInfo();
 
 private:
     uint32 BattlePayDistributionObjectCount;
@@ -44,7 +44,7 @@ private:
     uint32 IconFileDataID;
     uint32 EntryID;
     uint32 GroupID;
-    uint32 ProductID;
+	uint32 ProductID;
     uint8 DisplayType;
     uint8 Type;
     uint32 Flags;

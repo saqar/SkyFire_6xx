@@ -554,7 +554,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_BANK_BUY_TAB,                                  0x1BC3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankBuyTab              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_BANK_DEPOSIT_MONEY,                            0x1B11, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankDepositMoney        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_BANK_LOG_QUERY,                                0x0428, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankLogQuery            ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_GUILD_BANK_MONEY_WITHDRAWN_QUERY,                    0x063D, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankMoneyWithdrawn      ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GUILD_BANK_MONEY_WITHDRAWN_QUERY,                    0x063D, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankMoneyWithdrawn      ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_BANK_QUERY_TAB,                                0x1139, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankQueryTab            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_BANK_QUERY_TEXT,                               0x062D, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQueryGuildBankTabText        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_GUILD_BANK_SWAP_ITEMS,                               0x1131, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildBankSwapItems           ); // 6.0.3 19116

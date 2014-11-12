@@ -670,10 +670,8 @@ void WorldSession::HandleEmoteOpcode(WorldPacket& recvData)
     if (!GetPlayer()->IsAlive() || GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         return;
 
-    uint32 emote;
-    recvData >> emote;
-    sScriptMgr->OnPlayerEmote(GetPlayer(), emote);
-    GetPlayer()->HandleEmoteCommand(emote);
+    //sScriptMgr->OnPlayerEmote(GetPlayer(), emote);
+    GetPlayer()->HandleEmoteCommand(0);
 }
 
 namespace Trinity

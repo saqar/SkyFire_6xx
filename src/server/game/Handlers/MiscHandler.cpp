@@ -570,6 +570,37 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recvData)
     //GetPlayer()->SendInitWorldStates(true, newZone);
 }
 
+void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
+{
+    uint32 zoneId = _player->GetZoneId();
+    uint32 team = _player->GetTeam();
+
+    std::vector<uint32> graveyardIds;
+    auto range = sObjectMgr->GraveYardStore.equal_range(zoneId);
+
+    for (auto it = range.first; it != range.second && graveyardIds.size() < 16; ++it)
+    {
+        if (it->second.team == 0 || it->second.team == team)
+            graveyardIds.push_back(it->first);
+    }
+
+    if (graveyardIds.empty())
+    {
+        TC_LOG_DEBUG("network", "No graveyards found for zone %u for player %u (team %u) in CMSG_REQUEST_CEMETERY_LIST", zoneId, m_GUIDLow, team);
+        return;
+    }
+
+    WorldPacket data(SMSG_REQUEST_CEMETERY_LIST_RESPONSE, 4 + 4 * graveyardIds.size());
+
+    data.WriteBit(0); // IsGossipTriggered
+    data << uint32(graveyardIds.size());
+
+    for (uint32 i = 0; i < graveyardIds.size(); ++i)
+        data << uint32(graveyardIds[i]);
+
+    SendPacket(&data);
+}
+
 void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
     if (GetPlayer()->IsAlive() || !GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
@@ -1716,7 +1747,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "MSG_SET_RAID_DIFFICULTY");
+    TC_LOG_DEBUG("network", "CMSG_SET_RAID_DIFFICULTY");
 
     uint32 mode;
     recvData >> mode;
@@ -1812,10 +1843,7 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleRequestPetInfoOpcode(WorldPacket& /*recvData */)
 {
-    /*
-        TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PET_INFO");
-        recvData.hexlike();
-    */
+    TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PET_INFO");
 }
 
 void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)

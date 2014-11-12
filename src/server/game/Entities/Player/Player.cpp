@@ -20601,7 +20601,7 @@ void Player::SendDungeonDifficulty(bool IsInGroup)
 
 void Player::SendRaidDifficulty(bool IsInGroup, int32 forcedDifficulty)
 {
-    WorldPacket data(MSG_SET_RAID_DIFFICULTY, 4);
+    WorldPacket data(SMSG_SET_RAID_DIFFICULTY, 4);
     data << uint32(forcedDifficulty == -1 ? GetRaidDifficulty() : forcedDifficulty);
     GetSession()->SendPacket(&data);
 }
@@ -22653,25 +22653,9 @@ void Player::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /*= 0*/
     // Send activate cooldown timer (possible 0) at client side
     ObjectGuid guid = GetGUID();
 
-    WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[2]);
-
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[6]);
+    WorldPacket data(SMSG_COOLDOWN_EVENT, 9 + 4);
+    data << guid;
     data << uint32(spellInfo->Id);
-    data.WriteByteSeq(guid[7]);
     SendDirectMessage(&data);
 }
 
@@ -23449,8 +23433,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendInitialSpells();
 
     data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
-    data.WriteBits(0, 22); // Count
-    data.FlushBits();
+    data << uint32(0); // Count
+    data << uint32(0); // SpellID
     GetSession()->SendPacket(&data);
 
     SendInitialActionButtons();
@@ -24662,23 +24646,7 @@ void Player::SetMover(Unit* target)
     ObjectGuid guid = target->GetGUID();
 
     WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 9);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
+    data << guid;
 
     SendDirectMessage(&data);
 }
@@ -26247,23 +26215,23 @@ void Player::SendEquipmentSetList()
     WorldPacket data(SMSG_EQUIPMENT_SET_LIST, 4);
     size_t count_pos = data.wpos();
     data << uint32(count);                                  // count placeholder
-    for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
+    for (auto itr : m_EquipmentSets)
     {
-        if (itr->second.state == EQUIPMENT_SET_DELETED)
+        if (itr.second.state == EQUIPMENT_SET_DELETED)
             continue;
-        data.appendPackGUID(itr->second.Guid);
-        data << uint32(itr->first);
-        data << itr->second.Name;
-        data << itr->second.IconName;
+        data << itr.second.Guid;
+        data << uint32(itr.first);
+        data << uint32(0);
         for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
             // ignored slots stored in IgnoreMask, client wants "1" as raw GUID, so no HIGHGUID_ITEM
-            if (itr->second.IgnoreMask & (1 << i))
+            if (itr.second.IgnoreMask & (1 << i))
                 data.appendPackGUID(uint64(1));
             else
-                data.appendPackGUID(MAKE_NEW_GUID(itr->second.Items[i], 0, HIGHGUID_ITEM));
+                data.appendPackGUID(MAKE_NEW_GUID(itr.second.Items[i], 0, HIGHGUID_ITEM));
         }
-
+        data << itr.second.Name;
+        data << itr.second.IconName;
         ++count;                                            // client have limit but it checked at loading and set
     }
     data.put<uint32>(count_pos, count);

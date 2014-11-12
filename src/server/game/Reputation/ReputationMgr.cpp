@@ -158,10 +158,10 @@ void ReputationMgr::SendForceReactions()
     data.WriteBits(_forcedReactions.size(), 6);
     data.FlushBits();
 
-    for (ForcedReactions::const_iterator itr = _forcedReactions.begin(); itr != _forcedReactions.end(); ++itr)
+    for (auto itr : _forcedReactions)
     {
-        data << uint32(itr->first);                         // faction_id (Faction.dbc)
-        data << uint32(itr->second);                        // reputation rank
+        data << uint32(itr.first);                         // faction_id (Faction.dbc)
+        data << uint32(itr.second);                        // reputation rank
     }
 
     _player->SendDirectMessage(&data);

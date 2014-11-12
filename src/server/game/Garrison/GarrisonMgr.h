@@ -53,6 +53,8 @@ public:
     GarrisonMgr();
     ~GarrisonMgr();
 
+    void HandleGetGarrisonInfoResult();
+
     uint32 GetGarrisonId() const { return m_garrId; }
     uint32 GetAccountId() const { return m_accountId; }
     uint32 GetCharacterId() const { return m_charId; }

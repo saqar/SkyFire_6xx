@@ -76,72 +76,7 @@ public:
             return false;
         }
 
-        std::string param = (char*)args;
-
-        if (param == "info")
-        {
-            WorldPacket data(SMSG_GET_GARR_INFO_RESULT);
-            bool active;
-
-            data << uint32(0);                              // Unk
-            data << uint32(0);                              // GarrSiteID
-            data << uint32(0);                              // FactionIndex
-            data << uint32(0);                              // GarrSiteLevelID
-            data << uint32(0);                              // Unk
-            data << uint32(0);                              // Unk
-            data << uint32(0);                              // Unk
-            data << uint32(0);                              // Unk
-            data << uint32(0);                              // Unk
-
-            //GarrisonMission
-            data << uint64(0);                              // DBID
-            data << uint32(0);                              // MissionRecID
-            data << uint32(0);                              // OfferTime
-            data << uint32(0);                              // OfferDuration
-            data << uint32(0);                              // StartTime
-            data << uint32(0);                              // TravelDuration
-            data << uint32(0);                              // MissionDuration
-            data << uint32(0);                              // MissionState
-
-            // GarrisonBuildingInfo
-            data << uint32(0);                              // GarrPlotInstanceID
-            data << uint32(0);                              // GarrBuildingID
-            data << uint32(0);                              // TimeBuilt
-            data << uint32(0);                              // CurrentGarSpecID
-            data << uint32(0);                              // Unknown
-            active = data.WriteBit(0);                      // Active
-
-            //GarrisonFollower
-            data << uint64(0);                              // DBID
-            data << uint32(0);                              // GarrFollowerID
-            data << uint32(0);                              // CreatureID
-            data << uint32(0);                              // Gender
-            data << uint32(0);                              // Spec
-            data << uint32(0);                              // Race
-            data << uint32(0);                              // Quality
-            data << uint32(0);                              // FollowerLevel
-            data << uint32(0);                              // ItemLevelWeapon
-            data << uint32(0);                              // ItemLevelArmor
-            data << uint32(0);                              // Xp
-
-
-            // for loop
-            data << uint32(0);                              // AbilityID
-
-            // GarrisonPlotInfo
-            data << uint32(0);                              // GarrPlotInstanceID
-            data << float(0);                               // PositionX
-            data << float(0);                               // PositionY
-            data << float(0);                               // PositionZ
-            data << uint32(0);                              // PlotType
-
-            // for loop
-            data << uint32(0);                              // ArchivedMissions
-
-            handler->GetSession()->SendPacket(&data);
-            return true;
-        }
-        return false;
+		
     }
 };
 

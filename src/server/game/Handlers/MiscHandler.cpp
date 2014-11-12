@@ -570,6 +570,37 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recvData)
     //GetPlayer()->SendInitWorldStates(true, newZone);
 }
 
+void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
+{
+    uint32 zoneId = _player->GetZoneId();
+    uint32 team = _player->GetTeam();
+
+    std::vector<uint32> graveyardIds;
+    auto range = sObjectMgr->GraveYardStore.equal_range(zoneId);
+
+    for (auto it = range.first; it != range.second && graveyardIds.size() < 16; ++it)
+    {
+        if (it->second.team == 0 || it->second.team == team)
+            graveyardIds.push_back(it->first);
+    }
+
+    if (graveyardIds.empty())
+    {
+        TC_LOG_DEBUG("network", "No graveyards found for zone %u for player %u (team %u) in CMSG_REQUEST_CEMETERY_LIST", zoneId, m_GUIDLow, team);
+        return;
+    }
+
+    WorldPacket data(SMSG_REQUEST_CEMETERY_LIST_RESPONSE, 4 + 4 * graveyardIds.size());
+
+    data.WriteBit(0); // IsGossipTriggered
+    data << uint32(graveyardIds.size());
+
+    for (uint32 i = 0; i < graveyardIds.size(); ++i)
+        data << uint32(graveyardIds[i]);
+
+    SendPacket(&data);
+}
+
 void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
     if (GetPlayer()->IsAlive() || !GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
@@ -1716,7 +1747,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "MSG_SET_RAID_DIFFICULTY");
+    TC_LOG_DEBUG("network", "CMSG_SET_RAID_DIFFICULTY");
 
     uint32 mode;
     recvData >> mode;
@@ -1812,10 +1843,7 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleRequestPetInfoOpcode(WorldPacket& /*recvData */)
 {
-    /*
-        TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PET_INFO");
-        recvData.hexlike();
-    */
+    TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_PET_INFO");
 }
 
 void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)
@@ -1901,10 +1929,10 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    uint64 guid;
-    recvData >> guid;
+    uint64 HealerGuid;
+    recvData >> HealerGuid;
 
-    Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
+    Creature* unit = GetPlayer()->GetMap()->GetCreature(HealerGuid);
     if (!unit)
         return;
 
@@ -1912,10 +1940,10 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
         return;
 
     if (bg)
-        sBattlegroundMgr->SendAreaSpiritHealerQueryOpcode(_player, bg, guid);
+        sBattlegroundMgr->SendAreaSpiritHealerQueryOpcode(_player, bg, HealerGuid);
 
     if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
-        bf->SendAreaSpiritHealerQueryOpcode(_player, guid);
+        bf->SendAreaSpiritHealerQueryOpcode(_player, HealerGuid);
 }
 
 void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData)
@@ -1924,21 +1952,21 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    uint64 guid;
-    recvData >> guid;
+    uint64 HealerGuid;
+    recvData >> HealerGuid;
 
-    Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
+    Creature* unit = GetPlayer()->GetMap()->GetCreature(HealerGuid);
     if (!unit)
         return;
 
     if (!unit->IsSpiritService())                            // it's not spirit service
         return;
-
+    
     if (bg)
-        bg->AddPlayerToResurrectQueue(guid, _player->GetGUID());
+        bg->AddPlayerToResurrectQueue(HealerGuid, _player->GetGUID());
 
     if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
-        bf->AddPlayerToResurrectQueue(guid, _player->GetGUID());
+        bf->AddPlayerToResurrectQueue(HealerGuid, _player->GetGUID());
 }
 
 void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)
@@ -2162,7 +2190,8 @@ void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_SAVE_CUF_PROFILES");
 
-    uint8 count = (uint8)recvPacket.ReadBits(20);
+    uint32 count = 0;
+    recvPacket >> count;
 
     if (count > MAX_CUF_PROFILES)
     {
@@ -2177,47 +2206,45 @@ void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)
     for (uint8 i = 0; i < count; ++i)
     {
         profiles[i] = new CUFProfile;
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2            , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_157                         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1            , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP               , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR               , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS                    , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS, recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_156                         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST    , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS         , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER                  , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS                , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_UNK_145                         , recvPacket.ReadBit());
-        strlens[i] = (uint8)recvPacket.ReadBits(8);
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE               , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS       , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS        , recvPacket.ReadBit());
-        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER            , recvPacket.ReadBit());
-    }
+        strlens[i] = (uint8)recvPacket.ReadBits(7);
+        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER,              recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS,                      recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST,      recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION,           recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT,           recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS,  recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR,                 recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER,                    recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS,                  recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS,         recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DYNAMIC_POSITION,                  recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_LOCKED,                            recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_SHOWN,                             recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS,           recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS,           recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS,           recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS,          recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1,              recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2,              recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP,                 recvPacket.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE,                 recvPacket.ReadBit());
 
-    for (uint8 i = 0; i < count; ++i)
-    {
-        recvPacket >> profiles[i]->Unk146;
-        profiles[i]->ProfileName = recvPacket.ReadString(strlens[i]);
-        recvPacket >> profiles[i]->Unk152;
         recvPacket >> profiles[i]->FrameHeight;
         recvPacket >> profiles[i]->FrameWidth;
-        recvPacket >> profiles[i]->Unk150;
-        recvPacket >> profiles[i]->HealthText;
-        recvPacket >> profiles[i]->Unk147;
         recvPacket >> profiles[i]->SortBy;
-        recvPacket >> profiles[i]->Unk154;
-        recvPacket >> profiles[i]->Unk148;
+        recvPacket >> profiles[i]->HealthText;
+        recvPacket >> profiles[i]->TopPoint;
+        recvPacket >> profiles[i]->BottomPoint;
+        recvPacket >> profiles[i]->LeftPoint;  
+        recvPacket >> profiles[i]->TopOffset;
+        recvPacket >> profiles[i]->BottomOffset;
+        recvPacket >> profiles[i]->LeftOffset;
+
+        profiles[i]->ProfileName = recvPacket.ReadString(strlens[i]);
 
         GetPlayer()->SaveCUFProfile(i, profiles[i]);
     }
@@ -2230,60 +2257,60 @@ void WorldSession::SendLoadCUFProfiles()
 {
     Player* player = GetPlayer();
 
-    uint8 count = player->GetCUFProfilesCount();
+    uint32 count = player->GetCUFProfilesCount();
 
-    ByteBuffer byteBuffer(25 * count);
-    WorldPacket data(SMSG_LOAD_CUF_PROFILES, 5 * count + 25 * count);
+    WorldPacket data(SMSG_LOAD_CUF_PROFILES, 50 * count);
 
-    data.WriteBits(count, 20);
+    data << count;
     for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
     {
         CUFProfile* profile = player->GetCUFProfile(i);
         if (!profile)
             continue;
 
-        data.WriteBit(profile->BoolOptions[CUF_UNK_157]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_10_PLAYERS]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_5_PLAYERS]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_25_PLAYERS]);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HEAL_PREDICTION]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVE]);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HORIZONTAL_GROUPS]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_40_PLAYERS]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_3_PLAYERS]);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_AGGRO_HIGHLIGHT]);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_BORDER]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_2_PLAYERS]);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_NON_BOSS_DEBUFFS]);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_MAIN_TANK_AND_ASSIST]);
-        data.WriteBit(profile->BoolOptions[CUF_UNK_156]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_2]);
-        data.WriteBit(profile->BoolOptions[CUF_USE_CLASS_COLORS]);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_POWER_BAR]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_1]);
-        data.WriteBits(profile->ProfileName.size(), 8);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS]);
-        data.WriteBit(profile->BoolOptions[CUF_KEEP_GROUPS_TOGETHER]);
-        data.WriteBit(profile->BoolOptions[CUF_UNK_145]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_15_PLAYERS]);
-        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_PETS]);
-        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVP]);
+        data.WriteBits(profile->ProfileName.size(), 7);
 
-        byteBuffer << uint16(profile->Unk154);
-        byteBuffer << uint16(profile->FrameHeight);
-        byteBuffer << uint16(profile->Unk152);
-        byteBuffer << uint8(profile->Unk147);
-        byteBuffer << uint16(profile->Unk150);
-        byteBuffer << uint8(profile->Unk146);
-        byteBuffer << uint8(profile->HealthText);
-        byteBuffer << uint8(profile->SortBy);
-        byteBuffer << uint16(profile->FrameWidth);
-        byteBuffer << uint8(profile->Unk148);
-        byteBuffer.WriteString(profile->ProfileName);
+        data.WriteBit(profile->BoolOptions[CUF_KEEP_GROUPS_TOGETHER]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_PETS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_MAIN_TANK_AND_ASSIST]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HEAL_PREDICTION]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_AGGRO_HIGHLIGHT]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_POWER_BAR]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_BORDER]);
+        data.WriteBit(profile->BoolOptions[CUF_USE_CLASS_COLORS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HORIZONTAL_GROUPS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_NON_BOSS_DEBUFFS]);
+        data.WriteBit(profile->BoolOptions[CUF_DYNAMIC_POSITION]);
+        data.WriteBit(profile->BoolOptions[CUF_LOCKED]);
+        data.WriteBit(profile->BoolOptions[CUF_SHOWN]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_2_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_3_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_5_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_10_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_15_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_25_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_40_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_1]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_2]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVP]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVE]);
+
+        data << uint16(profile->FrameHeight);
+        data << uint16(profile->FrameWidth);
+        data << uint8(profile->SortBy);
+        data << uint8(profile->HealthText);
+        data << uint8(profile->TopPoint);
+        data << uint8(profile->BottomPoint);
+        data << uint8(profile->LeftPoint);
+        data << uint16(profile->TopOffset);
+        data << uint16(profile->BottomOffset);
+        data << uint16(profile->LeftOffset);
+        
+        data.WriteString(profile->ProfileName);
     }
 
     data.FlushBits();
-    data.append(byteBuffer);
     SendPacket(&data);
 }
 
@@ -2299,4 +2326,37 @@ void WorldSession::HandleSortBankBagsOpcode(WorldPacket& recvData)
     ObjectGuid guid;
 
     recvData >> guid;
+}
+
+void WorldSession::SendServerWorldInfo()
+{
+    size_t maxsize = (4 + 1 + 4 + 1 + 1 + 1 + 1 +
+        HasIneligibleForLootMask ? 4 : 0 + HasInstanceGroupSize ? 4 : 0 + HasRestrictedAccountMaxLevel ? 4 : 0 + HasRestrictedAccountMaxMoney ? 4 : 0);
+
+    WorldPacket data(SMSG_WORLD_SERVER_INFO, maxsize);
+
+    data << uint32(GetPlayer()->GetMap()->GetDifficulty());
+    data << uint8(sWorld->getBoolConfig(CONFIG_IS_TOURNAMENT_REALM));
+    data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);
+
+    data.WriteBit(HasIneligibleForLootMask);
+    data.WriteBit(HasInstanceGroupSize);
+    data.WriteBit(HasRestrictedAccountMaxLevel);
+    data.WriteBit(HasRestrictedAccountMaxMoney);
+
+    data.FlushBits();
+
+    if (HasIneligibleForLootMask)
+        data << uint32(0);
+
+    if (HasInstanceGroupSize)
+        data << uint32(0);
+
+    if (HasRestrictedAccountMaxLevel)
+        data << uint32(0);
+
+    if (HasRestrictedAccountMaxMoney)
+        data << uint32(100000); // RestrictedMoney (starter accounts)
+
+    GetPlayer()->GetSession()->SendPacket(&data);
 }

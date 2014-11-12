@@ -228,6 +228,7 @@ class WorldSession
         void SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps, std::set<uint32> const& worldAreas);
         void SendQueryTimeResponse();
         void SendGroupInviteNotification(const std::string& inviterName, bool inGroup);
+        void SendServerWorldInfo();
 
         void SendAuthResponse(uint8 code, bool queued, uint32 queuePos = 0);
         void SendClientCacheVersion(uint32 version);
@@ -418,7 +419,9 @@ class WorldSession
         void HandleMoveUnRootAck(WorldPacket& recvPacket);
         void HandleMoveRootAck(WorldPacket& recvPacket);
         void HandleLookingForGroup(WorldPacket& recvPacket);
+
         void HandleReturnToGraveyard(WorldPacket& recvPacket);
+        void HandleRequestCemeteryList(WorldPacket& recvPacket);
 
         // new inspect
         void HandleInspectOpcode(WorldPacket& recvPacket);
@@ -515,7 +518,6 @@ class WorldSession
         void HandleWorldportrResponse();                // for server-side calls
 
         void HandleMovementOpcodes(WorldPacket& recvPacket);
-        void HandleSetActiveMoverOpcode(WorldPacket& recvData);
         void HandleMoveNotActiveMover(WorldPacket& recvData);
         void HandleDismissControlledVehicle(WorldPacket& recvData);
         void HandleRequestVehicleExit(WorldPacket& recvData);
@@ -948,6 +950,10 @@ class WorldSession
         void HandleBlackMarketBidOpcode(WorldPacket& recvData);
         void SendBlackMarketBidResult();
 
+        // BattlePay
+        void HandletBattlePayGetProductListResponse();
+        void HandletBattlePayGetProductListResponseData();
+
         // Miscellaneous
         void HandleSpellClick(WorldPacket& recvData);
         void HandleMirrorImageDataRequest(WorldPacket& recvData);
@@ -1012,6 +1018,9 @@ class WorldSession
         void HandleCreateShipment(WorldPacket& recvData);
         void HandleCompleteShipment(WorldPacket& recvData);
         void HandleCompleteAllReadyShipment(WorldPacket& recvData);
+
+        // Battle Pay
+        void HandleBaattlePayProductListQuery(WorldPacket& recvData);
 
     private:
         void InitializeQueryCallbackParameters();
@@ -1116,6 +1125,11 @@ class WorldSession
         time_t timeLastWhoCommand;
         z_stream_s* _compressionStream;
         rbac::RBACData* _RBACData;
+
+        bool HasIneligibleForLootMask = false;
+        bool HasInstanceGroupSize = false;
+        bool HasRestrictedAccountMaxLevel = false;
+        bool HasRestrictedAccountMaxMoney = false;
 };
 #endif
 /// @}

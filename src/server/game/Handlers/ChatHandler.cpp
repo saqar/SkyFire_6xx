@@ -670,10 +670,8 @@ void WorldSession::HandleEmoteOpcode(WorldPacket& recvData)
     if (!GetPlayer()->IsAlive() || GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         return;
 
-    uint32 emote;
-    recvData >> emote;
-    sScriptMgr->OnPlayerEmote(GetPlayer(), emote);
-    GetPlayer()->HandleEmoteCommand(emote);
+    //sScriptMgr->OnPlayerEmote(GetPlayer(), emote);
+    GetPlayer()->HandleEmoteCommand(0);
 }
 
 namespace Trinity
@@ -757,23 +755,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
     recvData >> text_emote;
     recvData >> emoteNum;
 
-guid[6] = recvData.ReadBit();
-guid[7] = recvData.ReadBit();
-guid[3] = recvData.ReadBit();
-guid[2] = recvData.ReadBit();
-guid[0] = recvData.ReadBit();
-guid[5] = recvData.ReadBit();
-guid[1] = recvData.ReadBit();
-guid[4] = recvData.ReadBit();
-
-recvData.ReadByteSeq(guid[0]);
-recvData.ReadByteSeq(guid[5]);
-recvData.ReadByteSeq(guid[1]);
-recvData.ReadByteSeq(guid[4]);
-recvData.ReadByteSeq(guid[2]);
-recvData.ReadByteSeq(guid[3]);
-recvData.ReadByteSeq(guid[7]);
-recvData.ReadByteSeq(guid[6]);
+	recvData >> guid;
 
     sScriptMgr->OnPlayerTextEmote(GetPlayer(), text_emote, emoteNum, guid);
 
@@ -824,24 +806,8 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recvData)
     uint8 unk;
     //TC_LOG_DEBUG("network", "WORLD: Received CMSG_CHAT_IGNORED");
 
-    guid[5] = recvData.ReadBit();
+	recvData >> guid;
     recvData >> unk;                                       // probably related to spam reporting
-    guid[0] = recvData.ReadBit();
-    guid[1] = recvData.ReadBit();
-    guid[3] = recvData.ReadBit();
-    guid[6] = recvData.ReadBit();
-    guid[7] = recvData.ReadBit();
-    guid[4] = recvData.ReadBit();
-    guid[2] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(guid[2]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[3]);
-    recvData.ReadByteSeq(guid[4]);
-    recvData.ReadByteSeq(guid[7]);
-    recvData.ReadByteSeq(guid[6]);
-    recvData.ReadByteSeq(guid[0]);
-    recvData.ReadByteSeq(guid[5]);
 
     Player* player = ObjectAccessor::FindPlayer(guid);
     if (!player || !player->GetSession())

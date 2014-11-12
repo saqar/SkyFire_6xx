@@ -34,7 +34,7 @@ void WorldSession::HandleGarrCompleteMission(WorldPacket& recvData)
 }
 
 void WorldSession::HandleGarrSetBuildingActive(WorldPacket& recvData)
-{ 
+{
     TC_LOG_ERROR("network", "World: Received CMSG_GARR_SET_BUILDING_ACTIVE");
     uint32 PlotInstanceID;
     recvData >> PlotInstanceID;
@@ -90,8 +90,7 @@ void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
 }
 
 void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
-{
-}
+{ }
 
 void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
 {
@@ -109,9 +108,9 @@ void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
     // Garrison function to start mission
 
     WorldPacket data(SMSG_GARR_OPEN_ARCHITECT);
-    ObjectGuid guid;
+    ObjectGuid NpcGUID;
 
-    data << guid;
+    data << NpcGUID;
 
     SendPacket(&data);
 }
@@ -172,4 +171,90 @@ void WorldSession::HandleGarrRemoveFollower(WorldPacket& recvData)
 
     recvData >> npcGuid;
     recvData >> FollowerDBID;
+}
+
+void HandleGetGarrisonInfoResult()
+{
+    TC_LOG_DEBUG("network", "World: Sent SMSG_GET_GARR_INFO_RESULT");
+
+    ObjectGuid guid;
+    Unit const* m_unit = 0;
+    GarrPlotEntry const* plotEntry = 0;
+
+    uint32 GarrisonBuildingInfoCount = 0;
+    uint32 GarrisonPlotInfoCount = 0;
+    uint32 GarrisonFollowerCount = 0;
+    uint32 GarrisonMission = 0;
+    uint32 ArchivedMissions = 0;
+    uint32 AbilityIDCount = 0;
+
+    WorldPacket data(SMSG_GET_GARR_INFO_RESULT);
+
+    data << uint32(GarrisonBuildingInfoCount); // 21
+    data << uint32(0); // 22
+    data << uint32(0); // 8
+
+    data << uint32(GarrisonBuildingInfoCount);
+    data << uint32(GarrisonPlotInfoCount);
+    data << uint32(GarrisonFollowerCount);
+    data << uint32(GarrisonMission);
+    data << uint32(ArchivedMissions);
+
+
+    for (uint32 i = 0; i < GarrisonBuildingInfoCount; i++)
+    {
+        // sub_5EA03C
+        data << uint32(0); // 2
+        data << uint32(0); // 3
+        data << uint32(0); // 4
+        data << uint32(0); // 5
+        data << uint32(0); // 5
+        data.WriteBit(0); // Active
+    }
+
+    for (uint32 i = 0; i < GarrisonPlotInfoCount; i++)
+    {
+        // sub_5E8944
+        data << uint32(0);
+        data << float(0.0f); // PlotPos x
+        data << float(0.0f); // y
+        data << float(0.0f); // z
+        data << uint32(0); // 5
+    }
+
+    for (uint32 i = 0; i < GarrisonFollowerCount; i++)
+    {
+        // sub_61D8C6
+        data << uint64(0); // DbID
+        data << uint32(0); // 2
+        data << uint32(0); // 3
+        data << uint32(0); // 4
+        data << uint32(0); // 5
+        data << uint32(0); // 6
+        data << uint32(0); // 7
+        data << uint32(0); // 8
+        data << uint32(0); // 9
+        data << uint32(AbilityIDCount);
+        data << uint32(0); // 14
+        for (uint32 z = 0; z < AbilityIDCount; z++)
+            data << uint32(0); // AbilityID
+    }
+
+    for (uint32 i = 0; i < GarrisonMission; i++)
+    {
+        // sub_61BED1
+        data << uint64(0); // DbID
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+    }
+
+    for (uint32 i = 0; i < ArchivedMissions; i++)
+        data << uint32(ArchivedMissions);
+
+    //m_owner->GetSession()->SendPacket(&data);
 }

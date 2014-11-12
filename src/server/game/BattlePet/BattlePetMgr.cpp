@@ -397,23 +397,8 @@ void BattlePetMgr::SendBattlePetDeleted(uint64 id)
     ObjectGuid petEntry = id;
 
     WorldPacket data(SMSG_BATTLE_PET_DELETED, 1 + 8);
-    data.WriteBit(petEntry[0]);
-    data.WriteBit(petEntry[4]);
-    data.WriteBit(petEntry[7]);
-    data.WriteBit(petEntry[6]);
-    data.WriteBit(petEntry[1]);
-    data.WriteBit(petEntry[5]);
-    data.WriteBit(petEntry[2]);
-    data.WriteBit(petEntry[3]);
-
-    data.WriteByteSeq(petEntry[6]);
-    data.WriteByteSeq(petEntry[1]);
-    data.WriteByteSeq(petEntry[7]);
-    data.WriteByteSeq(petEntry[0]);
-    data.WriteByteSeq(petEntry[4]);
-    data.WriteByteSeq(petEntry[3]);
-    data.WriteByteSeq(petEntry[5]);
-    data.WriteByteSeq(petEntry[2]);
+    
+	data << petEntry;
 
     m_owner->GetSession()->SendPacket(&data);
 }
@@ -451,6 +436,7 @@ void BattlePetMgr::SendBattlePetJournal()
 
         ObjectGuid petEntry = battlePet->GetId();
 
+		data << petEntry;
         data.WriteBit(!battlePet->GetFlags());
         data.WriteBit(petEntry[3]);
         data.WriteBit(petEntry[7]);
@@ -591,51 +577,35 @@ void BattlePetMgr::SendBattlePetUpdate(BattlePet* battlePet, bool notification)
 
     WorldPacket data(SMSG_BATTLE_PET_UPDATE, 4 + 1 + 8 + battlePet->GetNickname().size() + 4 + 4 + 4 + 4 + 2 + 4 + 4 + 1 + 2 + 2 + 4 + 2);
     data.WriteBits(1, 19);
-    data.WriteBit(petEntry[4]);
-    data.WriteBit(petEntry[1]);
-    data.WriteBit(petEntry[7]);
     data.WriteBit(!battlePet->GetQuality());
     data.WriteBit(!battlePet->GetBreed());
-    data.WriteBit(petEntry[5]);
     data.WriteBit(0);                           // unknown
-    data.WriteBit(petEntry[2]);
     data.WriteBit(!battlePet->GetFlags());
     data.WriteBit(0);                           // BATTLE_PET_FLAG_NOT_ACCOUNT_BOUND
-    data.WriteBit(petEntry[6]);
-    data.WriteBit(petEntry[3]);
     data.WriteBits(battlePet->GetNickname().size(), 7);
-    data.WriteBit(petEntry[0]);
     data.WriteBit(notification);
     data.FlushBits();
 
-    data.WriteByteSeq(petEntry[1]);
     data.WriteString(battlePet->GetNickname());
     data << uint32(battlePet->GetCurrentHealth());
     data << uint32(battlePet->GetSpecies());
-    data.WriteByteSeq(petEntry[0]);
     data << uint32(battlePet->GetPower());
     data << uint32(battlePet->GetSpeed());
 
     if (battlePet->GetBreed())
         data << uint16(battlePet->GetBreed());
 
-    data.WriteByteSeq(petEntry[4]);
     data << uint32(creatureTemplate->Entry);
     data << uint32(battlePet->GetMaxHealth());
-    data.WriteByteSeq(petEntry[6]);
 
     if (battlePet->GetQuality())
         data << uint8(battlePet->GetQuality());
 
-    data.WriteByteSeq(petEntry[2]);
-    data.WriteByteSeq(petEntry[3]);
     data << uint16(battlePet->GetXp());
-    data.WriteByteSeq(petEntry[7]);
 
     if (battlePet->GetFlags())
         data << uint16(battlePet->GetFlags());
 
-    data.WriteByteSeq(petEntry[5]);
     data << uint32(creatureTemplate->Modelid1);
     data << uint16(battlePet->GetLevel());
 

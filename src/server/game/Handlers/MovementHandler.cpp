@@ -489,37 +489,6 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
     }
 }
 
-void WorldSession::HandleSetActiveMoverOpcode(WorldPacket& recvPacket)
-{
-    TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
-
-    ObjectGuid guid;
-
-    guid[7] = recvPacket.ReadBit();
-    guid[2] = recvPacket.ReadBit();
-    guid[1] = recvPacket.ReadBit();
-    guid[0] = recvPacket.ReadBit();
-    guid[4] = recvPacket.ReadBit();
-    guid[5] = recvPacket.ReadBit();
-    guid[6] = recvPacket.ReadBit();
-    guid[3] = recvPacket.ReadBit();
-
-    recvPacket.ReadByteSeq(guid[3]);
-    recvPacket.ReadByteSeq(guid[2]);
-    recvPacket.ReadByteSeq(guid[4]);
-    recvPacket.ReadByteSeq(guid[0]);
-    recvPacket.ReadByteSeq(guid[5]);
-    recvPacket.ReadByteSeq(guid[1]);
-    recvPacket.ReadByteSeq(guid[6]);
-    recvPacket.ReadByteSeq(guid[7]);
-
-    if (GetPlayer()->IsInWorld())
-    {
-        if (_player->m_mover->GetGUID() != guid)
-            TC_LOG_ERROR("network", "HandleSetActiveMoverOpcode: incorrect mover guid: mover is " UI64FMTD " (%s - Entry: %u) and should be " UI64FMTD, uint64(guid), GetLogNameForGuid(guid), GUID_ENPART(guid), _player->m_mover->GetGUID());
-    }
-}
-
 void WorldSession::HandleMoveNotActiveMover(WorldPacket &recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
@@ -531,26 +500,11 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recvData)
 
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvData*/)
 {
-    ObjectGuid guid = GetPlayer()->GetGUID();
+    ObjectGuid guid = GetPlayer()->GetGUID128();
 
     WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 1 + 8);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[3]);
-
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[2]);
+    
+	data >> guid;
 
     GetPlayer()->SendMessageToSet(&data, false);
 }
@@ -576,30 +530,16 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_MOVE_HOVER_ACK");
 
-    uint64 guid;                                            // guid - unused
-    recvData.readPackGUID(guid);
-
-    recvData.read_skip<uint32>();                          // unk
-
     MovementInfo movementInfo;
     GetPlayer()->ReadMovementInfo(recvData, &movementInfo);
-
-    recvData.read_skip<uint32>();                          // unk2
 }
 
 void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_MOVE_WATER_WALK_ACK");
 
-    uint64 guid;                                            // guid - unused
-    recvData.readPackGUID(guid);
-
-    recvData.read_skip<uint32>();                          // unk
-
     MovementInfo movementInfo;
     GetPlayer()->ReadMovementInfo(recvData, &movementInfo);
-
-    recvData.read_skip<uint32>();                          // unk2
 }
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recvData)

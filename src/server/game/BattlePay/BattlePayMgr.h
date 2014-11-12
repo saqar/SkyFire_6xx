@@ -17,6 +17,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Opcodes.h"
+#include "WorldSession.h"
+
 #ifndef BATTLE_PAY_MGR_H
 #define BATTLE_PAY_MGR_H
 
@@ -25,6 +28,36 @@ class BattlePayMgr
 public:
     BattlePayMgr();
     ~BattlePayMgr();
+
+	void GetBattlePayProduct();
+	void ReadBattlepayDisplayInfo();
+
+private:
+    uint32 BattlePayDistributionObjectCount;
+    uint32 BattlePayProductGroupCount;
+    uint32 BattlePayShopEntryCount;
+    uint32 BattlepayProductItemCount;
+    uint64 NormalPriceFixedPoint;
+    uint64 CurrentPriceFixedPoint;
+
+    uint32 Ordering;
+    uint32 IconFileDataID;
+    uint32 EntryID;
+    uint32 GroupID;
+	uint32 ProductID;
+    uint8 DisplayType;
+    uint8 Type;
+    uint32 Flags;
+    uint8 NameSize;
+    uint8 BannerType;
+    uint32 CreatureDisplayInfoID;
+    uint32 FileDataID;
+    bool HasFileDataID;
+    bool HasFlags;
+    bool HasPet;
+    bool HasBattlepayDisplayInfo;
+    bool HasBATTLEPETRESULT;
+    bool HasCreatureDisplayInfoID;
 };
 
 #endif

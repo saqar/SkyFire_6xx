@@ -3417,9 +3417,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
 void Player::SendInitialSpells()
 {
-    time_t curTime = time(NULL);
-    time_t infTime = curTime + infinityCooldownDelayCheck;
-
     uint16 spellCount = 0;
 
     WorldPacket data(SMSG_INITIAL_SPELLS, (1+2+4*m_spells.size()+2+m_spellCooldowns.size()*(2+2+2+4+4)));
@@ -3445,42 +3442,6 @@ void Player::SendInitialSpells()
 
     data.put(pos, spellCount);
 
-    /*
-    uint16 spellCooldowns = m_spellCooldowns.size();
-    data << uint16(spellCooldowns);
-    for (SpellCooldowns::const_iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end(); ++itr)
-    {
-        SpellInfo const* sEntry = sSpellMgr->GetSpellInfo(itr->first);
-        if (!sEntry)
-            continue;
-
-        data << uint32(itr->first);
-
-        data << uint32(itr->second.itemid);                 // cast item id
-        data << uint16(sEntry->GetCategory());              // spell category
-
-        // send infinity cooldown in special format
-        if (itr->second.end >= infTime)
-        {
-            data << uint32(1);                              // cooldown
-            data << uint32(0x80000000);                     // category cooldown
-            continue;
-        }
-
-        time_t cooldown = itr->second.end > curTime ? (itr->second.end-curTime)*IN_MILLISECONDS : 0;
-
-        if (sEntry->GetCategory())                          // may be wrong, but anyway better than nothing...
-        {
-            data << uint32(0);                              // cooldown
-            data << uint32(cooldown);                       // category cooldown
-        }
-        else
-        {
-            data << uint32(cooldown);                       // cooldown
-            data << uint32(0);                              // category cooldown
-        }
-    }
-    */
     GetSession()->SendPacket(&data);
 
     TC_LOG_DEBUG("network", "CHARACTER: Sent Initial Spells");
@@ -7359,84 +7320,40 @@ void Player::_SaveCurrency(SQLTransaction& trans)
     }
 }
 
-void Player::SendNewCurrency(uint32 id) const
-{
-    PlayerCurrenciesMap::const_iterator itr = _currencyStorage.find(id);
-    if (itr == _currencyStorage.end())
-        return;
-
-    ByteBuffer currencyData;
-    WorldPacket packet(SMSG_INIT_CURRENCY, 3 + 1 + 4 + 4 + 4 + 4);
-    packet.WriteBits(1, 21);
-
-    CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(id);
-    if (!entry) // should never happen
-        return;
-
-    uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-    uint32 weekCount = itr->second.weekCount / precision;
-    uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
-    uint32 seasonCount = 0;
-
-    packet.WriteBit(seasonCount);
-    packet.WriteBits(0, 5); // some flags
-    packet.WriteBit(weekCap);
-    packet.WriteBit(weekCount);
-
-    if (weekCount)
-        currencyData << uint32(weekCount);
-
-    currencyData << uint32(entry->ID);
-
-    if (seasonCount)
-        currencyData << uint32(seasonCount);
-
-    currencyData << uint32(itr->second.totalCount / precision);
-
-    if (weekCap)
-        currencyData << uint32(weekCap);
-
-    packet.FlushBits();
-    packet.append(currencyData);
-    GetSession()->SendPacket(&packet);
-}
-
 void Player::SendCurrencies() const
 {
     ByteBuffer currencyData;
     WorldPacket packet(SMSG_INIT_CURRENCY, 3 + (_currencyStorage.size() * (1 + 4 + 4 + 4 + 4)));
-    size_t count_pos = packet.bitwpos();
-    packet.WriteBits(_currencyStorage.size(), 21);
+    size_t count_pos = packet.wpos();
+    packet << uint32(0);
 
     size_t count = 0;
-    for (PlayerCurrenciesMap::const_iterator itr = _currencyStorage.begin(); itr != _currencyStorage.end(); ++itr)
+    for (auto itr : _currencyStorage)
     {
-        CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(itr->first);
+        CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(itr.first);
 
         // not send init meta currencies.
         if (!entry || entry->Category == CURRENCY_CATEGORY_META_CONQUEST)
             continue;
 
         uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-        uint32 weekCount = itr->second.weekCount / precision;
+        uint32 weekCount = itr.second.weekCount / precision;
         uint32 weekCap = GetCurrencyWeekCap(entry) / precision;
-        uint32 seasonCount = 0;
+        uint32 WeekMaxCount = 0;
 
-        packet.WriteBit(seasonCount);
-        packet.WriteBits(0, 5); // some flags
-        packet.WriteBit(weekCap);
+        currencyData << uint32(entry->ID);
+        currencyData << uint32(itr.second.totalCount / precision);
         packet.WriteBit(weekCount);
+        packet.WriteBit(WeekMaxCount);
+        packet.WriteBit(weekCap);
+        packet.WriteBits(0, 5); // some flags
 
         if (weekCount)
             currencyData << uint32(weekCount);
 
-        currencyData << uint32(entry->ID);
-
-        if (seasonCount)
-            currencyData << uint32(seasonCount);
-
-        currencyData << uint32(itr->second.totalCount / precision);
-
+        if (WeekMaxCount)
+            currencyData << uint32(WeekMaxCount);
+        
         if (weekCap)
             currencyData << uint32(weekCap);
 
@@ -7445,7 +7362,7 @@ void Player::SendCurrencies() const
 
     packet.FlushBits();
     packet.append(currencyData);
-    packet.PutBits(count_pos, count, 21);
+    packet.put(count_pos, count);
     GetSession()->SendPacket(&packet);
 }
 
@@ -18016,7 +17933,7 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
 
     do
     {
-        // SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154 FROM character_cuf_profiles WHERE guid = ?
+        // SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, LeftPoint, BottomPoint, topPoint, bottomOffset, leftOffset, topOffset FROM character_cuf_profiles WHERE guid = ?
         Field* fields = result->Fetch();
 
         uint8 id           = fields[0].GetUInt8();
@@ -18026,12 +17943,12 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
         uint8 sortBy       = fields[4].GetUInt8();
         uint8 healthText   = fields[5].GetUInt8();
         uint32 boolOptions = fields[6].GetUInt32();
-        uint8 unk146       = fields[7].GetUInt8();
-        uint8 unk147       = fields[8].GetUInt8();
-        uint8 unk148       = fields[9].GetUInt8();
-        uint16 unk150      = fields[10].GetUInt16();
-        uint16 unk152      = fields[11].GetUInt16();
-        uint16 unk154      = fields[12].GetUInt16();
+        uint8 LeftPoint    = fields[7].GetUInt8();
+        uint8 BottomPoint  = fields[8].GetUInt8();
+        uint8 topPoint     = fields[9].GetUInt8();
+        uint16 bottomOffset= fields[10].GetUInt16();
+        uint16 leftOffset  = fields[11].GetUInt16();
+        uint16 topOffset   = fields[12].GetUInt16();
 
         if (id > MAX_CUF_PROFILES)
         {
@@ -18039,7 +17956,7 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
             continue;
         }
 
-        _CUFProfiles[id] = new CUFProfile(name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154);
+        _CUFProfiles[id] = new CUFProfile(name, frameHeight, frameWidth, sortBy, healthText, boolOptions, LeftPoint, BottomPoint, topPoint, bottomOffset, leftOffset, topOffset);
     }
     while (result->NextRow());
 }
@@ -20049,22 +19966,22 @@ void Player::_SaveCUFProfiles(SQLTransaction& trans)
         }
         else
         {
-            // REPLACE INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            // REPLACE INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, LeftPoint, BottomPoint, topPoint, bottomOffset, leftOffset, topOffset) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_CUF_PROFILES);
             stmt->setUInt32(0, lowGuid);
             stmt->setUInt8(1, i);
-            stmt->setString(2, _CUFProfiles[i]->ProfileName);
-            stmt->setUInt16(3, _CUFProfiles[i]->FrameHeight);
-            stmt->setUInt16(4, _CUFProfiles[i]->FrameWidth);
-            stmt->setUInt8(5, _CUFProfiles[i]->SortBy);
-            stmt->setUInt8(6, _CUFProfiles[i]->HealthText);
-            stmt->setUInt32(7, _CUFProfiles[i]->BoolOptions.to_ulong()); // 27 of 32 fields used, fits in an int
-            stmt->setUInt8(8, _CUFProfiles[i]->Unk146);
-            stmt->setUInt8(9, _CUFProfiles[i]->Unk147);
-            stmt->setUInt8(10, _CUFProfiles[i]->Unk148);
-            stmt->setUInt16(11, _CUFProfiles[i]->Unk150);
-            stmt->setUInt16(12, _CUFProfiles[i]->Unk152);
-            stmt->setUInt16(13, _CUFProfiles[i]->Unk154);
+            stmt->setString(2,  _CUFProfiles[i]->ProfileName);
+            stmt->setUInt16(3,  _CUFProfiles[i]->FrameHeight);
+            stmt->setUInt16(4,  _CUFProfiles[i]->FrameWidth);
+            stmt->setUInt8(5,   _CUFProfiles[i]->SortBy);
+            stmt->setUInt8(6,   _CUFProfiles[i]->HealthText);
+            stmt->setUInt32(7,  _CUFProfiles[i]->BoolOptions.to_ulong()); // 27 of 32 fields used, fits in an int
+            stmt->setUInt8(8,   _CUFProfiles[i]->LeftPoint);
+            stmt->setUInt8(9,   _CUFProfiles[i]->BottomPoint);
+            stmt->setUInt8(10,  _CUFProfiles[i]->TopPoint);
+            stmt->setUInt16(11, _CUFProfiles[i]->BottomOffset);
+            stmt->setUInt16(12, _CUFProfiles[i]->LeftOffset);
+            stmt->setUInt16(13, _CUFProfiles[i]->TopOffset);
         }
 
         trans->Append(stmt);
@@ -20662,7 +20579,7 @@ void Player::SendDungeonDifficulty(bool IsInGroup)
 
 void Player::SendRaidDifficulty(bool IsInGroup, int32 forcedDifficulty)
 {
-    WorldPacket data(MSG_SET_RAID_DIFFICULTY, 4);
+    WorldPacket data(SMSG_SET_RAID_DIFFICULTY, 4);
     data << uint32(forcedDifficulty == -1 ? GetRaidDifficulty() : forcedDifficulty);
     GetSession()->SendPacket(&data);
 }
@@ -21512,7 +21429,8 @@ void Player::SetSpellModTakingSpell(Spell* spell, bool apply)
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
 {
     WorldPacket data(SMSG_SET_PROFICIENCY, 4 + 1);
-    data << uint32(itemSubclassMask) << uint8(itemClass);
+    data << uint32(itemSubclassMask);
+    data << uint8(itemClass);
     GetSession()->SendPacket(&data);
 }
 
@@ -22759,25 +22677,9 @@ void Player::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /*= 0*/
     // Send activate cooldown timer (possible 0) at client side
     ObjectGuid guid = GetGUID();
 
-    WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[2]);
-
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[6]);
+    WorldPacket data(SMSG_COOLDOWN_EVENT, 9 + 4);
+    data << guid;
     data << uint32(spellInfo->Id);
-    data.WriteByteSeq(guid[7]);
     SendDirectMessage(&data);
 }
 
@@ -23549,33 +23451,14 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendTalentsInfoData();
 
-    data.Initialize(SMSG_WORLD_SERVER_INFO, 4 + 4 + 1 + 1);
-    // Bitfields have wrong order
-    data.WriteBit(0);                                               // IneligibleForLoot
-    data.WriteBit(0);                                               // HasRestrictedLevel
-    data.WriteBit(0);                                               // HasRestrictedMoney
-    data.WriteBit(0);                                               // HasGroupSize
-    data.FlushBits();
-
-    data << uint8(0);                                               // IsOnTournamentRealm
-    data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
-    data << uint32(GetMap()->GetDifficulty());
-
-    //if (HasGroupSize)
-    //    data << uint32(0);
-    //if (HasRestrictedLevel)
-    //    data << uint32(20);                                       // RestrictedLevel (starter accounts)
-    //if (IneligibleForLoot)
-    //    data << uint32(0);                                        // EncounterMask
-    //if (HasRestrictedMoney)
-    //    data << uint32(100000);                                   // RestrictedMoney (starter accounts)
-    GetSession()->SendPacket(&data);
+    // SMSG_WORLD_SERVER_INFO
+    GetSession()->SendServerWorldInfo();
 
     SendInitialSpells();
 
     data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
-    data.WriteBits(0, 22); // Count
-    data.FlushBits();
+    data << uint32(0); // Count
+    data << uint32(0); // SpellID
     GetSession()->SendPacket(&data);
 
     SendInitialActionButtons();
@@ -24787,23 +24670,7 @@ void Player::SetMover(Unit* target)
     ObjectGuid guid = target->GetGUID();
 
     WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 9);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[6]);
-
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[1]);
+    data << guid;
 
     SendDirectMessage(&data);
 }
@@ -26207,23 +26074,23 @@ void Player::SendEquipmentSetList()
     WorldPacket data(SMSG_EQUIPMENT_SET_LIST, 4);
     size_t count_pos = data.wpos();
     data << uint32(count);                                  // count placeholder
-    for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end(); ++itr)
+    for (auto itr : m_EquipmentSets)
     {
-        if (itr->second.state == EQUIPMENT_SET_DELETED)
+        if (itr.second.state == EQUIPMENT_SET_DELETED)
             continue;
-        data.appendPackGUID(itr->second.Guid);
-        data << uint32(itr->first);
-        data << itr->second.Name;
-        data << itr->second.IconName;
+        data << itr.second.Guid;
+        data << uint32(itr.first);
+        data << uint32(0);
         for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
             // ignored slots stored in IgnoreMask, client wants "1" as raw GUID, so no HIGHGUID_ITEM
-            if (itr->second.IgnoreMask & (1 << i))
+            if (itr.second.IgnoreMask & (1 << i))
                 data.appendPackGUID(uint64(1));
             else
-                data.appendPackGUID(MAKE_NEW_GUID(itr->second.Items[i], 0, HIGHGUID_ITEM));
+                data.appendPackGUID(MAKE_NEW_GUID(itr.second.Items[i], 0, HIGHGUID_ITEM));
         }
-
+        data << itr.second.Name;
+        data << itr.second.IconName;
         ++count;                                            // client have limit but it checked at loading and set
     }
     data.put<uint32>(count_pos, count);

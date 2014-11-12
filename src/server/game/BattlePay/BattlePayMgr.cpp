@@ -18,3 +18,18 @@
  */
 
 #include "BattlePayMgr.h"
+#include "WorldSession.h"
+
+void WorldSession::HandleBaattlePayProductListQuery(WorldPacket& recvData)
+{
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_BATTLE_PAY_GET_PRODUCT_LIST");
+
+    HandletBattlePayGetProductListResponse();
+}
+
+void WorldSession::HandletBattlePayGetProductListResponse()
+{
+    TC_LOG_DEBUG("network", "WORLD: Received SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE");
+
+    HandletBattlePayGetProductListResponseData();
+}

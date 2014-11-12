@@ -64,7 +64,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_ACCEPT_TRADE,                                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAcceptTradeOpcode            );
     DEFINE_OPCODE_HANDLER(CMSG_ACTIVATETAXI,                                        0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleActivateTaxiOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_ACTIVATETAXIEXPRESS,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleActivateTaxiExpressOpcode    );
-    DEFINE_OPCODE_HANDLER(CMSG_ADDON_REGISTERED_PREFIXES,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonRegisteredPrefixesOpcode);
+    DEFINE_OPCODE_HANDLER(CMSG_ADDON_REGISTERED_PREFIXES,                           0x03F4, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonRegisteredPrefixesOpcode); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_ADD_FRIEND,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddFriendOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_ADD_IGNORE,                                          0x1321, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAddIgnoreOpcode              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_ALTER_APPEARANCE,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAlterAppearance              );
@@ -91,7 +91,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BUSY_TRADE,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBusyTradeOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_BUY_BANK_SLOT,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBuyBankSlotOpcode            );
     DEFINE_OPCODE_HANDLER(CMSG_CANCEL_AURA,                                         0x08AE, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCancelAuraOpcode             ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_CANCEL_AUTO_REPEAT_SPELL,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCancelAutoRepeatSpellOpcode  );
+    DEFINE_OPCODE_HANDLER(CMSG_CANCEL_AUTO_REPEAT_SPELL,                            0x0939, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCancelAutoRepeatSpellOpcode  ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_CANCEL_CAST,                                         0x0071, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleCancelCastOpcode             ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_CANCEL_CHANNELLING,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCancelChanneling             );
     DEFINE_OPCODE_HANDLER(CMSG_CANCEL_MOUNT_AURA,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCancelMountAuraOpcode        );
@@ -128,7 +128,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CORPSE_MAP_POSITION_QUERY,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCorpseMapPositionQuery       );
     DEFINE_OPCODE_HANDLER(CMSG_CREATURE_QUERY,                                      0x0505, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleCreatureQueryOpcode          ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_DANCE_QUERY,                                         0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_DB_QUERY_BULK,                                       0x138B, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleDBQueryBulk                  ); // 6.0.3 19116             
+    DEFINE_OPCODE_HANDLER(CMSG_DB_QUERY_BULK,                                       0x138B, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleDBQueryBulk                  ); // 6.0.3 19116           
     DEFINE_OPCODE_HANDLER(CMSG_DEL_FRIEND,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDelFriendOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_DEL_IGNORE,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDelIgnoreOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CONTROLLED_VEHICLE,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDismissControlledVehicle     );
@@ -266,7 +266,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SET_SELECTION,                                       0x05BD, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleSetSelectionOpcode           ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_SET_TAXI_BENCHMARK_MODE,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetTaxiBenchmarkOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_SET_TITLE,                                           0x0BC6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSetTitleOpcode               );
-    DEFINE_OPCODE_HANDLER(CMSG_SET_VEHICLE_REC_ID_ACK,                              0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_SET_VEHICLE_REC_ID_ACK,                              0x1973, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_SET_WATCHED_FACTION,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetWatchedFactionOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_SHOWING_CLOAK,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleShowingCloakOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_SHOWING_HELM,                                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleShowingHelmOpcode            );
@@ -449,23 +449,23 @@ void OpcodeTable::InitializeClientTable()
 
     DEFINE_OPCODE_HANDLER(CMSG_CHAT_IGNORED,                                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChatIgnoredOpcode            );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_BATTLEGROUND,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_GUILD,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_OFFICER,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_PARTY,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_RAID,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_WHISPER,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       );
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_GUILD,                             0x1823, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_OFFICER,                           0x188A, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_PARTY,                             0x137C, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_RAID,                              0x082C, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_ADDON_WHISPER,                           0x13DC, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAddonMessagechatOpcode       ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_AFK,                                     0x1BDC, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_BATTLEGROUND,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_BATTLEGROUND,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            );
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_CHANNEL,                                 0x0913, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_DND,                                     0x0AAB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_EMOTE,                                   0x113C, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_GUILD,                                   0x0B1B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_OFFICER,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_OFFICER,                                 0x1884, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_PARTY,                                   0x0134, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID_WARNING,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID,                                    0x1161, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID_WARNING,                            0x0134, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_SAY,                                     0x1884, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_WHISPER,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_WHISPER,                                 0x0913, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_YELL,                                    0x1161, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode            ); // 6.0.3 19116
 
     DEFINE_OPCODE_HANDLER(CMSG_CLEAR_CHANNEL_WATCH,                                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -492,7 +492,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_VOICE_OFF,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelVoiceOnOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_VOICE_ON,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChannelVoiceOnOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_JOIN_CHANNEL,                                        0x0B4B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleJoinChannel                  ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_LEAVE_CHANNEL,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLeaveChannel                 ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_LEAVE_CHANNEL,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLeaveChannel                 );
     DEFINE_OPCODE_HANDLER(CMSG_SET_CHANNEL_WATCH,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetChannelWatch              );
     DEFINE_OPCODE_HANDLER(CMSG_SET_ACTIVE_VOICE_CHANNEL,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSetActiveVoiceChannel        );
 
@@ -699,38 +699,38 @@ void OpcodeTable::InitializeClientTable()
     
     ///< Movement
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_TIME_SKIPPED,                                   0x19C2, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleMoveTimeSkippedOpcode        ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_FORCE_MOVE_ROOT_ACK,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck                  );
-    DEFINE_OPCODE_HANDLER(CMSG_FORCE_MOVE_UNROOT_ACK,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveUnRootAck                );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_CHARM_TELEPORT_CHEAT,                           0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_CHNG_TRANSPORT,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              );
+    DEFINE_OPCODE_HANDLER(CMSG_FORCE_MOVE_ROOT_ACK,                                 0x0B73, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck                  ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_FORCE_MOVE_UNROOT_ACK,                               0x0B6C, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveUnRootAck                ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_CHARM_TELEPORT_CHEAT,                           0x1942, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_CHNG_TRANSPORT,                                 0x0969, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_FALL_LAND,                                      0x0D54, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FALL_RESET,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FEATHER_FALL_ACK,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleFeatherFallAck               );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK,             0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck     );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK,                0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_SWIM_BACK_SPEED_CHANGE_ACK,               0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck       );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_TURN_RATE_CHANGE_ACK,                     0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_GRAVITY_DISABLE_ACK,                            0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_GRAVITY_ENABLE_ACK,                             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FALL_RESET,                                     0x0522, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FEATHER_FALL_ACK,                               0x1142, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleFeatherFallAck               ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK,             0x05D3, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK,                  0x028B, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK,                    0x0591, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK,                0x0089, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK,                     0x0B7C, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_SWIM_BACK_SPEED_CHANGE_ACK,               0x0533, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK,                    0x008A, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_TURN_RATE_CHANGE_ACK,                     0x0DC1, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK,                    0x0204, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleForceSpeedChangeAck          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_GRAVITY_DISABLE_ACK,                            0x0553, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_GRAVITY_ENABLE_ACK,                             0x1952, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_HEARTBEAT,                                      0x19C1, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_HOVER_ACK,                                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMoveHoverAck                 );
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_HOVER_ACK,                                      0x0542, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleMoveHoverAck                 ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_JUMP,                                           0x0282, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_KNOCK_BACK_ACK,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveKnockBackAck             );
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_KNOCK_BACK_ACK,                                 0x09C1, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveKnockBackAck             ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_NOT_ACTIVE_MOVER,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveNotActiveMover           );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY,                                    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY_ACK,                                0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveSetCanFlyAckOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK,    0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL          );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_COLLISION_HEIGHT_ACK,                       0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleSetCollisionHeightAck        );
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY_ACK,                                0x0202, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveSetCanFlyAckOpcode       ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK,    0x0284, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_COLLISION_HEIGHT_ACK,                       0x0141, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleSetCollisionHeightAck        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_FACING,                                     0x19D2, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_PITCH,                                      0x0D92, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_RUN_MODE,                                   0x0D51, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_WALK_MODE,                                  0x0544, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SPLINE_DONE,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveSplineDoneOpcode         );
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_RUN_MODE,                                   0x0D51, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_WALK_MODE,                                  0x0544, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SPLINE_DONE,                                    0x0B63, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveSplineDoneOpcode         ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_START_ASCEND,                                   0x0D41, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_START_BACKWARD,                                 0x0583, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_START_DESCEND,                                  0x0B79, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
@@ -749,12 +749,10 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_STOP_SWIM,                                      0x097C, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_STOP_TURN,                                      0x000B, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_TELEPORT_ACK,                                   0x0D01, STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveTeleportAck              ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_TELEPORT_CHEAT,                                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_TIME_SKIPPED,                                   0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_TOGGLE_COLLISION_CHEAT,                         0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_WATER_WALK_ACK,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveWaterWalkAck             );
-    DEFINE_OPCODE_HANDLER(CMSG_WORLDPORT_RESPONSE,                                  0x0938, STATUS_TRANSFER,  PROCESS_THREADUNSAFE, &WorldSession::HandleWorldportrResponse           ); // 6.0.3 19116
-    
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_TELEPORT_CHEAT,                                 0x196A, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_TOGGLE_COLLISION_CHEAT,                         0x008B, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_WATER_WALK_ACK,                                 0x0543, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveWaterWalkAck             ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_WORLDPORT_RESPONSE,                                  0x0938, STATUS_TRANSFER,  PROCESS_THREADUNSAFE, &WorldSession::HandleWorldportrResponse           ); // 6.0.3 19116 
 
 #undef DEFINE_OPCODE_HANDLER
 };

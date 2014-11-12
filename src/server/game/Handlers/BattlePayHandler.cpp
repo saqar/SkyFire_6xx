@@ -22,6 +22,8 @@
 
 void BattlePayMgr::HandletBattlePayGetProductListResponse()
 {
+    TC_LOG_DEBUG("network", "WORLD: Received SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE");
+
     WorldPacket data(SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE, 250); // TODO: fix this shit :S
 
     data << uint32(0); // Result

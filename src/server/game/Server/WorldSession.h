@@ -1018,7 +1018,6 @@ class WorldSession
 
         // Battle Pay
         void HandleBaattlePayProductListQuery(WorldPacket& recvData);
-        void HandletBattlePayGetProductListResponse();
 
     private:
         void InitializeQueryCallbackParameters();

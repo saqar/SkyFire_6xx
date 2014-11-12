@@ -27,10 +27,3 @@ void WorldSession::HandleBaattlePayProductListQuery(WorldPacket& recvData)
 
     HandletBattlePayGetProductListResponse();
 }
-
-void WorldSession::HandletBattlePayGetProductListResponse()
-{
-    TC_LOG_DEBUG("network", "WORLD: Received SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE");
-
-    HandletBattlePayGetProductListResponse();
-}

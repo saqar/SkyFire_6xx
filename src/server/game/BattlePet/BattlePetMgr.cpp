@@ -436,6 +436,7 @@ void BattlePetMgr::SendBattlePetJournal()
 
         ObjectGuid petEntry = battlePet->GetId();
 
+		data << petEntry;
         data.WriteBit(!battlePet->GetFlags());
         data.WriteBit(petEntry[3]);
         data.WriteBit(petEntry[7]);

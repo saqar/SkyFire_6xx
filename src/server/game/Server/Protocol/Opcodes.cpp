@@ -515,7 +515,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_PET_ACTION,                                          0x133A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetAction                    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_PET_CANCEL_AURA,                                     0x0A30, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetCancelAuraOpcode          ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_PET_CAST_SPELL,                                      0x0286, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetCastSpellOpcode           ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_PET_NAME_QUERY,                                      0x048B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQuery                 ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_PET_NAME_QUERY,                                      0x1433, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQuery                 ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_PET_RENAME,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetRename                    );
     DEFINE_OPCODE_HANDLER(CMSG_PET_SET_ACTION,                                      0x020F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetSetAction                 ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_PET_SPELL_AUTOCAST,                                  0x0A2F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetSpellAutocastOpcode       ); // 6.0.3 19116

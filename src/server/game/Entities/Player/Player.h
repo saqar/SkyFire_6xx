@@ -188,9 +188,9 @@ enum CUFBoolOptions
     CUF_AUTO_ACTIVATE_SPEC_2,
     CUF_AUTO_ACTIVATE_PVP,
     CUF_AUTO_ACTIVATE_PVE,
-    CUF_UNK_145,
-    CUF_UNK_156,
-    CUF_UNK_157,
+    CUF_SHOWN,
+    CUF_LOCKED,
+    CUF_DYNAMIC_POSITION,
 
     // The unks is _LOCKED and _SHOWN and _DYNAMIC, unknown order
 
@@ -206,28 +206,28 @@ struct CUFProfile
         FrameWidth  = 0;
         SortBy      = 0;
         HealthText  = 0;
-        Unk146      = 0;
-        Unk147      = 0;
-        Unk148      = 0;
-        Unk150      = 0;
-        Unk152      = 0;
-        Unk154      = 0;
+        LeftPoint   = 0;
+        BottomPoint = 0;
+        TopPoint    = 0;
+        BottomOffset= 0;
+        LeftOffset  = 0;
+        TopOffset   = 0;
     }
 
     CUFProfile(const std::string& name, uint16 frameHeight, uint16 frameWidth, uint8 sortBy, uint8 healthText, uint32 boolOptions,
-        uint8 unk146, uint8 unk147, uint8 unk148, uint16 unk150, uint16 unk152, uint16 unk154)
+        uint8 LeftPoint, uint8 BottomPoint, uint8 topPoint, uint16 bottomOffset, uint16 leftOffset, uint16 topOffset)
         : ProfileName(name), BoolOptions((int)boolOptions)
     {
         FrameHeight = frameHeight;
         FrameWidth  = frameWidth;
         SortBy      = sortBy;
         HealthText  = healthText;
-        Unk146      = unk146;
-        Unk147      = unk147;
-        Unk148      = unk148;
-        Unk150      = unk150;
-        Unk152      = unk152;
-        Unk154      = unk154;
+        LeftPoint   = LeftPoint;
+        BottomPoint = BottomPoint;
+        TopPoint    = topPoint;
+        BottomOffset= bottomOffset;
+        LeftOffset  = leftOffset;
+        TopOffset   = topOffset;
     }
 
     std::string ProfileName;
@@ -235,16 +235,12 @@ struct CUFProfile
     uint16 FrameWidth;
     uint8 SortBy;
     uint8 HealthText;
-
-    // LeftAlign, TopAlight, BottomAllign (unk order)
-    uint8 Unk146;
-    uint8 Unk147;
-    uint8 Unk148;
-
-    // LeftOffset, TopOffset and BottomOffset (unk order)
-    uint16 Unk150;
-    uint16 Unk152;
-    uint16 Unk154;
+    uint8 LeftPoint;
+    uint8 BottomPoint;
+    uint8 TopPoint;
+    uint16 BottomOffset;
+    uint16 LeftOffset;
+    uint16 TopOffset;
 
     std::bitset<CUF_BOOL_OPTIONS_COUNT> BoolOptions;
 

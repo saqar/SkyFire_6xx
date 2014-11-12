@@ -17955,7 +17955,7 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
 
     do
     {
-        // SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154 FROM character_cuf_profiles WHERE guid = ?
+        // SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, LeftPoint, BottomPoint, topPoint, bottomOffset, leftOffset, topOffset FROM character_cuf_profiles WHERE guid = ?
         Field* fields = result->Fetch();
 
         uint8 id           = fields[0].GetUInt8();
@@ -17965,12 +17965,12 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
         uint8 sortBy       = fields[4].GetUInt8();
         uint8 healthText   = fields[5].GetUInt8();
         uint32 boolOptions = fields[6].GetUInt32();
-        uint8 unk146       = fields[7].GetUInt8();
-        uint8 unk147       = fields[8].GetUInt8();
-        uint8 unk148       = fields[9].GetUInt8();
-        uint16 unk150      = fields[10].GetUInt16();
-        uint16 unk152      = fields[11].GetUInt16();
-        uint16 unk154      = fields[12].GetUInt16();
+        uint8 LeftPoint    = fields[7].GetUInt8();
+        uint8 BottomPoint  = fields[8].GetUInt8();
+        uint8 topPoint     = fields[9].GetUInt8();
+        uint16 bottomOffset= fields[10].GetUInt16();
+        uint16 leftOffset  = fields[11].GetUInt16();
+        uint16 topOffset   = fields[12].GetUInt16();
 
         if (id > MAX_CUF_PROFILES)
         {
@@ -17978,7 +17978,7 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
             continue;
         }
 
-        _CUFProfiles[id] = new CUFProfile(name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154);
+        _CUFProfiles[id] = new CUFProfile(name, frameHeight, frameWidth, sortBy, healthText, boolOptions, LeftPoint, BottomPoint, topPoint, bottomOffset, leftOffset, topOffset);
     }
     while (result->NextRow());
 }
@@ -19988,22 +19988,22 @@ void Player::_SaveCUFProfiles(SQLTransaction& trans)
         }
         else
         {
-            // REPLACE INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            // REPLACE INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, LeftPoint, BottomPoint, topPoint, bottomOffset, leftOffset, topOffset) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_CUF_PROFILES);
             stmt->setUInt32(0, lowGuid);
             stmt->setUInt8(1, i);
-            stmt->setString(2, _CUFProfiles[i]->ProfileName);
-            stmt->setUInt16(3, _CUFProfiles[i]->FrameHeight);
-            stmt->setUInt16(4, _CUFProfiles[i]->FrameWidth);
-            stmt->setUInt8(5, _CUFProfiles[i]->SortBy);
-            stmt->setUInt8(6, _CUFProfiles[i]->HealthText);
-            stmt->setUInt32(7, _CUFProfiles[i]->BoolOptions.to_ulong()); // 27 of 32 fields used, fits in an int
-            stmt->setUInt8(8, _CUFProfiles[i]->Unk146);
-            stmt->setUInt8(9, _CUFProfiles[i]->Unk147);
-            stmt->setUInt8(10, _CUFProfiles[i]->Unk148);
-            stmt->setUInt16(11, _CUFProfiles[i]->Unk150);
-            stmt->setUInt16(12, _CUFProfiles[i]->Unk152);
-            stmt->setUInt16(13, _CUFProfiles[i]->Unk154);
+            stmt->setString(2,  _CUFProfiles[i]->ProfileName);
+            stmt->setUInt16(3,  _CUFProfiles[i]->FrameHeight);
+            stmt->setUInt16(4,  _CUFProfiles[i]->FrameWidth);
+            stmt->setUInt8(5,   _CUFProfiles[i]->SortBy);
+            stmt->setUInt8(6,   _CUFProfiles[i]->HealthText);
+            stmt->setUInt32(7,  _CUFProfiles[i]->BoolOptions.to_ulong()); // 27 of 32 fields used, fits in an int
+            stmt->setUInt8(8,   _CUFProfiles[i]->LeftPoint);
+            stmt->setUInt8(9,   _CUFProfiles[i]->BottomPoint);
+            stmt->setUInt8(10,  _CUFProfiles[i]->TopPoint);
+            stmt->setUInt16(11, _CUFProfiles[i]->BottomOffset);
+            stmt->setUInt16(12, _CUFProfiles[i]->LeftOffset);
+            stmt->setUInt16(13, _CUFProfiles[i]->TopOffset);
         }
 
         trans->Append(stmt);

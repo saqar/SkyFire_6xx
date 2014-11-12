@@ -201,7 +201,7 @@ void HandleGetGarrisonInfoResult()
     data << uint32(ArchivedMissions);
 
 
-    for (int8 i = 0; i < GarrisonBuildingInfoCount; i++)
+    for (uint32 i = 0; i < GarrisonBuildingInfoCount; i++)
     {
         // sub_5EA03C
         data << uint32(0); // 2
@@ -212,7 +212,7 @@ void HandleGetGarrisonInfoResult()
         data.WriteBit(0); // Active
     }
 
-    for (int8 i = 0; i < GarrisonPlotInfoCount; i++)
+    for (uint32 i = 0; i < GarrisonPlotInfoCount; i++)
     {
         // sub_5E8944
         data << uint32(0);
@@ -222,7 +222,7 @@ void HandleGetGarrisonInfoResult()
         data << uint32(0); // 5
     }
 
-    for (int8 i = 0; i < GarrisonFollowerCount; i++)
+    for (uint32 i = 0; i < GarrisonFollowerCount; i++)
     {
         // sub_61D8C6
         data << uint64(0); // DbID
@@ -236,11 +236,11 @@ void HandleGetGarrisonInfoResult()
         data << uint32(0); // 9
         data << uint32(AbilityIDCount);
         data << uint32(0); // 14
-        for (int8 z = 0; z < AbilityIDCount; z++)
+        for (uint32 z = 0; z < AbilityIDCount; z++)
             data << uint32(0); // AbilityID
     }
 
-    for (int8 i = 0; i < GarrisonMission; i++)
+    for (uint32 i = 0; i < GarrisonMission; i++)
     {
         // sub_61BED1
         data << uint64(0); // DbID
@@ -253,7 +253,7 @@ void HandleGetGarrisonInfoResult()
         data << uint32(0);
     }
 
-    for (int8 i = 0; i < ArchivedMissions; i++)
+    for (uint32 i = 0; i < ArchivedMissions; i++)
         data << uint32(ArchivedMissions);
 
     //m_owner->GetSession()->SendPacket(&data);

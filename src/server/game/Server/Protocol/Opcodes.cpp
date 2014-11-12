@@ -907,7 +907,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_HOTFIX_NOTIFY,                                   0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_INITIALIZE_FACTIONS,                             0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_INITIAL_SPELLS,                                  0x0A81, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_INIT_CURRENCY,                                   0x0B06, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_INIT_CURRENCY,                                   0x0B06, STATUS_UNHANDLED); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_INIT_WORLD_STATES,                               0x0B04, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_INSPECT,                                         0x052E, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_INSPECT_HONOR_STATS,                             0x0000, STATUS_UNHANDLED);

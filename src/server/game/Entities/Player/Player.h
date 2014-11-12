@@ -188,12 +188,7 @@ enum CUFBoolOptions
     CUF_AUTO_ACTIVATE_SPEC_2,
     CUF_AUTO_ACTIVATE_PVP,
     CUF_AUTO_ACTIVATE_PVE,
-    CUF_SHOWN,
-    CUF_LOCKED,
     CUF_DYNAMIC_POSITION,
-
-    // The unks is _LOCKED and _SHOWN and _DYNAMIC, unknown order
-
     CUF_BOOL_OPTIONS_COUNT,
 };
 
@@ -215,15 +210,15 @@ struct CUFProfile
     }
 
     CUFProfile(const std::string& name, uint16 frameHeight, uint16 frameWidth, uint8 sortBy, uint8 healthText, uint32 boolOptions,
-        uint8 LeftPoint, uint8 BottomPoint, uint8 topPoint, uint16 bottomOffset, uint16 leftOffset, uint16 topOffset)
+        uint8 leftPoint, uint8 bottomPoint, uint8 topPoint, uint16 bottomOffset, uint16 leftOffset, uint16 topOffset)
         : ProfileName(name), BoolOptions((int)boolOptions)
     {
         FrameHeight = frameHeight;
         FrameWidth  = frameWidth;
         SortBy      = sortBy;
         HealthText  = healthText;
-        LeftPoint   = LeftPoint;
-        BottomPoint = BottomPoint;
+        LeftPoint   = leftPoint;
+        BottomPoint = bottomPoint;
         TopPoint    = topPoint;
         BottomOffset= bottomOffset;
         LeftOffset  = leftOffset;

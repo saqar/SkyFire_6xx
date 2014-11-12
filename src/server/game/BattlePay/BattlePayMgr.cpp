@@ -18,6 +18,7 @@
  */
 
 #include "BattlePayMgr.h"
+#include "WorldSession.h"
 
 void WorldSession::HandleBaattlePayProductListQuery(WorldPacket& recvData)
 {

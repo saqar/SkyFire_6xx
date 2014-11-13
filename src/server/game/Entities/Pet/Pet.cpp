@@ -494,7 +494,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
             ss << GetSpecialization(i) << " ";
 
         ss  << "', "
-            << uint32(GetSpecializationCount()) << "', "
+            << uint32(GetSpecializationCount()) << ", "
             << uint32(GetActiveSpecialization()) << ')';
 
         trans->Append(ss.str().c_str());

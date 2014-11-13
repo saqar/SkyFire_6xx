@@ -2009,18 +2009,18 @@ void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
     _player->SetPendingBind(0, 0);
 }
 
-void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
+void WorldSession::HandleDBQueryBulk(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
     uint32 tableHash, count, recordId;
 
     recvPacket >> tableHash;
-    recvPacket >> count;
+    count = recvPacket.ReadBits(13);
 
     DB2StorageBase const* store = GetDB2Storage(tableHash);
     if (!store)
     {
-        TC_LOG_ERROR("network", "CMSG_REQUEST_HOTFIX: Received unknown hotfix type: %u", tableHash);
+        TC_LOG_ERROR("network", "CMSG_DB_QUERY_BULK: Received unknown query hash: %u", tableHash);
         recvPacket.rfinish();
         return;
     }
@@ -2052,7 +2052,7 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
 
         SendPacket(&data);
 
-        TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent hotfix entry: %u type: %u", recordId, tableHash);
+        TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent db entry: %u type: %u", recordId, tableHash);
     }
 }
 

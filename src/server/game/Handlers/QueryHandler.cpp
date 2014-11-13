@@ -527,18 +527,3 @@ void WorldSession::HandleQuestPOIQuery(WorldPacket& recvData)
 
     SendPacket(&data);
 }
-
-void WorldSession::HandleDBQueryBulk(WorldPacket& recvPacket)
-{
-    ObjectGuid guid;
-    uint32 count;
-
-    recvPacket << uint32(0);         //Db2 file hash
-    count = recvPacket.ReadBits(13); // count
-
-    for (uint32 i = 0; i < count; i++)
-    {
-        recvPacket << guid;
-        recvPacket << uint32(0);
-    }
-}

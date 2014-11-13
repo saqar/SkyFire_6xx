@@ -18,110 +18,11 @@
  */
 
 #include "BattlePayMgr.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
-void WorldSession::HandletBattlePayGetProductListResponseData()
+void WorldSession::HandleBattlePayGetProductList(WorldPacket& /*recvData*/)
 {
-    uint32 BattlePayDistributionObjectCount;
-    uint32 BattlePayProductGroupCount;
-    uint32 BattlePayShopEntryCount;
-
-    uint32 Ordering;
-    uint32 IconFileDataID;
-    uint32 EntryID;
-    uint32 GroupID;
-    uint32 ProductID;
-    uint8 DisplayType;
-    uint32 Flags;
-    uint8 NameSize;
-    uint8 BannerType;
-    bool HasBattlepayDisplayInfo;
-    bool HasCreatureDisplayInfoID;
-
-    WorldPacket data(SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE, 250); // TODO: fix this shit :S
-
-    data << uint32(0); // Result
-    data << uint32(0); // CurrencyID
-
-    data << BattlePayDistributionObjectCount;
-    data << BattlePayProductGroupCount;
-    data << BattlePayShopEntryCount;
-
-    //for (uint8 i = 0; i < BattlePayDistributionObjectCount; i++)
-    //    BattlePayMgr::GetBattlePayProduct;
-
-    for (uint8 i = 0; i < BattlePayProductGroupCount; i++)
-    {
-        data << GroupID;
-        data << IconFileDataID;
-        data << DisplayType;
-        data << Ordering;
-        data.WriteBits(NameSize, 8);
-        data.WriteString("Name"); // bits4
-    }
-
-    for (uint8 i = 0; i < BattlePayShopEntryCount; i++)
-    {
-        data << EntryID;
-        data << GroupID;
-        data << ProductID;
-        data << Ordering;
-        data << Flags;
-        data << BannerType;
-        data.WriteBit(HasBattlepayDisplayInfo);
-        //if (HasBattlepayDisplayInfo)
-        //    BattlePayMgr::ReadBattlepayDisplayInfo;
-    }
-}
-
-void BattlePayMgr::GetBattlePayProduct()
-{
-	WorldPacket data;
-
-	data << ProductID;
-    data << NormalPriceFixedPoint;
-    data << CurrentPriceFixedPoint;
-    data << BattlepayProductItemCount;
-    data << Type;
-    data << Flags;
-
-    for (int j = 0; j < BattlepayProductItemCount; j++)
-    {
-        data << uint32(0); // ID
-        data << uint32(0); // ItemID
-        data << uint32(0); // Quantity
-        data.WriteBit(HasBattlepayDisplayInfo);
-        data.WriteBit(HasPet);
-        data.WriteBit(HasBATTLEPETRESULT);
-        if (HasBATTLEPETRESULT)
-            data.WriteBits(0, 4); // PetResult
-        //if (HasBattlepayDisplayInfo)
-        //   BattlePayMgr::ReadBattlepayDisplayInfo;
-    }
-
-    data.WriteBits(0, 2); // ChoiceType
-    data.WriteBit(HasBattlepayDisplayInfo);
-    //if (HasBattlepayDisplayInfo)
-    //    BattlePayMgr::ReadBattlepayDisplayInfo;
-}
-
-void BattlePayMgr::ReadBattlepayDisplayInfo()
-{
-
-	WorldPacket data;
-
-    data.WriteBit(HasCreatureDisplayInfoID);
-    data.WriteBit(HasFileDataID);
-    data.WriteBits(0, 10); // bits16
-    data.WriteBits(0, 10); // bits529
-    data.WriteBits(0, 13); // bits1042
-    data.WriteBit(HasFlags);
-    if (HasCreatureDisplayInfoID)
-        data << CreatureDisplayInfoID;
-    if (HasFileDataID)
-        data << FileDataID;
-    data.WriteString("Name1"); // bits16
-    data.WriteString("Name2"); // bits529
-    data.WriteString("Name3"); // bits1042
-    if (HasFlags)
-        data << Flags;
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_BATTLE_PAY_GET_PRODUCT_LIST");
+    sBattlePayMgr->SendBattlePayProductList(this);
 }

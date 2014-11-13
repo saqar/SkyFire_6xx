@@ -951,8 +951,7 @@ class WorldSession
         void SendBlackMarketBidResult();
 
         // BattlePay
-        void HandletBattlePayGetProductListResponse();
-        void HandletBattlePayGetProductListResponseData();
+        void HandleBattlePayGetProductList(WorldPacket& recvData);
 
         // Miscellaneous
         void HandleSpellClick(WorldPacket& recvData);

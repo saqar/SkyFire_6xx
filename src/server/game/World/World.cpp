@@ -84,6 +84,7 @@
 #include "BattlefieldMgr.h"
 #include "TransportMgr.h"
 #include "BattlePetMgr.h"
+#include "BattlePayMgr.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1817,6 +1818,9 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Loading Battle Pet quality data...");
     sObjectMgr->LoadBattlePetQualityData();
+
+    TC_LOG_INFO("server.loading", "Loading Battle Pay store data...");
+    sBattlePayMgr->LoadFromDb();
 
     ///- Initialize game time and timers
     TC_LOG_INFO("server.loading", "Initialize game time and timers");

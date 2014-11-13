@@ -46,8 +46,8 @@ void WorldSession::HandletBattlePayGetProductListResponseData()
     data << BattlePayProductGroupCount;
     data << BattlePayShopEntryCount;
 
-    for (uint8 i = 0; i < BattlePayDistributionObjectCount; i++)
-        BattlePayMgr::GetBattlePayProduct;
+    //for (uint8 i = 0; i < BattlePayDistributionObjectCount; i++)
+    //    BattlePayMgr::GetBattlePayProduct;
 
     for (uint8 i = 0; i < BattlePayProductGroupCount; i++)
     {
@@ -68,8 +68,8 @@ void WorldSession::HandletBattlePayGetProductListResponseData()
         data << Flags;
         data << BannerType;
         data.WriteBit(HasBattlepayDisplayInfo);
-        if (HasBattlepayDisplayInfo)
-            BattlePayMgr::ReadBattlepayDisplayInfo;
+        //if (HasBattlepayDisplayInfo)
+        //    BattlePayMgr::ReadBattlepayDisplayInfo;
     }
 }
 
@@ -94,14 +94,14 @@ void BattlePayMgr::GetBattlePayProduct()
         data.WriteBit(HasBATTLEPETRESULT);
         if (HasBATTLEPETRESULT)
             data.WriteBits(0, 4); // PetResult
-        if (HasBattlepayDisplayInfo)
-            BattlePayMgr::ReadBattlepayDisplayInfo;
+        //if (HasBattlepayDisplayInfo)
+        //   BattlePayMgr::ReadBattlepayDisplayInfo;
     }
 
     data.WriteBits(0, 2); // ChoiceType
     data.WriteBit(HasBattlepayDisplayInfo);
-    if (HasBattlepayDisplayInfo)
-        BattlePayMgr::ReadBattlepayDisplayInfo;
+    //if (HasBattlepayDisplayInfo)
+    //    BattlePayMgr::ReadBattlepayDisplayInfo;
 }
 
 void BattlePayMgr::ReadBattlepayDisplayInfo()

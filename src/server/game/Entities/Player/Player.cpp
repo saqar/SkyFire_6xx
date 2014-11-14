@@ -13824,17 +13824,17 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
 {
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE (%u)", msg);
 
-    ObjectGuid pItemGuid = pItem ? pItem->GetGUID() : 0;
-    ObjectGuid pItemGuid2 = pItem2 ? pItem2->GetGUID() : 0;
+    ObjectGuid pItemGuid = pItem ? pItem->GetGUID128() : 0;
+    ObjectGuid pItemGuid2 = pItem2 ? pItem2->GetGUID128() : 0;
 
     WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I ? 22 : 18));
 
     if (msg != EQUIP_ERR_OK)
     {
-        data << uint8(0);                       // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
-        data << pItemGuid2;
-        data << pItemGuid;
         data << uint8(msg);
+        data << pItemGuid;
+        data << pItemGuid2;
+        data << uint8(0);                       // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
 
         if (msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS
             || msg == EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS

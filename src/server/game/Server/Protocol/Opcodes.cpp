@@ -327,12 +327,12 @@ void OpcodeTable::InitializeClientTable()
 
     ///< Items
     DEFINE_OPCODE_HANDLER(CMSG_TRANSMOGRIFY_ITEMS,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleTransmogrifyItems            );
-    DEFINE_OPCODE_HANDLER(CMSG_AUTOBANK_ITEM,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAutoBankItemOpcode           );
+    DEFINE_OPCODE_HANDLER(CMSG_AUTOBANK_ITEM,                                       0x0751, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutoBankItemOpcode           ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_AUTOEQUIP_ITEM,                                      0x0F35, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutoEquipItemOpcode          ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_AUTOEQUIP_ITEM_SLOT,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAutoEquipItemSlotOpcode      );
-    DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_BAG_ITEM,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAutoStoreBagItemOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_BANK_ITEM,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAutoStoreBankItemOpcode      );
-    DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_LOOT_ITEM,                                 0x01C3, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutostoreLootItemOpcode      ); // 6.0.2 18764
+    DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_BAG_ITEM,                                  0x0F18, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutoStoreBagItemOpcode       ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_BANK_ITEM,                                 0x0732, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutoStoreBankItemOpcode      ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUTOSTORE_LOOT_ITEM,                                 0x0609, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutostoreLootItemOpcode      ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BUY_ITEM,                                            0x0352, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBuyItemOpcode                ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BUYBACK_ITEM,                                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem                  );
     DEFINE_OPCODE_HANDLER(CMSG_DESTROY_ITEM,                                        0x01EE, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDestroyItemOpcode            ); // 6.0.3 19116
@@ -343,9 +343,9 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_READ_ITEM,                                           0x08F6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleReadItem                     ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_REPAIR_ITEM,                                         0x0B54, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleRepairItemOpcode             ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_SELL_ITEM,                                           0x0351, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSellItemOpcode               ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_SPLIT_ITEM,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSplitItemOpcode              );
-    DEFINE_OPCODE_HANDLER(CMSG_SWAP_INV_ITEM,                                       0x04ED, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSwapInvItemOpcode            ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_SWAP_ITEM,                                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSwapItem                     );
+    DEFINE_OPCODE_HANDLER(CMSG_SPLIT_ITEM,                                          0x0795, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSplitItemOpcode              );
+    DEFINE_OPCODE_HANDLER(CMSG_SWAP_INV_ITEM,                                       0x0F17, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSwapInvItemOpcode            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_SWAP_ITEM,                                           0x0736, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSwapItem                     ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_USE_ITEM,                                            0x08B6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleUseItemOpcode                ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_WRAP_ITEM,                                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWrapItemOpcode               );
 

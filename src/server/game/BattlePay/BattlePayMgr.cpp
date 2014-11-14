@@ -283,7 +283,7 @@ void BattlePayMgr::SendBattlePayProductList(WorldSession* session)
 
     WorldPacket data(SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE, 500);   // guess size
     data << uint32(0);
-    data << uint32(BATTLE_PAY_CURRENCY_TEST);
+    data << uint32(m_currency);
 
     data << uint32(m_productStore.size());
     data << uint32(m_groupStore.size());

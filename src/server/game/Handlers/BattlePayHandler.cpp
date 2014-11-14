@@ -24,5 +24,9 @@
 void WorldSession::HandleBattlePayGetProductList(WorldPacket& /*recvData*/)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_BATTLE_PAY_GET_PRODUCT_LIST");
+
+    if (!sBattlePayMgr->IsStoreEnabled())
+        return;
+
     sBattlePayMgr->SendBattlePayProductList(this);
 }

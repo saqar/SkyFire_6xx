@@ -38,12 +38,6 @@ void WorldSession::HandleGarrSetBuildingActive(WorldPacket& recvData)
     TC_LOG_ERROR("network", "World: Received CMSG_GARR_SET_BUILDING_ACTIVE");
     uint32 PlotInstanceID;
     recvData >> PlotInstanceID;
-
-    WorldPacket data(SMSG_GARR_BUILDING_ACTIVATED);
-
-    data << uint32(0);                              // BuildingID
-
-    SendPacket(&data);
 }
 
 void WorldSession::HandleGarrGenerateRecruits(WorldPacket& recvData)
@@ -70,15 +64,6 @@ void WorldSession::HandleGarrPurchaseBuilding(WorldPacket& recvData)
 
     // Functions for
     // sGarrisonMgr(garr->PurchaseBuilding);
-
-    WorldPacket data(SMSG_GARR_PLOT_PLACED);
-    data << uint32(0);
-    data << float(0);
-    data << float(0);
-    data << float(0);
-    data << uint32(0);
-
-    SendPacket(&data);
 }
 
 void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
@@ -88,9 +73,6 @@ void WorldSession::HandleGarrUpgrade(WorldPacket& recvData)
 
     recvData >> guid;
 }
-
-void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
-{ }
 
 void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
 {
@@ -102,17 +84,8 @@ void WorldSession::HandleGarrStartMission(WorldPacket& recvData)
     recvData >> npcGuid;
     recvData >> MissionRecID;
 
-    for (uint64 i = 0; i < 5; i++)
+    for (auto i = 0; i < 5; i++)
         recvData >> uint64(FollowerDBIDs);
-
-    // Garrison function to start mission
-
-    WorldPacket data(SMSG_GARR_OPEN_ARCHITECT);
-    ObjectGuid NpcGUID;
-
-    data << NpcGUID;
-
-    SendPacket(&data);
 }
 
 void WorldSession::HandleGarrRequestBlueprintData(WorldPacket& recvData)
@@ -167,7 +140,7 @@ void WorldSession::HandleGarrRemoveFollower(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "World: Received CMSG_GARR_REMOVE_FOLLOWER_FROM_BUILDING");
     ObjectGuid npcGuid;
-    uint64 FollowerDBID = 0;
+    uint64 FollowerDBID;
 
     recvData >> npcGuid;
     recvData >> FollowerDBID;

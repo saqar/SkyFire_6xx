@@ -110,7 +110,15 @@ class BattlePayMgr
     friend class ACE_Singleton<BattlePayMgr, ACE_Null_Mutex>;
 
 public:
+    BattlePayMgr()
+        : m_enabled(false), m_currency(BATTLE_PAY_CURRENCY_DOLLAR) { }
+
     ~BattlePayMgr();
+
+    bool IsStoreEnabled() { return m_enabled; }
+    void SetEnableState(bool enabled) { m_enabled = enabled; }
+    uint32 GetStoreCurrency() { return m_currency; }
+    void SetStoreCurrency(uint32 currency) { m_currency = currency; }
 
     void LoadFromDb();
 
@@ -122,6 +130,9 @@ private:
     BattlePayProductSet m_productStore;
     BattlePayGroupSet m_groupStore;
     BattlePayShopEntryset m_shopEntryStore;
+
+    bool m_enabled;
+    uint32 m_currency;
 
     bool HasProductId(uint32 productId);
 

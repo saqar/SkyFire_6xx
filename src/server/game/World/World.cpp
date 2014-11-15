@@ -286,6 +286,16 @@ void World::AddSession_(WorldSession* s)
     s->SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));
     s->SendTutorialsData();
     s->SendTimezoneInformation();
+
+    WorldPacket data(SMSG_FEATURE_SYSTEM_STATUS_GLUE_SCREEN, 1);
+    data.WriteBit(1);                                             // BpayStoreAvailable
+    data.WriteBit(sBattlePayMgr->IsStoreEnabled());
+    data.WriteBit(0);                                             // CharUndeleteEnabled
+    data.WriteBit(0);                                             // BpayStoreDisabledByParentalControls
+    data.FlushBits();
+
+    s->SendPacket(&data);
+
     //s->SendAccountDataTimes(GLOBAL_CACHE_MASK);
 
     UpdateMaxSessionCounters();
@@ -1106,6 +1116,10 @@ void World::LoadConfigSettings(bool reload)
         TC_LOG_ERROR("server.loading", "BattlePet.InitialLevel (%i) can't be loaded. Set to 1.", m_int_configs[CONFIG_BATTLE_PET_INITIAL_LEVEL]);
         m_int_configs[CONFIG_BATTLE_PET_INITIAL_LEVEL] = 1;
     }
+
+    // battle pay
+    sBattlePayMgr->SetEnableState(sConfigMgr->GetIntDefault("BattlePay.StoreEnabled", 1) ? true : false);
+    sBattlePayMgr->SetStoreCurrency(sConfigMgr->GetIntDefault("BattlePay.StoreEnabled", BATTLE_PAY_CURRENCY_DOLLAR));
 
     //visibility on continents
     m_MaxVisibleDistanceOnContinents = sConfigMgr->GetFloatDefault("Visibility.Distance.Continents", DEFAULT_VISIBILITY_DISTANCE);

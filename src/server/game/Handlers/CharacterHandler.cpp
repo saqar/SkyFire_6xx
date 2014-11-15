@@ -21,6 +21,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Battleground.h"
+#include "BattlePayMgr.h"
 #include "CalendarMgr.h"
 #include "Chat.h"
 #include "Common.h"
@@ -899,7 +900,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     data.WriteBit(feedbackSystem);      // feedback system (bug, suggestion and report systems)
     data.WriteBit(0);                   // Scroll of Resurrection button
     data.WriteBit(1);                   // Battle Pay icon
-    data.WriteBit(1);                   // Battle Pay status (0 - "The Shop is temporarily unavailable.")
+    data.WriteBit(sBattlePayMgr->IsStoreEnabled());
     data.WriteBit(0);                   // Battle Pay parental control (1 - "Feature has been disabled by Parental Controls.")
     data.WriteBit(0);                   // item restoration button
     data.WriteBit(0);                   // broswer enabled

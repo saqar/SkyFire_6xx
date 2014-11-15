@@ -196,7 +196,7 @@ public:
 	~GarrisonMgr();
 
 	// Database Methods
-	void LoadFromDB() { };
+    void LoadFromDB();
 
 	// Garrison Methods
 	void BuildingActivate();

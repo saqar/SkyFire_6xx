@@ -43,11 +43,11 @@ struct Followers
 {
 	Followers(uint64 DbId, uint32 followerId, uint32 creatureId, uint32 givenNameId, uint32 familyNameId, uint32 gender, 
 		uint32 spec, uint32 race, uint32 quality, uint32 level, uint32 iLevelW, uint32 iLevelA, uint32 buildingId, uint32 missionId, uint32 abilityId)
-		: DBID(DbId), GarrFollowerID(followerId), CreatureID(creatureId), GarrGivenNameID(givenNameId), GarrFamilyNameID(familyNameId), _Gender(gender),
+        : npcEntry(DbId), GarrFollowerID(followerId), CreatureID(creatureId), GarrGivenNameID(givenNameId), GarrFamilyNameID(familyNameId), _Gender(gender),
 		_Spec(spec), _Race(race), Quality(quality), FollowerLevel(level), ItemLevelArmor(iLevelA), ItemLevelWeapon(iLevelW), CurrentBuildingID(buildingId),
 		CurrentMissionID(missionId), AbilityID(abilityId) { }
 public:
-	uint64 DBID;
+	uint64 npcEntry;
 	uint32 GarrFollowerID;
 	uint32 CreatureID;
 	uint32 GarrGivenNameID;
@@ -108,11 +108,11 @@ public:
 struct Missions
 {
 	Missions(uint64 dbId, uint32 missionId, uint32 offerTime, uint32 offerDuration, uint32 startTime, uint32 travelDuration, uint32 missionDuration, uint32 missionState)
-		: DBID(dbId), MissionRecID(missionId), OfferTime(offerTime), OfferDuration(offerDuration), StartTime(startTime), TravelDuration(travelDuration),
+        : missionEntry(dbId), MissionRecID(missionId), OfferTime(offerTime), OfferDuration(offerDuration), StartTime(startTime), TravelDuration(travelDuration),
 		MissionDuration(missionDuration), MissionState(missionState) { }
 
 public:
-	uint64 DBID;
+	uint64 missionEntry;
 	uint32 MissionRecID;
 	uint32 OfferTime;
 	uint32 OfferDuration;

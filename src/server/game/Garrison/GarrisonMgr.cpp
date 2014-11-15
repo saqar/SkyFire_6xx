@@ -274,7 +274,7 @@ void GarrisonMgr::SendGarrisonGetInfo(WorldSession* session)
                 // We can't really know just what these are for sure
                 // But we can definitely guess
 
-                data << uint64(follower->DBID);
+                data << uint64(follower->npcEntry);
                 data << uint32(follower->GarrFollowerID);
                 data << uint32(follower->CreatureID);
                 data << uint32(follower->Quality);
@@ -296,7 +296,7 @@ void GarrisonMgr::SendGarrisonGetInfo(WorldSession* session)
             for (auto itr : m_MissionStore)
             {
                 const Missions* mission = itr;
-                data << uint64(mission->DBID); // DbID
+                data << uint64(mission->missionEntry); // DbID
                 data << uint32(mission->MissionRecID);
                 data << uint32(mission->OfferTime);
                 data << uint32(mission->OfferDuration);

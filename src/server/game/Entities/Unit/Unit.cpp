@@ -15796,19 +15796,18 @@ void Unit::SendThreatListUpdate()
         uint32 count = getThreatManager().getThreatList().size();
 
         TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_UPDATE Message");
-        WorldPacket data(SMSG_THREAT_UPDATE, 8 + count * 8);
-        ObjectGuid guid;
-        ObjectGuid guid2;
 
-        data << guid;
+        WorldPacket data(SMSG_THREAT_UPDATE, 16 + 4 + count * (16 + 4));
+        data << GetGUID128();
         data << uint32(count);
+
         ThreatContainer::StorageType const &tlist = getThreatManager().getThreatList();
         for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
-            data << guid;
-            data << guid2;
-            data << uint32((*itr)->getThreat()*100);
+            data << ObjectGuid((*itr)->getUnitGuid());
+            data << uint32((*itr)->getThreat() * 100);
         }
+
         SendMessageToSet(&data, false);
     }
 }
@@ -15820,19 +15819,19 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
         uint32 count = getThreatManager().getThreatList().size();
 
         TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_HIGHEST_THREAT_UPDATE Message");
-        WorldPacket data(SMSG_HIGHEST_THREAT_UPDATE, 8 + 8 + count * 8);
-        ObjectGuid guid;
-        ObjectGuid guid1;
 
-        data << guid;
-        data << uint32(count);					    // Targets
+        WorldPacket data(SMSG_HIGHEST_THREAT_UPDATE, 16 + 16 + 4 + count * (16 + 4));
+        data << GetGUID128();
+        data << ObjectGuid(pHostileReference->getUnitGuid());
+        data << uint32(count);
 
         ThreatContainer::StorageType const &tlist = getThreatManager().getThreatList();
         for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
         {
-            data << guid1;
-            data << uint32((*itr)->getThreat());	// Threat
+            data << ObjectGuid((*itr)->getUnitGuid());
+            data << uint32((*itr)->getThreat());
         }
+
         SendMessageToSet(&data, false);
     }
 }
@@ -15840,20 +15839,19 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
 void Unit::SendClearThreatListOpcode()
 {
     TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_CLEAR Message");
-    WorldPacket data(SMSG_THREAT_CLEAR, 8);
-    ObjectGuid guid;
 
-    data << guid;
-
+    WorldPacket data(SMSG_THREAT_CLEAR, 16);
+    data << GetGUID128();
     SendMessageToSet(&data, false);
 }
 
 void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
 {
     TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_REMOVE Message");
-    WorldPacket data(SMSG_THREAT_REMOVE, 8 + 8);
-    data.append(GetPackGUID());
-    data.appendPackGUID(pHostileReference->getUnitGuid());
+
+    WorldPacket data(SMSG_THREAT_REMOVE, 16 + 16);
+    data << GetGUID128();
+    data << ObjectGuid(pHostileReference->getUnitGuid());
     SendMessageToSet(&data, false);
 }
 

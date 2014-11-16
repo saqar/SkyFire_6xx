@@ -145,3 +145,7 @@ void WorldSession::HandleGarrRemoveFollower(WorldPacket& recvData)
     recvData >> npcGuid;
     recvData >> FollowerDBID;
 }
+
+void WorldSession::HandleGarrGetInfo(WorldPacket& recvData)
+{
+}

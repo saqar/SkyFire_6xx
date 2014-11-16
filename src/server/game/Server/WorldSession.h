@@ -411,6 +411,7 @@ class WorldSession
         void HandleReorderCharacters(WorldPacket& recvData);
         void HandleOpeningCinematic(WorldPacket& recvData);
         void HandleDBQueryBulk(WorldPacket& recvPacket);
+        void SendRandomCharacterNameResult(std::string const* name);
 
         // played time
         void HandlePlayedTime(WorldPacket& recvPacket);

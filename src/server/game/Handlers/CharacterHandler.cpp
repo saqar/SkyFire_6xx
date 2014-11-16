@@ -2410,21 +2410,30 @@ void WorldSession::HandleRandomizeCharNameOpcode(WorldPacket& recvData)
     if (!Player::IsValidRace(race))
     {
         TC_LOG_ERROR("general", "Invalid race (%u) sent by accountId: %u", race, GetAccountId());
+        SendRandomCharacterNameResult(nullptr);
         return;
     }
 
     if (!Player::IsValidGender(gender))
     {
         TC_LOG_ERROR("general", "Invalid gender (%u) sent by accountId: %u", gender, GetAccountId());
+        SendRandomCharacterNameResult(nullptr);
         return;
     }
 
-    std::string const* name = GetRandomCharacterName(race, gender);
-    WorldPacket data(SMSG_RANDOMIZE_CHAR_NAME, 1 + name->size());
-    data.WriteBit(0); // unk
-    data.WriteBits(name->size(), 6);
+    SendRandomCharacterNameResult(GetRandomCharacterName(race, gender));
+}
+
+void WorldSession::SendRandomCharacterNameResult(std::string const* name)
+{
+    bool success = (name != nullptr);
+
+    WorldPacket data(SMSG_RANDOMIZE_CHAR_NAME, success ? 1 + name->size() : 1);
+    data.WriteBit(success);
+    data.WriteBits(success ? name->size() : 0, 6);
     data.FlushBits();
-    data.WriteString(*name);
+
+    data.WriteString(success ? *name : "");
     SendPacket(&data);
 }
 

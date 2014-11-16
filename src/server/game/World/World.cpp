@@ -1119,7 +1119,7 @@ void World::LoadConfigSettings(bool reload)
 
     // battle pay
     sBattlePayMgr->SetEnableState(sConfigMgr->GetIntDefault("BattlePay.StoreEnabled", 1) ? true : false);
-    sBattlePayMgr->SetStoreCurrency(sConfigMgr->GetIntDefault("BattlePay.StoreEnabled", BATTLE_PAY_CURRENCY_DOLLAR));
+    sBattlePayMgr->SetStoreCurrency(sConfigMgr->GetIntDefault("BattlePay.StoreCurrency", BATTLE_PAY_CURRENCY_DOLLAR));
 
     //visibility on continents
     m_MaxVisibleDistanceOnContinents = sConfigMgr->GetFloatDefault("Visibility.Distance.Continents", DEFAULT_VISIBILITY_DISTANCE);

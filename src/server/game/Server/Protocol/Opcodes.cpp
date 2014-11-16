@@ -943,7 +943,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_MISSILE_CANCEL,                                  0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MODIFY_COOLDOWN,                                 0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MONEY_NOTIFY,                                    0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_MOTD,                                            0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_MOTD,                                            0x0442, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_MOUNTRESULT,                                     0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_MOUNTSPECIAL_ANIM,                               0x159F, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_MULTIPLE_PACKETS,                                0x0000, STATUS_UNHANDLED);

@@ -937,39 +937,44 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     // Send MOTD
     {
-        data.Initialize(SMSG_MOTD, 50);                     // new in 2.0.1
-        data.WriteBits(0, 4);
+        std::string motd = sWorld->GetMotd();
 
-        uint32 linecount=0;
-        std::string str_motd = sWorld->GetMotd();
-        std::string::size_type pos, nextpos;
-        ByteBuffer stringBuffer;
+        WorldPacket data(SMSG_MOTD, 1 + motd.size());       // new in 2.0.1
+        data.WriteBits(0, 4);                               // placeholder
+        data.FlushBits();
+
+        uint32 lineCount = 0;
+        std::string::size_type pos, nextPos;
 
         pos = 0;
-        while ((nextpos= str_motd.find('@', pos)) != std::string::npos)
+        while ((nextPos = motd.find('@', pos)) != std::string::npos)
         {
-            if (nextpos != pos)
+            if (nextPos != pos)
             {
-                std::string string = str_motd.substr(pos, nextpos-pos);
-                data.WriteBits(strlen(string.c_str()), 7);
-                stringBuffer.WriteString(string);
-                ++linecount;
+                std::string string = motd.substr(pos, nextPos - pos);
+
+                data.WriteBits(string.size(), 7);
+                data.FlushBits();
+                data.WriteString(string);
+
+                lineCount++;
             }
-            pos = nextpos + 1;
+
+            pos = nextPos + 1;
         }
 
-        if (pos<str_motd.length())
+        if (pos < motd.length())
         {
-            std::string string = str_motd.substr(pos);
-            data.WriteBits(strlen(string.c_str()), 7);
-            stringBuffer.WriteString(string);
-            ++linecount;
+            std::string string = motd.substr(pos);
+
+            data.WriteBits(string.size(), 7);
+            data.FlushBits();
+            data.WriteString(string);
+
+            lineCount++;
         }
 
-
-        data.PutBits(0, linecount, 4);
-        data.FlushBits();
-        data.append(stringBuffer);
+        data.PutBits(0, lineCount, 4);
 
         SendPacket(&data);
         TC_LOG_DEBUG("network", "WORLD: Sent motd (SMSG_MOTD)");

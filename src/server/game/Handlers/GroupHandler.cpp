@@ -1056,8 +1056,12 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_PARTY_MEMBER_STATS");
-    uint64 guid;
+
+    ObjectGuid guid;
+    uint8 PartyIndex;
+
     recvData >> guid;
+    recvData >> PartyIndex;
 
     Player* player = HashMapHolder<Player>::Find(guid);
     if (!player)

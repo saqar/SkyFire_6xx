@@ -809,9 +809,10 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: CMSG_SPELLCLICK");
 
     ObjectGuid guid;
+    uint8 TryAutoDismount;
 
     recvData >> guid;
-    uint8 unk = recvData.ReadBit(); //TryAutoDismount
+    recvData >> TryAutoDismount;
 
     // this will get something not in world. crash
     Creature* unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);

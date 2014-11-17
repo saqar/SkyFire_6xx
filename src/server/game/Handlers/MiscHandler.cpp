@@ -530,10 +530,10 @@ void WorldSession::HandleSetPvP(WorldPacket& recvData)
 {
     if (recvData.size() == 1)
     {
-        bool newPvPStatus;
-        newPvPStatus = recvData.ReadBit();
-        GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, newPvPStatus);
-        GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !newPvPStatus);
+        bool EnablePVP;
+        EnablePVP = recvData.ReadBit();
+        GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, EnablePVP);
+        GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !EnablePVP);
     }
 }
 void WorldSession::HandleTogglePvP(WorldPacket& recvData)
@@ -619,10 +619,11 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recvData)
 void WorldSession::HandleStandStateChangeOpcode(WorldPacket& recvData)
 {
     // TC_LOG_DEBUG("network", "WORLD: Received CMSG_STANDSTATECHANGE"); -- too many spam in log at lags/debug stop
-    uint32 animstate;
-    recvData >> animstate;
+    uint32 StandState;
 
-    _player->SetStandState(animstate);
+    recvData >> StandState;
+
+    _player->SetStandState(StandState);
 }
 
 void WorldSession::HandleContactListOpcode(WorldPacket& recvData)
@@ -1259,18 +1260,18 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
 
 void WorldSession::HandleSetActionBarToggles(WorldPacket& recvData)
 {
-    uint8 actionBar;
+    uint8 Mask;
 
-    recvData >> actionBar;
+    recvData >> Mask;
 
     if (!GetPlayer())                                        // ignore until not logged (check needed because STATUS_AUTHED)
     {
-        if (actionBar != 0)
-            TC_LOG_ERROR("network", "WorldSession::HandleSetActionBarToggles in not logged state with value: %u, ignored", uint32(actionBar));
+        if (Mask != 0)
+            TC_LOG_ERROR("network", "WorldSession::HandleSetActionBarToggles in not logged state with value: %u, ignored", uint32(Mask));
         return;
     }
 
-    GetPlayer()->SetByteValue(PLAYER_FIELD_LIFETIME_MAX_RANK, 2, actionBar);
+    GetPlayer()->SetByteValue(PLAYER_FIELD_LIFETIME_MAX_RANK, 2, Mask);
 }
 
 void WorldSession::HandlePlayedTime(WorldPacket& recvData)

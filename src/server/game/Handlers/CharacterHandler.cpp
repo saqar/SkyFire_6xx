@@ -1266,14 +1266,22 @@ void WorldSession::HandleSetFactionInactiveOpcode(WorldPacket& recvData)
 void WorldSession::HandleShowingHelmOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_SHOWING_HELM for %s", _player->GetName().c_str());
-    recvData.read_skip<uint8>(); // unknown, bool?
+
+    uint8 ShowHelm;
+   
+    recvData >> ShowHelm;
+
     _player->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
 }
 
 void WorldSession::HandleShowingCloakOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "CMSG_SHOWING_CLOAK for %s", _player->GetName().c_str());
-    recvData.read_skip<uint8>(); // unknown, bool?
+
+    uint8 ShowHelm;
+
+    recvData >> ShowHelm;
+
     _player->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
 }
 

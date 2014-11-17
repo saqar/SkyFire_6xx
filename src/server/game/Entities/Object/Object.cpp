@@ -197,7 +197,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         return;
 
     uint8  updateType = UPDATETYPE_CREATE_OBJECT;
-    uint16 flags      = m_updateFlag;
+    uint32 flags      = m_updateFlag;
 
     /** lower flag1 **/
     if (target == this)                                      // building packet for yourself
@@ -390,7 +390,7 @@ uint32 Object::GetDynamicUInt32Value(uint32 tab, uint16 index) const
     return m_dynamicTab[tab][index];
 }
 
-void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
+void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
 {
     bool hasLiving = flags & UPDATEFLAG_LIVING;
     bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION;

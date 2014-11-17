@@ -553,6 +553,8 @@ union GameObjectValue
         uint32 PathProgress;
         TransportAnimation const* AnimationInfo;
         uint32 CurrentSeg;
+        std::vector<uint32>* StopFrames;
+        uint32 StateUpdateTimer;
     } Transport;
     //25 GAMEOBJECT_TYPE_FISHINGHOLE
     struct

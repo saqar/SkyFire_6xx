@@ -50,13 +50,15 @@ enum TypeMask
 {
     TYPEMASK_OBJECT         = 0x0001,
     TYPEMASK_ITEM           = 0x0002,
-    TYPEMASK_CONTAINER      = 0x0006,                       // TYPEMASK_ITEM | 0x0004
-    TYPEMASK_UNIT           = 0x0008,                       // creature
+    TYPEMASK_CONTAINER      = 0x0004,
+    TYPEMASK_UNIT           = 0x0008,
     TYPEMASK_PLAYER         = 0x0010,
     TYPEMASK_GAMEOBJECT     = 0x0020,
     TYPEMASK_DYNAMICOBJECT  = 0x0040,
     TYPEMASK_CORPSE         = 0x0080,
     TYPEMASK_AREATRIGGER    = 0x0100,
+    TYPEMASK_SCENEOBJECT    = 0x0200,
+    TYPEMASK_CONVERSATION   = 0x0400,
     TYPEMASK_SEER           = TYPEMASK_PLAYER | TYPEMASK_UNIT | TYPEMASK_DYNAMICOBJECT
 };
 
@@ -71,10 +73,11 @@ enum TypeID
     TYPEID_DYNAMICOBJECT = 6,
     TYPEID_CORPSE        = 7,
     TYPEID_AREATRIGGER   = 8,
-    TYPEID_SCENEOBJECT   = 9
+    TYPEID_SCENEOBJECT   = 9,
+    TYPEID_CONVERSATION  = 10
 };
 
-#define NUM_CLIENT_OBJECT_TYPES             10
+#define NUM_CLIENT_OBJECT_TYPES             11
 
 uint32 GuidHigh2TypeId(uint32 guid_hi);
 
@@ -453,7 +456,7 @@ class Object
 
         uint32 GetUpdateFieldData(Player const* target, uint32*& flags) const;
 
-        void BuildMovementUpdate(ByteBuffer* data, uint16 flags) const;
+        void BuildMovementUpdate(ByteBuffer* data, uint32 flags) const;
         void BuildDynamicValuesUpdate(ByteBuffer *data) const;
         virtual void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const;
 
@@ -463,7 +466,7 @@ class Object
         uint16 m_objectType;
 
         TypeID m_objectTypeId;
-        uint16 m_updateFlag;
+        uint32 m_updateFlag;
 
         union
         {
@@ -638,16 +641,16 @@ struct MovementInfo
             pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
             seat = -1;
             time = 0;
-            time2 = 0;
-            time3 = 0;
+            prevTime = 0;
+            vehicleId = 0;
         }
 
         uint64 guid;
         Position pos;
         int8 seat;
         uint32 time;
-        uint32 time2;
-        uint32 time3;
+        uint32 prevTime;
+        uint32 vehicleId;
     } transport;
 
     // swimming/flying

@@ -376,9 +376,9 @@ void OpcodeTable::InitializeClientTable()
     ///< Battlefield & Battlegroud & Battlemaster
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LEAVE,                                   0x06F1, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBattlefieldLeaveOpcode       ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LIST,                                    0x03B1, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldListOpcode        ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_ENTRY_INVITE_RESPONSE,               0x059A, STATUS_LOGGEDIN, PROCESS_INPLACE,    &WorldSession::HandleBfEntryInviteResponse        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_ENTRY_INVITE_RESPONSE,               0x059A, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBfEntryInviteResponse        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_EXIT_REQUEST,                        0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleBfExitRequest                );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_INVITE_RESPONSE,               0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,    &WorldSession::HandleBfQueueInviteResponse        );
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_INVITE_RESPONSE,               0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleBfQueueInviteResponse        );
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_REQUEST,                       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_PORT,                                    0x11EB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattleFieldPortOpcode        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_STATUS,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldStatusOpcode      );
@@ -593,7 +593,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_GET_RECRUITS,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderGetRecruits       );
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_POST_REQUEST,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderPostRequest       );
     DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_REMOVE_RECRUIT,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderRemoveRecruit     );
-    DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_SET_GUILD_POST,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderSetGuildPost      )
+    DEFINE_OPCODE_HANDLER(CMSG_LF_GUILD_SET_GUILD_POST,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderSetGuildPost      );
     DEFINE_OPCODE_HANDLER(CMSG_QUERY_GUILD_MEMBER_RECIPES,                          0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_QUERY_GUILD_MEMBERS_FOR_RECIPE,                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_QUERY_GUILD_RECIPES,                                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -617,7 +617,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CHALLENGE_MODE_DELETE_LEADER,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_CHALLENGE_MODE_DUMP_LEADERS,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_CHALLENGE_MODE_REQUEST_LEADERS,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_CHALLENGE_MODE_REQUEST_LEADERS_CHEAT,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                      );
+    DEFINE_OPCODE_HANDLER(CMSG_CHALLENGE_MODE_REQUEST_LEADERS_CHEAT,                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_CHALLENGE_MODE_REQUEST_MAP_STATS,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_FINISH_CHALLENGE_MODE_CHEAT,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GET_CHALLENGE_MODE_REWARDS,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
@@ -672,7 +672,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GARR_FORCE_BUILDING_ACTIVE,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_GENERATE_RECRUITS,                              0x0472, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGarrGenerateRecruits         ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_GARR_LEARN_BLUEPRINT_CHEAT,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_LEARN_BUILDING_SPECIALIZATION_CHEAT,            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                  );
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_LEARN_BUILDING_SPECIALIZATION_CHEAT,            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_LIST_FOLLOWERS_CHEAT,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_MISSION_BONUS_ROLL,                             0x102C, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGarrMissionBonusRoll         ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_GARR_PLACE_BUILDING_CHEAT,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
@@ -682,9 +682,9 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GARR_REMOVE_BUILDING_CHEAT,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_REMOVE_FOLLOWER_CHEAT,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_REMOVE_FOLLOWER_FROM_BUILDING,                  0x01BB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGarrRemoveFollower           ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_REQUEST_BLUEPRINT_AND_SPECIALIZATION_DATA,      0x16F2, STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrRequestBlueprintData); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_ACTIVE_BUILDING_SPECIALIZATION,             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                   );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_ACTIVE_BUILDING_SPECIALIZATION_CHEAT,       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL             );
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_REQUEST_BLUEPRINT_AND_SPECIALIZATION_DATA,      0x16F2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGarrRequestBlueprintData     ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_ACTIVE_BUILDING_SPECIALIZATION,             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_ACTIVE_BUILDING_SPECIALIZATION_CHEAT,       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_BUILDING_ACTIVE,                            0x041A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleGarrSetBuildingActive        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_FOLLOWER_ITEM_LEVEL_CHEAT,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_LEVEL_CHEAT,                                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );

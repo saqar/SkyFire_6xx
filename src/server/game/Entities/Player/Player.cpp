@@ -3446,6 +3446,20 @@ void Player::SendInitialSpells()
     TC_LOG_DEBUG("network", "CHARACTER: Sent Initial Spells");
 }
 
+void Player::SendUnlearnSpells()
+{
+    uint32 count = 0;
+
+    WorldPacket data(SMSG_SEND_UNLEARN_SPELLS, 4 + count * 4);
+
+    data << count; // Count
+
+    //for (uint32 i = 0; i < count; i++)
+    //    data << uint32(0); // SpellID
+
+    GetSession()->SendPacket(&data);
+}
+
 void Player::RemoveMail(uint32 id)
 {
     for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
@@ -23452,10 +23466,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendInitialSpells();
 
-    WorldPacket data(SMSG_SEND_UNLEARN_SPELLS, 4 + 4);
-    data << uint32(0); // Count
-    data << uint32(0); // SpellID
-    GetSession()->SendPacket(&data);
+    SendUnlearnSpells();
 
     SendInitialActionButtons();
     m_reputationMgr->SendInitialReputations();
@@ -24645,7 +24656,8 @@ void Player::SetMover(Unit* target)
 
     ObjectGuid guid = target->GetGUID();
 
-    WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 9);
+    WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 16);
+
     data << guid;
 
     SendDirectMessage(&data);

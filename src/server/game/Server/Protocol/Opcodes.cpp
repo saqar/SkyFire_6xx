@@ -163,7 +163,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT,                                             0x01EC, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleInspectOpcode                ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_INSPECT_HONOR_STATS,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleInspectHonorStatsOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_INSTANCE_LOCK_WARNING_RESPONSE,                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_KEEP_ALIVE,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess               );
+    DEFINE_OPCODE_HANDLER(CMSG_KEEP_ALIVE,                                          0x0981, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess               ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_LEARN_TALENT,                                        0x0BB6, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLearnTalentOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_LIST_INVENTORY,                                      0x0B39, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleListInventoryOpcode          ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_LOAD_SCREEN,                                         0x0B08, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleLoadScreenOpcode             ); // 6.0.3 19116
@@ -199,7 +199,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_SHOW_SIGNATURES,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionShowSignOpcode       );
     DEFINE_OPCODE_HANDLER(CMSG_PETITION_SIGN,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePetitionSignOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_PING,                                                0x0416, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess               ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_PLAYED_TIME,                                         0x1BB2, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePlayedTime                   );
+    DEFINE_OPCODE_HANDLER(CMSG_PLAYED_TIME,                                         0x1BB2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePlayedTime                   ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_PLAYER_LOGIN,                                        0x0B1D, STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandlePlayerLoginOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_PLAYER_VEHICLE_ENTER,                                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleEnterPlayerVehicle           );
     DEFINE_OPCODE_HANDLER(CMSG_PLAY_DANCE,                                          0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );

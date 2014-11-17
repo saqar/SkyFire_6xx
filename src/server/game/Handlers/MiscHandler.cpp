@@ -1276,13 +1276,14 @@ void WorldSession::HandleSetActionBarToggles(WorldPacket& recvData)
 
 void WorldSession::HandlePlayedTime(WorldPacket& recvData)
 {
-    uint8 unk1;
-    recvData >> unk1;                                      // 0 or 1 expected
+    uint8 TriggerScriptEvent;
+
+    recvData >> TriggerScriptEvent;                                      // 0 or 1 expected
 
     WorldPacket data(SMSG_PLAYED_TIME, 4 + 4 + 1);
     data << uint32(_player->GetTotalPlayedTime());
     data << uint32(_player->GetLevelPlayedTime());
-    data << uint8(unk1);                                    // 0 - will not show in chat frame
+    data << uint8(TriggerScriptEvent);                                    // 0 - will not show in chat frame
     SendPacket(&data);
 }
 
@@ -2350,6 +2351,8 @@ void WorldSession::HotFixHandler()
     size_t hSize = (hotfix.size() * (4 + 4 + 4));
 
     WorldPacket data(SMSG_HOTFIX_INFO, hSize);
+
+    data << uint32(hotfix.size());
 
     for (uint32 i = 0; i < hotfix.size(); ++i)
     {

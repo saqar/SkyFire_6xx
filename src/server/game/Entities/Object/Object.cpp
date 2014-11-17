@@ -3278,11 +3278,10 @@ void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target /*= NULL*/)
 {
     ObjectGuid guid = GetGUID();
 
-    WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4 + 9);
+    WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4 + 16);
 
     data << guid;
     data << uint32(sound_id);
-
 
     if (target)
         target->SendDirectMessage(&data);

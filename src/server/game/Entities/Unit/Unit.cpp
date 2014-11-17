@@ -2783,9 +2783,7 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
 {
     //TC_LOG_DEBUG("entities.unit", "Interrupt spell for unit %u.", GetEntry());
     Spell* spell = m_currentSpells[spellType];
-    if (spell
-        && (withDelayed || spell->getState() != SPELL_STATE_DELAYED)
-        && (withInstant || spell->GetCastTime() > 0))
+    if (spell && (withDelayed || spell->getState() != SPELL_STATE_DELAYED) && (withInstant || spell->GetCastTime() > 0))
     {
         // for example, do not let self-stun aura interrupt itself
         if (!spell->IsInterruptable())
@@ -13906,7 +13904,6 @@ void Unit::SendSetPlayHoverAnim(bool enable)
 
     data << guid;
     data.WriteBit(enable);
-
 
     SendMessageToSet(&data, true);
 }

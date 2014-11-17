@@ -590,7 +590,7 @@ void WorldSession::HandleRequestCemeteryList(WorldPacket& /*recvPacket*/)
         return;
     }
 
-    WorldPacket data(SMSG_REQUEST_CEMETERY_LIST_RESPONSE, 4 + 4 * graveyardIds.size());
+    WorldPacket data(SMSG_REQUEST_CEMETERY_LIST_RESPONSE, 1 + 4 + 4 * graveyardIds.size());
 
     data.WriteBit(0); // IsGossipTriggered
     data << uint32(graveyardIds.size());

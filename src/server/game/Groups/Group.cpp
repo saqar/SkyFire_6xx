@@ -742,10 +742,11 @@ void Group::Disband(bool hideDestroy /* = false */)
         if (!player->GetSession())
             continue;
 
-        WorldPacket data;
+        
         if (!hideDestroy)
         {
-            data.Initialize(SMSG_GROUP_DESTROYED, 0);
+            WorldPacket data(SMSG_GROUP_DESTROYED, 0);
+
             player->GetSession()->SendPacket(&data);
         }
 

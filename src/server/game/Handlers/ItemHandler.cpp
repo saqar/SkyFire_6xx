@@ -959,14 +959,15 @@ void WorldSession::SendEnchantmentLog(uint64 target, uint64 caster, uint32 itemI
     GetPlayer()->SendMessageToSet(&data, true);
 }
 
-void WorldSession::SendItemEnchantTimeUpdate(uint64 Playerguid, uint64 Itemguid, uint32 slot, uint32 Duration)
+void WorldSession::SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, uint32 slot, uint32 Duration)
 {
-                                                            // last check 2.0.10
-    WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, (8+4+4+8));
-    data << uint64(Itemguid);
-    data << uint32(slot);
-    data << uint32(Duration);
-    data << uint64(Playerguid);
+    WorldPacket data(SMSG_ITEM_ENCHANT_TIME_UPDATE, 8 + 4 + 4 + 8);
+
+    data << Itemguid;
+    data << Duration;
+    data << slot;
+    data << Playerguid;
+
     SendPacket(&data);
 }
 

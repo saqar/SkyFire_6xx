@@ -20554,10 +20554,14 @@ void Player::SendAttackSwingBadFacingAttack()
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendAutoRepeatCancel(Unit* target)
+void Player::SendAutoRepeatCancel(Unit* player)
 {
-    WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, target->GetPackGUID().size());
-    data.append(target->GetPackGUID());                     // may be it's target guid
+    ObjectGuid guid = player->GetGUID128();
+
+    WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 16);
+
+    data << guid;
+
     GetSession()->SendPacket(&data);
 }
 
@@ -22676,9 +22680,10 @@ void Player::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /*= 0*/
     // Send activate cooldown timer (possible 0) at client side
     ObjectGuid guid = GetGUID();
 
-    WorldPacket data(SMSG_COOLDOWN_EVENT, 9 + 4);
+    WorldPacket data(SMSG_COOLDOWN_EVENT, 16 + 4);
     data << guid;
     data << uint32(spellInfo->Id);
+
     SendDirectMessage(&data);
 }
 
@@ -23602,9 +23607,11 @@ void Player::ApplyEquipCooldown(Item* pItem)
 
         AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), time(NULL) + 30);
 
-        WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
+        WorldPacket data(SMSG_ITEM_COOLDOWN, 20);
+
         data << pItem->GetGUID();
         data << uint32(spellData.SpellId);
+
         GetSession()->SendPacket(&data);
     }
 }
@@ -24619,10 +24626,11 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
 {
     ObjectGuid guid = target->GetGUID();
 
-    WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 9 + 1);
-    data << guid;
+    WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 1 + 16);
+    
     data.WriteBit(allowMove);
-
+    data << guid;
+   
     GetSession()->SendPacket(&data);
 
     if (target == this && allowMove == 1)

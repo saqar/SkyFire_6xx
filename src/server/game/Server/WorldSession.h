@@ -346,7 +346,7 @@ class WorldSession
 
         //Item Enchantment
         void SendEnchantmentLog(uint64 target, uint64 caster, uint32 itemId, uint32 enchantId);
-        void SendItemEnchantTimeUpdate(uint64 Playerguid, uint64 Itemguid, uint32 slot, uint32 Duration);
+        void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, uint32 slot, uint32 Duration);
 
         //Taxi
         void SendTaxiStatus(uint64 guid);
@@ -535,7 +535,6 @@ class WorldSession
         void HandleBattleMasterHelloOpcode(WorldPacket& recvData);
 
         void HandleGroupInviteOpcode(WorldPacket& recvPacket);
-        //void HandleGroupCancelOpcode(WorldPacket& recvPacket);
         void HandleGroupInviteResponseOpcode(WorldPacket& recvPacket);
         //void HandleGroupUninviteOpcode(WorldPacket& recvPacket);
         void HandleGroupUninviteGuidOpcode(WorldPacket& recvPacket);

@@ -415,7 +415,9 @@ void AchievementMgr<T>::RemoveCriteriaProgress(CriteriaEntry const* entry)
         return;
 
     WorldPacket data(SMSG_CRITERIA_DELETED, 4);
+
     data << uint32(entry->ID);
+
     SendPacket(&data);
 
     m_criteriaProgress.erase(criteriaProgress);
@@ -763,7 +765,9 @@ void AchievementMgr<Player>::Reset()
     for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
     {
         WorldPacket data(SMSG_CRITERIA_DELETED, 4);
+
         data << uint32(iter->first);
+
         SendPacket(&data);
     }
 

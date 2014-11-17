@@ -1986,7 +1986,7 @@ class Player : public Unit, public GridObject<Player>
         void SendAttackSwingDeadTarget();
         void SendAttackSwingNotInRange();
         void SendAttackSwingBadFacingAttack();
-        void SendAutoRepeatCancel(Unit* target);
+        void SendAutoRepeatCancel(Unit* player);
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
         void SendDungeonDifficulty(bool IsInGroup);

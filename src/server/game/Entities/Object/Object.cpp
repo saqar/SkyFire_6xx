@@ -392,15 +392,29 @@ uint32 Object::GetDynamicUInt32Value(uint32 tab, uint16 index) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
 {
+    bool NoBirthAnim = false;
+    bool EnablePortals = false;
+    bool PlayHoverAnim = false;
+    bool IsSuppressingGreetings = false;
     bool hasLiving = flags & UPDATEFLAG_LIVING;
     bool hasStacionaryPostion = flags & UPDATEFLAG_STATIONARY_POSITION;
     bool hasGobjectRotation = flags & UPDATEFLAG_ROTATION;
-    bool hasTransportPosition = false;//flags & UPDATEFLAG_GO_TRANSPORT_POSITION;
+    bool hasTransportPosition = flags & UPDATEFLAG_TRANSPORT_POSITION;
     bool hasTarget = flags & UPDATEFLAG_HAS_TARGET;
-    bool hasTransport = false;//flags & UPDATEFLAG_TRANSPORT;
-    bool hasVehicle = false; //flags & UPDATEFLAG_VEHICLE;
+    bool ServerTime = flags & UPDATEFLAG_TRANSPORT;
+    bool hasVehicle = flags & UPDATEFLAG_VEHICLE;
     bool hasAnimKits = false; //flags & UPDATEFLAG_ANIMKITS;
-    bool hasAreatrigger = flags & UPDATEFlAG_AREATRIGGER;
+    bool hasAreatrigger = flags & UPDATEFLAG_AREATRIGGER;
+    bool HasGameObject = false;
+    bool ThisIsYou = flags & UPDATEFLAG_SELF;
+    bool ReplaceActive = false;
+    bool SceneObjCreate = false;
+    bool ScenePendingInstances = false;
+    
+    uint32 PauseTimesCount = 0;
+    if (GameObject const* go = ToGameObject())
+        if (go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
+            PauseTimesCount = go->GetGOValue()->Transport.StopFrames->size();
 
     bool hasFallData;
     bool hasFallDirection;
@@ -412,25 +426,58 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
     uint32 movementFlags;
     uint32 movementFlagsExtra;
 
-    data->WriteBit(0); // NoBithAnim
-    data->WriteBit(0); // EnablePortals
-    data->WriteBit(0); // PlayHoverAnim
-    data->WriteBit(0); // IsSuppressessingGreetings
+    uint32 ElapsedMs;
+    bool HasAbsoluteOrientation = false;
+    bool HasDynamicShape = false;
+    bool HasAttached = true;
+    bool HasFaceMovementDir = false;
+    bool HasFollowsTerrain = false;
+    bool HasTargetRollPitchYaw = false;
+    bool HasScaleCurveID = false;
+    bool HasMorphCurveID = false;
+    bool HasFacingCurveID = false;
+    bool HasMoveCurveID = false;
+    bool HasAreaTriggerSphere;
+    bool HasAreaTriggerBox = false;
+    bool HasAreaTriggerPolygon = false;
+    bool HasAreaTriggerCylinder = false;
+    bool HasAreaTriggerSpline = false;
+    uint32 ScaleCurveID = 0;
+    uint32 MorphCurveID = 0;
+    uint32 FacingCurveID = 0;
+    uint32 MoveCurveID = 0;
+    uint32 VerticesCount = 0;
+    uint32 VerticesTargetCount = 0;
+    uint32 TimeToTarget = 0;
+    uint32 ElapsedTimeForMovement = 0;
+
+    uint32 WorldEffectID = 0;
+
+    bool CliSceneLocalScriptData = false;
+    bool PetBattleFullUpdate = false;
+    
+    uint32 SceneInstanceIDsCount = 0;
+    uint32 SceneInstanceIDs = 0;
+
+    data->WriteBit(NoBirthAnim);
+    data->WriteBit(EnablePortals);
+    data->WriteBit(PlayHoverAnim);
+    data->WriteBit(IsSuppressingGreetings);
     data->WriteBit(hasLiving);
     data->WriteBit(hasTransportPosition);
     data->WriteBit(hasStacionaryPostion);
     data->WriteBit(hasTarget);
-    data->WriteBit(0); //serverTime
+    data->WriteBit(ServerTime);
     data->WriteBit(hasVehicle);
     data->WriteBit(hasAnimKits);
     data->WriteBit(hasGobjectRotation);
     data->WriteBit(hasAreatrigger);
-    data->WriteBit(0); // GameObject
-    data->WriteBit(flags & UPDATEFLAG_SELF);
-    data->WriteBit(0); // ReplaceActive
-    data->WriteBit(0);
-    data->WriteBit(0);
-    *data << uint32(0);
+    data->WriteBit(HasGameObject);
+    data->WriteBit(ThisIsYou);
+    data->WriteBit(ReplaceActive);
+    data->WriteBit(SceneObjCreate);
+    data->WriteBit(ScenePendingInstances);
+    *data << uint32(PauseTimesCount);
 
     if (hasLiving)
     {
@@ -457,14 +504,16 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
         *data << float(Position::NormalizeOrientation(self->GetOrientation()));
         *data << float(G3D::wrap(self->m_movementInfo.pitch, float(-M_PI), float(M_PI)));
         *data << float(self->m_movementInfo.splineElevation);
-        *data << uint32(0); //ForcesCount
+
+        uint32 removeMovementForcesCount = 0;
+        *data << uint32(removeMovementForcesCount);
         *data << uint32(self->GetMovementCounter());
 
         data->WriteBits(movementFlags, 30);
         data->WriteBits(movementFlagsExtra, 15);
         data->WriteBit(hasUnitTransport);
         data->WriteBit(hasFallData);
-        data->WriteBit(0); // HasSpline
+        data->WriteBit(hasSpline);
         data->WriteBit(0); // HeightChangeFailed
         data->WriteBit(0); // RemoteTimeValid
         data->FlushBits();
@@ -481,11 +530,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
             *data << int8(self->GetTransSeat());
             *data << uint32(self->GetTransTime());
 
-            data->WriteBit(self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid);
+            data->WriteBit(self->m_movementInfo.transport.prevTime && self->m_movementInfo.transport.guid);
             data->WriteBit(self->GetTransport() && self->GetTransport()->GetEntry());
 
-            if (self->m_movementInfo.transport.time2 && self->m_movementInfo.transport.guid)
-                *data << uint32(self->m_movementInfo.transport.time3);
+            if (self->m_movementInfo.transport.prevTime && self->m_movementInfo.transport.guid)
+                *data << uint32(self->m_movementInfo.transport.vehicleId);
 
             if (self->GetTransport() && self->GetTransport()->GetEntry())
                 *data << uint32(self->GetTransport()->GetEntry());
@@ -515,12 +564,35 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
         *data << float(self->GetSpeed(MOVE_FLIGHT_BACK));
         *data << float(self->GetSpeed(MOVE_TURN_RATE));
         *data << float(self->GetSpeed(MOVE_PITCH_RATE));
-        *data << uint32(0); // MovementForces
+
+        uint32 MovementForceCount = 0;
+        *data << uint32(MovementForceCount);
 
         data->WriteBit(hasSpline);
 
         if (hasSpline)
             Movement::PacketBuilder::WriteCreateData(*self->movespline, *data);
+    }
+
+    if (hasTransportPosition)
+    {
+        WorldObject const* self = static_cast<WorldObject const*>(this);
+        *data << self->m_movementInfo.transport.guid;                   // Transport Guid
+        *data << float(self->GetTransOffsetX());
+        *data << float(self->GetTransOffsetY());
+        *data << float(self->GetTransOffsetZ());
+        *data << float(self->GetTransOffsetO());
+        *data << int8(self->m_movementInfo.transport.seat);             // VehicleSeatIndex
+        *data << uint32(self->m_movementInfo.transport.time);           // MoveTime
+
+        data->WriteBit(self->m_movementInfo.transport.prevTime != 0);
+        data->WriteBit(self->m_movementInfo.transport.vehicleId != 0);
+
+        if (self->m_movementInfo.transport.prevTime)
+            *data << uint32(self->m_movementInfo.transport.prevTime);   // PrevMoveTime
+
+        if (self->m_movementInfo.transport.vehicleId)
+            *data << uint32(self->m_movementInfo.transport.vehicleId);  // VehicleRecID
     }
 
     if (hasStacionaryPostion)
@@ -544,38 +616,288 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
         *data << victimGuid;
     }
 
+    if (ServerTime)
+    {
+        GameObject const* go = ToGameObject();
+
+        if (go && go->ToTransport())                                    // ServerTime
+            *data << uint32(go->GetGOValue()->Transport.PathProgress);
+        else
+            *data << uint32(getMSTime());
+    }
+
+    if (hasVehicle)
+    {
+        Unit const* unit = ToUnit();
+        *data << uint32(unit->GetVehicleKit()->GetVehicleInfo()->m_ID); // RecID
+        *data << float(unit->GetOrientation());                         // InitialRawFacing
+    }
+
+    if (hasAnimKits)
+    {
+        Unit const* unit = ToUnit();
+        *data << uint16(0/*unit->GetAIAnimKitId()*/);                        // AiID
+        *data << uint16(0/*unit->GetMovementAnimKitId()*/);                  // MovementID
+        *data << uint16(0/*unit->GetMeleeAnimKitId()*/);                     // MeleeID
+    }
+
     if (hasGobjectRotation)
         *data << uint64(ToGameObject()->GetRotation());
 
     if (hasAreatrigger)
     {
         AreaTrigger const* areaTrigger = ToAreaTrigger();
-        *data << uint32(0); // Elapsed
-        *data << float(0); // TargetRollPitchYaw X
-        *data << float(0); // TargetRollPitchYaw Y
-        *data << float(0); // TargetRollPitchYaw Z
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(1);
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(areaTrigger->GetRadius() != 0.f); // Size has to be sent
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(0);
-        data->WriteBit(0);
+        ElapsedMs = 0;
+        HasAreaTriggerSphere = areaTrigger->GetRadius() != 0.f;
 
-        if (areaTrigger->GetRadius() != 0.f)
+        *data << uint32(ElapsedMs);
+        *data << float(0); // RollPitchYaw1 X
+        *data << float(0); // RollPitchYaw1 Y
+        *data << float(0); // RollPitchYaw1 Z
+        data->WriteBit(HasAbsoluteOrientation);
+        data->WriteBit(HasDynamicShape);
+        data->WriteBit(HasAttached);
+        data->WriteBit(HasFaceMovementDir);
+        data->WriteBit(HasFollowsTerrain);
+        data->WriteBit(HasTargetRollPitchYaw);
+        data->WriteBit(HasScaleCurveID);
+        data->WriteBit(HasMorphCurveID);
+        data->WriteBit(HasFacingCurveID);
+        data->WriteBit(HasMoveCurveID);
+        data->WriteBit(HasAreaTriggerSphere);
+        data->WriteBit(HasAreaTriggerBox);
+        data->WriteBit(HasAreaTriggerPolygon);
+        data->WriteBit(HasAreaTriggerCylinder);
+        data->WriteBit(HasAreaTriggerSpline);
+
+        if (HasTargetRollPitchYaw)
         {
-            *data << float(areaTrigger->GetRadius());
-            *data << float(areaTrigger->GetRadius());
+            *data << float(0); // TargetRollPitchYaw X
+            *data << float(0); // TargetRollPitchYaw Y
+            *data << float(0); // TargetRollPitchYaw Z
+        }
+
+        if (HasScaleCurveID)
+            *data << uint32(ScaleCurveID);
+
+        if (HasMorphCurveID)
+            *data << uint32(MorphCurveID);
+
+        if (HasFacingCurveID)
+            *data << uint32(FacingCurveID);
+
+        if (HasMoveCurveID)
+            *data << uint32(MoveCurveID);
+
+        if (HasAreaTriggerSphere)
+        {
+            *data << float(areaTrigger->GetRadius()); // Radius
+            *data << float(areaTrigger->GetRadius()); // RadiusTarget
+        }
+
+        if (HasAreaTriggerBox)
+        {
+            *data << float(0); // Extents X
+            *data << float(0); // Extents Y
+            *data << float(0); // Extents Z
+
+            *data << float(0); // ExtentsTarget X
+            *data << float(0); // ExtentsTarget Y
+            *data << float(0); // ExtentsTarget Z
+        }
+
+        if (HasAreaTriggerPolygon)
+        {
+            *data << uint32(VerticesCount);
+            *data << uint32(VerticesTargetCount);
+            
+            *data << float(0); // Height
+            *data << float(0); // HeightTarget
+
+            for (uint32 i = 0; i < VerticesCount; ++i)
+            {
+                *data << float(0); // Vertices x
+                *data << float(0); // Vertices y
+            }
+
+            for (uint32 i = 0; i < VerticesTargetCount; ++i)
+            {
+                *data << float(0); // VerticesTarget x
+                *data << float(0); // VerticesTarget y
+            }
+        }
+
+        if (HasAreaTriggerCylinder)
+        {
+            *data << float(0); // Radius
+            *data << float(0); // RadiusTarget
+            *data << float(0); // Height
+            *data << float(0); // HeightTarget
+            *data << float(0); // Float4
+            *data << float(0); // Float5
+        }
+
+        if (HasAreaTriggerSpline)
+        {
+            *data << uint32(TimeToTarget);
+            *data << uint32(ElapsedTimeForMovement);
+
+            *data << uint32(VerticesCount);
+
+            for (uint32 i = 0; i < VerticesCount; ++i)
+            {
+                *data << float(0); // Points x
+                *data << float(0); // Points y
+                *data << float(0); // Points z
+            }
         }
     }
+
+    if (HasGameObject)
+    {
+        *data << uint32(WorldEffectID);
+        
+        data->WriteBit(0); // bit8
+        
+        //if (bit8)
+        //    *data << uint32(0);
+    }
+
+    if (SceneObjCreate)
+    {
+        data->WriteBit(CliSceneLocalScriptData);
+        data->WriteBit(PetBattleFullUpdate);
+
+        if (CliSceneLocalScriptData)
+        {
+            //var DataLength = packet.ReadBits(7);
+            //packet.ReadWoWString("Data", DataLength, index);
+        }
+
+        if (PetBattleFullUpdate)
+        {
+            /*for (var i = 0; i < 2; ++i)
+            {
+                packet.ReadPackedGuid128("CharacterID", index, i);
+
+                packet.ReadInt32("TrapAbilityID", index, i);
+                packet.ReadInt32("TrapStatus", index, i);
+
+                packet.ReadInt16("RoundTimeSecs", index, i);
+
+                packet.ReadByte("FrontPet", index, i);
+                packet.ReadByte("InputFlags", index, i);
+
+                packet.ResetBitReader();
+
+                var PetBattlePetUpdateCount = packet.ReadBits("PetBattlePetUpdateCount", 2, index, i);
+
+                for (var j = 0; j < PetBattlePetUpdateCount; ++j)
+                {
+                    packet.ReadPackedGuid128("BattlePetGUID", index, i, j);
+
+                    packet.ReadInt32("SpeciesID", index, i, j);
+                    packet.ReadInt32("DisplayID", index, i, j);
+                    packet.ReadInt32("CollarID", index, i, j);
+
+                    packet.ReadInt16("Level", index, i, j);
+                    packet.ReadInt16("Xp", index, i, j);
+
+
+                    packet.ReadInt32("CurHealth", index, i, j);
+                    packet.ReadInt32("MaxHealth", index, i, j);
+                    packet.ReadInt32("Power", index, i, j);
+                    packet.ReadInt32("Speed", index, i, j);
+                    packet.ReadInt32("NpcTeamMemberID", index, i, j);
+
+                    packet.ReadInt16("BreedQuality", index, i, j);
+                    packet.ReadInt16("StatusFlags", index, i, j);
+
+                    packet.ReadByte("Slot", index, i, j);
+
+                    var PetBattleActiveAbility = packet.ReadInt32("PetBattleActiveAbility", index, i, j);
+                    var PetBattleActiveAura = packet.ReadInt32("PetBattleActiveAura", index, i, j);
+                    var PetBattleActiveState = packet.ReadInt32("PetBattleActiveState", index, i, j);
+
+                    for (var k = 0; k < PetBattleActiveAbility; ++k)
+                    {
+                        packet.ReadInt32("AbilityID", index, i, j, k);
+                        packet.ReadInt16("CooldownRemaining", index, i, j, k);
+                        packet.ReadInt16("LockdownRemaining", index, i, j, k);
+                        packet.ReadByte("AbilityIndex", index, i, j, k);
+                        packet.ReadByte("Pboid", index, i, j, k);
+                    }
+
+                    for (var k = 0; k < PetBattleActiveAura; ++k)
+                    {
+                        packet.ReadInt32("AbilityID", index, i, j, k);
+                        packet.ReadInt32("InstanceID", index, i, j, k);
+                        packet.ReadInt32("RoundsRemaining", index, i, j, k);
+                        packet.ReadInt32("CurrentRound", index, i, j, k);
+                        packet.ReadByte("CasterPBOID", index, i, j, k);
+                    }
+
+                    for (var k = 0; k < PetBattleActiveState; ++k)
+                    {
+                        packet.ReadInt32("StateID", index, i, j, k);
+                        packet.ReadInt32("StateValue", index, i, j, k);
+                    }
+
+                    packet.ResetBitReader();
+                    var bits57 = packet.ReadBits(7);
+                    packet.ReadWoWString("CustomName", bits57, index, i, j);
+                }
+            }
+
+            for (var i = 0; i < 3; ++i)
+            {
+                var PetBattleActiveAura = packet.ReadInt32("PetBattleActiveAura", index, i);
+                var PetBattleActiveState = packet.ReadInt32("PetBattleActiveState", index, i);
+
+                for (var j = 0; j < PetBattleActiveAura; ++j)
+                {
+                    packet.ReadInt32("AbilityID", index, i, j);
+                    packet.ReadInt32("InstanceID", index, i, j);
+                    packet.ReadInt32("RoundsRemaining", index, i, j);
+                    packet.ReadInt32("CurrentRound", index, i, j);
+                    packet.ReadByte("CasterPBOID", index, i, j);
+                }
+
+                for (var j = 0; j < PetBattleActiveState; ++j)
+                {
+                    packet.ReadInt32("StateID", index, i, j);
+                    packet.ReadInt32("StateValue", index, i, j);
+                }
+            }
+
+            packet.ReadInt16("WaitingForFrontPetsMaxSecs", index);
+            packet.ReadInt16("PvpMaxRoundTime", index);
+
+            packet.ReadInt32("CurRound", index);
+            packet.ReadInt32("NpcCreatureID", index);
+            packet.ReadInt32("NpcDisplayID", index);
+
+            packet.ReadByte("CurPetBattleState");
+            packet.ReadByte("ForfeitPenalty");
+
+            packet.ReadPackedGuid128("InitialWildPetGUID");
+
+            packet.ReadBit("IsPVP");
+            packet.ReadBit("CanAwardXP");*/
+        }
+    }
+
+    if (ScenePendingInstances)
+    {
+        *data << uint32(SceneInstanceIDsCount);
+
+        for (uint32 i = 0; i < SceneInstanceIDsCount; ++i)
+            *data << uint32(SceneInstanceIDs);
+    }
+
+    if (GameObject const* go = ToGameObject())
+        for (uint32 i = 0; i < PauseTimesCount; ++i)
+            *data << uint32(go->GetGOValue()->Transport.StopFrames->at(i));
 
     data->FlushBits();
 }
@@ -1285,9 +1607,9 @@ void MovementInfo::OutDebug()
         TC_LOG_INFO("misc", "seat: %i", transport.seat);
         TC_LOG_INFO("misc", "time: %u", transport.time);
         if (flags2 & MOVEMENTFLAG2_INTERPOLATED_MOVEMENT)
-            TC_LOG_INFO("misc", "time2: %u", transport.time2);
-        if (transport.time3)
-            TC_LOG_INFO("misc", "time3: %u", transport.time3);
+            TC_LOG_INFO("misc", "prevTime: %u", transport.prevTime);
+        if (transport.vehicleId)
+            TC_LOG_INFO("misc", "vehicleId: %u", transport.vehicleId);
     }
 
     if ((flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING))

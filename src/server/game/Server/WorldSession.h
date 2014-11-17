@@ -228,7 +228,11 @@ class WorldSession
         void SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps, std::set<uint32> const& worldAreas);
         void SendQueryTimeResponse();
         void SendGroupInviteNotification(const std::string& inviterName, bool inGroup);
+
         void SendServerWorldInfo();
+        void SendBindPointUpdate(float x, float y, float z, uint32 mapId, uint32 areaId, bool direct = false);
+        void ClientSetTimeSpeed();
+        void HotFixHandler();
 
         void SendAuthResponse(uint8 code, bool queued, uint32 queuePos = 0);
         void SendClientCacheVersion(uint32 version);

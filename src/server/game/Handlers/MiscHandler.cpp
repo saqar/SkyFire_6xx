@@ -2314,3 +2314,48 @@ void WorldSession::SendServerWorldInfo()
 
     GetPlayer()->GetSession()->SendPacket(&data);
 }
+
+void WorldSession::SendBindPointUpdate(float x, float y, float z, uint32 mapId, uint32 areaId, bool direct)
+{
+    WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
+    data << x;
+    data << y;
+    data << z;
+    data << mapId;
+    data << areaId;
+
+    if (direct)
+        GetPlayer()->SendDirectMessage(&data);
+    else
+        GetPlayer()->GetSession()->SendPacket(&data);
+}
+
+void WorldSession::ClientSetTimeSpeed()
+{
+    WorldPacket data(SMSG_LOGIN_SETTIMESPEED, 20);
+
+    data.AppendPackedTime(sWorld->GetGameTime());
+    data.AppendPackedTime(sWorld->GetGameTime());
+    data << float(0.01666667f);                     // NewSpeed
+    data << uint32(0);                              // ServerTime
+    data << uint32(0);                              // GameTime
+
+    GetPlayer()->GetSession()->SendPacket(&data);
+}
+
+void WorldSession::HotFixHandler()
+{
+    HotfixData const& hotfix = sObjectMgr->GetHotfixData();
+    size_t hSize = (hotfix.size() * (4 + 4 + 4));
+
+    WorldPacket data(SMSG_HOTFIX_INFO, hSize);
+
+    for (uint32 i = 0; i < hotfix.size(); ++i)
+    {
+        data << uint32(hotfix[i].Timestamp);
+        data << uint32(hotfix[i].Entry);
+        data << uint32(hotfix[i].Type);
+    }
+
+    SendPacket(&data);
+}

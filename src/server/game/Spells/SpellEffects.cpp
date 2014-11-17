@@ -4652,14 +4652,7 @@ void Spell::EffectBind(SpellEffIndex effIndex)
     player->SetHomebind(homeLoc, areaId);
 
     // binding
-    WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
-    data << float(homeLoc.GetPositionX());
-    data << float(homeLoc.GetPositionY());
-    data << float(homeLoc.GetPositionZ());
-    data << uint32(homeLoc.GetMapId());
-    data << uint32(areaId);
-
-    player->SendDirectMessage(&data);
+    player->GetSession()->SendBindPointUpdate(homeLoc.GetPositionX(), homeLoc.GetPositionY(), homeLoc.GetPositionZ(), homeLoc.GetMapId(), areaId, true);
 
     TC_LOG_DEBUG("spells", "EffectBind: New homebind X: %f, Y: %f, Z: %f, MapId: %u, AreaId: %u",
         homeLoc.GetPositionX(), homeLoc.GetPositionY(), homeLoc.GetPositionZ(), homeLoc.GetMapId(), areaId);

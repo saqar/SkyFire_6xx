@@ -23435,14 +23435,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // guild bank list wtf?
 
     // Homebind
-    WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
-    data << float(m_homebindX);
-    data << float(m_homebindZ);
-    data << float(m_homebindY);
-    data << uint32(m_homebindMapId);
-    data << uint32(m_homebindAreaId);
-
-    GetSession()->SendPacket(&data);
+    GetSession()->SendBindPointUpdate(m_homebindX, m_homebindY, m_homebindZ, m_homebindMapId, m_homebindAreaId);
 
     // SMSG_SET_PROFICIENCY
     // SMSG_SET_PCT_SPELL_MODIFIER
@@ -23451,12 +23444,11 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendTalentsInfoData();
 
-    // SMSG_WORLD_SERVER_INFO
     GetSession()->SendServerWorldInfo();
 
     SendInitialSpells();
 
-    data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
+    WorldPacket data(SMSG_SEND_UNLEARN_SPELLS, 4 + 4);
     data << uint32(0); // Count
     data << uint32(0); // SpellID
     GetSession()->SendPacket(&data);
@@ -23467,19 +23459,11 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendEquipmentSetList();
 
-    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 20);
-    data.AppendPackedTime(sWorld->GetGameTime());
-    data.AppendPackedTime(sWorld->GetGameTime());
-    data << float(0.01666667f);
-    data << uint32(0);
-    data << uint32(0);                    // game speed
-    GetSession()->SendPacket(&data);
+    GetSession()->ClientSetTimeSpeed();
 
     GetReputationMgr().SendForceReactions();                // SMSG_SET_FORCED_REACTIONS
 
-    // SMSG_TALENTS_INFO x 2 for pet (unspent points and talents in separate packets...)
     // SMSG_PET_GUIDS
-    // SMSG_UPDATE_WORLD_STATE
     // SMSG_POWER_UPDATE
 
     SendCurrencies();

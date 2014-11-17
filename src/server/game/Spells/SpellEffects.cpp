@@ -4664,9 +4664,10 @@ void Spell::EffectBind(SpellEffIndex effIndex)
     ObjectGuid guid = m_caster->GetGUID();
 
     // zone update
-    data.Initialize(SMSG_PLAYERBOUND, 16 + 4);
+    WorldPacket data(SMSG_PLAYERBOUND, 16 + 4);
+
     data << guid;
-    data << uint32(areaId);
+    data << areaId;
 
     player->SendDirectMessage(&data);
 }

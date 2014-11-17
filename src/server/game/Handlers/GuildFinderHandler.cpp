@@ -104,55 +104,24 @@ void WorldSession::HandleGuildFinderBrowse(WorldPacket& recvPacket)
 
         ObjectGuid guildGUID = ObjectGuid(guild->GetGUID());
 
-        data.WriteBit(guildGUID[7]);
-        data.WriteBit(guildGUID[5]);
+        data << guildGUID;
         data.WriteBits(guild->GetName().size(), 8);
-        data.WriteBit(guildGUID[0]);
         data.WriteBits(guildSettings.GetComment().size(), 11);
-        data.WriteBit(guildGUID[4]);
-        data.WriteBit(guildGUID[1]);
-        data.WriteBit(guildGUID[2]);
-        data.WriteBit(guildGUID[6]);
-        data.WriteBit(guildGUID[3]);
-
         bufferData << uint32(guild->GetEmblemInfo().GetColor());
         bufferData << uint32(guild->GetEmblemInfo().GetBorderStyle()); // Guessed
         bufferData << uint32(guild->GetEmblemInfo().GetStyle());
-
         bufferData.WriteString(guildSettings.GetComment());
-
         bufferData << uint8(0); // Unk
-
-        bufferData.WriteByteSeq(guildGUID[5]);
-
         bufferData << uint32(guildSettings.GetInterests());
-
-        bufferData.WriteByteSeq(guildGUID[6]);
-        bufferData.WriteByteSeq(guildGUID[4]);
-
         bufferData << uint32(guild->GetLevel());
-
         bufferData.WriteString(guild->GetName());
-
         bufferData << uint32(guild->GetAchievementMgr().GetAchievementPoints());
-
-        bufferData.WriteByteSeq(guildGUID[7]);
-
         bufferData << uint8(sGuildFinderMgr->HasRequest(player->GetGUIDLow(), guild->GetGUID())); // Request pending
-
-        bufferData.WriteByteSeq(guildGUID[2]);
-        bufferData.WriteByteSeq(guildGUID[0]);
-
         bufferData << uint32(guildSettings.GetAvailability());
-
-        bufferData.WriteByteSeq(guildGUID[1]);
-
         bufferData << uint32(guild->GetEmblemInfo().GetBackgroundColor());
         bufferData << uint32(0); // Unk Int 2 (+ 128) // Always 0 or 1
         bufferData << uint32(guild->GetEmblemInfo().GetBorderColor());
         bufferData << uint32(guildSettings.GetClassRoles());
-
-        bufferData.WriteByteSeq(guildGUID[3]);
         bufferData << uint32(guild->GetMembersCount());
     }
 
@@ -196,35 +165,15 @@ void WorldSession::HandleGuildFinderGetApplications(WorldPacket& /*recvPacket*/)
 
             ObjectGuid guildGuid = ObjectGuid(guild->GetGUID());
 
-            data.WriteBit(guildGuid[1]);
-            data.WriteBit(guildGuid[0]);
-            data.WriteBit(guildGuid[5]);
+            data << guildGuid;
             data.WriteBits(request.GetComment().size(), 11);
-            data.WriteBit(guildGuid[3]);
-            data.WriteBit(guildGuid[7]);
-            data.WriteBit(guildGuid[4]);
-            data.WriteBit(guildGuid[6]);
-            data.WriteBit(guildGuid[2]);
             data.WriteBits(guild->GetName().size(), 8);
 
-            bufferData.WriteByteSeq(guildGuid[2]);
             bufferData.WriteString(request.GetComment());
-            bufferData.WriteByteSeq(guildGuid[5]);
             bufferData.WriteString(guild->GetName());
-
             bufferData << uint32(guildSettings.GetAvailability());
             bufferData << uint32(request.GetExpiryTime() - time(NULL)); // Time left to application expiry (seconds)
-
-            bufferData.WriteByteSeq(guildGuid[0]);
-            bufferData.WriteByteSeq(guildGuid[6]);
-            bufferData.WriteByteSeq(guildGuid[3]);
-            bufferData.WriteByteSeq(guildGuid[7]);
-
             bufferData << uint32(guildSettings.GetClassRoles());
-
-            bufferData.WriteByteSeq(guildGuid[4]);
-            bufferData.WriteByteSeq(guildGuid[1]);
-
             bufferData << uint32(time(NULL) - request.GetSubmitTime()); // Time since application (seconds)
             bufferData << uint32(guildSettings.GetInterests());
         }
@@ -262,42 +211,18 @@ void WorldSession::HandleGuildFinderGetRecruits(WorldPacket& recvPacket)
         ObjectGuid playerGuid(MAKE_NEW_GUID(request.GetPlayerGUID(), 0, HIGHGUID_PLAYER));
 
         data.WriteBits(request.GetComment().size(), 11);
-        data.WriteBit(playerGuid[2]);
-        data.WriteBit(playerGuid[4]);
-        data.WriteBit(playerGuid[3]);
-        data.WriteBit(playerGuid[7]);
-        data.WriteBit(playerGuid[0]);
+        data << playerGuid;
         data.WriteBits(request.GetName().size(), 7);
-        data.WriteBit(playerGuid[5]);
-        data.WriteBit(playerGuid[1]);
-        data.WriteBit(playerGuid[6]);
-
-        dataBuffer.WriteByteSeq(playerGuid[4]);
-
         dataBuffer << int32(time(NULL) <= request.GetExpiryTime());
-
-        dataBuffer.WriteByteSeq(playerGuid[3]);
-        dataBuffer.WriteByteSeq(playerGuid[0]);
-        dataBuffer.WriteByteSeq(playerGuid[1]);
-
         dataBuffer << int32(request.GetLevel());
-
-        dataBuffer.WriteByteSeq(playerGuid[6]);
-        dataBuffer.WriteByteSeq(playerGuid[7]);
-        dataBuffer.WriteByteSeq(playerGuid[2]);
-
         dataBuffer << int32(time(NULL) - request.GetSubmitTime()); // Time in seconds since application submitted.
         dataBuffer << int32(request.GetAvailability());
         dataBuffer << int32(request.GetClassRoles());
         dataBuffer << int32(request.GetInterests());
         dataBuffer << int32(request.GetExpiryTime() - time(NULL)); // TIme in seconds until application expires.
-
         dataBuffer.WriteString(request.GetName());
         dataBuffer.WriteString(request.GetComment());
-
         dataBuffer << int32(request.GetClass());
-
-        dataBuffer.WriteByteSeq(playerGuid[5]);
     }
 
     data.FlushBits();

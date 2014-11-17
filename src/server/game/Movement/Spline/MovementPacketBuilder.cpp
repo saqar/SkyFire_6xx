@@ -250,8 +250,6 @@ namespace Movement
             }
 
         }
-
-
     }
 
     void PacketBuilder::WriteFacingTargetPart(MoveSpline const& moveSpline, ByteBuffer& data)
@@ -259,23 +257,7 @@ namespace Movement
         if (GetMonsterMoveType(moveSpline) == MonsterMoveFacingTarget && !moveSpline.Finalized())
         {
             ObjectGuid facingGuid = moveSpline.facing.target;
-            data.WriteBit(facingGuid[4]);
-            data.WriteBit(facingGuid[7]);
-            data.WriteBit(facingGuid[0]);
-            data.WriteBit(facingGuid[5]);
-            data.WriteBit(facingGuid[1]);
-            data.WriteBit(facingGuid[2]);
-            data.WriteBit(facingGuid[3]);
-            data.WriteBit(facingGuid[6]);
-
-            data.WriteByteSeq(facingGuid[4]);
-            data.WriteByteSeq(facingGuid[2]);
-            data.WriteByteSeq(facingGuid[0]);
-            data.WriteByteSeq(facingGuid[5]);
-            data.WriteByteSeq(facingGuid[6]);
-            data.WriteByteSeq(facingGuid[3]);
-            data.WriteByteSeq(facingGuid[1]);
-            data.WriteByteSeq(facingGuid[7]);
+            data << facingGuid;
         }
     }
 }

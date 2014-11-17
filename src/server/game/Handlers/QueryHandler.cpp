@@ -334,29 +334,13 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
     ObjectGuid corpseGuid = corpse->GetGUID();
 
     WorldPacket data(SMSG_CORPSE_QUERY, 9 + 1 + (4 * 5));
-    data.WriteBit(corpseGuid[0]);
-    data.WriteBit(corpseGuid[3]);
-    data.WriteBit(corpseGuid[2]);
+    data << corpseGuid;
     data.WriteBit(1); // Corpse Found
-    data.WriteBit(corpseGuid[5]);
-    data.WriteBit(corpseGuid[4]);
-    data.WriteBit(corpseGuid[1]);
-    data.WriteBit(corpseGuid[7]);
-    data.WriteBit(corpseGuid[6]);
-
-    data.WriteByteSeq(corpseGuid[5]);
-    data << float(z);
-    data.WriteByteSeq(corpseGuid[1]);
-    data << uint32(corpseMapId);
-    data.WriteByteSeq(corpseGuid[6]);
-    data.WriteByteSeq(corpseGuid[4]);
-    data << float(x);
-    data.WriteByteSeq(corpseGuid[3]);
-    data.WriteByteSeq(corpseGuid[7]);
-    data.WriteByteSeq(corpseGuid[2]);
-    data.WriteByteSeq(corpseGuid[0]);
-    data << int32(mapId);
-    data << float(y);
+    data << z;
+    data << corpseMapId;
+    data << x;
+    data << mapId;
+    data << y;
     SendPacket(&data);
 }
 

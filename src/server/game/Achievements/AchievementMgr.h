@@ -250,7 +250,7 @@ class AchievementMgr
         void CompletedAchievement(AchievementEntry const* entry, Player* referencePlayer);
         void CheckAllAchievementCriteria(Player* referencePlayer);
         void SendAllAchievementData(Player* receiver) const;
-        void SendAchievementInfo(Player* receiver, uint32 achievementId = 0) const;
+        void SendAchievementInfo(Player* receiver, uint32 achievementId = 0);
         bool HasAchieved(uint32 achievementId) const;
         T* GetOwner() const { return _owner; }
 
@@ -262,7 +262,8 @@ class AchievementMgr
     private:
         void SendAchievementEarned(AchievementEntry const* achievement) const;
         void SendCriteriaUpdate(CriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted) const;
-        CriteriaProgress* GetCriteriaProgress(CriteriaEntry const* entry);
+        CriteriaProgress* GetCriteriaProgress(uint32 criteriaID);
+        CriteriaProgress* GetCriteriaProgress(CriteriaEntry const* entry) { return GetCriteriaProgress(entry->ID); }
         void SetCriteriaProgress(CriteriaEntry const* entry, uint64 changeValue, Player* referencePlayer, ProgressType ptype = PROGRESS_SET);
         void RemoveCriteriaProgress(CriteriaEntry const* entry);
         void CompletedCriteriaFor(AchievementEntry const* achievement, Player* referencePlayer);

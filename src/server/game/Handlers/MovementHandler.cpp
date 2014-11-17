@@ -489,15 +489,6 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
     }
 }
 
-void WorldSession::HandleMoveNotActiveMover(WorldPacket &recvData)
-{
-    TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
-
-    MovementInfo mi;
-    GetPlayer()->ReadMovementInfo(recvData, &mi);
-    _player->m_movementInfo = mi;
-}
-
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvData*/)
 {
     ObjectGuid guid = GetPlayer()->GetGUID128();

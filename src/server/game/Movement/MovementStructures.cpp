@@ -286,7 +286,6 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         //case CMSG_MOVE_GRAVITY_ENABLE_ACK:
         //case CMSG_MOVE_HOVER_ACK:
         //case CMSG_MOVE_KNOCK_BACK_ACK:
-        //case CMSG_MOVE_NOT_ACTIVE_MOVER:
         //case CMSG_MOVE_SET_CAN_FLY_ACK:
         //case CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK:
         //case CMSG_MOVE_SET_COLLISION_HEIGHT_ACK:

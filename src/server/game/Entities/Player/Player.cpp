@@ -3122,22 +3122,21 @@ void Player::GiveLevel(uint8 level)
     sObjectMgr->GetPlayerClassLevelInfo(getClass(), level, basehp, basemana);
 
     // send levelup info to client
-    WorldPacket data(SMSG_LEVELUP_INFO, ((MAX_POWERS_PER_CLASS * 4) + 4 + 4 + (MAX_STATS * 4) + 4));
+    WorldPacket data(SMSG_LEVELUP_INFO, (4 + 4 +(MAX_POWERS_PER_CLASS * 4) + (MAX_STATS * 4) + 4));
 
+    data << uint32(level);
     data << uint32(int32(basehp) - int32(GetCreateHealth()));
 
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)       // Stats loop (0-4)
         data << uint32(int32(info.stats[i]) - GetCreateStat(Stats(i)));
-
-    bool talent = false;
-
-    data << bool(talent);
-    data << uint32(level);
+    
     data << uint32(int32(basemana) - int32(GetCreateMana()));
     data << uint32(0); //unk
     data << uint32(0); //unk
     data << uint32(0); //unk
     data << uint32(0); //unk
+
+    data << uint32(0); //Cp
 
     GetSession()->SendPacket(&data);
 

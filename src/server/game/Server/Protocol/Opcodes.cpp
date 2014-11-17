@@ -924,7 +924,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_INVENTORY_CHANGE_FAILURE,                        0x0112, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_LEARNED_DANCE_MOVES,                             0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_LEARNED_SPELL,                                   0x08AB, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_LEVELUP_INFO,                                    0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_LEVELUP_INFO,                                    0x1BE4, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_LIST_INVENTORY,                                  0x0940, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_LOAD_CUF_PROFILES,                               0x1530, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_LOGIN_SETTIMESPEED,                              0x09AA, STATUS_NEVER    ); // 6.0.3 19116

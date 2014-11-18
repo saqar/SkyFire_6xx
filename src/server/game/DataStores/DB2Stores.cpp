@@ -39,7 +39,7 @@ DB2Storage<ItemToBattlePetEntry> sItemToBattlePetStore(ItemToBattlePetfmt);
 BattlePetBreedSet sBattlePetBreedSet;
 BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
-DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt/*, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply*/);
+DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply);
 DB2Storage<GarrAbilityEntry> sGarrAbilityStore(GarrAbilityEntryfmt);
 DB2Storage<GarrAbilityCategoryEntry> sGarrAbilityCategoryStore(GarrAbilityCategoryEntryfmt);
 DB2Storage<GarrBuildingEntry> sGarrBuildingStore(GarrBuildingEntryfmt);

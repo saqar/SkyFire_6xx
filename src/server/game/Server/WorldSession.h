@@ -980,8 +980,6 @@ class WorldSession
         void HandleSortBagsOpcode(WorldPacket& recvPacket);
         void HandleSortBankBagsOpcode(WorldPacket& recvPacket);
 
-        void SendBroadcastText(uint32 entry);
-
         int32 HandleEnableNagleAlgorithm();
 
         // Compact Unit Frames (4.x)

@@ -20,11 +20,45 @@
 #ifndef SHIPMENT_MGR_H
 #define SHIPMENT_MGR_H
 
+#define MAX_WORK_ORDERS 14
+
+
+struct Shipment
+{
+    Shipment(uint32 _shipmentRecId, uint64 _shipmentEntry, uint32 _creationTime, uint32 _shipmentDuration, uint32 _shipmentId, 
+        uint32 _plotInstanceId, uint32 _maxShipments, bool _success, uint32 _result, uint32 _container)
+        : ShipmentRecID(_shipmentRecId), ShipmentEntry(_shipmentEntry), CreationTime(_creationTime), ShipmentDuration(_shipmentDuration),
+        ShipmentID(_shipmentId), PlotInstanceID(_plotInstanceId), MaxShipments(_maxShipments), Success(_success), Result(_result), Container(_container) { }
+
+public:
+    uint32 ShipmentRecID;
+    uint64 ShipmentEntry;
+    uint32 CreationTime;
+    uint32 ShipmentDuration;
+    uint32 ShipmentID;
+    uint32 PlotInstanceID;
+    uint32 MaxShipments;
+    bool Success;
+    uint32 Result;
+    uint32 Container;
+};
+
+typedef std::set<Shipment*> ShipmentSet;
+
 class ShipmentMgr
 {
 public:
     ShipmentMgr();
     ~ShipmentMgr();
+
+    void LoadFromDb();
+
+    void SendShipmentOfTypeResponse(WorldSession* session);
+
+private:
+    ShipmentSet m_shipmentStore;
+
+    void LoadShipmentsFromDb();
 };
 
 #endif

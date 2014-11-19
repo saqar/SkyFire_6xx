@@ -50,17 +50,6 @@ void WorldSession::HandleGetShipmentOfType(WorldPacket& recvData)
     uint32 container = 0;
 
     recvData >> container;
-
-    WorldPacket data(SMSG_GET_SHIPMENTS_OF_TYPE_RESPONSE);
-    
-    data << uint32(0);
-
-    data << uint64(0);                      // ShipmentID
-    data << uint32(0);                      // ShipmentRecID
-    data << uint32(0);                      // CreationTime
-    data << uint32(0);                      // ShipmentDuration
-
-    SendPacket(&data);
 }
 
 void WorldSession::HandleCreateShipment(WorldPacket& recvData)

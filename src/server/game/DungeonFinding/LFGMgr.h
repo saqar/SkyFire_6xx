@@ -183,6 +183,11 @@ struct LfgQueueStatusData
         queueId(_queueId), dungeonId(_dungeonId), joinTime(_joinTime), waitTime(_waitTime), waitTimeAvg(_waitTimeAvg), waitTimeTank(_waitTimeTank),
         waitTimeHealer(_waitTimeHealer), waitTimeDps(_waitTimeDps), queuedTime(_queuedTime), tanks(_tanks), healers(_healers), dps(_dps), waitTimeRole(_waitTimeRole) { }
 
+    LfgQueueStatusData(uint8 _subType, uint8 _reason, uint8 _needs, uint32 _slots, uint32 _slotsCount, ObjectGuid _suspendedPlayers, uint32 _requestedRoles,
+        bool _IsParty, bool _NotifyUi, bool _Joined, bool _LfgJoined, bool _Queued, std::string _comment, uint32 _suspednedPlayersCount)
+        : subType(_subType), reason(_reason), needs(_needs), slots(_slots), slotsCount(_slotsCount), suspendedPlayers(_suspendedPlayers), requestedRoles(_requestedRoles),
+        IsParty(_IsParty), Notify(_NotifyUi), Joined(_Joined), LfgJoined(_LfgJoined), Queued(_Queued), Comment(_comment), SuspendedPlayersCount(_suspednedPlayersCount) { }
+
     uint8 queueId;
     uint32 dungeonId;
     time_t joinTime;
@@ -196,7 +201,24 @@ struct LfgQueueStatusData
     uint8 healers;
     uint8 dps;
 
+    uint8 subType;
+    uint8 reason;
+    uint8 needs;
+    uint32 slots;
+    uint32 slotsCount;
+    ObjectGuid suspendedPlayers;
+    uint32 requestedRoles;
+    bool IsParty;
+    bool Notify;
+    bool Joined;
+    bool LfgJoined;
+    bool Queued;
+    std::string Comment;
     int32 waitTimeRole;
+    uint32 SuspendedPlayersCount;
+
+#define QUEUE_NEEDS 3
+#define QUEUE_SLOTS 5
 };
 
 struct LfgPlayerRewardData

@@ -603,7 +603,7 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
     uint32 size = 0;
     ObjectGuid guid = GetPlayer()->GetGUID();
     uint32 queueId = sLFGMgr->GetQueueId(_player->GetGUID());
-    for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
+    for (auto it = joinData.lockmap.begin(); it != joinData.lockmap.end(); it++)
         size += 8 + 4 + uint32(it->second.size()) * (4 + 4 + 4 + 4);
 
     TC_LOG_DEBUG("lfg", "SMSG_LFG_JOIN_RESULT %s checkResult: %u checkValue: %u",
@@ -611,9 +611,10 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
 
     WorldPacket data(SMSG_LFG_JOIN_RESULT, 4 + 4 + size);
 	uint32 blacklistCount = 0;
+    uint32 slotsCount = 0;
 
 	// RideTicket
-	data << guid;
+	data << guid;                                       // RequesterGuid
 	data << uint32(0);									// ID
 	data << uint32(0);								    // Type
 	data << uint32(0);								    // Time
@@ -621,16 +622,11 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
 	data << uint8(joinData.result);						// Result
 	data << uint8(joinData.state);						// ResultDetail
 
-	//data << uint32(blacklistCount);						// BlacklistCount
-
-	for (uint32 i = 0; i < blacklistCount; i++)
+	for (auto i = 0; i < blacklistCount; i++)
 	{
-		uint32 slotsCount = 0;
-
 		data << guid;
-		data << slotsCount;
 
-		for (uint32 j = 0; j < slotsCount; i++)
+		for (auto j = 0; j < slotsCount; i++)
 		{
 			data << uint32(0);							// Slot
 			data << uint32(0);							// Reason
@@ -652,26 +648,38 @@ void WorldSession::SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData)
         queueData.queuedTime, queueData.tanks, queueData.healers, queueData.dps);
 
     ObjectGuid guid = _player->GetGUID128();
-    WorldPacket data(SMSG_LFG_QUEUE_STATUS);
+    WorldPacket data(SMSG_LFG_QUEUE_STATUS, 500);                   // We guess size
 
     // CliTicket
     data << guid;
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);
+    
+    data << uint32(queueData.subType);
+    data << uint32(queueData.reason);
 
-    // QueueStatus
-    data << uint32(queueData.queuedTime);       // QueuedTime
-    data << uint32(queueData.waitTimeAvg);      // AvgWaitTime
-    data << uint32(0);                          // Slot
+    for (auto i = 0; i < QUEUE_NEEDS; i++)
+        data << uint32(queueData.needs);
 
-    for (int i = 0; i < 3; i++)                 // For loop is for the roles, Healer, DPS, Tank.
-    {
-        data << uint32(0);                      // LastNeeded
-        data << uint8(queueData.waitTimeRole);  // AvgWaitTimeByRole
-    }
+    data << uint32(queueData.slotsCount);
+    data << uint32(queueData.requestedRoles);
+    data << uint32(queueData.SuspendedPlayersCount);
 
-    data << uint32(0);                          // AvgWaitTimeMe
+    for (auto i = 0; i < queueData.slotsCount; i++)
+        data << uint32(queueData.slots);
+
+    for (auto i = 0; i < queueData.SuspendedPlayersCount; i++)
+        data << ObjectGuid(queueData.suspendedPlayers);
+
+    data.WriteBit(queueData.IsParty);
+    data.WriteBit(queueData.Notify);
+    data.WriteBit(queueData.Joined);
+    data.WriteBit(queueData.LfgJoined);
+    data.WriteBit(queueData.Queued);
+
+    data.WriteBits(0, 8);
+    data.WriteString(queueData.Comment);
 
     SendPacket(&data);
 }

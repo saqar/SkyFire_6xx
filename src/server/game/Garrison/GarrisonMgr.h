@@ -172,7 +172,6 @@ public:
 	uint32 GoldCost;
 };
 
-
 typedef std::set <Abilities*> AbilitiesSet;
 typedef std::set <Buildings*> GarrBuildingSet;
 typedef std::set <Garrisons*> GarrisonsSet;
@@ -207,6 +206,7 @@ public:
 	// Garrison Opcodes
 	void SendGarrisonActivateBuilding(WorldSession* session);
 	void SendGarrisonArchitect(WorldSession* session);
+    void SendGarrisonCompleteMission(WorldSession* session);
 	void SendGarrisonGetInfo(WorldSession* session);
 	void SendGarrisonPlotPlacedResult(WorldSession* session);
 

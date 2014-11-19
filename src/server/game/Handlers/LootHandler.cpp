@@ -36,15 +36,15 @@
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_AUTOSTORE_LOOT_ITEM");
+
     Player* player = GetPlayer();
-    Loot* loot = NULL;
     int32 lootCount;
 
-    recvData.read_skip<uint16>();
     recvData >> lootCount;
 
     for (int i = 0; i < lootCount; i++)
     {
+        Loot* loot = nullptr;
         ObjectGuid guid;
         uint8 lootSlot;
 

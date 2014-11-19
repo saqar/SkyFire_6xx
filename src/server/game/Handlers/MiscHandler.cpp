@@ -2002,13 +2002,6 @@ void WorldSession::HandleDBQueryBulk(WorldPacket& recvPacket)
         recvPacket >> guid;
         recvPacket >> recordId;
 
-        // temp: this should be moved once broadcast text is properly implemented
-        if (tableHash == DB2_REPLY_BROADCAST)
-        {
-            SendBroadcastText(recordId);
-            continue;
-        }
-
         if (!store->HasRecord(recordId))
             continue;
 
@@ -2026,48 +2019,6 @@ void WorldSession::HandleDBQueryBulk(WorldPacket& recvPacket)
 
         TC_LOG_DEBUG("network", "SMSG_DB_REPLY: Sent db entry: %u type: %u", recordId, tableHash);
     }
-}
-
-void WorldSession::SendBroadcastText(uint32 recordId)
-{
-    /*
-     *  This is a hack fix! Still uses Gossip Id's instead of Broadcast Id's.
-     *  Major database changed required at some point.
-     */
-
-    ByteBuffer buffer;
-    std::string defaultText = "Greetings, $n";
-
-    GossipText const* pGossip = sObjectMgr->GetGossipText(recordId);
-
-    uint16 nrmTextLength = pGossip ? pGossip->Options[0].Text_0.length() : defaultText.length();
-    uint16 altTextLength = pGossip ? pGossip->Options[0].Text_1.length() : defaultText.length();
-
-    buffer << uint32(recordId);
-    buffer << uint32(pGossip ? pGossip->Options[0].Language : 0);
-    buffer << uint16(nrmTextLength);
-
-    if (nrmTextLength)
-        buffer << std::string(pGossip ? pGossip->Options[0].Text_0 : defaultText);
-
-    buffer << uint16(altTextLength);
-
-    if (altTextLength)
-        buffer << std::string(pGossip ? pGossip->Options[0].Text_1 : defaultText);
-
-    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
-        buffer << uint32(0);
-
-    buffer << uint32(1);
-
-    WorldPacket data(SMSG_DB_REPLY, 4 + 4 + 4 + 4 + buffer.size());
-    data << uint32(DB2_REPLY_BROADCAST);
-    data << uint32(recordId);
-    data << uint32(time(NULL));
-    data << uint32(buffer.size());
-    data.append(buffer);
-
-    SendPacket(&data);
 }
 
 void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recvPacket)

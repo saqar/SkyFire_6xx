@@ -354,7 +354,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
 
     TC_LOG_DEBUG("network", "WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textId);
 
-    GossipText const* pGossip = sObjectMgr->GetGossipText(guid);
+    GossipText const* pGossip = sObjectMgr->GetGossipText(textId);
 
     WorldPacket data(SMSG_NPC_TEXT_UPDATE, 4 + 1 + 4 + 64);
     data << textId;
@@ -367,10 +367,8 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
         data << float(pGossip ? pGossip->Options[i].Probability : 0);
 
-    data << textId;                                     // should be a broadcast id
-
-    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS - 1; i++)
-        data << uint32(0);
+    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
+        data << uint32(pGossip ? pGossip->Options[i].BroadcastTextID : 0);
 
     SendPacket(&data);
 

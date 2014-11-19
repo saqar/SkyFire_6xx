@@ -21,4 +21,25 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-ShipmentMgr::ShipmentMgr() { };
+ShipmentMgr::ShipmentMgr() {
+
+    for (auto itr : m_shipmentStore)
+        delete itr;
+
+    m_shipmentStore.clear();
+};
+
+void ShipmentMgr::SendShipmentOfTypeResponse(WorldSession* session)
+{
+    WorldPacket data(SMSG_GET_SHIPMENTS_OF_TYPE_RESPONSE);
+    Shipment const* shipment = 0;
+
+    data << uint32(shipment->Container);                      // Unknown
+
+    data << uint64(shipment->ShipmentEntry);
+    data << uint32(shipment->ShipmentRecID);
+    data << uint32(shipment->CreationTime);
+    data << uint32(shipment->ShipmentDuration);
+
+    session->SendPacket(&data);
+}

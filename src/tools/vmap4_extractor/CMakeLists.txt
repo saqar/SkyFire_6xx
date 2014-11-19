@@ -22,18 +22,18 @@ if( NOT MSVC )
 endif()
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/dep/StormLib/src
+  ${CMAKE_SOURCE_DIR}/dep/CascLib/src
 )
 
 add_executable(vmap4extractor ${sources})
 
 target_link_libraries(vmap4extractor
+  casc
   ${BZIP2_LIBRARIES}
   ${ZLIB_LIBRARIES}
-  storm
 )
 
-add_dependencies(vmap4extractor storm)
+add_dependencies(vmap4extractor casc)
 
 if( UNIX )
   install(TARGETS vmap4extractor DESTINATION bin)

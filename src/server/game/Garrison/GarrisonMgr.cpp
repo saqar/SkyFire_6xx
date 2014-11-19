@@ -20,6 +20,8 @@
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "DB2Enums.h"
+#include "DB2Structure.h"
+#include "DB2Stores.h"
 #include "Field.h"
 #include "GarrisonMgr.h"
 #include "ObjectMgr.h"
@@ -180,6 +182,53 @@ void GarrisonMgr::LoadBuildingsFromDb()
     TC_LOG_INFO("server.loading", ">> Loaded %u Garrison Buildings store entries in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
+void GarrisonMgr::LoadMissionsFromDb()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT ID, Level, ItemLevel, Type, Followers, field5, Time, field7, field8,"
+        " Category, Name, Description, Location, MissionID, field14, Resources, BonusReward, Experience, Percentage FROM garrison_mission");
+    if (!result)
+    {
+        TC_LOG_INFO("sql.sql", ">> Loaded 0 Garrison Missions store entries, table `garrison_mission` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+    int p;
+    do
+    {
+        p = 0;
+        Field* fields = result->Fetch();
+
+        uint32 ID                   = fields[p++].GetUInt32();
+        uint32 Level                = fields[p++].GetUInt32();
+        uint32 ItemLevel            = fields[p++].GetUInt32();
+        uint32 Type                 = fields[p++].GetUInt32();
+        uint32 Followers            = fields[p++].GetUInt32();
+        uint32 field5               = fields[p++].GetUInt32();
+        uint32 Time                 = fields[p++].GetUInt32();
+        uint32 _followers           = fields[p++].GetUInt32();
+        uint32 field7               = fields[p++].GetUInt32();
+        uint32 field8               = fields[p++].GetUInt32();
+        uint32 Categeory            = fields[p++].GetUInt32();
+        std::string Name            = fields[p++].GetString();
+        std::string Description     = fields[p++].GetString();
+        std::string Location        = fields[p++].GetString();
+        uint32 MissionId            = fields[p++].GetUInt32();
+        uint32 field14              = fields[p++].GetUInt32();
+        uint32 Resources            = fields[p++].GetUInt32();
+        uint32 BonusReward          = fields[p++].GetUInt32();
+        uint32 Experience           = fields[p++].GetUInt32();
+        uint32 Percentage           = fields[p++].GetUInt32();
+
+        count++;
+
+    } while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u Garrison Missions store entries in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
 bool GarrisonMgr::HasAbilityId(uint32 id)
 {
     for (auto citr : m_AbilitiesStore)
@@ -216,6 +265,20 @@ bool GarrisonMgr::HasFollowerId(uint32 id)
     return false;
 }
 
+void ReadGarrisonMission(WorldPacket& data, Missions const* mission)
+{
+    data << uint64(mission->missionEntry);
+    data << uint32(mission->MissionRecID);
+
+    data << uint32(mission->OfferTime);
+    data << uint32(mission->OfferDuration);
+    data << uint32(mission->StartTime);
+    data << uint32(mission->TravelDuration);
+    data << uint32(mission->MissionDuration);
+
+    data << uint32(mission->MissionState);
+}
+
 void GarrisonMgr::SendGarrisonGetInfo(WorldSession* session)
 {
     TC_LOG_DEBUG("network", "World: Sent SMSG_GET_GARR_INFO_RESULT");
@@ -227,8 +290,8 @@ void GarrisonMgr::SendGarrisonGetInfo(WorldSession* session)
         const GarrisonInfo* info = itr;
 
         data << uint32(info->GarrisonBuildingInfoCount); // 21
-        data << uint32(0); // 22
-        data << uint32(0); // 8
+        data << uint32(0);                               // 22
+        data << uint32(0);                               // 8
 
         data << uint32(info->GarrisonBuildingInfoCount);
         data << uint32(info->GarrisonPlotInfoCount);
@@ -330,7 +393,7 @@ void GarrisonMgr::SendGarrisonPlotPlacedResult(WorldSession* session)
 {
     TC_LOG_DEBUG("network", "World: Sending SMSG_GARR_PLOT_PLACED");
     WorldPacket data(SMSG_GARR_PLOT_PLACED);
-    PlotInfo* plot;
+    PlotInfo const* plot = 0;
 
     data << uint32(plot->GarrPlotInstanceID);
     data << float(plot->PosX);
@@ -344,9 +407,32 @@ void GarrisonMgr::SendGarrisonPlotPlacedResult(WorldSession* session)
 void GarrisonMgr::SendGarrisonActivateBuilding(WorldSession* session)
 {
     WorldPacket data(SMSG_GARR_BUILDING_ACTIVATED, 4);
-    GarrisonBuildingInfo* building;
+    GarrisonBuildingInfo const* building = 0;
 
     data << uint32(building->GarrBuildingID);
+
+    session->SendPacket(&data);
+}
+
+void GarrisonMgr::SendGarrisonCompleteMission(WorldSession* session)
+{
+    WorldPacket data(SMSG_GARR_COMPLETE_MISSION_RESULT, 200);                    // We guess size
+    Missions const* mission = 0;
+
+    // Should be ReadGarrisonMission();
+    data << uint64(mission->missionEntry);
+    data << uint32(mission->MissionRecID);
+
+    data << uint32(mission->OfferTime);
+    data << uint32(mission->OfferDuration);
+    data << uint32(mission->StartTime);
+    data << uint32(mission->TravelDuration);
+    data << uint32(mission->MissionDuration);
+
+    data << uint32(mission->MissionState);
+
+    data << uint32(mission->MissionRecID);
+    data << uint32(0);                          // Result
 
     session->SendPacket(&data);
 }

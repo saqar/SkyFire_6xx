@@ -196,9 +196,9 @@ void DB2Utilities::WriteBroadcastTextDbReply(DB2Storage<BroadcastTextEntry> cons
     buffer << uint16(femaleTextLength);
     if (femaleTextLength > 0)
         buffer << femaleText;
-    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
+    for (int i = 0; i < MAX_GOSSIP_TEXT_EMOTES; i++)
         buffer << uint32(broadcastText->Emotes[i]._Emote);
-    for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
+    for (int i = 0; i < MAX_GOSSIP_TEXT_EMOTES; i++)
         buffer << uint32(broadcastText->Emotes[i]._Delay);
     buffer << uint32(broadcastText->SoundId);
     buffer << uint32(broadcastText->EndEmoteId);

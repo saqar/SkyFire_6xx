@@ -155,7 +155,7 @@ typedef std::set<LfgPlayerDungeonInfo> LfgPlayerDungeonInfoSet;
 // Data needed by SMSG_LFG_JOIN_RESULT
 struct LfgJoinResultData
 {
-    LfgJoinResultData(LfgJoinResult _result = LFG_JOIN_OK, LfgRoleCheckState _state = LFG_ROLECHECK_DEFAULT, uint32 _slot, uint32 _reason, uint32 _sub1, uint32 _sub2)
+    LfgJoinResultData(LfgJoinResult _result, LfgRoleCheckState _state, uint32 _slot, uint32 _reason, uint32 _sub1, uint32 _sub2)
         : result(_result), state(_state), Slot(_slot), Reason(_reason), SubReasonOne(_sub1), SubReasonTwo(_sub2) { }
     LfgJoinResult result;
     LfgRoleCheckState state;

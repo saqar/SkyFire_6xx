@@ -136,6 +136,8 @@ struct LfgRoleCheck;
 struct LfgProposal;
 struct LfgProposalPlayer;
 struct LfgPlayerBoot;
+struct LfgPlayerInfo;
+struct LfgPlayerDungeonInfo;
 
 typedef std::map<uint8, LFGQueue> LfgQueueContainer;
 typedef std::multimap<uint32, LfgReward const*> LfgRewardContainer;
@@ -149,8 +151,8 @@ typedef std::map<uint64, LfgPlayerBoot> LfgPlayerBootContainer;
 typedef std::map<uint64, LfgGroupData> LfgGroupDataContainer;
 typedef std::map<uint64, LfgPlayerData> LfgPlayerDataContainer;
 typedef UNORDERED_MAP<uint32, LFGDungeonData> LFGDungeonContainer;
-typedef std::set<LfgPlayerInfo> LfgPlayerInfoSet;
-typedef std::set<LfgPlayerDungeonInfo> LfgPlayerDungeonInfoSet;
+typedef std::map<uint64, LfgPlayerInfo> LfgPlayerInfoSet;
+typedef std::map<uint64, LfgPlayerDungeonInfo> LfgPlayerDungeonInfoSet;
 
 // Data needed by SMSG_LFG_JOIN_RESULT
 struct LfgJoinResultData
@@ -382,7 +384,6 @@ public:
     uint32 RewardExperience;
 
     uint32 CurrencyID;
-    uint32 Quantity;
     uint32 ItemID;
     bool FirstReward;
     bool ShortageEligible;

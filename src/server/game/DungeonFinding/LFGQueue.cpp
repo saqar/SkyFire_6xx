@@ -111,17 +111,16 @@ void LFGQueue::RemoveFromQueue(uint64 guid)
     for (LfgQueueDataContainer::iterator itr = QueueDataStore.begin(); itr != QueueDataStore.end(); ++itr)
         if (itr->first != guid)
         {
-            if (std::string::npos != itr->second.bestCompatible.find(sguid))
-            {
-                itr->second.bestCompatible.clear();
-                FindBestCompatibleInQueue(itr);
-            }
+        if (std::string::npos != itr->second.bestCompatible.find(sguid))
+        {
+            itr->second.bestCompatible.clear();
+            FindBestCompatibleInQueue(itr);
         }
-        else
+        } else
             itDelete = itr;
 
-    if (itDelete != QueueDataStore.end())
-        QueueDataStore.erase(itDelete);
+        if (itDelete != QueueDataStore.end())
+            QueueDataStore.erase(itDelete);
 }
 
 void LFGQueue::AddToNewQueue(uint64 guid)
@@ -462,8 +461,7 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
             SetCompatibles(strGuids, LFG_INCOMPATIBLES_NO_DUNGEONS);
             return LFG_INCOMPATIBLES_NO_DUNGEONS;
         }
-    }
-    else
+    } else
     {
         uint64 gguid = *check.begin();
         const LfgQueueData &queue = QueueDataStore[gguid];
@@ -512,16 +510,15 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
             if (!leader || !proposal.leader || urand(0, 1))
                 proposal.leader = itRoles->first;
             leader = true;
-        }
-        else if (!leader && (!proposal.leader || urand(0, 1)))
+        } else if (!leader && (!proposal.leader || urand(0, 1)))
             proposal.leader = itRoles->first;
 
         // Assing player data and roles
         LfgProposalPlayer &data = proposal.players[itRoles->first];
-        data.role = itRoles->second;
+        data.Role = itRoles->second;
         data.group = proposalGroups.find(itRoles->first)->second;
         if (!proposal.isNew && data.group && data.group == proposal.group) // Player from existing group, autoaccept
-            data.accept = LFG_ANSWER_AGREE;
+            data.Accepted = LFG_ANSWER_AGREE;
     }
 
     // Mark proposal members as not queued (but not remove queue data)
@@ -614,8 +611,7 @@ std::string LFGQueue::DumpQueueInfo() const
             {
                 groups++;
                 playersInGroup += sLFGMgr->GetPlayerCount(guid);
-            }
-            else
+            } else
                 players++;
         }
     }
@@ -646,7 +642,7 @@ void LFGQueue::FindBestCompatibleInQueue(LfgQueueDataContainer::iterator itrQueu
         if (itr->second.compatibility == LFG_COMPATIBLES_WITH_LESS_PLAYERS &&
             std::string::npos != itr->first.find(sguid))
         {
-            UpdateBestCompatibleInQueue(itrQueue, itr->first, itr->second.roles);
+        UpdateBestCompatibleInQueue(itrQueue, itr->first, itr->second.roles);
         }
 }
 

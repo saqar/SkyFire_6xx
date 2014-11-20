@@ -349,7 +349,7 @@ void GarrisonMgr::SendGarrisonGetInfo(WorldSession* session)
                 data << uint32(info->AbilityIDCount);
                 data << uint32(follower->_Gender);
 
-                for (auto z = 0; z < info->AbilityIDCount; z++)
+                for (uint32 z = 0; z < info->AbilityIDCount; z++)
                     data << uint32(follower->AbilityID);
             }
         }
@@ -370,7 +370,7 @@ void GarrisonMgr::SendGarrisonGetInfo(WorldSession* session)
             }
         }
 
-        for (auto i = 0; i < info->ArchivedMissions; i++)
+        for (uint32 i = 0; i < info->ArchivedMissions; i++)
             data << uint32(info->ArchivedMissions);
     }
 

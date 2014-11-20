@@ -421,8 +421,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LFG_GET_SYSTEM_INFO,                                 0x030F, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLfgGetSystemInfo             ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_LFG_JOIN,                                            0x0925, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLfgJoinOpcode                ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_LFG_LEAVE,                                           0x01A2, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgLeaveOpcode               ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_LFG_LFR_JOIN,                                        0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_LFG_LFR_LEAVE,                                       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_GET_STATUS,                                 0x0B17, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_JOIN,                                       0x0B84, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_LFG_LIST_LEAVE,                                      0x0DA9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19116

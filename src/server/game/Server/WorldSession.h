@@ -841,8 +841,6 @@ class WorldSession
         void HandleLfgProposalResultOpcode(WorldPacket& recvData);
         void HandleLfgSetBootVoteOpcode(WorldPacket& recvData);
         void HandleLfgTeleportOpcode(WorldPacket& recvData);
-        void HandleLfrJoinOpcode(WorldPacket& recvData);
-        void HandleLfrLeaveOpcode(WorldPacket& recvData);
         void HandleLfgGetStatus(WorldPacket& recvData);
         void HandleDungeonFinderOpen(WorldPacket& data);
         void HandleLfgGetSystemInfo(WorldPacket& data);

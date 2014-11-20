@@ -23,8 +23,7 @@
 namespace lfg
 {
 
-LfgGroupData::LfgGroupData(): m_State(LFG_STATE_NONE), m_OldState(LFG_STATE_NONE),
-    m_Leader(0), m_Dungeon(0), m_KicksLeft(LFG_GROUP_MAX_KICKS)
+LfgGroupData::LfgGroupData(): m_State(LFG_STATE_NONE), m_OldState(LFG_STATE_NONE), m_Leader(0), m_Dungeon(0), m_KicksLeft(LFG_GROUP_MAX_KICKS)
 { }
 
 LfgGroupData::~LfgGroupData()

@@ -273,6 +273,7 @@ void WorldSession::SendLfgPlayerLockInfo()
     {
         data << uint32(*it);                               // Dungeon Entry (id + type)
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
+        lfg::LfgPlayerDungeonInfo const* info = nullptr;
         Quest const* quest = NULL;
         bool done = false;
         if (reward)
@@ -286,109 +287,97 @@ void WorldSession::SendLfgPlayerLockInfo()
             }
         }
 
-        // LfgPlayerDungeonInfo
-        data << uint32(0);                                              // Slot
-        data << uint32(0);                                              // CompletionQuantity
-        data << uint32(0);                                              // CompletionLimit
-        data << uint32(0);                                              // CompletionCurrencyID
-        data << uint32(0);                                              // SpecificQuantity
-        data << uint32(0);                                              // SpecificLimit
-        data << uint32(0);                                              // OverallQuantity
-        data << uint32(0);                                              // OverallLimit
-        data << uint32(0);                                              // PurseWeeklyQuantity
-        data << uint32(0);                                              // PurseWeeklyLimit
-        data << uint32(0);                                              // PurseQuantity
-        data << uint32(0);                                              // PurseLimit
-        data << uint32(0);                                              // Quantity
-        data << uint32(0);                                              // CompletedMask
+        data << uint32(info->Slot);                                              // Slot
+        data << uint32(info->CompletionQuantity);                                // CompletionQuantity
+        data << uint32(info->CompletionLimit);                                   // CompletionLimit
+        data << uint32(info->CompletionCurrencyID);                              // CompletionCurrencyID
+        data << uint32(info->SpecificQuantity);                                  // SpecificQuantity
+        data << uint32(info->SpecificLimit);                                     // SpecificLimit
+        data << uint32(info->OverallQuantity);                                   // OverallQuantity
+        data << uint32(info->OverallLimit);                                      // OverallLimit
+        data << uint32(info->PurseWeeklyQuantity);                               // PurseWeeklyQuantity
+        data << uint32(info->PurseWeeklyLimit);                                  // PurseWeeklyLimit
+        data << uint32(info->PurseQuantity);                                     // PurseQuantity
+        data << uint32(info->PurseLimit);                                        // PurseLimit
+        data << uint32(info->Quantity);                                          // Quantity
+        data << uint32(info->CompletedMask);                                     // CompletedMask
 
-        uint32 ShortageRewardCount = 0;
-        data << uint32(ShortageRewardCount);                            // ShortageRewardCount
+        data << uint32(info->ShortageRewardCount);                               // ShortageRewardCount
 
         // Rewards
-        uint32 itemCount = 0;
-        uint32 currencyCount = 0;
-        uint32 bonusCurrencyCount = 0;
 
-        data << uint32(0);                                              // Mask
-        data << uint32(0);                                              // RewardMoney
-        data << uint32(0);                                              // RewardXP
-        data << uint32(itemCount);                                      // ItemCount
-        data << uint32(currencyCount);                                  // currencyCount
-        data << uint32(bonusCurrencyCount);                             // bonusCurrencyCount
+        data << uint32(info->Mask);                                              // Mask
+        data << uint32(info->RewardMoney);                                       // RewardMoney
+        data << uint32(info->RewardExperience);                                  // RewardXP
+        data << uint32(info->itemCount);                                         // ItemCount
+        data << uint32(info->currencyCount);                                     // currencyCount
+        data << uint32(info->bonusCurrencyCount);                                // bonusCurrencyCount
 
         // Items
-        for (uint32 j = 0; j < itemCount; j++)
+        for (auto j = 0; j < info->itemCount; j++)
         {
-            data << uint32(0);                                          // ItemID
-            data << uint32(0);                                          // Quantity
+            data << uint32(info->ItemID);                                        // ItemID
+            data << uint32(info->Quantity);                                      // Quantity
         }
 
         // Currency
-        for (uint32 j = 0; j < currencyCount; j++)
+        for (auto j = 0; j < info->currencyCount; j++)
         {
-            data << uint32(0);                                          // CurrencyID
-            data << uint32(0);                                          // Quantity
+            data << uint32(info->CurrencyID);                                    // CurrencyID
+            data << uint32(info->Quantity);                                      // Quantity
         }
 
         // BonusCurrency
-        for (uint32 j = 0; j < bonusCurrencyCount; j++)
+        for (auto j = 0; j < info->bonusCurrencyCount; j++)
         {
-            data << uint32(0);                                          // CurrencyID
-            data << uint32(0);                                          // Quantity
+            data << uint32(info->CurrencyID);                                    // CurrencyID
+                data << uint32(info->Quantity);                                  // Quantity
         }
 
         bool bit3 = true;
-        data.WriteBit(bit3);
-
         if (bit3)
             data << uint32(0);
 
         // ShortageReward
-        for (uint32 k = 0; k < ShortageRewardCount; k++)
+        for (auto k = 0; k < info->ShortageRewardCount; k++)
         {
             // Rewards
-            uint32 itemCount = 0;
-            uint32 currencyCount = 0;
-            uint32 bonusCurrencyCount = 0;
 
-            data << uint32(0);                                              // Mask
-            data << uint32(0);                                              // RewardMoney
-            data << uint32(0);                                              // RewardXP
-            data << uint32(itemCount);                                      // ItemCount
-            data << uint32(currencyCount);                                  // currencyCount
-            data << uint32(bonusCurrencyCount);                             // bonusCurrencyCount
+            data << uint32(info->Mask);                                          // Mask
+            data << uint32(info->RewardMoney);                                   // RewardMoney
+            data << uint32(info->RewardExperience);                              // RewardXP
+            data << uint32(info->itemCount);                                     // ItemCount
+            data << uint32(info->currencyCount);                                 // currencyCount
+            data << uint32(info->bonusCurrencyCount);                            // bonusCurrencyCount
 
             // Items
-            for (uint32 k = 0; k < itemCount; k++)
+            for (auto k = 0; k < info->itemCount; k++)
             {
-                data << uint32(0);                                          // ItemID
-                data << uint32(0);                                          // Quantity
+                data << uint32(info->ItemID);                                    // ItemID
+                data << uint32(info->Quantity);                                  // Quantity
             }
 
             // Currency
-            for (uint32 k = 0; k < currencyCount; k++)
+            for (auto k = 0; k < info->currencyCount; k++)
             {
-                data << uint32(0);                                          // CurrencyID
-                data << uint32(0);                                          // Quantity
+                data << uint32(info->CurrencyID);                                // CurrencyID
+                data << uint32(info->Quantity);                                  // Quantity
             }
 
             // BonusCurrency
-            for (uint32 k = 0; k < bonusCurrencyCount; k++)
+            for (auto k = 0; k < info->bonusCurrencyCount; k++)
             {
-                data << uint32(0);                                          // CurrencyID
-                data << uint32(0);                                          // Quantity
+                data << uint32(info->CurrencyID);                                // CurrencyID
+                data << uint32(info->Quantity);                                  // Quantity
             }
             
             bool bit3 = true;
-            data.WriteBit(bit3);
-
             if (bit3)
                 data << uint32(0);
         }
 
-        data.WriteBit(0);                                                   // FirstReward
-        data.WriteBit(0);                                                   // ShortageEligible
+        data.WriteBit(info->FirstReward);                                        // FirstReward
+        data.WriteBit(info->ShortageEligible);                                   // ShortageEligible
     }
 
     SendPacket(&data);
@@ -576,7 +565,7 @@ void WorldSession::SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& roleCheck)
         data << uint8(player ? player->getLevel() : 0);  // Level
         data.WriteBit(0);                                // RoleCheckComplete
 
-        for (lfg::LfgRolesMap::const_iterator it = roleCheck.roles.begin(); it != roleCheck.roles.end(); ++it)
+        for (auto it = roleCheck.roles.begin(); it != roleCheck.roles.end(); ++it)
         {
             if (it->first == roleCheck.leader)
                 continue;
@@ -628,10 +617,10 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
 
 		for (auto j = 0; j < slotsCount; i++)
 		{
-			data << uint32(0);							// Slot
-			data << uint32(0);							// Reason
-			data << uint32(0);							// SubReason1
-			data << uint32(0);							// SubReason2
+			data << uint32(joinData.Slot);				// Slot
+			data << uint32(joinData.Reason);			// Reason
+			data << uint32(joinData.SubReasonOne);		// SubReason1
+            data << uint32(joinData.SubReasonTwo);		// SubReason2
 		}
 	}
 
@@ -701,7 +690,7 @@ void WorldSession::SendLfgPlayerReward(lfg::LfgPlayerRewardData const& rewardDat
 
 void WorldSession::SendLfgBootProposalUpdate(lfg::LfgPlayerBoot const& boot)
 {
-    uint64 guid = GetPlayer()->GetGUID();
+    ObjectGuid guid = GetPlayer()->GetGUID();
     lfg::LfgAnswer playerVote = boot.votes.find(guid)->second;
     uint8 votesNum = 0;
     uint8 agreeNum = 0;
@@ -723,16 +712,16 @@ void WorldSession::SendLfgBootProposalUpdate(lfg::LfgPlayerBoot const& boot)
         secsleft, lfg::LFG_GROUP_KICK_VOTES_NEEDED, boot.reason.c_str());
 
     WorldPacket data(SMSG_LFG_BOOT_PROPOSAL_UPDATE, 1 + 1 + 1 + 1 + 8 + 4 + 4 + 4 + 4 + boot.reason.length());
-
+    
     data.WriteBit(boot.inProgress);                                 // VoteInProgress
-    data.WriteBit(0);                                               // VotePassed
-    data.WriteBit(0);                                               // MyVoteComplete
-    data.WriteBit(0);                                               // MyVote
+    data.WriteBit(boot.VotePassed);                                 // VotePassed
+    data.WriteBit(boot.MyVoteComplete);                             // MyVoteComplete
+    data.WriteBit(boot.MyVote);                                     // MyVote
     data.WriteBits(0, 8);                                           // ReasonLen
     data << ObjectGuid(boot.victim);                                // VictimGUID
-    data << uint32(votesNum);                                       // TotalVotes
-    data << uint32(agreeNum);                                       // BootVotes
-    data << uint32(secsleft);                                       // TimeLeft
+    data << uint32(boot.TotalVotes);                                // TotalVotes
+    data << uint32(boot.BootVotes);                                 // BootVotes
+    data << uint32(boot.TimeLeft);                                  // TimeLeft
     data << uint32(lfg::LFG_GROUP_KICK_VOTES_NEEDED);               // NeededVotes
     data << boot.reason.c_str();                                    // Reason
 
@@ -741,8 +730,8 @@ void WorldSession::SendLfgBootProposalUpdate(lfg::LfgPlayerBoot const& boot)
 
 void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
 {
-    uint64 guid = GetPlayer()->GetGUID();
-    uint64 gguid = proposal.players.find(guid)->second.group;
+    ObjectGuid guid = GetPlayer()->GetGUID();
+    ObjectGuid gguid = proposal.players.find(guid)->second.group;
     bool silent = !proposal.isNew && gguid == proposal.group;
     uint32 dungeonEntry = proposal.dungeonId;
     uint32 queueId = sLFGMgr->GetQueueId(_player->GetGUID());
@@ -771,25 +760,25 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     data << uint32(0);                                      // UnixTime
 
     //ClientLFGProposalUpdate
-    data << uint64(0);                                      // InstanceID
-    data << uint32(0);                                      // CompletedMask
-    data << uint32(0);                                      // Slot
+    data << uint64(proposal.InstanceID);                    // InstanceID
+    data << uint32(proposal.CompletedMask);                 // CompletedMask
+    data << uint32(proposal.Slot);                          // Slot
     data << uint8(proposal.state);                          // State
-    data << uint32(proposal.id);                            // ProposalID
-    data << uint32(0);                                      // No Idea
+    data << uint32(proposal.ProposalID);                    // ProposalID
+    data << uint32(0);                                      // Unknown
 
     data.WriteBit(silent);
 
-    for (lfg::LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
+    for (auto it = proposal.players.begin(); it != proposal.players.end(); ++it)
     {
         lfg::LfgProposalPlayer const& player = it->second;
 
-        data << uint32(player.role);                        // Role
-        data.WriteBit(0);                                   // Me
-        data.WriteBit(0);                                   // SameParty
-        data.WriteBit(0);                                   // MyParty
-        data.WriteBit(0);                                   // Responded
-        data.WriteBit(0);                                   // Accepted
+        data << uint32(player.Role);                        // Role
+        data.WriteBit(player.Me);                           // Me
+        data.WriteBit(player.SameParty);                    // SameParty
+        data.WriteBit(player.MyParty);                      // MyParty
+        data.WriteBit(player.Responded);                    // Responded
+        data.WriteBit(player.Accepted);                     // Accepted
     }
 
     SendPacket(&data);

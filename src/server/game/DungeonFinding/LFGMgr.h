@@ -149,15 +149,21 @@ typedef std::map<uint64, LfgPlayerBoot> LfgPlayerBootContainer;
 typedef std::map<uint64, LfgGroupData> LfgGroupDataContainer;
 typedef std::map<uint64, LfgPlayerData> LfgPlayerDataContainer;
 typedef UNORDERED_MAP<uint32, LFGDungeonData> LFGDungeonContainer;
+typedef std::set<LfgPlayerInfo> LfgPlayerInfoSet;
+typedef std::set<LfgPlayerDungeonInfo> LfgPlayerDungeonInfoSet;
 
 // Data needed by SMSG_LFG_JOIN_RESULT
 struct LfgJoinResultData
 {
-    LfgJoinResultData(LfgJoinResult _result = LFG_JOIN_OK, LfgRoleCheckState _state = LFG_ROLECHECK_DEFAULT):
-        result(_result), state(_state) { }
+    LfgJoinResultData(LfgJoinResult _result = LFG_JOIN_OK, LfgRoleCheckState _state = LFG_ROLECHECK_DEFAULT, uint32 _slot, uint32 _reason, uint32 _sub1, uint32 _sub2)
+        : result(_result), state(_state), Slot(_slot), Reason(_reason), SubReasonOne(_sub1), SubReasonTwo(_sub2) { }
     LfgJoinResult result;
     LfgRoleCheckState state;
     LfgLockPartyMap lockmap;
+    uint32 Slot;
+    uint32 Reason;
+    uint32 SubReasonOne;
+    uint32 SubReasonTwo;
 };
 
 // Data needed by SMSG_LFG_UPDATE_STATUS
@@ -245,20 +251,28 @@ struct LfgReward
 /// Stores player data related to proposal to join
 struct LfgProposalPlayer
 {
-    LfgProposalPlayer(): role(0), accept(LFG_ANSWER_PENDING), group(0) { }
-    uint8 role;                                            ///< Proposed role
-    LfgAnswer accept;                                      ///< Accept status (-1 not answer | 0 Not agree | 1 agree)
-    uint64 group;                                          ///< Original group guid. 0 if no original group
+    LfgProposalPlayer(): Role(0), Accepted(0), SameParty(0), Me(0), MyParty(0), Responded(0), group(0) { }
+
+    ObjectGuid group;
+    uint32 Role;
+    bool Me;
+    bool SameParty;
+    bool MyParty;
+    bool Responded;
+    bool Accepted;
 };
 
 /// Stores group data related to proposal to join
 struct LfgProposal
 {
-    LfgProposal(uint32 dungeon = 0): id(0), dungeonId(dungeon), state(LFG_PROPOSAL_INITIATING),
-        group(0), leader(0), cancelTime(0), encounters(0), isNew(true)
+    LfgProposal(uint32 dungeon = 0) : InstanceID(0), dungeonId(dungeon), state(LFG_PROPOSAL_INITIATING),
+        group(0), leader(0), cancelTime(0), encounters(0), isNew(true), CompletedMask(0), Slot(0), ProposalID(0)
         { }
 
-    uint32 id;                                             ///< Proposal Id
+    uint32 InstanceID;                                     ///< Proposal Id
+    uint32 CompletedMask;                                  ///< Completed Mask
+    uint32 Slot;                                           ///< Slot
+    uint32 ProposalID;                                     ///< ProposalID
     uint32 dungeonId;                                      ///< Dungeon to join
     LfgProposalState state;                                ///< State of the proposal
     uint64 group;                                          ///< Proposal group (0 if new)
@@ -287,6 +301,12 @@ struct LfgPlayerBoot
 {
     time_t cancelTime;                                     ///< Time left to vote
     bool inProgress;                                       ///< Vote in progress
+    bool VotePassed;                                       ///< Vote has passed
+    bool MyVoteComplete;                                   ///< My vote has completed
+    bool MyVote;                                           ///< My vote
+    uint32 TotalVotes;                                     ///< Total amount of votes
+    uint32 BootVotes;                                      ///< Number of votes in favor of boot
+    uint32 TimeLeft;                                       ///< Amount of time left on boot proposal
     LfgAnswerContainer votes;                              ///< Player votes (-1 not answer | 0 Not agree | 1 agree)
     uint64 victim;                                         ///< Player guid to be kicked (can't vote)
     std::string reason;                                    ///< kick reason
@@ -317,6 +337,55 @@ struct LFGDungeonData
 
     // Helpers
     uint32 Entry() const { return id + (type << 24); }
+};
+
+struct LfgPlayerInfo
+{
+    LfgPlayerInfo() { }
+public:
+
+};
+
+struct LfgPlayerDungeonInfo
+{
+    LfgPlayerDungeonInfo(uint32 _slot, uint32 _completQuant, uint32 _completLimit, uint32 _comepletCurrency, uint32 _specQuant, uint32 _specLimit, uint32 _overQuant,
+        uint32 _overLimit, uint32 _weekQuant, uint32 _, uint32 _purseQuant, uint32 _purseLimit, uint32 _quantity, uint32 _completedMask, uint32 _purseWeeklyQuant,
+        uint32 _shortageRewCount, uint32 _itemCount, uint32 _currencyCount, uint32 _bonusCurrCount, uint32 _mask, uint32 _rewMoney, uint32 _rewExp, uint32 _currId,
+        uint32 _itemId, bool _FirstReward, bool _ShortageEligible)
+    : Slot(_slot), CompletionQuantity(_completQuant), CompletionCurrencyID(_comepletCurrency), CompletionLimit(_completLimit), SpecificQuantity(_specQuant),
+    SpecificLimit(_specLimit), OverallQuantity(_overQuant), OverallLimit(_overLimit), PurseWeeklyQuantity(_purseWeeklyQuant), PurseWeeklyLimit(_purseLimit),
+    PurseQuantity(_purseQuant), Quantity(_quantity), CompletedMask(_completedMask), ShortageRewardCount(_shortageRewCount), itemCount(_itemCount),
+    currencyCount(_currencyCount), bonusCurrencyCount(_bonusCurrCount), Mask(_mask), RewardMoney(_rewMoney), RewardExperience(_rewExp), CurrencyID(_currId),
+    ItemID(_itemId), FirstReward(_FirstReward), ShortageEligible(_ShortageEligible) { }
+public:
+    uint32 Slot;
+    uint32 CompletionQuantity;
+    uint32 CompletionLimit;
+    uint32 CompletionCurrencyID;
+    uint32 SpecificQuantity;
+    uint32 SpecificLimit;
+    uint32 OverallQuantity;
+    uint32 OverallLimit;
+    uint32 PurseWeeklyQuantity;
+    uint32 PurseWeeklyLimit;
+    uint32 PurseQuantity;
+    uint32 PurseLimit;
+    uint32 Quantity;
+    uint32 CompletedMask;
+
+    uint32 ShortageRewardCount;
+    uint32 itemCount;
+    uint32 currencyCount;
+    uint32 bonusCurrencyCount;
+    uint32 Mask;
+    uint32 RewardMoney;
+    uint32 RewardExperience;
+
+    uint32 CurrencyID;
+    uint32 Quantity;
+    uint32 ItemID;
+    bool FirstReward;
+    bool ShortageEligible;
 };
 
 class LFGMgr
@@ -498,6 +567,8 @@ class LFGMgr
         LfgPlayerBootContainer BootsStore;                 ///< Current player kicks
         LfgPlayerDataContainer PlayersStore;               ///< Player data
         LfgGroupDataContainer GroupsStore;                 ///< Group data
+        LfgDungeonSet m_lfgDungeonStore;
+        LfgPlayerDungeonInfoSet m_lfgDungeonInfoStore;
 };
 
 } // namespace lfg

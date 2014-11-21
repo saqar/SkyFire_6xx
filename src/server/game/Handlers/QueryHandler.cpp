@@ -295,10 +295,16 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
 
     if (!corpse)
     {
-        WorldPacket data(SMSG_CORPSE_QUERY, 1);
-        data.WriteBits(0, 9); // Not found + guid stream
-        for (int i = 0; i < 5; i++)
-            data << uint32(0);
+        WorldPacket data(SMSG_CORPSE_QUERY, 2 + (5 * 4) + 8);
+        data.WriteBit(0); // Corpse not Found
+        data.FlushBits();
+
+        data << uint32(0);
+        data << float(0);
+        data << float(0);
+        data << float(0);
+        data << uint32(0);
+        data << ObjectGuid(0);
         SendPacket(&data);
         return;
     }
@@ -334,13 +340,15 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recvData*/)
     ObjectGuid corpseGuid = corpse->GetGUID();
 
     WorldPacket data(SMSG_CORPSE_QUERY, 9 + 1 + (4 * 5));
-    data << corpseGuid;
     data.WriteBit(1); // Corpse Found
+    data.FlushBits();
+    
+    data << mapId;
+    data << x;
+    data << y;
     data << z;
     data << corpseMapId;
-    data << x;
-    data << mapId;
-    data << y;
+    data << corpse->GetGUID128();
     SendPacket(&data);
 }
 
@@ -420,8 +428,8 @@ void WorldSession::HandleCorpseMapPositionQuery(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Recv CMSG_CORPSE_MAP_POSITION_QUERY");
 
-    uint32 transportGuidLow;
-    recvData >> transportGuidLow;
+    ObjectGuid transportGuid;
+    recvData >> transportGuid;
 
     WorldPacket data(SMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE, 4+4+4+4);
     data << float(0);

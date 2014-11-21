@@ -1637,9 +1637,6 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading Graveyard-zone links...");
     sObjectMgr->LoadGraveyardZones();
 
-    TC_LOG_INFO("server.loading", "Loading Graveyard Orientations...");
-    sObjectMgr->LoadGraveyardOrientations();
-
     TC_LOG_INFO("server.loading", "Loading spell pet auras...");
     sSpellMgr->LoadSpellPetAuras();
 

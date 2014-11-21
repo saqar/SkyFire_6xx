@@ -210,7 +210,7 @@ public:
         else
             player->SaveRecallPosition();
 
-        player->TeleportTo(gy->map_id, gy->x, gy->y, gy->z, player->GetOrientation());
+        player->TeleportTo(gy->map_id, gy->x, gy->y, gy->z, (gy->Facing * M_PI) / 180);
         return true;
     }
 

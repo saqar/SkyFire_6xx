@@ -5104,8 +5104,8 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 */
 void Player::BuildPlayerRepop()
 {
-    WorldPacket data(SMSG_PRE_RESURRECT, GetPackGUID().size());
-    data.append(GetPackGUID());
+    WorldPacket data(SMSG_PRE_RESURRECT, 8);
+    data << GetGUID128();
     GetSession()->SendPacket(&data);
 
     if (getRace() == RACE_NIGHTELF)
@@ -5570,14 +5570,13 @@ void Player::RepopAtGraveyard()
     // and don't show spirit healer location
     if (ClosestGrave)
     {
-        float const* orientation = sObjectMgr->GetGraveyardOrientation(ClosestGrave->ID);
-        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, orientation ? *orientation : GetOrientation());
+        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, (ClosestGrave->Facing * M_PI) / 180);
         if (isDead())                                        // not send if alive, because it used in TeleportTo()
         {
             WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);  // show spirit healer position on minimap
             data << ClosestGrave->map_id;
-            data << ClosestGrave->y;
             data << ClosestGrave->x;
+            data << ClosestGrave->y;
             data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
         }
@@ -24823,11 +24822,7 @@ void Player::SendCorpseReclaimDelay(bool load)
 
     //! corpse reclaim delay 30 * 1000ms or longer at often deaths
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
-    data.WriteBit(delay == 0);
-
-    if (delay)
-        data << uint32(delay * IN_MILLISECONDS);
-
+    data << uint32(delay * IN_MILLISECONDS);
     GetSession()->SendPacket(&data);
 }
 

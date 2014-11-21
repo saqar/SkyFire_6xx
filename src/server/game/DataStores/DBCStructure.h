@@ -2610,7 +2610,7 @@ struct WorldSafeLocsEntry
     float     x;                                            // 2
     float     y;                                            // 3
     float     z;                                            // 4
-    //float unk1;                                           // 5
+    float     Facing;                                       // 5        In degrees, to gain Orientation use (Facing * M_PI) / 180
     //char*   name;                                         // 6        m_AreaName_lang
 };
 

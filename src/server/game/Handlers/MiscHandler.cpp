@@ -62,7 +62,7 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_REPOP_REQUEST Message");
 
-    recvData.read_skip<uint8>();
+    recvData.ReadBit(); // CheckInstance
 
     if (GetPlayer()->IsAlive() || GetPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;

@@ -2331,12 +2331,14 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (!GetSession()->PlayerLogout())
             {
                 WorldPacket data(SMSG_NEW_WORLD, 4 + 4 + 4 + 4 + 4 + 4);
+
                 data << uint32(mapid);
                 data << float(m_teleport_dest.GetPositionX());
                 data << float(m_teleport_dest.GetPositionY());
                 data << float(m_teleport_dest.GetPositionZ());
                 data << float(m_teleport_dest.GetOrientation());
-                data << uint32(0); // Reason
+                data << uint32(16); // 16 - Normal map change; 21 - Teleport to another map without a loading screen
+
                 GetSession()->SendPacket(&data);
                 SendSavedInstances();
             }

@@ -100,7 +100,7 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket& recvData)
 
 void WorldSession::SendShowBank(ObjectGuid guid)
 {
-    WorldPacket data(SMSG_SHOW_BANK, 1 + 8);
+    WorldPacket data(SMSG_SHOW_BANK, 16);
 
     data << guid;
 
@@ -109,6 +109,8 @@ void WorldSession::SendShowBank(ObjectGuid guid)
 
 void WorldSession::HandleTrainerListOpcode(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_TRAINER_LIST");
+
     ObjectGuid guid;
 
     recvData >> guid;
@@ -162,9 +164,9 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
     bool can_learn_primary_prof = GetPlayer()->GetFreePrimaryProfessionPoints() > 0;
 
     uint32 count = 0;
-    for (TrainerSpellMap::const_iterator itr = trainer_spells->spellList.begin(); itr != trainer_spells->spellList.end(); ++itr)
+    for (auto TrainerSpellMap : trainer_spells->spellList)
     {
-        TrainerSpell const* tSpell = &itr->second;
+        TrainerSpell const* tSpell = &TrainerSpellMap.second;
 
         bool valid = true;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -881,6 +883,7 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
 
     recvData >> npcGuid;
     recvData >> itemGuid;
+    guildBank = recvData.ReadBit();
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_REPAIR);
     if (!unit)

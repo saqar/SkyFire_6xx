@@ -1385,9 +1385,11 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
 {
-    WorldPacket data(SMSG_EMOTE, 4 + 8);
-    data << uint32(anim_id);
+    WorldPacket data(SMSG_EMOTE, 4 + 16);
+
     data << ObjectGuid(GetGUID128());
+    data << uint32(anim_id);
+
     SendMessageToSet(&data, true);
 }
 

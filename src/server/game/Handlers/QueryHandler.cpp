@@ -153,9 +153,11 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
 
     if (info)
     {
-        std::string Name, SubName;
+        std::string Name, NameAlt, SubName, SubNameAlt;
         Name = info->Name;
+        NameAlt = info->NameAlt;
         SubName = info->SubName;
+        SubNameAlt = info->SubNameAlt;
 
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
@@ -163,23 +165,31 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
             if (CreatureLocale const* cl = sObjectMgr->GetCreatureLocale(entry))
             {
                 ObjectMgr::GetLocaleString(cl->Name, loc_idx, Name);
+                ObjectMgr::GetLocaleString(cl->NameAlt, loc_idx, NameAlt);
                 ObjectMgr::GetLocaleString(cl->SubName, loc_idx, SubName);
+                ObjectMgr::GetLocaleString(cl->SubNameAlt, loc_idx, SubNameAlt);
             }
         }
 
         TC_LOG_DEBUG("network", "WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", info->Name.c_str(), entry);
         data.WriteBits(SubName.length() ? SubName.length() + 1 : 0, 11);
-        data.WriteBits(0, 11); // subName2
+        data.WriteBits(SubNameAlt.length() ? SubNameAlt.length() + 1 : 0, 11);
         data.WriteBits(info->IconName.length() ? info->IconName.length() + 1 : 0, 6);
         data.WriteBit(info->RacialLeader);
 
-        for (int i = 0; i < 8; i++)
-                data.WriteBits(i == 0 ? Name.length() + 1 : 0, 11);
+        for (int i = 0; i < 4; i++)
+        {
+            data.WriteBits(i == 0 ? Name.length() + 1 : 0, 11);
+            data.WriteBits(i == 0 ? NameAlt.length() + 1 : 0, 11);
+        }
 
         data.FlushBits();
 
         if (Name != "")
             data << Name;
+
+        if (NameAlt != "")
+            data << NameAlt;
 
         data << uint32(info->type_flags);                     // Flags
         data << uint32(info->type_flags2);                    // Flags2
@@ -197,10 +207,13 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         data << uint32(MAX_CREATURE_QUEST_ITEMS);             // Quest items
         data << uint32(info->movementId);                     // CreatureMovementInfo.dbc
         data << uint32(info->expansion);                      // Expansion Required
-        data << uint32(0);                                    // unk
+        data << uint32(info->FlagQuest);                      // FlagQuest 6.x
 
         if (SubName != "")
             data << SubName;                                  // Subname
+
+        if (SubNameAlt != "")
+            data << SubNameAlt;                               // SubnameAlt
 
         if (info->IconName != "")
             data << info->IconName;                           // "Directions" for guard, string for Icons 2.3.0

@@ -83,7 +83,9 @@ struct CreatureTemplate
     uint32  Modelid3;
     uint32  Modelid4;
     std::string  Name;
+    std::string  NameAlt;
     std::string  SubName;
+    std::string  SubNameAlt;
     std::string  IconName;
     uint32  GossipMenuId;
     uint8   minlevel;
@@ -93,6 +95,7 @@ struct CreatureTemplate
     uint32  faction_A;
     uint32  faction_H;
     uint32  npcflag;
+    uint32  npcflag2;
     float   speed_walk;
     float   speed_run;
     float   scale;
@@ -137,6 +140,7 @@ struct CreatureTemplate
     float   ModArmor;
     bool    RacialLeader;
     uint32  questItems[MAX_CREATURE_QUEST_ITEMS];
+    uint32  FlagQuest;                                      // Currently unused but comes from wdb
     uint32  movementId;
     bool    RegenHealth;
     uint32  MechanicImmuneMask;
@@ -219,7 +223,9 @@ typedef UNORDERED_MAP<uint16, CreatureBaseStats> CreatureBaseStatsContainer;
 struct CreatureLocale
 {
     StringVector Name;
+    StringVector NameAlt;
     StringVector SubName;
+    StringVector SubNameAlt;
 };
 
 struct GossipMenuItemsLocale

@@ -888,40 +888,33 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket* data, uint64 guid
     if (!bracketEntry)
         return;
 
-    uint32 winnerConquest = (player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_CONQUEST_FIRST) : sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_CONQUEST_LAST)) / CURRENCY_PRECISION;
-    uint32 winnerHonor = (player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_HONOR_FIRST) : sWorld->getIntConfig(CONFIG_BG_REWARD_WINNER_HONOR_LAST)) / CURRENCY_PRECISION;
-    uint32 loserHonor = (!player->GetRandomWinner() ? sWorld->getIntConfig(CONFIG_BG_REWARD_LOSER_HONOR_FIRST) : sWorld->getIntConfig(CONFIG_BG_REWARD_LOSER_HONOR_LAST)) / CURRENCY_PRECISION;
-
-    ObjectGuid guidBytes = guid;
-
-    data->Initialize(SMSG_BATTLEFIELD_LIST);
-    *data << uint32(winnerConquest);             // Winner Conquest Reward or Random Winner Conquest Reward
-    *data << uint32(winnerConquest);             // Winner Conquest Reward or Random Winner Conquest Reward
-    *data << uint32(loserHonor);                 // Loser Honor Reward or Random Loser Honor Reward
-    *data << uint32(bgTypeId);                   // battleground id
-    *data << uint32(loserHonor);                 // Loser Honor Reward or Random Loser Honor Reward
-    *data << uint32(winnerHonor);                // Winner Honor Reward or Random Winner Honor Reward
-    *data << uint32(winnerHonor);                // Winner Honor Reward or Random Winner Honor Reward
-    *data << uint8(bracketEntry->maxLevel);      // max level
-    *data << uint8(bracketEntry->minLevel);      // min level
-
-    *data << guidBytes;
-    data->WriteBit(0);                                      // unk
-    data->WriteBit(0);                                      // unk
-    size_t count_pos = data->bitwpos();
-    data->WriteBits(0, 24);                                 // placeholder
-    data->WriteBit(0);                                      // unk
-    data->WriteBit(0);                                      // unk
+    ObjectGuid BattlemasterGuid = guid;
 
     uint32 count = 0;
     BattlegroundBracketId bracketId = bracketEntry->GetBracketId();
     BattlegroundClientIdsContainer& clientIds = it->second.m_ClientBattlegroundIds[bracketId];
-    for (BattlegroundClientIdsContainer::const_iterator itr = clientIds.begin(); itr != clientIds.end(); ++itr)
+
+    data->Initialize(SMSG_BATTLEFIELD_LIST, 16 + 4 + 2 + 2 + clientIds.size() + 1 + 1 + 1 + 1);
+
+    *data << BattlemasterGuid;
+    *data << uint32(bgTypeId);
+    *data << uint8(bracketEntry->minLevel);
+    *data << uint8(bracketEntry->maxLevel);
+
+    size_t count_pos = data->wpos();
+    *data << uint32(0);
+    
+    for (auto Battlefields : clientIds)
     {
-        *data << uint32(*itr);
+        *data << uint32(Battlefields);
         ++count;
     }
-    data->PutBits(count_pos, count, 24);                    // bg instance count
+    data->put(count_pos, count);
+
+    data->WriteBit(0);
+    data->WriteBit(0);
+    data->WriteBit(0);
+    data->WriteBit(0);
 }
 
 void BattlegroundMgr::SendToBattleground(Player* player, uint32 instanceId, BattlegroundTypeId bgTypeId)

@@ -1119,7 +1119,6 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     AccountData* adata = GetAccountData(AccountDataType(type));
 
     uint32 size = adata->Data.size();
-
     uLongf destSize = compressBound(size);
 
     ByteBuffer dest;
@@ -1132,17 +1131,15 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     }
 
     dest.resize(destSize);
-
-    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8+4+4+4+destSize);
-
     ObjectGuid guid;
 
+    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8 + 4 + 4 + 4 + destSize);
+
     data << guid;
-    data << uint32(size);                                   // decompressed length
+    data << uint32(adata->Time);
+    data << uint32(size);
+    data.WriteBits(type, 3);
     data << uint32(destSize);
-    data.WriteBits(type, 3);                                 // type (0-7)
-    data << uint32(adata->Time);                            // unix time
-    data.WriteBits(type, 3);                                 // type (0-7)
     data.append(dest);
 
     SendPacket(&data);

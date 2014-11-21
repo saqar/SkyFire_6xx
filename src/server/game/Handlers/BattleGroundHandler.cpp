@@ -782,11 +782,12 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
     TC_LOG_DEBUG("network", "WORLD: CMSG_REQUEST_RATED_BG_STATS");
 
     WorldPacket data(SMSG_BATTLEFIELD_RATED_INFO, 29);
+
     data << uint32(0);  // Reward
     data << uint8(3);   // unk
     data << uint32(0);  // unk
     data << uint32(0);  // unk
-    data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
+    data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_RATED_BG_META, true);
     data << uint32(0);  // unk
     data << uint32(0);  // unk
     data << _player->GetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, true);

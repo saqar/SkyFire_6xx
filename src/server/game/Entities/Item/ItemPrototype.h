@@ -295,18 +295,15 @@ enum ItemFlagsCustom
 
 enum CurrencyFlags
 {
-    CURRENCY_FLAG_TRADEABLE          = 0x01,
-    // ...
-    CURRENCY_FLAG_HIGH_PRECISION     = 0x08,
-    // ...
-    CURRENCY_FLAG_COUNT_SEASON_TOTAL = 0x80,
+    CURRENCY_FLAG_TRADEABLE         = 0x01,
+    CURRENCY_FLAG_HIGH_PRECISION    = 0x08,
+    CURRENCY_FLAG_HAS_SEASON_COUNT  = 0x80
 };
 
 enum CurrencyCategory
 {
-    // ...
-    CURRENCY_CATEGORY_META_CONQUEST = 89,
-    // ...
+    CURRENCY_CATEGORY_ARCHAEOLOGY   = 82,
+    CURRENCY_CATEGORY_META_CONQUEST = 89
 };
 
 enum ItemVendorType

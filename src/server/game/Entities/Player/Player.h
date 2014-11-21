@@ -149,6 +149,8 @@ struct PlayerCurrency
    PlayerCurrencyState state;
    uint32 totalCount;
    uint32 weekCount;
+   uint32 seasonCount;
+   uint8 flags;
 };
 
 typedef UNORDERED_MAP<uint32, PlayerTalent*> PlayerTalentMap;
@@ -1374,31 +1376,15 @@ class Player : public Unit, public GridObject<Player>
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
-        /// send full data about all currencies to client
         void SendCurrencies() const;
-        /// send conquest currency points and their cap week/arena
         void SendPvpRewards() const;
-        /// return count of currency witch has plr
         uint32 GetCurrency(uint32 id, bool usePrecision) const;
-        /// return count of currency gaind on current week
         uint32 GetCurrencyOnWeek(uint32 id, bool usePrecision) const;
-        /// return week cap by currency id
         uint32 GetCurrencyWeekCap(uint32 id, bool usePrecision) const;
-        /// return presence related currency
         bool HasCurrency(uint32 id, uint32 count) const;
-        /// initialize currency count for custom initialization at create character
         void SetCurrency(uint32 id, uint32 count, bool printLog = true);
         void ResetCurrencyWeekCap();
-
-        /**
-          * @name   ModifyCurrency
-          * @brief  Change specific currency and send result to client
-
-          * @param  id currency entry from CurrencyTypes.dbc
-          * @param  count integer value for adding/removing curent currency
-          * @param  printLog used on SMSG_UPDATE_CURRENCY
-          * @param  ignore gain multipliers
-        */
+        void ModifyCurrencyFlag(uint32 id, uint8 flag);
         void ModifyCurrency(uint32 id, int32 count, bool printLog = true, bool ignoreMultipliers = false);
 
         void ApplyEquipCooldown(Item* pItem);
@@ -2645,25 +2631,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_currentBuybackSlot;
 
         PlayerCurrenciesMap _currencyStorage;
-
-        /**
-          * @name   GetCurrencyWeekCap
-          * @brief  return week cap for selected currency
-
-          * @param  CurrencyTypesEntry for which to retrieve weekly cap
-        */
         uint32 GetCurrencyWeekCap(CurrencyTypesEntry const* currency) const;
-
-        /*
-         * @name   GetCurrencyTotalCap
-         * @brief  return total cap for selected currency
-
-         * @param  CurrencyTypesEntry for which to retrieve total cap
-         */
         uint32 GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const;
-
-        /// Updates weekly conquest point cap (dynamic cap)
-        void UpdateConquestCurrencyCap(uint32 currency);
 
         VoidStorageItem* _voidStorageItems[VOID_STORAGE_MAX_SLOT];
 

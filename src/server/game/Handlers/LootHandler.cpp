@@ -507,3 +507,14 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     loot->NotifyItemRemoved(slotid);
     --loot->unlootedCount;
 }
+
+void WorldSession::HandleChangeCurrencyFlags(WorldPacket& recvPacket)
+{
+    uint32 currencyId, flags;
+
+    recvPacket >> flags;
+    recvPacket >> currencyId;
+
+    if (GetPlayer())
+        GetPlayer()->ModifyCurrencyFlag(currencyId, uint8(flags));
+}

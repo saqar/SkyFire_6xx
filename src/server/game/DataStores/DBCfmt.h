@@ -166,6 +166,6 @@ char const VehicleSeatEntryfmt[] = "niiffffffffffiiiiiifffffffiiifffiiiiiiiffiii
 char const WMOAreaTableEntryfmt[] = "niiixxxxxiixxxx";
 char const WorldMapAreaEntryfmt[] = "xinxffffixxxxx";
 char const WorldMapOverlayEntryfmt[] = "nxiiiixxxxxxxxxx";
-char const WorldSafeLocsEntryfmt[] = "nifffxx";
+char const WorldSafeLocsEntryfmt[] = "niffffx";
 
 #endif

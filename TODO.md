@@ -1,5 +1,6 @@
 ## To-do list (Try to keep the order by importance):
 
+* ANYTHING AND EVERYTHING PVP RELATED
 * Account Wide features (THIS IS VERY IMPORTANT). 
 * Creature Data bruteforced from client. (This would help our waypoint issue).
 * Spawns

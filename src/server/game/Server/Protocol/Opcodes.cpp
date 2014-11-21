@@ -128,7 +128,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_CORPSE_MAP_POSITION_QUERY,                           0x13AB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCorpseMapPositionQuery       ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_CREATURE_QUERY,                                      0x0505, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleCreatureQueryOpcode          ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_DANCE_QUERY,                                         0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_DB_QUERY_BULK,                                       0x138B, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleDBQueryBulk                  ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_DB_QUERY_BULK,                                       0x138B, STATUS_AUTHED,    PROCESS_INPLACE,      &WorldSession::HandleDBQueryBulk                  ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_DEL_FRIEND,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDelFriendOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_DEL_IGNORE,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDelIgnoreOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CONTROLLED_VEHICLE,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDismissControlledVehicle     );

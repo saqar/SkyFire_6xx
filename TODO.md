@@ -2,29 +2,26 @@
 
 * Account Wide features (THIS IS VERY IMPORTANT). 
 * Creature Data bruteforced from client. (This would help our waypoint issue).
-* Pets
+* Spawns
+* Phases
 * Waypoints
-* Garrisons
 * Guilds (includes bank).
 * Professions (This is a big deal for 6xx, because it plays in to the garrison system).
 * Reputation (also a big deal for 6xx)
-* Auctions
-* Item Upgrades (Wonder if this is in 6xx later patches. I'll bet it is).
-* Phases
-* Gossip
-* Text system
+* Garrisons
 * Dungeon Finder/Raid Finder
-* In Game Shop
+
+-- From here on, no particular order of importance --
 * Scenarios
 * Implement PvP Power / Update resil
 * Mail
 * Rated BGs
-* Archaeology
 * Guild Finder
 * Character Boost
 * RaF
 * Calendar
 * Void Storage
+* Archaeology
 
 ## Things that aren't done, but are close:
 * Achievements/Guild Achievements
@@ -35,6 +32,7 @@
 * Spell scripts
 * Object Update
 * Groups 
+* In Game Shop
 
 ## Finished Stuff:
 * Auth
@@ -63,3 +61,5 @@
 * Loot
 * Mounts
 * Update Fields
+* Pets
+* Auctions

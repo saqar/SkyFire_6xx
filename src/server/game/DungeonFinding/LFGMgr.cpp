@@ -1993,4 +1993,20 @@ LfgDungeonSet LFGMgr::GetRandomAndSeasonalDungeons(uint8 level, uint8 expansion)
     return randomDungeons;
 }
 
+void LFGMgr::BuildRideTicket(WorldPacket data, ObjectGuid PlayerGuid, uint32 ClientInstanceID, uint32 QueueSlot, uint32 JoinTime)
+{
+    data << PlayerGuid;
+    data << ClientInstanceID;
+    data << QueueSlot;
+    data << JoinTime;
+}
+
+void LFGMgr::ReadRideTicket(WorldPacket recvData, ObjectGuid PlayerGuid, uint32 ClientInstanceID, uint32 QueueSlot, uint32 JoinTime)
+{
+    recvData >> PlayerGuid;
+    recvData >> ClientInstanceID;
+    recvData >> QueueSlot;
+    recvData >> JoinTime;
+}
+
 } // namespace lfg

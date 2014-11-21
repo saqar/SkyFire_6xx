@@ -120,13 +120,11 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 {
     ObjectGuid leaveGuid;
     Group* group = GetPlayer()->GetGroup();
-    uint64 guid = GetPlayer()->GetGUID();
-    uint64 gguid = group ? group->GetGUID() : guid;
+    ObjectGuid RequesterGuid = GetPlayer()->GetGUID128();
+    uint64 gguid = group ? group->GetGUID() : RequesterGuid;
+    uint32 ClientInstanceId, QueueId, joinTime;
 
-    recvData.read_skip<uint32>();                          // Always 8
-    recvData.read_skip<uint32>();                          // Join date
-    recvData.read_skip<uint32>();                          // Always 3
-    recvData.read_skip<uint32>();                          // Queue Id
+    sLFGMgr->ReadRideTicket(recvData, RequesterGuid, ClientInstanceId, QueueId, joinTime);
 
     recvData >> leaveGuid;
 
@@ -134,25 +132,21 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
         GetPlayerInfo().c_str(), group ? 1 : 0, uint64(leaveGuid));
 
     // Check cheating - only leader can leave the queue
-    if (!group || group->GetLeaderGUID() == guid)
+    if (!group || group->GetLeaderGUID() == RequesterGuid)
         sLFGMgr->LeaveLfg(gguid);
 }
 
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
 {
     uint32 proposalID;  // Proposal ID
-    uint32 Id, Type, Time;
+    uint32 Id, Type, joinTime;
     uint64 InstanceID;
     bool accept;
 
-    ObjectGuid guid1;
+    ObjectGuid RequesterGuid;
     ObjectGuid guid2;
 
-    // RideTicket
-    recvData >> guid1;
-    recvData >> Id;
-    recvData >> Type;
-    recvData >> Time;
+    sLFGMgr->ReadRideTicket(recvData, RequesterGuid, Id, Type, joinTime);
 
     // UserClientDFProposalResponse
     recvData >> InstanceID;
@@ -442,7 +436,7 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     bool join = false;
     bool queued = false;
     uint8 size = uint8(updateData.dungeons.size());
-    ObjectGuid guid = _player->GetGUID();
+    ObjectGuid RequesterGuid = _player->GetGUID();
     time_t joinTime = sLFGMgr->GetQueueJoinTime(_player->GetGUID());
     uint32 queueId = sLFGMgr->GetQueueId(_player->GetGUID());
 
@@ -472,17 +466,16 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
 
     WorldPacket data(SMSG_LFG_UPDATE_STATUS, 1 + 8 + 3 + 2 + 1 + updateData.comment.length() + 4 + 4 + 1 + 1 + 1 + 4 + size);
 
+    sLFGMgr->BuildRideTicket(data, RequesterGuid, 0, queueId, joinTime);
+
     data << uint8(0);                                      // Reason
     data << uint8(0);                                      // Subtype
     data << uint8(updateData.updateType);                  // Lfg Update type
     for (uint8 i = 0; i < 3; ++i)
         data << uint8(0);                                  // Needs - Always 0
-    data << uint32(queueId);                               // Queue Id
-    data << uint32(joinTime);                              // Join date
     data << uint32(3);
-    for (lfg::LfgDungeonSet::const_iterator it = updateData.dungeons.begin(); it != updateData.dungeons.end(); ++it)
-        data << uint32(*it);
-    data << guid;
+    for (auto DungeonsUpdateData : updateData.dungeons)
+        data << uint32(DungeonsUpdateData);
     data.WriteBit(party);
     data.WriteBit(size > 0);                               // Extra info
     data.WriteBit(join);                                   // LFG Join
@@ -572,7 +565,7 @@ void WorldSession::SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& roleCheck)
 void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
 {
     uint32 size = 0;
-    ObjectGuid guid = GetPlayer()->GetGUID();
+    ObjectGuid RequesterGuid = GetPlayer()->GetGUID();
     uint32 queueId = sLFGMgr->GetQueueId(_player->GetGUID());
     for (auto it = joinData.lockmap.begin(); it != joinData.lockmap.end(); it++)
         size += 8 + 4 + uint32(it->second.size()) * (4 + 4 + 4 + 4);
@@ -583,18 +576,14 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
     uint32 blacklistCount = 0;
     uint32 slotsCount = 0;
 
-    // RideTicket
-    data << guid;                                       // RequesterGuid
-    data << uint32(0);									// ID
-    data << uint32(0);								    // Type
-    data << uint32(0);								    // Time
+    sLFGMgr->BuildRideTicket(data, RequesterGuid, 0, 0, 0);
 
     data << uint8(joinData.result);						// Result
     data << uint8(joinData.state);						// ResultDetail
 
     for (uint32 i = 0; i < blacklistCount; i++)
     {
-        data << guid;
+        data << RequesterGuid;
 
         for (uint32 j = 0; j < slotsCount; i++)
         {
@@ -617,14 +606,10 @@ void WorldSession::SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData)
         queueData.waitTimeTank, queueData.waitTimeHealer, queueData.waitTimeDps,
         queueData.queuedTime, queueData.tanks, queueData.healers, queueData.dps);
 
-    ObjectGuid guid = _player->GetGUID128();
+    ObjectGuid RequesterGuid = _player->GetGUID128();
     WorldPacket data(SMSG_LFG_QUEUE_STATUS, 500);                   // We guess size
 
-    // CliTicket
-    data << guid;
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
+    sLFGMgr->BuildRideTicket(data, RequesterGuid, 0, 0, 0);
 
     data << uint32(queueData.subType);
     data << uint32(queueData.reason);
@@ -711,8 +696,8 @@ void WorldSession::SendLfgBootProposalUpdate(lfg::LfgPlayerBoot const& boot)
 
 void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
 {
-    ObjectGuid guid = GetPlayer()->GetGUID();
-    ObjectGuid gguid = proposal.players.find(guid)->second.group;
+    ObjectGuid RequesterGuid = GetPlayer()->GetGUID();
+    ObjectGuid gguid = proposal.players.find(RequesterGuid)->second.group;
     bool silent = !proposal.isNew && gguid == proposal.group;
     uint32 dungeonEntry = proposal.dungeonId;
     uint32 queueId = sLFGMgr->GetQueueId(_player->GetGUID());
@@ -723,7 +708,7 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     // show random dungeon if player selected random dungeon and it's not lfg group
     if (!silent)
     {
-        lfg::LfgDungeonSet const& playerDungeons = sLFGMgr->GetSelectedDungeons(guid);
+        lfg::LfgDungeonSet const& playerDungeons = sLFGMgr->GetSelectedDungeons(RequesterGuid);
         if (playerDungeons.find(proposal.dungeonId) == playerDungeons.end())
             dungeonEntry = (*playerDungeons.begin());
     }
@@ -732,12 +717,7 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
 
     WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + proposal.players.size() * (4 + 1 + 1 + 1 + 1 + 1));
 
-    //CliRideTicket
-    ObjectGuid requester;
-    data << requester;                                      // RequesterGuid
-    data << uint32(0);                                      // ID
-    data << uint32(0);                                      // Type
-    data << uint32(0);                                      // UnixTime
+    sLFGMgr->BuildRideTicket(data, RequesterGuid, 0, queueId, joinTime);
 
     //ClientLFGProposalUpdate
     data << uint64(proposal.InstanceID);                    // InstanceID

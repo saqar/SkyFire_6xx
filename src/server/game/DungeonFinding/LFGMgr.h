@@ -519,6 +519,9 @@ class LFGMgr
         /// Sends queue status to player
         static void SendLfgQueueStatus(uint64 guid, LfgQueueStatusData const& data);
 
+        void BuildRideTicket(WorldPacket data, ObjectGuid PlayerGuid, uint32 ClientInstanceID, uint32 QueueSlot, uint32 JoinTime);
+        void ReadRideTicket(WorldPacket recvData, ObjectGuid PlayerGuid, uint32 ClientInstanceID, uint32 QueueSlot, uint32 JoinTime);
+
     private:
         uint8 GetTeam(uint64 guid);
         void RestoreState(uint64 guid, char const* debugMsg);

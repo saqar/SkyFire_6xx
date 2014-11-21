@@ -25,8 +25,8 @@ GuildMgr::GuildMgr() : NextGuildId(1)
 
 GuildMgr::~GuildMgr()
 {
-    for (GuildContainer::iterator itr = GuildStore.begin(); itr != GuildStore.end(); ++itr)
-        delete itr->second;
+    for (auto GuildStoreMap : GuildStore)
+        delete GuildStoreMap.second;
 }
 
 void GuildMgr::AddGuild(Guild* guild)
@@ -41,8 +41,8 @@ void GuildMgr::RemoveGuild(uint32 guildId)
 
 void GuildMgr::SaveGuilds()
 {
-    for (GuildContainer::iterator itr = GuildStore.begin(); itr != GuildStore.end(); ++itr)
-        itr->second->SaveToDB();
+    for (auto GuildStoreMap : GuildStore)
+        GuildStoreMap.second->SaveToDB();
 }
 
 uint32 GuildMgr::GenerateGuildId()
@@ -80,12 +80,12 @@ Guild* GuildMgr::GetGuildByName(const std::string& guildName) const
 {
     std::string search = guildName;
     std::transform(search.begin(), search.end(), search.begin(), ::toupper);
-    for (GuildContainer::const_iterator itr = GuildStore.begin(); itr != GuildStore.end(); ++itr)
+    for (auto GuildStoreMap : GuildStore)
     {
-        std::string gname = itr->second->GetName();
+        std::string gname = GuildStoreMap.second->GetName();
         std::transform(gname.begin(), gname.end(), gname.begin(), ::toupper);
         if (search == gname)
-            return itr->second;
+            return GuildStoreMap.second;
     }
     return NULL;
 }
@@ -100,9 +100,9 @@ std::string GuildMgr::GetGuildNameById(uint32 guildId) const
 
 Guild* GuildMgr::GetGuildByLeader(uint64 guid) const
 {
-    for (GuildContainer::const_iterator itr = GuildStore.begin(); itr != GuildStore.end(); ++itr)
-        if (itr->second->GetLeaderGUID() == guid)
-            return itr->second;
+    for (auto GuildStoreMap : GuildStore)
+        if (GuildStoreMap.second->GetLeaderGUID() == guid)
+            return GuildStoreMap.second;
 
     return NULL;
 }
@@ -435,16 +435,16 @@ void GuildMgr::LoadGuilds()
     {
         PreparedQueryResult achievementResult;
         PreparedQueryResult criteriaResult;
-        for (GuildContainer::const_iterator itr = GuildStore.begin(); itr != GuildStore.end(); ++itr)
+        for (auto GuildStoreMap : GuildStore)
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_ACHIEVEMENT);
-            stmt->setUInt32(0, itr->first);
+            stmt->setUInt32(0,GuildStoreMap.first);
             achievementResult = CharacterDatabase.Query(stmt);
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_ACHIEVEMENT_CRITERIA);
-            stmt->setUInt32(0, itr->first);
+            stmt->setUInt32(0, GuildStoreMap.first);
             criteriaResult = CharacterDatabase.Query(stmt);
 
-            itr->second->GetAchievementMgr().LoadFromDB(achievementResult, criteriaResult);
+            GuildStoreMap.second->GetAchievementMgr().LoadFromDB(achievementResult, criteriaResult);
         }
     }
 
@@ -453,10 +453,9 @@ void GuildMgr::LoadGuilds()
     {
         uint32 oldMSTime = getMSTime();
 
-        for (GuildContainer::iterator itr = GuildStore.begin(); itr != GuildStore.end();)
+        for (auto GuildStoreMap : GuildStore)
         {
-            Guild* guild = itr->second;
-            ++itr;
+            Guild* guild = GuildStoreMap.second;
             if (guild && !guild->Validate())
                 delete guild;
         }
@@ -582,7 +581,7 @@ void GuildMgr::ResetTimes(bool week)
     CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_UPD_GUILD_RESET_TODAY_EXPERIENCE));
     CharacterDatabase.Execute(CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_MEMBER_WITHDRAW));
 
-    for (GuildContainer::const_iterator itr = GuildStore.begin(); itr != GuildStore.end(); ++itr)
-        if (Guild* guild = itr->second)
+    for (auto GuildStoreMap : GuildStore)
+        if (Guild* guild = GuildStoreMap.second)
             guild->ResetTimes(week);
 }

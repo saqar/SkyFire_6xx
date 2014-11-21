@@ -22,13 +22,9 @@
 #include "GuildMgr.h"
 #include "World.h"
 
-GuildFinderMgr::GuildFinderMgr()
-{
-}
+GuildFinderMgr::GuildFinderMgr() { }
 
-GuildFinderMgr::~GuildFinderMgr()
-{
-}
+GuildFinderMgr::~GuildFinderMgr() { }
 
 void GuildFinderMgr::LoadFromDB()
 {

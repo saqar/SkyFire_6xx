@@ -2077,8 +2077,8 @@ void Unit::SendMeleeAttackStart(Unit* victim)
 {
     WorldPacket data(SMSG_ATTACKSTART, 8 + 8);
 
-    ObjectGuid attackerGuid = victim->GetGUID();
-    ObjectGuid victimGuid = GetGUID();
+    ObjectGuid attackerGuid = victim->GetGUID128();
+    ObjectGuid victimGuid = GetGUID128();
 
     data << attackerGuid;
     data << victimGuid;
@@ -2088,15 +2088,16 @@ void Unit::SendMeleeAttackStart(Unit* victim)
 
 void Unit::SendMeleeAttackStop(Unit* victim)
 {
-    WorldPacket data(SMSG_ATTACKSTOP, 8 + 8);
+    WorldPacket data(SMSG_ATTACKSTOP, 16 + 16);
 
-    ObjectGuid attackerGuid = GetGUID();
-    ObjectGuid victimGuid = victim ? victim->GetGUID() : 0;
+    ObjectGuid attackerGuid = GetGUID128();
+    ObjectGuid victimGuid = victim ? victim->GetGUID128() : 0;
 
     data << attackerGuid;
     data << victimGuid;
     data.WriteBit(0);
     data.FlushBits();
+
     SendMessageToSet(&data, true);
 }
 

@@ -110,25 +110,24 @@ void Guild::SendCommandResult(WorldSession* session, GuildCommandType type, Guil
 
     session->SendPacket(&data);
 
-    TC_LOG_DEBUG("guild", "SMSG_GUILD_COMMAND_RESULT [%s]: Type: %u, code: %u, param: %s"
-         , session->GetPlayerInfo().c_str(), type, errCode, param.c_str());
+    TC_LOG_DEBUG("guild", "SMSG_GUILD_COMMAND_RESULT [%s]: Type: %u, code: %u, param: %s",
+        session->GetPlayerInfo().c_str(), type, errCode, param.c_str());
 }
 
 void Guild::SendSaveEmblemResult(WorldSession* session, GuildEmblemError errCode)
 {
     WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);
+
     data << uint32(errCode);
     session->SendPacket(&data);
 
     TC_LOG_DEBUG("guild", "MSG_SAVE_GUILD_EMBLEM [%s] Code: %u", session->GetPlayerInfo().c_str(), errCode);
 }
 
-// LogHolder
 Guild::LogHolder::~LogHolder()
 {
-    // Cleanup
-    for (GuildLog::iterator itr = m_log.begin(); itr != m_log.end(); ++itr)
-        delete (*itr);
+    for (auto m_logMap : m_log)
+        delete (m_logMap);
 }
 
 // Adds event loaded from database to collection
@@ -161,8 +160,9 @@ inline void Guild::LogHolder::WritePacket(WorldPacket& data) const
 {
     ByteBuffer buffer;
     data.WriteBits(m_log.size(), 21);
-    for (GuildLog::const_iterator itr = m_log.begin(); itr != m_log.end(); ++itr)
-        (*itr)->WritePacket(data, buffer);
+
+    for (auto LogMap : m_log)
+        (LogMap)->WritePacket(data, buffer);
 
     data.FlushBits();
     data.append(buffer);
@@ -540,14 +540,16 @@ bool Guild::BankTab::SetItem(SQLTransaction& trans, uint8 slotId, Item* item)
 void Guild::BankTab::SendText(Guild const* guild, WorldSession* session) const
 {
     WorldPacket data(SMSG_GUILD_BANK_QUERY_TEXT_RESULT, 1 + m_text.size() + 1);
+
     data.WriteBits(m_text.length(), 14);
     data << uint32(m_tabId);
     data.WriteString(m_text);
 
     if (session)
     {
-        TC_LOG_DEBUG("guild", "SMSG_GUILD_BANK_QUERY_TEXT_RESULT [%s]: Tabid: %u, Text: %s"
-            , session->GetPlayerInfo().c_str(), m_tabId, m_text.c_str());
+        TC_LOG_DEBUG("guild", "SMSG_GUILD_BANK_QUERY_TEXT_RESULT [%s]: Tabid: %u, Text: %s",
+            session->GetPlayerInfo().c_str(), m_tabId, m_text.c_str());
+
         session->SendPacket(&data);
     }
     else
@@ -801,8 +803,8 @@ void Guild::MoveItemData::LogAction(MoveItemData* pFrom) const
 
 inline void Guild::MoveItemData::CopySlots(SlotIds& ids) const
 {
-    for (ItemPosCountVec::const_iterator itr = m_vec.begin(); itr != m_vec.end(); ++itr)
-        ids.insert(uint8(itr->pos));
+    for (auto VecMap : m_vec)
+        ids.insert(uint8(VecMap.pos));
 }
 
 // PlayerMoveItemData
@@ -1084,18 +1086,8 @@ InventoryResult Guild::BankMoveItemData::CanStore(Item* pItem, bool swap)
 }
 
 // Guild
-Guild::Guild():
-    m_id(0),
-    m_leaderGuid(0),
-    m_createdDate(0),
-    m_accountsNumber(0),
-    m_bankMoney(0),
-    m_eventLog(NULL),
-    m_newsLog(NULL),
-    m_achievementMgr(this),
-    _level(1),
-    _experience(0),
-    _todayExperience(0)
+Guild::Guild(): m_id(0), m_leaderGuid(0), m_createdDate(0), m_accountsNumber(0), m_bankMoney(0), m_eventLog(NULL), m_newsLog(NULL),
+                m_achievementMgr(this), _level(1), _experience(0), _todayExperience(0)
 {
     memset(&m_bankEventLog, 0, (GUILD_BANK_MAX_TABS + 1) * sizeof(LogHolder*));
 }
@@ -1117,10 +1109,10 @@ Guild::~Guild()
         m_bankEventLog[tabId] = NULL;
     }
 
-    for (Members::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    for (auto MembersMap : m_members)
     {
-        delete itr->second;
-        itr->second = NULL;
+        delete MembersMap.second;
+        MembersMap.second = NULL;
     }
 }
 
@@ -1323,9 +1315,9 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
     data << uint32(m_accountsNumber);                                                   // NumAccounts
     data << uint32(sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP));                  // MaxWeeklyRep
 
-    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    for (auto MembersMap : m_members)
     {
-        Member* member = itr->second;
+        Member* member = MembersMap.second;
         size_t pubNoteLength = member->GetPublicNote().length();
         size_t offNoteLength = member->GetOfficerNote().length();
 
@@ -2020,6 +2012,7 @@ void Guild::HandleGuildPartyRequest(WorldSession* session)
         return;
 
     WorldPacket data(SMSG_GUILD_PARTY_STATE_RESPONSE, 13);
+
     data.WriteBit(player->GetMap()->GetOwnerGuildId(player->GetTeam()) == GetId()); // Is guild group
     data.FlushBits();
     data << float(0.f);                                                             // Guild XP multiplier
@@ -2027,13 +2020,16 @@ void Guild::HandleGuildPartyRequest(WorldSession* session)
     data << uint32(0);                                                              // Needed guild members
 
     session->SendPacket(&data);
+
     TC_LOG_DEBUG("guild", "SMSG_GUILD_PARTY_STATE_RESPONSE [%s]", session->GetPlayerInfo().c_str());
 }
 
 void Guild::SendEventLog(WorldSession* session) const
 {
     WorldPacket data(SMSG_GUILD_EVENT_LOG_QUERY_RESULT, 3 + m_eventLog->GetSize() * (1 + 9 + 9 + 4 + 4));
+
     m_eventLog->WritePacket(data);
+
     session->SendPacket(&data);
     TC_LOG_DEBUG("guild", "SMSG_GUILD_EVENT_LOG_QUERY_RESULT [%s]", session->GetPlayerInfo().c_str());
 }
@@ -2047,21 +2043,15 @@ void Guild::SendNewsUpdate(WorldSession* session)
         return;
 
     WorldPacket data(SMSG_GUILD_NEWS_UPDATE, (21 + size * (26 + 8)) / 8 + (8 + 6 * 4) * size);
+
     data.WriteBits(size, 19);
 
     for (GuildLog::const_iterator itr = logs->begin(); itr != logs->end(); ++itr)
     {
         ObjectGuid guid = ((NewsLogEntry*)(*itr))->GetPlayerGuid();
 
-        data.WriteBit(guid[3]);
+        data << guid;
         data.WriteBits(0, 24); // Not yet implemented used for guild achievements
-        data.WriteBit(guid[4]);
-        data.WriteBit(guid[5]);
-        data.WriteBit(guid[6]);
-        data.WriteBit(guid[0]);
-        data.WriteBit(guid[7]);
-        data.WriteBit(guid[2]);
-        data.WriteBit(guid[1]);
     }
 
     data.FlushBits();
@@ -2116,6 +2106,7 @@ void Guild::SendPermissions(WorldSession* session) const
     uint8 rankId = member->GetRankId();
 
     WorldPacket data(SMSG_GUILD_PERMISSIONS_QUERY_RESULTS, 4 * 15 + 1);
+
     data << uint32(_GetMemberRemainingMoney(member));
     data << uint32(_GetPurchasedTabsSize());
     data << uint32(_GetRankRights(rankId));
@@ -2140,7 +2131,9 @@ void Guild::SendMoneyInfo(WorldSession* session) const
 
     int32 amount = _GetMemberRemainingMoney(member);
     WorldPacket data(SMSG_GUILD_BANK_MONEY_WITHDRAWN, 8);
+
     data << int64(amount);
+
     session->SendPacket(&data);
     TC_LOG_DEBUG("guild", "SMSG_GUILD_BANK_MONEY_WITHDRAWN [%s] Money: %u", session->GetPlayerInfo().c_str(), amount);
 }
@@ -2164,9 +2157,11 @@ void Guild::SendLoginInfo(WorldSession* session)
     */
 
     WorldPacket data(SMSG_GUILD_EVENT, 1 + 1 + m_motd.size() + 1);
+
     data << uint8(GE_MOTD);
     data << uint8(1);
     data << m_motd;
+
     session->SendPacket(&data);
 
     TC_LOG_DEBUG("guild", "SMSG_GUILD_EVENT [%s] MOTD", session->GetPlayerInfo().c_str());
@@ -2176,10 +2171,12 @@ void Guild::SendLoginInfo(WorldSession* session)
 
     // Send to self separately, player is not in world yet and is not found by _BroadcastEvent
     data.Initialize(SMSG_GUILD_EVENT, 1 + 1 + player->GetName().size() + 8);
+
     data << uint8(GE_SIGNED_ON);
     data << uint8(1);
     data << player->GetName();
     data << uint64(player->GetGUID());
+
     session->SendPacket(&data);
 
     data.Initialize(SMSG_GUILD_MEMBER_DAILY_RESET, 0);  // tells the client to request bank withdrawal limit
@@ -2431,8 +2428,8 @@ void Guild::BroadcastToGuild(WorldSession* session, bool officerOnly, std::strin
     {
         WorldPacket data;
         ChatHandler::BuildChatPacket(data, officerOnly ? CHAT_MSG_OFFICER : CHAT_MSG_GUILD, Language(language), session->GetPlayer(), NULL, msg);
-        for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-            if (Player* player = itr->second->FindPlayer())
+        for (auto MembersMap : m_members)
+            if (Player* player = MembersMap.second->FindPlayer())
                 if (player->GetSession() && _HasRankRight(player, officerOnly ? GR_RIGHT_OFFCHATLISTEN : GR_RIGHT_GCHATLISTEN) &&
                     !player->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()))
                     player->GetSession()->SendPacket(&data);
@@ -2445,8 +2442,8 @@ void Guild::BroadcastAddonToGuild(WorldSession* session, bool officerOnly, std::
     {
         WorldPacket data;
         ChatHandler::BuildChatPacket(data, officerOnly ? CHAT_MSG_OFFICER : CHAT_MSG_GUILD, LANG_ADDON, session->GetPlayer(), NULL, msg, 0, "", DEFAULT_LOCALE, prefix);
-        for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-            if (Player* player = itr->second->FindPlayer())
+        for (auto MembersMap : m_members)
+            if (Player* player = MembersMap.second->FindPlayer())
                 if (player->GetSession() && _HasRankRight(player, officerOnly ? GR_RIGHT_OFFCHATLISTEN : GR_RIGHT_GCHATLISTEN) &&
                     !player->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()) &&
                     player->GetSession()->IsAddonRegistered(prefix))
@@ -2456,16 +2453,16 @@ void Guild::BroadcastAddonToGuild(WorldSession* session, bool officerOnly, std::
 
 void Guild::BroadcastPacketToRank(WorldPacket* packet, uint8 rankId) const
 {
-    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        if (itr->second->IsRank(rankId))
-            if (Player* player = itr->second->FindPlayer())
+    for (auto MembersMap : m_members)
+        if (MembersMap.second->IsRank(rankId))
+            if (Player* player = MembersMap.second->FindPlayer())
                 player->GetSession()->SendPacket(packet);
 }
 
 void Guild::BroadcastPacket(WorldPacket* packet) const
 {
-    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        if (Player* player = itr->second->FindPlayer())
+    for (auto MembersMap : m_members)
+        if (Player* player = MembersMap.second->FindPlayer())
             player->GetSession()->SendPacket(packet);
 }
 
@@ -2476,7 +2473,7 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
     WorldPacket data(SMSG_CALENDAR_FILTER_GUILD);
     data << uint32(count); // count placeholder
 
-    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    for (auto MembersMap : m_members)
     {
         // not sure if needed, maybe client checks it as well
         if (count >= CALENDAR_MAX_INVITES)
@@ -2486,7 +2483,7 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
             return;
         }
 
-        Member* member = itr->second;
+        Member* member = MembersMap.second;
         uint32 level = Player::GetLevelFromDB(member->GetGUID());
 
         if (member->GetGUID() != session->GetPlayer()->GetGUID() && level >= minLevel && level <= maxLevel && member->IsRankNotLower(minRank))
@@ -2776,8 +2773,8 @@ void Guild::_UpdateAccountsNumber()
 {
     // We use a set to be sure each element will be unique
     std::set<uint32> accountsIdSet;
-    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        accountsIdSet.insert(itr->second->GetAccountId());
+    for (auto MembersMap : m_members)
+        accountsIdSet.insert(MembersMap.second->GetAccountId());
 
     m_accountsNumber = accountsIdSet.size();
 }
@@ -3183,11 +3180,11 @@ void Guild::_SendBankContentUpdate(uint8 tabId, SlotIds slots) const
         size_t rempos = data.wpos();
         data << uint32(0);                                      // Item withdraw amount, will be filled later
 
-        for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-            if (_MemberHasTabRights(itr->second->GetGUID(), tabId, GUILD_BANK_RIGHT_VIEW_TAB))
-                if (Player* player = itr->second->FindPlayer())
+        for (auto MembersMap : m_members)
+            if (_MemberHasTabRights(MembersMap.second->GetGUID(), tabId, GUILD_BANK_RIGHT_VIEW_TAB))
+                if (Player* player = MembersMap.second->FindPlayer())
                 {
-                    data.put<uint32>(rempos, uint32(_GetMemberRemainingSlots(itr->second, tabId)));
+                    data.put<uint32>(rempos, uint32(_GetMemberRemainingSlots(MembersMap.second, tabId)));
                     player->GetSession()->SendPacket(&data);
                 }
 
@@ -3200,6 +3197,7 @@ void Guild::_BroadcastEvent(GuildEvents guildEvent, uint64 guid, const char* par
     uint8 count = !param3 ? (!param2 ? (!param1 ? 0 : 1) : 2) : 3;
 
     WorldPacket data(SMSG_GUILD_EVENT, 1 + 1 + count + (guid ? 8 : 0));
+
     data << uint8(guildEvent);
     data << uint8(count);
 
@@ -3328,7 +3326,6 @@ void Guild::SendGuildRanksUpdate(uint64 setterGuid, uint64 targetGuid, uint32 ra
     data.FlushBits();
     data << uint32(rank);
 
-
     BroadcastPacket(&data);
 
     member->ChangeRank(rank);
@@ -3351,7 +3348,9 @@ void Guild::GiveXP(uint32 xp, Player* source)
         xp = std::min(xp, sWorld->getIntConfig(CONFIG_GUILD_DAILY_XP_CAP) - uint32(_todayExperience));
 
     WorldPacket data(SMSG_GUILD_XP_GAIN, 8);
+
     data << uint64(xp);
+
     source->GetSession()->SendPacket(&data);
 
     _experience += xp;
@@ -3376,9 +3375,9 @@ void Guild::GiveXP(uint32 xp, Player* source)
                     perksToLearn.push_back(entry->SpellId);
 
         // Notify all online players that guild level changed and learn perks
-        for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        for (auto MembersMap : m_members)
         {
-            if (Player* player = itr->second->FindPlayer())
+            if (Player* player = MembersMap.second->FindPlayer())
             {
                 player->SetGuildLevel(GetLevel());
                 for (size_t i = 0; i < perksToLearn.size(); ++i)
@@ -3398,10 +3397,12 @@ void Guild::SendGuildXP(WorldSession* session /* = NULL */) const
     Member const* member = GetMember(session->GetGuidLow());
 
     WorldPacket data(SMSG_GUILD_XP, 32);
+
     data << uint64(GetExperience());
     data << uint64(member ? member->GetWeekActivity() : 0);
     data << uint64(member ? member->GetTotalActivity() : 0);
     data << uint64(sGuildMgr->GetXPForGuildLevel(GetLevel()) - GetExperience());    // XP missing for next level
+
     session->SendPacket(&data);
 }
 
@@ -3409,19 +3410,21 @@ void Guild::SendGuildReputationWeeklyCap(WorldSession* session, uint32 reputatio
 {
     uint32 cap = sWorld->getIntConfig(CONFIG_GUILD_WEEKLY_REP_CAP) - reputation;
     WorldPacket data(SMSG_GUILD_REPUTATION_WEEKLY_CAP, 4);
+
     data << uint32(cap);
+
     session->SendPacket(&data);
-    TC_LOG_DEBUG("guild", "SMSG_GUILD_REPUTATION_WEEKLY_CAP [%s]: Left: %u",
-                   session->GetPlayerInfo().c_str(), cap);
+
+    TC_LOG_DEBUG("guild", "SMSG_GUILD_REPUTATION_WEEKLY_CAP [%s]: Left: %u", session->GetPlayerInfo().c_str(), cap);
 }
 
 void Guild::ResetTimes(bool weekly)
 {
     _todayExperience = 0;
-    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    for (auto MembersMap : m_members)
     {
-        itr->second->ResetValues(weekly);
-        if (Player* player = itr->second->FindPlayer())
+        MembersMap.second->ResetValues(weekly);
+        if (Player* player = MembersMap.second->FindPlayer())
         {
             //SendGuildXP(player->GetSession());
             WorldPacket data(SMSG_GUILD_MEMBER_DAILY_RESET, 0);  // tells the client to request bank withdrawal limit
@@ -3478,8 +3481,10 @@ void Guild::HandleNewsSetSticky(WorldSession* session, uint32 newsId, bool stick
         session->GetPlayerInfo().c_str(), newsId, sticky);
 
     WorldPacket data(SMSG_GUILD_NEWS_UPDATE, 7 + 32);
+
     data.WriteBits(1, 19);
     ByteBuffer buffer;
     news->WritePacket(data, buffer);
+
     session->SendPacket(&data);
 }

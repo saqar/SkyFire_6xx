@@ -4499,11 +4499,9 @@ void Spell::EffectPlaySound(SpellEffIndex effIndex)
         return;
     }
 
-    ObjectGuid guid = m_caster->GetGUID();
-
-    WorldPacket data(SMSG_PLAY_SOUND, 4 + 9);
-    data << guid;
+    WorldPacket data(SMSG_PLAY_SOUND, 4 + 2 + 16);
     data << soundId;
+    data << ObjectGuid(m_caster->GetGUID128());
 
     unitTarget->ToPlayer()->GetSession()->SendPacket(&data);
 }

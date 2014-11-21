@@ -451,11 +451,11 @@ void BattlegroundMgr::BuildUpdateWorldStatePacket(WorldPacket* data, uint32 fiel
     *data << uint32(field);
 }
 
-void BattlegroundMgr::BuildPlaySoundPacket(WorldPacket* data, uint32 soundid)
+void BattlegroundMgr::BuildPlaySoundPacket(WorldPacket* data, uint32 soundId)
 {
-    data->Initialize(SMSG_PLAY_SOUND, 4 + 9);
-    data->WriteBits(0, 8);
-    *data << uint32(soundid);
+    data->Initialize(SMSG_PLAY_SOUND, 4 + 2);
+    *data << uint32(soundId);
+    *data << ObjectGuid(0);
 }
 
 void BattlegroundMgr::BuildPlayerLeftBattlegroundPacket(WorldPacket* data, uint64 guid)

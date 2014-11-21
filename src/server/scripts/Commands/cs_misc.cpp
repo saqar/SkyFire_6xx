@@ -2410,11 +2410,9 @@ public:
             return false;
         }
 
-        ObjectGuid guid = handler->GetSession()->GetPlayer()->GetGUID();
-
-        WorldPacket data(SMSG_PLAY_SOUND, 4 + 9);
-        data << guid;
-        data << soundId;
+        WorldPacket data(SMSG_PLAY_SOUND, 4 + 2 + 16);
+        data << uint32(soundId);
+        data << ObjectGuid(handler->GetSession()->GetPlayer()->GetGUID128());
 
         sWorld->SendGlobalMessage(&data);
 

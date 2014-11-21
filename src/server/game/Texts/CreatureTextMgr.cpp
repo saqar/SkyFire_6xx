@@ -326,11 +326,9 @@ void CreatureTextMgr::SendSound(Creature* source, uint32 sound, ChatMsg msgType,
     if (!sound || !source)
         return;
 
-    ObjectGuid guid = source->GetGUID();
-
-    WorldPacket data(SMSG_PLAY_SOUND, 4 + 9);
-    data << guid;
-    data << sound;
+    WorldPacket data(SMSG_PLAY_SOUND, 4 + 2 + 16);
+    data << uint32(sound);
+    data << ObjectGuid(source->GetGUID128());
 
     SendNonChatPacket(source, &data, msgType, whisperTarget, range, team, gmOnly);
 }

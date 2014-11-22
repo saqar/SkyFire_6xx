@@ -18,8 +18,6 @@
  */
 
 #include "AccountMgr.h"
-#include "ArenaTeam.h"
-#include "ArenaTeamMgr.h"
 #include "Battleground.h"
 #include "BattlePayMgr.h"
 #include "CalendarMgr.h"
@@ -161,10 +159,6 @@ bool LoginQueryHolder::Initialize()
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_MEMBER);
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_GUILD, stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_ARENAINFO);
-    stmt->setUInt32(0, lowGuid);
-    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_ARENA_INFO, stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_ACHIEVEMENTS);
     stmt->setUInt32(0, lowGuid);
@@ -752,15 +746,6 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
     {
         WorldPacket data(SMSG_CHAR_DELETE, 1);
         data << uint8(CHAR_DELETE_FAILED_GUILD_LEADER);
-        SendPacket(&data);
-        return;
-    }
-
-    // is arena team captain
-    if (sArenaTeamMgr->GetArenaTeamByCaptain(guid))
-    {
-        WorldPacket data(SMSG_CHAR_DELETE, 1);
-        data << uint8(CHAR_DELETE_FAILED_ARENA_CAPTAIN);
         SendPacket(&data);
         return;
     }
@@ -2122,9 +2107,6 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                 trans->Append(stmt);
 
             }
-
-            // Leave Arena Teams
-            Player::LeaveAllArenaTeams(guid);
 
             // Reset homebind and position
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PLAYER_HOMEBIND);

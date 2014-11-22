@@ -108,7 +108,6 @@ void GarrisonMgr::LoadAbilitiesFromDb()
             continue;
         }
 
-
         Abilities* ability = new Abilities(ID, Type, Name, Description, SpellId, Data1, Data2);
 
         m_AbilitiesStore.insert(ability);

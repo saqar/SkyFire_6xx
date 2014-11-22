@@ -3202,7 +3202,10 @@ enum HolidayIds
     HOLIDAY_RATED_BG_25_VS_25        = 443,
     HOLIDAY_ANNIVERSARY_7_YEARS      = 467,
     HOLIDAY_DARKMOON_FAIRE_TEROKKAR  = 479,
-    HOLIDAY_ANNIVERSARY_8_YEARS      = 484
+    HOLIDAY_ANNIVERSARY_8_YEARS      = 484,
+    HOLIDAY_CALL_TO_ARMS_SM          = 488,
+    HOLIDAY_CALL_TO_ARMS_TOK         = 489,
+    HOLIDAY_CALL_TO_ARMS_DG          = 515
 };
 
 // values based at QuestInfo.dbc
@@ -3940,13 +3943,13 @@ enum BattlegroundTypeId
     BATTLEGROUND_BFG            = 120, // Battle For Gilneas
     // 441 = "Icecrown Citadel"
     // 443 = "The Ruby Sanctum"
-    // 656 = "Rated Eye of the Storm"
-    BATTLEGROUND_TOK           = 699, // 5.x Temple of Kotmogu
-    BATTLEGROUND_CTF           = 706, // 5.x CTF3
-    BATTLEGROUND_SM            = 708, // 5.x Silvershard Mines
-    BATTLEGROUND_TA            = 719, // 5.x Tol'Vir Arena
-    BATTLEGROUND_DG            = 754, // 5.x Deepwind Gorge
-    BATTLEGROUND_TTP           = 757, // 5.x The Tiger's Peak
+    BATTLEGROUND_RATED_EY       = 656, // Rated Eye of The Storm
+    BATTLEGROUND_TOK            = 699, // Temple of Kotmogu
+    BATTLEGROUND_CTF            = 706, // CTF3
+    BATTLEGROUND_SM             = 708, // Silvershard Mines
+    BATTLEGROUND_TA             = 719, // Tol'Viron Arena
+    BATTLEGROUND_DG             = 754, // Deepwind Gorge
+    BATTLEGROUND_TTP            = 757, // The Tiger's Peak
 };
 
 #define MAX_BATTLEGROUND_TYPE_ID 758
@@ -4096,10 +4099,14 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_IC       = 6,
     BATTLEGROUND_QUEUE_TP       = 7,
     BATTLEGROUND_QUEUE_BFG      = 8,
-    BATTLEGROUND_QUEUE_RB       = 9,
-    BATTLEGROUND_QUEUE_2v2      = 10,
-    BATTLEGROUND_QUEUE_3v3      = 11,
-    BATTLEGROUND_QUEUE_5v5      = 12,
+    BATTLEGROUND_QUEUE_TOK      = 9,
+    BATTLEGROUND_QUEUE_DG       = 10,
+    BATTLEGROUND_QUEUE_SM       = 11,
+    BATTLEGROUND_QUEUE_RB       = 12,
+    BATTLEGROUND_QUEUE_2v2      = 13,
+    BATTLEGROUND_QUEUE_3v3      = 14,
+    BATTLEGROUND_QUEUE_5v5      = 15,
+    BATTLEGROUND_QUEUE_10v10    = 16,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 

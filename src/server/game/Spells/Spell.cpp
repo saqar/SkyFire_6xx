@@ -5699,26 +5699,26 @@ SpellCastResult Spell::CheckCasterAuras() const
 SpellCastResult Spell::CheckArenaAndRatedBattlegroundCastRules()
 {
     bool isRatedBattleground = false; // NYI
-    bool isArena = !isRatedBattleground;
+    bool IsArena = !isRatedBattleground;
 
     // check USABLE attributes
     // USABLE takes precedence over NOT_USABLE
     if (isRatedBattleground && m_spellInfo->AttributesEx9 & SPELL_ATTR9_USABLE_IN_RATED_BATTLEGROUNDS)
         return SPELL_CAST_OK;
 
-    if (isArena && m_spellInfo->AttributesEx4 & SPELL_ATTR4_USABLE_IN_ARENA)
+    if (IsArena && m_spellInfo->AttributesEx4 & SPELL_ATTR4_USABLE_IN_ARENA)
         return SPELL_CAST_OK;
 
     // check NOT_USABLE attributes
     if (m_spellInfo->AttributesEx4 & SPELL_ATTR4_NOT_USABLE_IN_ARENA_OR_RATED_BG)
-        return isArena ? SPELL_FAILED_NOT_IN_ARENA : SPELL_FAILED_NOT_IN_RATED_BATTLEGROUND;
+        return IsArena ? SPELL_FAILED_NOT_IN_ARENA : SPELL_FAILED_NOT_IN_RATED_BATTLEGROUND;
 
-    if (isArena && m_spellInfo->AttributesEx9 & SPELL_ATTR9_NOT_USABLE_IN_ARENA)
+    if (IsArena && m_spellInfo->AttributesEx9 & SPELL_ATTR9_NOT_USABLE_IN_ARENA)
             return SPELL_FAILED_NOT_IN_ARENA;
 
     // check cooldowns
     uint32 spellCooldown = m_spellInfo->GetRecoveryTime();
-    if (isArena && spellCooldown > 10 * MINUTE * IN_MILLISECONDS) // not sure if still needed
+    if (IsArena && spellCooldown > 10 * MINUTE * IN_MILLISECONDS) // not sure if still needed
         return SPELL_FAILED_NOT_IN_ARENA;
 
     if (isRatedBattleground && spellCooldown > 15 * MINUTE * IN_MILLISECONDS)

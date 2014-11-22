@@ -835,7 +835,6 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS         = 14,
     PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES          = 15,
     PLAYER_LOGIN_QUERY_LOAD_GUILD                   = 16,
-    PLAYER_LOGIN_QUERY_LOAD_ARENA_INFO              = 17,
     PLAYER_LOGIN_QUERY_LOAD_ACHIEVEMENTS            = 18,
     PLAYER_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS       = 19,
     PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS          = 20,
@@ -1874,14 +1873,8 @@ class Player : public Unit, public GridObject<Player>
         static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
 
         // Arena Team
-        void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, uint8 type);
-        void SetArenaTeamInfoField(uint8 slot, ArenaTeamInfoType type, uint32 value);
-        static uint32 GetArenaTeamIdFromDB(uint64 guid, uint8 slot);
-        static void LeaveAllArenaTeams(uint64 guid);
         uint32 GetArenaTeamId(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_PVP_INFO + (slot * ARENA_TEAM_END) + ARENA_TEAM_ID); }
         uint32 GetArenaPersonalRating(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_PVP_INFO + (slot * ARENA_TEAM_END) + ARENA_TEAM_PERSONAL_RATING); }
-        void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
-        uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         uint32 GetRBGPersonalRating() const { return 0; }
 
         Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
@@ -2565,7 +2558,6 @@ class Player : public Unit, public GridObject<Player>
         void _LoadFriendList(PreparedQueryResult result);
         bool _LoadHomeBind(PreparedQueryResult result);
         void _LoadDeclinedNames(PreparedQueryResult result);
-        void _LoadArenaTeamInfo(PreparedQueryResult result);
         void _LoadEquipmentSets(PreparedQueryResult result);
         void _LoadBGData(PreparedQueryResult result);
         void _LoadGlyphs(PreparedQueryResult result);

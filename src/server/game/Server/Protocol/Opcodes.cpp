@@ -71,16 +71,6 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_AREATRIGGER,                                         0x01B4, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAreaTriggerOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_AREA_SPIRIT_HEALER_QUERY,                            0x0A08, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueryOpcode  ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_AREA_SPIRIT_HEALER_QUEUE,                            0x1921, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueueOpcode  ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_ACCEPT,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamAcceptOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_CREATE,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamCreateOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_DECLINE,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamDeclineOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_DISBAND,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamDisbandOpcode       );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_INVITE,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamInviteOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_LEADER,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamLeaderOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_LEAVE,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamLeaveOpcode         );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_QUERY,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamQueryOpcode         );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_REMOVE,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamRemoveOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_ARENA_TEAM_ROSTER,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleArenaTeamRosterOpcode        );
     DEFINE_OPCODE_HANDLER(CMSG_ATTACKSTOP,                                          0x065B, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleAttackStopOpcode             ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_ATTACKSWING,                                         0x1E9B, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleAttackSwingOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_AUTH_SESSION,                                        0x0487, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess               ); // 6.0.3 19116
@@ -225,8 +215,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PVP_OPTIONS_ENABLED,                         0x120C, STATUS_AUTHED,    PROCESS_INPLACE,      &WorldSession::HandleRequestPvpOptions            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PVP_REWARDS,                                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleRequestPvpReward             );
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_RAID_INFO,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRequestRaidInfoOpcode        );
-    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_RATED_BG_INFO,                               0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleRequestRatedBgInfo           );
-    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_RATED_BG_STATS,                              0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleRequestRatedBgStats          );
+    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_RATED_INFO,                                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleRequestRatedInfo             );
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_RESEARCH_HISTORY,                            0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_EXIT,                                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleRequestVehicleExit           );
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_NEXT_SEAT,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle);
@@ -304,15 +293,13 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_USED_FOLLOW,                                         0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_VIOLENCE_LEVEL,                                      0x0000, STATUS_AUTHED,    PROCESS_INPLACE,      &WorldSession::HandleViolenceLevel                );
     DEFINE_OPCODE_HANDLER(CMSG_WARDEN_DATA,                                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWardenDataOpcode             );
-    DEFINE_OPCODE_HANDLER(CMSG_WARGAME_ACCEPT,                                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_WARGAME_START,                                       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_WARGAME_REQUEST,                                     0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleWargameRequest               );
     DEFINE_OPCODE_HANDLER(CMSG_WHO,                                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWhoOpcode                    );
     DEFINE_OPCODE_HANDLER(CMSG_WHOIS,                                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWhoisOpcode                  );
     DEFINE_OPCODE_HANDLER(CMSG_WORLD_STATE_UI_TIMER_UPDATE,                         0x0302, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleWorldStateUITimerUpdate      ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_WORLD_TELEPORT,                                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleWorldTeleportOpcode          );
     DEFINE_OPCODE_HANDLER(CMSG_ZONEUPDATE,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleZoneUpdateOpcode             );
     DEFINE_OPCODE_HANDLER(CMSG_CORPSE_QUERY,                                        0x128A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCorpseQueryOpcode            ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(MSG_INSPECT_ARENA_TEAMS,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleInspectArenaTeamsOpcode      );
     DEFINE_OPCODE_HANDLER(MSG_LIST_STABLED_PETS,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleListStabledPetsOpcode        );
     DEFINE_OPCODE_HANDLER(MSG_NOTIFY_PARTY_SQUELCH,                                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(MSG_PARTY_ASSIGNMENT,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePartyAssignmentOpcode        );
@@ -376,18 +363,17 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LEAVE,                                   0x06F1, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBattlefieldLeaveOpcode       ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LIST,                                    0x03B1, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldListOpcode        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_ENTRY_INVITE_RESPONSE,               0x059A, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBfEntryInviteResponse        ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_EXIT_REQUEST,                        0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleBfExitRequest                );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_INVITE_RESPONSE,               0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleBfQueueInviteResponse        );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_REQUEST,                       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_EXIT_REQUEST,                        0x0B49, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleBfExitRequest                ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_INVITE_RESPONSE,               0x122A, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleBfQueueInviteResponse        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_MGR_QUEUE_REQUEST,                       0x1381, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_PORT,                                    0x11EB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattleFieldPortOpcode        ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_STATUS,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldStatusOpcode      );
-    DEFINE_OPCODE_HANDLER(CMSG_QUERY_BATTLEFIELD_STATE,                             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_STATUS,                                  0x0320, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlefieldStatusOpcode      ); // 6.0.3 19116
 
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEGROUND_PLAYER_POSITIONS,                       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleBattlegroundPlayerPositionsOpcode);
     
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN,                                   0x0D2E, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlemasterJoinOpcode       ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN_ARENA,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBattlemasterJoinArena        );
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN_RATED,                             0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN_RATED,                             0x06E4, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
 
     ///< Auction & Black Market
     DEFINE_OPCODE_HANDLER(CMSG_AUCTION_HELLO,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionHelloOpcode           );
@@ -765,13 +751,6 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_AREA_TRIGGER_MOVEMENT_UPDATE,                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ARENA_ERROR,                                     0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ARENA_UNIT_DESTROYED,                            0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_ARENA_TEAM_CHANGE_FAILED_QUEUED,                 0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_ARENA_TEAM_COMMAND_RESULT,                       0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_ARENA_TEAM_EVENT,                                0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_ARENA_TEAM_INVITE,                               0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_ARENA_TEAM_QUERY_RESPONSE,                       0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_ARENA_TEAM_ROSTER,                               0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_ARENA_TEAM_STATS,                                0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_ATTACKERSTATEUPDATE,                             0x1204, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_ATTACKSTART,                                     0x1D3E, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_ATTACKSTOP,                                      0x1382, STATUS_NEVER    ); // 6.0.3 19116
@@ -1070,7 +1049,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_STABLE_RESULT,                                   0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_STANDSTATE_UPDATE,                               0x1311, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_START_MIRROR_TIMER,                              0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_START_TIMER,                                     0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_START_TIMER,                                     0x0317, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_STOP_DANCE,                                      0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_STOP_MIRROR_TIMER,                               0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_STREAMING_MOVIE,                                 0x0000, STATUS_UNHANDLED);
@@ -1188,27 +1167,27 @@ void OpcodeTable::InitializeServerTable()
 
     ///< Battlefield & Battlegroud
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_LIST,                                0x11A1, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_EJECTED,                         0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_EJECT_PENDING,                   0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_ENTERED,                         0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_ENTRY_INVITE,                    0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_EJECTED,                         0x0DAF, STATUS_UNHANDLED); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_EJECT_PENDING,                   0x09A1, STATUS_UNHANDLED); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_ENTERED,                         0x11A3, STATUS_UNHANDLED); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_ENTRY_INVITE,                    0x128B, STATUS_UNHANDLED); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_EXIT_REQUEST,                    0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_QUEUE_INVITE,                    0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_QUEUE_REQUEST_RESPONSE,          0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_STATE_CHANGE,                    0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_PLAYER_POSITIONS,                    0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_PORT_DENIED,                         0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_QUEUE_REQUEST_RESPONSE,          0x0B28, STATUS_UNHANDLED); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_MGR_STATE_CHANGE,                    0x179A, STATUS_UNHANDLED); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_PORT_DENIED,                         0x0930, STATUS_UNHANDLED); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_RATED_INFO,                          0x1F0A, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_RATED_INFO,                          0x1F0A, STATUS_UNHANDLED); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_STATUS,                              0x1E89, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_STATUS_QUEUED,                       0x002D, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_STATUS_ACTIVE,                       0x1284, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_STATUS_NEEDCONFIRMATION,             0x1719, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_STATUS_WAITFORGROUPS,                0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_STATUS_WAITFORGROUPS,                0x082D, STATUS_UNHANDLED); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_STATUS_FAILED,                       0x0308, STATUS_NEVER    ); // 6.0.3 19116
 
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEGROUND_INFO_THROTTLED,                     0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEGROUND_PLAYER_JOINED,                      0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLEGROUND_PLAYER_LEFT,                        0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEGROUND_INFO_THROTTLED,                     0x19E2, STATUS_UNHANDLED); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEGROUND_PLAYER_JOINED,                      0x13EA, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEGROUND_PLAYER_LEFT,                        0x1BD1, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLEGROUND_PLAYER_POSITIONS,                   0x1BE9, STATUS_UNHANDLED); // 6.0.3 19116
 
     ///< Auction & Black market
     DEFINE_OPCODE_HANDLER(SMSG_AUCTION_BIDDER_LIST_RESULT,                      0x0000, STATUS_UNHANDLED);

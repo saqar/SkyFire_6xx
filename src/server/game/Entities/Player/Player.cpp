@@ -7341,51 +7341,46 @@ void Player::_SaveCurrency(SQLTransaction& trans)
 
 void Player::SendCurrencies() const
 {
-    size_t pSize = 3 + (_currencyStorage.size() * (1 + 4 + 4 + 4 + 4));
+    uint32 currencyCount = 0u;
 
-    WorldPacket packet(SMSG_INIT_CURRENCY, pSize);
-    size_t count_pos = packet.wpos();
-    packet << uint32(0);
+    WorldPacket packet(SMSG_INIT_CURRENCY, 4 + (4 + 4 + 1 + 4 + 4 + 4));
+    packet << uint32(currencyCount);    // placeholder
 
-    size_t count = 0;
-    for (auto CurrencyStorageMap : _currencyStorage)
+    for (auto currencyStorageMap : _currencyStorage)
     {
-        CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(CurrencyStorageMap.first);
-
+        CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(currencyStorageMap.first);
         if (!entry || entry->Category == CURRENCY_CATEGORY_META_CONQUEST)
             continue;
 
         uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-        uint32 WeeklyQuantity = CurrencyStorageMap.second.weekCount / precision;
-        uint32 MaxWeeklyQuantity = GetCurrencyWeekCap(entry) / precision; 
-        uint32 TrackedQuantity = CurrencyStorageMap.second.seasonCount;
-        bool sendSeason = TrackedQuantity > 0 && entry->HasSeasonCount();
-        TrackedQuantity /= precision;
-        uint32 Flags = CurrencyStorageMap.second.flags;
+        uint32 weeklyQuantity = currencyStorageMap.second.weekCount / precision;
+        uint32 maxWeeklyQuantity = GetCurrencyWeekCap(entry) / precision;
+        uint32 trackedQuantity = currencyStorageMap.second.seasonCount;
 
-        uint32 Type = entry->ID;
-        uint32 Quantity = CurrencyStorageMap.second.totalCount / precision;
+        bool sendSeason = trackedQuantity > 0 && entry->HasSeasonCount();
+        trackedQuantity /= precision;
 
-        packet << uint32(Type);
-        packet << uint32(Quantity);
-        packet.WriteBit(WeeklyQuantity);
-        packet.WriteBit(MaxWeeklyQuantity);
+        packet << uint32(entry->ID);
+        packet << uint32(currencyStorageMap.second.totalCount / precision);
+
+        packet.WriteBit(weeklyQuantity);
+        packet.WriteBit(maxWeeklyQuantity);
         packet.WriteBit(sendSeason);
-        packet.WriteBits(Flags, 5);
+        packet.WriteBits(currencyStorageMap.second.flags, 5);
 
-        if (WeeklyQuantity)
-            packet << uint32(WeeklyQuantity);
+        if (weeklyQuantity)
+            packet << uint32(weeklyQuantity);
 
-        if (MaxWeeklyQuantity)
-            packet << uint32(MaxWeeklyQuantity);
+        if (maxWeeklyQuantity)
+            packet << uint32(maxWeeklyQuantity);
         
         if (sendSeason)
-            packet << uint32(TrackedQuantity);
+            packet << uint32(trackedQuantity);
 
-        ++count;
+        currencyCount++;
     }
-    packet.put(count_pos, count);
 
+    packet.put<uint32>(0, currencyCount);
     GetSession()->SendPacket(&packet);
 }
 

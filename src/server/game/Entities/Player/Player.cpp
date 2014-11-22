@@ -20609,11 +20609,11 @@ void Player::SendAutoRepeatCancel(Unit* player)
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
+void Player::SendExplorationExperience(uint32 area, uint32 experience)
 {
-    WorldPacket data(SMSG_EXPLORATION_EXPERIENCE, 8);
-    data << uint32(Area);
-    data << uint32(Experience);
+    WorldPacket data(SMSG_EXPLORATION_EXPERIENCE, 4 + 4);
+    data << uint32(area);
+    data << uint32(experience);
     GetSession()->SendPacket(&data);
 }
 

@@ -38,7 +38,7 @@
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
     recvData >> guid;
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
@@ -63,7 +63,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from (GUID: %u TypeId:%u)", GUID_LOPART(guid), GuidHigh2TypeId(GUID_HIPART(guid)));
 }
 
-void WorldSession::SendBattleGroundList(uint64 guid, BattlegroundTypeId bgTypeId)
+void WorldSession::SendBattleGroundList(ObjectGuid guid, BattlegroundTypeId bgTypeId)
 {
     WorldPacket data;
     sBattlegroundMgr->BuildBattlegroundListPacket(&data, guid, _player, bgTypeId);
@@ -95,7 +95,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
     uint8 asGroup;
     bool isPremade = false;
     Group* grp = NULL;
-    uint64 guid;
+    ObjectGuid guid;
     uint8 roleMask = 0;
 
     recvData >> guid;
@@ -262,14 +262,14 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
     Player* aplr = NULL;
     Player* hplr = NULL;
 
-    if (uint64 guid = bg->GetFlagPickerGUID(TEAM_ALLIANCE))
+    if (ObjectGuid guid = bg->GetFlagPickerGUID(TEAM_ALLIANCE))
     {
         aplr = ObjectAccessor::FindPlayer(guid);
         if (aplr)
             ++acount;
     }
 
-    if (uint64 guid = bg->GetFlagPickerGUID(TEAM_HORDE))
+    if (ObjectGuid guid = bg->GetFlagPickerGUID(TEAM_HORDE))
     {
         hplr = ObjectAccessor::FindPlayer(guid);
         if (hplr)
@@ -658,7 +658,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
 
 void WorldSession::HandleReportPvPAFK(WorldPacket& recvData)
 {
-    uint64 playerGuid;
+    ObjectGuid playerGuid;
 
     recvData >> playerGuid;
 

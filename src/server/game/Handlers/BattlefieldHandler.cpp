@@ -30,20 +30,18 @@
 #include "Player.h"
 
 
-void WorldSession::SendBfInvitePlayerToWar(uint64 guid, uint32 zoneId, uint32 pTime)
+void WorldSession::SendBfInvitePlayerToWar(uint64 QueueID, uint32 AreaID, uint32 Time)
 {
-    ObjectGuid guidBytes = guid;
-
-    WorldPacket data(SMSG_BATTLEFIELD_MGR_ENTRY_INVITE, 4 + 16);
+    WorldPacket data(SMSG_BATTLEFIELD_MGR_ENTRY_INVITE, 4 + 4 + 16);
     
-    data << float(0);
-    data << uint32(zoneId);
-    data << uint32(time(NULL) + pTime);
+    data << QueueID;
+    data << AreaID;
+    data << Time;
 
     SendPacket(&data);
 }
 
-void WorldSession::SendBfInvitePlayerToQueue(uint64 guid)
+void WorldSession::SendBfInvitePlayerToQueue(ObjectGuid guid)
 {
     ObjectGuid guidBytes = guid;
 
@@ -62,7 +60,7 @@ void WorldSession::SendBfInvitePlayerToQueue(uint64 guid)
     SendPacket(&data);
 }
 
-void WorldSession::SendBfQueueInviteResponse(uint64 guid, uint32 ZoneId, bool CanQueue, bool Full)
+void WorldSession::SendBfQueueInviteResponse(ObjectGuid guid, uint32 ZoneId, bool CanQueue, bool Full)
 {
     const bool hasSecondGuid = false;
     const bool warmup = true;
@@ -79,7 +77,7 @@ void WorldSession::SendBfQueueInviteResponse(uint64 guid, uint32 ZoneId, bool Ca
     SendPacket(&data);
 }
 
-void WorldSession::SendBfEntered(uint64 guid)
+void WorldSession::SendBfEntered(ObjectGuid guid)
 {
     uint8 isAFK = _player->isAFK() ? 1 : 0;
 
@@ -94,7 +92,7 @@ void WorldSession::SendBfEntered(uint64 guid)
     SendPacket(&data);
 }
 
-void WorldSession::SendBfLeaveMessage(uint64 guid, BFLeaveReason reason)
+void WorldSession::SendBfLeaveMessage(ObjectGuid guid, BFLeaveReason reason)
 {
     WorldPacket data(SMSG_BATTLEFIELD_MGR_EJECTED, 11);
     data << float(0);

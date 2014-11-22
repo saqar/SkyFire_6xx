@@ -144,9 +144,9 @@ void BattlegroundMgr::Update(uint32 diff)
 void BattlegroundMgr::BuildRideTicket(WorldPacket* data, ObjectGuid PlayerGuid, uint32 ClientInstanceID, uint8 QueueSlot, uint32 JoinTime)
 {
     *data << PlayerGuid;
-    *data << uint32(ClientInstanceID);  // Id
-    *data << uint32(QueueSlot);         // Queue slot - Type
-    *data << uint32(JoinTime);          // Join Time
+    *data << uint32(ClientInstanceID);
+    *data << uint32(QueueSlot);
+    *data << uint32(JoinTime);
 }
 
 void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battleground* bg, Player* player, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 JoinTime, RatedType ratedType)
@@ -176,10 +176,10 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
             sBattlegroundMgr->BuildRideTicket(data, playerGuid, clientInstanceId, QueueSlot, JoinTime);
 
             *data << bgGuid;
+            *data << uint8(bg->GetMinLevel());
+            *data << uint8(bg->GetMaxLevel());
             *data << uint8(0);                          //packet.ReadByte("unk byte");
-            *data << uint8(bg->GetMaxLevel());          // MaxLevel
-            *data << uint8(0);                          //packet.ReadByte("unk byte");
-            *data << uint32(bg->GetClientInstanceID()); // Id
+            *data << uint32(bg->GetClientInstanceID());
             data->WriteBit(0);                          //packet.ReadBit("unk bit");
             data->WriteBit(0);                          //packet.ReadBit("unk bit");
 
@@ -189,7 +189,6 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
             data->WriteBit(1);                          // Eligible In Queue 
             data->WriteBit(0);                          //var b4 = !packet.ReadBit("unk bit");
 
-            //*data << uint8(bg->GetMinLevel());          // MinLevel
             //*data << uint8(0);                          // TeamSize
             //*data << uint32(Time1);                     // Join Time
             //data->WriteBit(bg->IsRated());              // Is Rated
@@ -205,10 +204,10 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
             sBattlegroundMgr->BuildRideTicket(data, playerGuid, clientInstanceId, QueueSlot, JoinTime);
 
             *data << bgGuid;
+            *data << uint8(bg->GetMinLevel());
+            *data << uint8(bg->GetMaxLevel());
             *data << uint8(0);                          //packet.ReadByte("unk byte");
-            *data << uint8(bg->GetMaxLevel());          // MaxLevel
-            *data << uint8(0);                          //packet.ReadByte("unk byte");
-            *data << uint32(bg->GetClientInstanceID()); // Id
+            *data << uint32(bg->GetClientInstanceID());
             data->WriteBit(0);                          //packet.ReadBit("unk bit");
             data->WriteBit(0);                          //packet.ReadBit("unk bit");
 
@@ -223,7 +222,6 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
             *data << uint8(0);                          // Role
 
             //data->WriteBit(bg->IsRated());              // Is Rated
-            //*data << uint8(bg->GetMinLevel());          // Min Level
             break;
         }
 
@@ -234,10 +232,10 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
             sBattlegroundMgr->BuildRideTicket(data, playerGuid, clientInstanceId, QueueSlot, JoinTime);
 
             *data << bgGuid;
+            *data << uint8(bg->GetMinLevel());
+            *data << uint8(bg->GetMaxLevel());
             *data << uint8(0);                          // packet.ReadByte("unk byte");
-            *data << uint8(bg->GetMaxLevel());          // MaxLevel
-            *data << uint8(0);                          // packet.ReadByte("unk byte");
-            *data << uint32(bg->GetClientInstanceID()); // Id
+            *data << uint32(bg->GetClientInstanceID());
             data->WriteBit(0);                          //packet.ReadBit("unk bit");
             data->WriteBit(0);                          //packet.ReadBit("unk bit");
 
@@ -254,7 +252,6 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
             data->WriteBit(0);                          // Left Early
 
             //data->WriteBit(bg->IsRated());              // Is Rated
-            //*data << uint8(bg->GetMinLevel());          // Min Level
             break;
         }
 

@@ -298,7 +298,7 @@ class WorldSession
 
         void SendAttackStop(Unit const* enemy);
 
-        void SendBattleGroundList(uint64 guid, BattlegroundTypeId bgTypeId = BATTLEGROUND_RB);
+        void SendBattleGroundList(ObjectGuid guid, BattlegroundTypeId bgTypeId = BATTLEGROUND_RB);
 
         void SendTradeStatus(TradeStatus status);
         void SendUpdateTrade(bool trader_data = true);
@@ -822,11 +822,11 @@ class WorldSession
         void HandleInstanceLockResponse(WorldPacket& recvPacket);
 
         // Battlefield
-        void SendBfInvitePlayerToWar(uint64 guid, uint32 zoneId, uint32 time);
-        void SendBfInvitePlayerToQueue(uint64 guid);
-        void SendBfQueueInviteResponse(uint64 guid, uint32 zoneId, bool canQueue = true, bool full = false);
-        void SendBfEntered(uint64 guid);
-        void SendBfLeaveMessage(uint64 guid, BFLeaveReason reason = BF_LEAVE_REASON_EXITED);
+        void SendBfInvitePlayerToWar(uint64 QueueID, uint32 AreaID, uint32 Time);
+        void SendBfInvitePlayerToQueue(ObjectGuid guid);
+        void SendBfQueueInviteResponse(ObjectGuid guid, uint32 zoneId, bool canQueue = true, bool full = false);
+        void SendBfEntered(ObjectGuid guid);
+        void SendBfLeaveMessage(ObjectGuid guid, BFLeaveReason reason = BF_LEAVE_REASON_EXITED);
         void HandleBfQueueInviteResponse(WorldPacket& recvData);
         void HandleBfEntryInviteResponse(WorldPacket& recvData);
         void HandleBfExitRequest(WorldPacket& recvData);

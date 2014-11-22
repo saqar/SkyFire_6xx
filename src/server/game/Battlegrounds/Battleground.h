@@ -434,8 +434,8 @@ class Battleground
         void RemoveAuraOnTeam(uint32 SpellID, uint32 TeamID);
         void RewardHonorToTeam(uint32 Honor, uint32 TeamID);
         void RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID);
-        void UpdateWorldState(uint32 Field, uint32 Value);
-        void UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* player);
+        void UpdateWorldState(uint32 Field, uint32 Value, bool Hidden = false);
+        void UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* player, bool Hidden = false);
         void EndBattleground(uint32 winner);
         void BlockMovement(Player* player);
 

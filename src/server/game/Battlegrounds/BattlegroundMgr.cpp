@@ -474,17 +474,19 @@ void BattlegroundMgr::BuildStatusFailedPacket(WorldPacket* data, Battleground* b
     *data << ClientID;
 }
 
-void BattlegroundMgr::BuildUpdateWorldStatePacket(WorldPacket* data, uint32 field, uint32 value)
+void BattlegroundMgr::BuildUpdateWorldStatePacket(WorldPacket* data, uint32 field, uint32 value, bool Hidden)
 {
     data->Initialize(SMSG_UPDATE_WORLD_STATE, 4 + 4);
-    data->WriteBit(0);
+
     *data << uint32(field);
     *data << uint32(value);
+    data->WriteBit(Hidden);
 }
 
 void BattlegroundMgr::BuildPlaySoundPacket(WorldPacket* data, uint32 soundId)
 {
     data->Initialize(SMSG_PLAY_SOUND, 4 + 2);
+
     *data << uint32(soundId);
     *data << ObjectGuid(0);
 }
@@ -520,10 +522,10 @@ Battleground* BattlegroundMgr::GetBattlegroundThroughClientInstance(uint32 insta
     if (it == bgDataStore.end())
         return NULL;
 
-    for (BattlegroundContainer::const_iterator itr = it->second.m_Battlegrounds.begin(); itr != it->second.m_Battlegrounds.end(); ++itr)
+    for (auto itr : it->second.m_Battlegrounds)
     {
-        if (itr->second->GetClientInstanceID() == instanceId)
-            return itr->second;
+        if (itr.second->GetClientInstanceID() == instanceId)
+            return itr.second;
     }
 
     return NULL;
@@ -991,6 +993,7 @@ void BattlegroundMgr::SendAreaSpiritHealerQueryOpcode(Player* player, Battlegrou
 void BattlegroundMgr::HandleStartTimer(Player* player, uint32 TimeRemaining, uint32 TotalTime, uint32 Type)
 {
     WorldPacket data(SMSG_START_TIMER, 4 + 4 + 4);
+
     data << TimeRemaining;
     data << TotalTime;
     data << Type;
@@ -1252,36 +1255,36 @@ BattlegroundTypeId BattlegroundMgr::GetRandomBG(BattlegroundTypeId bgTypeId)
 
     if (bgTypeId == BATTLEGROUND_AA)
     {
-        for (auto it : m_ArenaSelectionWeights)
+        for (auto ArenaSelectionWeightsMap : m_ArenaSelectionWeights)
         {
-            if (it.second)
+            if (ArenaSelectionWeightsMap.second)
             {
-                weight += it.second;
-                selectionWeights[it.first] = it.second;
+                weight += ArenaSelectionWeightsMap.second;
+                selectionWeights[ArenaSelectionWeightsMap.first] = ArenaSelectionWeightsMap.second;
             }
         }
     }
 
     if (bgTypeId == BATTLEGROUND_RATED_10_VS_10)
     {
-        for (auto it : m_RatedBattlegroundSelectionWeights)
+        for (auto RatedBattlegroundSelectionWeightsMap : m_RatedBattlegroundSelectionWeights)
         {
-            if (it.second)
+            if (RatedBattlegroundSelectionWeightsMap.second)
             {
-                weight += it.second;
-                selectionWeights[it.first] = it.second;
+                weight += RatedBattlegroundSelectionWeightsMap.second;
+                selectionWeights[RatedBattlegroundSelectionWeightsMap.first] = RatedBattlegroundSelectionWeightsMap.second;
             }
         }
     }
 
     else if (bgTypeId == BATTLEGROUND_RB)
     {
-        for (auto it : m_BGSelectionWeights)
+        for (auto BGSelectionWeightMap : m_BGSelectionWeights)
         {
-            if (it.second)
+            if (BGSelectionWeightMap.second)
             {
-                weight += it.second;
-                selectionWeights[it.first] = it.second;
+                weight += BGSelectionWeightMap.second;
+                selectionWeights[BGSelectionWeightMap.first] = BGSelectionWeightMap.second;
             }
         }
     }
@@ -1290,12 +1293,12 @@ BattlegroundTypeId BattlegroundMgr::GetRandomBG(BattlegroundTypeId bgTypeId)
     {
         uint32 selectedWeight = urand(0, weight - 1);
         weight = 0;
-        for (auto it : selectionWeights)
+        for (auto selectionWeightsMap : selectionWeights)
         {
-            weight += it.second;
+            weight += selectionWeightsMap.second;
             if (selectedWeight < weight)
             {
-                returnBgTypeId = it.first;
+                returnBgTypeId = selectionWeightsMap.first;
                 break;
             }
         }

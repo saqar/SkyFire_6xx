@@ -1488,7 +1488,7 @@ void GameEventMgr::UpdateWorldStates(uint16 event_id, bool Activate)
             if (bl && bl->HolidayWorldStateId)
             {
                 WorldPacket data;
-                sBattlegroundMgr->BuildUpdateWorldStatePacket(&data, bl->HolidayWorldStateId, Activate ? 1 : 0);
+                sBattlegroundMgr->BuildUpdateWorldStatePacket(&data, bl->HolidayWorldStateId, Activate ? 1 : 0, false);
                 sWorld->SendGlobalMessage(&data);
             }
         }

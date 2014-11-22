@@ -79,7 +79,7 @@ class BattlegroundMgr
         void BuildPlayerLeftBattlegroundPacket(WorldPacket* data, uint64 guid);
         void BuildBattlegroundListPacket(WorldPacket* data, uint64 guid, Player* player, BattlegroundTypeId bgTypeId);
         void BuildStatusFailedPacket(WorldPacket* data, Battleground* bg, Player* pPlayer, uint8 QueueSlot, GroupJoinBattlegroundResult result);
-        void BuildUpdateWorldStatePacket(WorldPacket* data, uint32 field, uint32 value);
+        void BuildUpdateWorldStatePacket(WorldPacket* data, uint32 field, uint32 value, bool Hidden);
         void BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg);
         void BuildRideTicket(WorldPacket* data, ObjectGuid PlayerGuid, uint32 ClientInstanceID, uint8 QueueSlot, uint32 JoinTime);
         void BuildBattlegroundStatusPacket(WorldPacket* data, Battleground* bg, Player* player, uint8 queueSlot, uint8 statusId, uint32 time1, uint32 JoinTime, RatedType ratedType);

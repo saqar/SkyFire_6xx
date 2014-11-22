@@ -687,17 +687,17 @@ void Battleground::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
                 player->GetReputationMgr().ModifyReputation(factionEntry, Reputation);
 }
 
-void Battleground::UpdateWorldState(uint32 Field, uint32 Value)
+void Battleground::UpdateWorldState(uint32 Field, uint32 Value, bool Hidden/*= false*/)
 {
     WorldPacket data;
-    sBattlegroundMgr->BuildUpdateWorldStatePacket(&data, Field, Value);
+    sBattlegroundMgr->BuildUpdateWorldStatePacket(&data, Field, Value, Hidden);
     SendPacketToAll(&data);
 }
 
-void Battleground::UpdateWorldStateForPlayer(uint32 field, uint32 value, Player* player)
+void Battleground::UpdateWorldStateForPlayer(uint32 field, uint32 value, Player* player, bool Hidden/*= false*/)
 {
     WorldPacket data;
-    sBattlegroundMgr->BuildUpdateWorldStatePacket(&data, field, value);
+    sBattlegroundMgr->BuildUpdateWorldStatePacket(&data, field, value, Hidden);
     player->SendDirectMessage(&data);
 }
 

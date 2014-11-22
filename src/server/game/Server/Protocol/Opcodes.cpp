@@ -376,14 +376,14 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEMASTER_JOIN_RATED,                             0x06E4, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        ); // 6.0.3 19116
 
     ///< Auction & Black Market
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_HELLO,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionHelloOpcode           );
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_BIDDER_ITEMS,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListBidderItems       );
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_ITEMS,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListItems             );
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_OWNER_ITEMS,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListOwnerItems        );
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_PENDING_SALES,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListPendingSales      );
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_PLACE_BID,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionPlaceBid              );
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_REMOVE_ITEM,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionRemoveItem            );
-    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_SELL_ITEM,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionSellItem              );
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_HELLO,                                       0x13EA, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionHelloOpcode           ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_BIDDER_ITEMS,                           0x050E, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListBidderItems       ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_ITEMS,                                  0x0B53, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListItems             ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_OWNER_ITEMS,                            0x03E2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListOwnerItems        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_LIST_PENDING_SALES,                          0x11E2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListPendingSales      ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_PLACE_BID,                                   0x0B11, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionPlaceBid              ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_REMOVE_ITEM,                                 0x1BEB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionRemoveItem            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_AUCTION_SELL_ITEM,                                   0x0027, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionSellItem              ); // 6.0.3 19116
 
     DEFINE_OPCODE_HANDLER(CMSG_BLACKMARKET_BID,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBlackMarketBidOpcode         );
     DEFINE_OPCODE_HANDLER(CMSG_BLACKMARKET_HELLO,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleBlackMarketHelloOpcode       );
@@ -843,7 +843,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_EQUIPMENT_SET_SAVED,                             0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_EQUIPMENT_SET_USE_RESULT,                        0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_EXPECTED_SPAM_RECORDS,                           0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_EXPLORATION_EXPERIENCE,                          0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_EXPLORATION_EXPERIENCE,                          0x07AE, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_FAILED_PLAYER_CONDITION,                         0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_FEATURE_SYSTEM_STATUS,                           0x0B1E, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_FEATURE_SYSTEM_STATUS_GLUE_SCREEN,               0x1540, STATUS_NEVER    ); // 6.0.3 19116
@@ -1190,13 +1190,13 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEGROUND_PLAYER_POSITIONS,                   0x1BE9, STATUS_UNHANDLED); // 6.0.3 19116
 
     ///< Auction & Black market
-    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_BIDDER_LIST_RESULT,                      0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_BIDDER_LIST_RESULT,                      0x01E9, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_AUCTION_BIDDER_NOTIFICATION,                     0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_COMMAND_RESULT,                          0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_HELLO,                                   0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_LIST_PENDING_SALES,                      0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_LIST_RESULT,                             0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_OWNER_LIST_RESULT,                       0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_COMMAND_RESULT,                          0x0B2D, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_HELLO,                                   0x011F, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_LIST_PENDING_SALES,                      0x0332, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_LIST_RESULT,                             0x0BA4, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_AUCTION_OWNER_LIST_RESULT,                       0x0B42, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_AUCTION_OWNER_NOTIFICATION,                      0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_AUCTION_REMOVED_NOTIFICATION,                    0x0000, STATUS_UNHANDLED);
 

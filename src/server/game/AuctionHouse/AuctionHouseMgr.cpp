@@ -517,7 +517,7 @@ void AuctionHouseObject::BuildListOwnerItems(WorldPacket& data, Player* player, 
 }
 
 void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player,
-    std::wstring const& wsearchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable,
+    std::wstring const& wsearchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, bool usable,
     uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
     uint32& count, uint32& totalcount)
 {
@@ -548,7 +548,7 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
         if (levelmin != 0x00 && (proto->RequiredLevel < levelmin || (levelmax != 0x00 && proto->RequiredLevel > levelmax)))
             continue;
 
-        if (usable != 0x00 && player->CanUseItem(item) != EQUIP_ERR_OK)
+        if (usable != false && player->CanUseItem(item) != EQUIP_ERR_OK)
             continue;
 
         // Allow search by suffix (ie: of the Monkey) or partial name (ie: Monkey)
@@ -615,30 +615,54 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
         TC_LOG_ERROR("misc", "AuctionEntry::BuildAuctionInfo: Auction %u has a non-existent item: %u", Id, itemGUIDLow);
         return false;
     }
-    data << uint32(Id);
-    data << uint32(item->GetEntry());
 
-    for (uint8 i = 0; i < PROP_ENCHANTMENT_SLOT_0; ++i) // PROP_ENCHANTMENT_SLOT_0 = 10
+    ObjectGuid _ownerGUID      = MAKE_NEW_GUID(owner,  0, HIGHGUID_PLAYER);       // Owner GUID
+    ObjectGuid _bidderGUID     = MAKE_NEW_GUID(bidder, 0, HIGHGUID_PLAYER);       // Bidder GUID
+    ObjectGuid _itemGUID       = MAKE_NEW_GUID(itemGUIDLow, 0, HIGHGUID_ITEM);    // Item GUID        -- Added in WoD
+    ObjectGuid _ownerAccountID = 0;                                               // Owner Account ID -- Added in WoD
+
+    // Write Item Instances
+    data << uint32(item->GetEntry());                                             // ItemID
+    data << uint32(item->GetItemSuffixFactor());                                  // SuffixFactor
+    data << uint32(item->GetItemRandomPropertyId());                              // Random item property id
+    data.FlushBits();
+    data.WriteBit(0);                                                             // HasItemBonus     -- Added in WoD
+    data.WriteBit(0);                                                             // HasModifications -- Added in WoD
+
+    data << int32(item->GetCount());                                              // item->count
+    data << int32(item->GetSpellCharges());                                       // item->charge FFFFFFF
+    data << int32(PROP_ENCHANTMENT_SLOT_0);                                       // Enhancement Count
+    data << int32(0);                                                             // flags            -- Added in WoD???
+    data << int32(Id);                                                            // Auction Item ID
+    data << _ownerGUID;                                                           // Owner GUID
+    data << uint64(startbid);                                                     // Auction->startbid (not sure if useful)
+    data << uint64(bid ? GetAuctionOutBid() : 0);
+    data << uint64(buyout);
+    data << int32((expire_time - time(NULL)) * IN_MILLISECONDS);                  // time left
+    data << uint8(0);                                                             // Delete Reason   -- Added in WoD
+
+    for (uint8 i = 0; i < PROP_ENCHANTMENT_SLOT_0; ++i)                           // PROP_ENCHANTMENT_SLOT_0 = 10
     {
-        data << uint32(item->GetEnchantmentId(EnchantmentSlot(i)));
+        data << int32(item->GetEnchantmentId(EnchantmentSlot(i)));
         data << uint32(item->GetEnchantmentDuration(EnchantmentSlot(i)));
-        data << uint32(item->GetEnchantmentCharges(EnchantmentSlot(i)));
+        data << int32(item->GetEnchantmentCharges(EnchantmentSlot(i)));
+        data << uint8(0);                                                         // Slot
     }
 
-    data << int32(0);
-    data << int32(item->GetItemRandomPropertyId());                 // Random item property id
-    data << uint32(item->GetItemSuffixFactor());                    // SuffixFactor
-    data << uint32(item->GetCount());                               // item->count
-    data << uint32(item->GetSpellCharges());                        // item->charge FFFFFFF
-    data << uint32(0);                                              // Unknown
-    data << uint64(owner);                                          // Auction->owner
-    data << uint64(startbid);                                       // Auction->startbid (not sure if useful)
-    data << uint64(bid ? GetAuctionOutBid() : 0);
-    // Minimal outbid
-    data << uint64(buyout);                                         // Auction->buyout
-    data << uint32((expire_time - time(NULL)) * IN_MILLISECONDS);   // time left
-    data << uint64(bidder);                                         // auction->bidder current
-    data << uint64(bid);                                            // current bid
+    data.FlushBits();
+
+    data.WriteBit(1);                                                            // ServerSideInfo -- Disable for more check
+    data.WriteBit(0);                                                            // BidInfo
+
+    /* ServerSideInfo Added In WoD
+    data << _itemGUID;
+    data << _ownerAccountID;
+    data << uint32((expire_time) * IN_MILLISECONDS);
+    */
+
+    data << _bidderGUID;
+    data << int64(bid);
+
     return true;
 }
 

@@ -152,7 +152,7 @@ void BattlegroundMgr::BuildRideTicket(WorldPacket* data, ObjectGuid PlayerGuid, 
 void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battleground* bg, Player* player, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 JoinTime, RatedType ratedType)
 {
     ObjectGuid playerGuid = player->GetGUID();
-    uint64 bgGuid;
+    ObjectGuid bgGuid;
     uint32 clientInstanceId = bg->GetClientInstanceID();
 
     if (bg)
@@ -459,9 +459,9 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
 
 void BattlegroundMgr::BuildStatusFailedPacket(WorldPacket* data, Battleground* bg, Player* player, uint8 QueueSlot, GroupJoinBattlegroundResult result)
 {
-    ObjectGuid playerGuid = player->GetGUID();
-    uint64 battlegroundGuid = bg->GetGUID();
-    ObjectGuid ClientID = 0;
+    ObjectGuid playerGuid = player->GetGUID128();
+    ObjectGuid battlegroundGuid = bg->GetGUID();
+    uint64 ClientID = 0;                            // Not a guid
     uint32 clientInstanceId = bg->GetClientInstanceID();  
     uint32 JoinTime = player->GetBattlegroundQueueJoinTime(bg->GetTypeID());
 
@@ -950,11 +950,11 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket* data, uint64 guid
         ++count;
     }
     data->put(count_pos, count);
-
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(0);
-    data->WriteBit(0);
+                                                // these may not be in right order, but those are the names.
+    data->WriteBit(0);                          // HasHolidayWinToday
+    data->WriteBit(0);                          // HasRandomWinToday
+    data->WriteBit(0);                          // PvpAnywhere
+    data->WriteBit(0);                          // IsRandomBG
 }
 
 void BattlegroundMgr::SendToBattleground(Player* player, uint32 instanceId, BattlegroundTypeId bgTypeId)

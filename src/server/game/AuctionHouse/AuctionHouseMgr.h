@@ -67,7 +67,7 @@ enum MailAuctionAnswers
 
 struct AuctionEntry
 {
-    uint32 Id;
+    uint32 autcionId;
     uint32 auctioneer;                                      // creature low guid
     uint32 itemGUIDLow;
     uint32 itemEntry;

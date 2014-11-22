@@ -1304,17 +1304,19 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 
     ObjectGuid Guid = GetGUID();
 
-    WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, 9 + 1 + 4 + 1 + 4 + 4);
-    
-    data << Guid;
-    data << uint32(damage);
+    WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, 2 + 16 + 1 + 4 + 4 + 4 + 1);
+    data << GetGUID128();
     data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
+    data << uint32(damage);
     data << uint32(absorb);
     data << uint32(resist);
-    SendMessageToSet(&data, true);
-    data.WriteBit(0); // Power Data
 
-    uint32 final_damage = DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+    data.WriteBit(0); // logData
+    data.FlushBits();
+
+    SendMessageToSet(&data, true);
+
+    uint32 finalDamage = DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
     if (!IsAlive())
     {
@@ -1329,7 +1331,7 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DEATHS_FROM, 1, type);
     }
 
-    return final_damage;
+    return finalDamage;
 }
 
 int32 Player::getMaxTimer(MirrorTimerType timer)

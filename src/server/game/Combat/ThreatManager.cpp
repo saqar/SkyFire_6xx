@@ -254,10 +254,10 @@ Unit* HostileReference::GetSourceUnit()
 
 void ThreatContainer::clearReferences()
 {
-    for (ThreatContainer::StorageType::const_iterator i = iThreatList.begin(); i != iThreatList.end(); ++i)
+    for (auto ThreatListMap : iThreatList)
     {
-        (*i)->unlink();
-        delete (*i);
+        (ThreatListMap)->unlink();
+        delete (ThreatListMap);
     }
 
     iThreatList.clear();
@@ -271,9 +271,9 @@ HostileReference* ThreatContainer::getReferenceByTarget(Unit* victim) const
         return NULL;
 
     uint64 const guid = victim->GetGUID();
-    for (ThreatContainer::StorageType::const_iterator i = iThreatList.begin(); i != iThreatList.end(); ++i)
+    for (auto ThreatListMap : iThreatList)
     {
-        HostileReference* ref = (*i);
+        HostileReference* ref = (ThreatListMap);
         if (ref && ref->getUnitGuid() == guid)
             return ref;
     }
@@ -584,8 +584,8 @@ void ThreatManager::resetAllAggro()
     if (threatList.empty())
         return;
 
-    for (ThreatContainer::StorageType::iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-        (*itr)->setThreat(0);
+    for (auto threatListMap : threatList)
+        (threatListMap)->setThreat(0);
 
     setDirty(true);
 }

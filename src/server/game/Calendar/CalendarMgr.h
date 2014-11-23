@@ -26,9 +26,7 @@
 
 enum CalendarMailAnswers
 {
-    // else
     CALENDAR_EVENT_REMOVED_MAIL_SUBJECT     = 0,
-    // if ( *(_DWORD *)(a1 + 8292) & 0x100 )
     CALENDAR_INVITE_REMOVED_MAIL_SUBJECT    = 0x100
 };
 

@@ -27,14 +27,14 @@
 
 BattlePayMgr::~BattlePayMgr()
 {
-    for (BattlePayProductSet::iterator itr = m_productStore.begin(); itr != m_productStore.end(); itr++)
-        delete *itr;
+    for (auto productStoreMap : m_productStore)
+        delete productStoreMap;
 
-    for (BattlePayGroupSet::iterator itr = m_groupStore.begin(); itr != m_groupStore.end(); itr++)
-        delete *itr;
+    for (auto groupStoreMap : m_groupStore)
+        delete groupStoreMap;
 
-    for (BattlePayShopEntryset::iterator itr = m_shopEntryStore.begin(); itr != m_shopEntryStore.end(); itr++)
-        delete *itr;
+    for (auto shopEntryStoreMap : m_shopEntryStore)
+        delete shopEntryStoreMap;
 
     m_productStore.clear();
     m_groupStore.clear();
@@ -233,8 +233,8 @@ void BattlePayMgr::LoadEntriesFromDb()
 
 bool BattlePayMgr::HasProductId(uint32 id)
 {
-    for (BattlePayProductSet::const_iterator citr = m_productStore.begin(); citr != m_productStore.end(); citr++)
-        if ((*citr)->Id == id)
+    for (auto productStoreMap : m_productStore)
+        if ((productStoreMap)->Id == id)
             return true;
 
     return false;
@@ -242,8 +242,8 @@ bool BattlePayMgr::HasProductId(uint32 id)
 
 bool BattlePayMgr::HasGroupId(uint32 id)
 {
-    for (BattlePayGroupSet::const_iterator citr = m_groupStore.begin(); citr != m_groupStore.end(); citr++)
-        if ((*citr)->Id == id)
+    for (auto groupStoreMap : m_groupStore)
+        if ((groupStoreMap)->Id == id)
             return true;
 
     return false;
@@ -251,8 +251,8 @@ bool BattlePayMgr::HasGroupId(uint32 id)
 
 bool BattlePayMgr::HasGroupName(std::string name)
 {
-    for (BattlePayGroupSet::const_iterator citr = m_groupStore.begin(); citr != m_groupStore.end(); citr++)
-        if ((*citr)->Name == name)
+    for (auto groupStoreMap : m_groupStore)
+        if ((groupStoreMap)->Name == name)
             return true;
 
     return false;
@@ -262,8 +262,10 @@ void BattlePayMgr::SendBattlePayDistributionList(WorldSession* session)
 {
     // TODO: finish this
     WorldPacket data(SMSG_BATTLE_PAY_GET_DISTRIBUTION_LIST_RESPONSE, 4 + 4);
+
     data << uint32(0);
     data << uint32(0);
+
     session->SendPacket(&data);
 }
 
@@ -271,8 +273,10 @@ void BattlePayMgr::SendBattlePayPurchaseList(WorldSession* session)
 {
     // TODO: finish this
     WorldPacket data(SMSG_BATTLE_PAY_GET_PURCHASE_LIST_RESPONSE, 4 + 4);
+
     data << uint32(0);
     data << uint32(0);
+
     session->SendPacket(&data);
 }
 
@@ -282,6 +286,7 @@ void BattlePayMgr::SendBattlePayProductList(WorldSession* session)
     SendBattlePayPurchaseList(session);
 
     WorldPacket data(SMSG_BATTLE_PAY_GET_PRODUCT_LIST_RESPONSE, 500);   // guess size
+
     data << uint32(0);
     data << uint32(m_currency);
 
@@ -289,9 +294,9 @@ void BattlePayMgr::SendBattlePayProductList(WorldSession* session)
     data << uint32(m_groupStore.size());
     data << uint32(m_shopEntryStore.size());
 
-    for (BattlePayProductSet::const_iterator citr = m_productStore.begin(); citr != m_productStore.end(); citr++)
+    for (auto productStoreMap : m_productStore)
     {
-        const BattlePayProduct* product = *citr;
+        const BattlePayProduct* product = productStoreMap;
 
         data << uint32(product->Id);
         data << uint64(product->NormalPrice);
@@ -332,9 +337,9 @@ void BattlePayMgr::SendBattlePayProductList(WorldSession* session)
         }
     }
 
-    for (BattlePayGroupSet::const_iterator citr = m_groupStore.begin(); citr != m_groupStore.end(); citr++)
+    for (auto groupStoreMap : m_groupStore)
     {
-        const BattlePayGroup* group = *citr;
+        const BattlePayGroup* group = groupStoreMap;
 
         data << uint32(group->Id);
         data << uint32(group->Icon);
@@ -345,9 +350,9 @@ void BattlePayMgr::SendBattlePayProductList(WorldSession* session)
         data.WriteString(group->Name);
     }
 
-    for (BattlePayShopEntryset::const_iterator citr = m_shopEntryStore.begin(); citr != m_shopEntryStore.end(); citr++)
+    for (auto shopEntryStoreMap : m_shopEntryStore)
     {
-        const BattlePayShopEntry* entry = *citr;
+        const BattlePayShopEntry* entry = shopEntryStoreMap;
 
         data << uint32(entry->Id);
         data << uint32(entry->GroupId);

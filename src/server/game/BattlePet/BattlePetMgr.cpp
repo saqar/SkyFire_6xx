@@ -31,8 +31,8 @@
 
 BattlePetMgr::~BattlePetMgr()
 {
-    for (BattlePetSet::iterator itr = m_battlePetSet.begin(); itr != m_battlePetSet.end(); itr++)
-        delete *itr;
+    for (auto battlePetSetMap : m_battlePetSet)
+        delete battlePetSetMap;
 
     m_battlePetSet.clear();
 }
@@ -231,8 +231,8 @@ uint8 BattlePetMgr::GetBattlePetCount(uint16 speciesId) const
 {
     uint8 counter = 0;
 
-    for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); citr++)
-        if ((*citr)->GetSpecies() == speciesId)
+    for (auto battlePetSetMap : m_battlePetSet)
+        if ((battlePetSetMap)->GetSpecies() == speciesId)
             counter++;
 
     return counter;
@@ -424,9 +424,9 @@ void BattlePetMgr::SendBattlePetJournal()
     size_t writePos = data.bitwpos();
     data.WriteBits(petCount, 19);               // placeholder
     
-    for (BattlePetSet::const_iterator citr = m_battlePetSet.begin(); citr != m_battlePetSet.end(); citr++)
+    for (auto battlePetSet : m_battlePetSet)
     {
-        BattlePet const* battlePet = *citr;
+        BattlePet const* battlePet = battlePetSet;
         if (battlePet->GetDbState() == BATTLE_PET_DB_STATE_DELETE)
             continue;
 
@@ -500,6 +500,7 @@ void BattlePetMgr::SendBattlePetSlotUpdate(uint8 slot, bool notification, uint64
     ObjectGuid petEntry = id;
 
     WorldPacket data(SMSG_BATTLE_PET_SLOT_UPDATE, 5 + 1);
+
     data.WriteBits(1, 25);
     data.WriteBit(0);                   // unknown
 

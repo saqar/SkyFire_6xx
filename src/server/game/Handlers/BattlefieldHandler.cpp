@@ -32,7 +32,7 @@
 
 void WorldSession::SendBfInvitePlayerToWar(uint64 QueueID, uint32 AreaID, uint32 Time)
 {
-    WorldPacket data(SMSG_BATTLEFIELD_MGR_ENTRY_INVITE, 4 + 4 + 16);
+    WorldPacket data(SMSG_BATTLEFIELD_MGR_ENTRY_INVITE, 8 + 4 + 4);
     
     data << QueueID;
     data << AreaID;
@@ -94,8 +94,8 @@ void WorldSession::SendBfEntered(ObjectGuid guid)
 
 void WorldSession::SendBfLeaveMessage(ObjectGuid guid, BFLeaveReason reason)
 {
-    WorldPacket data(SMSG_BATTLEFIELD_MGR_EJECTED, 11);
-    data << float(0);
+    WorldPacket data(SMSG_BATTLEFIELD_MGR_EJECTED, 8 + 2 + 2 + 1);
+    data << guid;
     data << uint8(2);               // BattleStatus
     data << uint8(reason);          // Reason
     data.WriteBit(0);               // Relocated

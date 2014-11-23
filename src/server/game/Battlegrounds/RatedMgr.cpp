@@ -58,7 +58,7 @@ void RatedMgr::RemoveRatedInfo(RatedInfo* info)
     RatedInfoContainer::iterator itr = m_ratedInfoStore.find(info->GetGUID());
     ASSERT(itr != m_ratedInfoStore.end());
 
-    delete itr->second;    
+    delete itr->second;
 
     m_ratedInfoStore.erase(itr->first);
 }
@@ -68,8 +68,8 @@ void RatedMgr::FinishWeek()
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_RATED_BATTLEGROUND_FINISH_WEEK);
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
-    for (auto ratedInfoStore : m_ratedInfoStore)
-        ratedInfoStore.second->FinishWeek();
+    for (auto ratedInfoStoreMap : m_ratedInfoStore)
+        ratedInfoStoreMap.second->FinishWeek();
 }
 
 void RatedMgr::LoadRatedInfo()
@@ -94,10 +94,8 @@ void RatedMgr::LoadRatedInfo()
             uint16 matchmakerRating = fields[index++].GetUInt16();
 
             playersMMRCache[guid] = matchmakerRating;
-        } 
-        while (result->NextRow());
-    }
-    else
+        } while (result->NextRow());
+    } else
         TC_LOG_INFO("server.loading", ">> Loaded 0 matchmaker ratings. DB table `character_rated_matchmaker_rating` is empty!");
 
     auto getPlayersMMR = [playersMMRCache](uint64 guid) -> uint16
@@ -119,7 +117,7 @@ void RatedMgr::LoadRatedInfo()
     }
 
     uint32 count = 0;
-    uint64 lastGuid = 0;    
+    uint64 lastGuid = 0;
     RatedInfo* info = NULL;
 
     do
@@ -147,18 +145,17 @@ void RatedMgr::LoadRatedInfo()
 
         StatsBySlot* stats = info->GetStatsBySlot(ratedType);
         ASSERT(stats);
-        
-        stats->WeekGames        = fields[index++].GetUInt16();
-        stats->WeekWins         = fields[index++].GetUInt16();
-        stats->WeekBest         = fields[index++].GetUInt16();
-        stats->SeasonGames      = fields[index++].GetUInt16();
-        stats->SeasonWins       = fields[index++].GetUInt16();
-        stats->SeasonBest       = fields[index++].GetUInt16();
-        stats->PersonalRating   = fields[index++].GetUInt16();
+
+        stats->WeekGames = fields[index++].GetUInt16();
+        stats->WeekWins = fields[index++].GetUInt16();
+        stats->WeekBest = fields[index++].GetUInt16();
+        stats->SeasonGames = fields[index++].GetUInt16();
+        stats->SeasonWins = fields[index++].GetUInt16();
+        stats->SeasonBest = fields[index++].GetUInt16();
+        stats->PersonalRating = fields[index++].GetUInt16();
 
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u character rated stats in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }

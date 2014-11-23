@@ -70,8 +70,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
         {
             data << uint8(calendarEvent->IsGuildEvent());
             data.appendPackGUID(calendarEvent->GetCreatorGUID());
-        }
-        else
+        } else
         {
             data << uint8(0);
             data.appendPackGUID((InvitesMap)->GetSenderGUID());
@@ -239,8 +238,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
         // 946684800 is 01/01/2000 00:00:00 - default response time
         CalendarInvite* invite = new CalendarInvite(0, calendarEvent->GetEventId(), 0, guid, 946684800, CALENDAR_STATUS_NOT_SIGNED_UP, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->AddInvite(calendarEvent, invite);
-    }
-    else
+    } else
     {
         uint32 inviteCount;
         recvData >> inviteCount;
@@ -305,8 +303,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
 
         sCalendarMgr->UpdateEvent(calendarEvent);
         sCalendarMgr->SendCalendarEventUpdateAlert(*calendarEvent, oldEventTime);
-    }
-    else
+    } else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
 }
 
@@ -345,8 +342,7 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
             sCalendarMgr->AddInvite(newEvent, new CalendarInvite(**itr, sCalendarMgr->GetFreeInviteId(), newEvent->GetEventId()));
 
         // should we change owner when somebody makes a copy of event owned by another person?
-    }
-    else
+    } else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
 }
 
@@ -374,8 +370,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
         inviteeGuid = player->GetGUID();
         inviteeTeam = player->GetTeam();
         inviteeGuildId = player->GetGuildId();
-    }
-    else
+    } else
     {
         // Invitee offline, get data from database
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUID_RACE_ACC_BY_NAME);
@@ -417,7 +412,6 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
         {
             if (calendarEvent->IsGuildEvent() && calendarEvent->GetGuildId() == inviteeGuildId)
             {
-                // we can't invite guild members to guild events
                 sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NO_GUILD_INVITES);
                 return;
             }
@@ -425,11 +419,9 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
             // 946684800 is 01/01/2000 00:00:00 - default response time
             CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, inviteeGuid, playerGuid, 946684800, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
             sCalendarMgr->AddInvite(calendarEvent, invite);
-        }
-        else
+        } else
             sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_EVENT_INVALID);
-    }
-    else
+    } else
     {
         if (isGuildEvent && inviteeGuildId == _player->GetGuildId())
         {
@@ -464,8 +456,7 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recvData)
         CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, guid, guid, time(NULL), status, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->AddInvite(calendarEvent, invite);
         sCalendarMgr->SendCalendarClearPendingAction(guid);
-    }
-    else
+    } else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
 }
 
@@ -477,7 +468,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recvData)
     uint32 status;
 
     recvData >> eventId >> inviteId >> status;
-   
+
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_RSVP [" UI64FMTD "] EventId [" UI64FMTD "], InviteId [" UI64FMTD "], status %u", guid, eventId, inviteId, status);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
@@ -497,11 +488,9 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recvData)
             sCalendarMgr->UpdateInvite(invite);
             sCalendarMgr->SendCalendarEventStatus(*calendarEvent, *invite);
             sCalendarMgr->SendCalendarClearPendingAction(guid);
-        }
-        else
+        } else
             sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_INVITE); // correct?
-    }
-    else
+    } else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
 }
 
@@ -514,7 +503,9 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recvData)
     uint64 inviteId;
 
     recvData.readPackGUID(invitee);
-    recvData >> inviteId >> ownerInviteId >> eventId;
+    recvData >> inviteId;
+    recvData >> ownerInviteId;
+    recvData >> eventId;
 
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_REMOVE_INVITE [" UI64FMTD "] EventId [" UI64FMTD "], ownerInviteId [" UI64FMTD "], Invitee ([" UI64FMTD "] id: [" UI64FMTD "])",
         guid, eventId, ownerInviteId, invitee, inviteId);
@@ -528,8 +519,7 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recvData)
         }
 
         sCalendarMgr->RemoveInvite(inviteId, eventId, guid);
-    }
-    else
+    } else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_INVITE);
 }
 
@@ -558,11 +548,9 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recvData)
             sCalendarMgr->UpdateInvite(invite);
             sCalendarMgr->SendCalendarEventStatus(*calendarEvent, *invite);
             sCalendarMgr->SendCalendarClearPendingAction(invitee);
-        }
-        else
+        } else
             sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_INVITE); // correct?
-    }
-    else
+    } else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
 }
 
@@ -576,7 +564,10 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recvData)
     uint8 rank;
 
     recvData.readPackGUID(invitee);
-    recvData >> eventId >>  inviteId >> ownerInviteId >> rank;
+    recvData >> eventId;
+    recvData >> inviteId;
+    recvData >> ownerInviteId;
+    recvData >> rank;
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_EVENT_MODERATOR_STATUS [" UI64FMTD "] EventId [" UI64FMTD "] ownerInviteId [" UI64FMTD "], Invitee ([" UI64FMTD "] id: [" UI64FMTD "], rank %u",
         guid, eventId, ownerInviteId, invitee, inviteId, rank);
 
@@ -587,11 +578,9 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recvData)
             invite->SetRank(CalendarModerationRank(rank));
             sCalendarMgr->UpdateInvite(invite);
             sCalendarMgr->SendCalendarEventModeratorStatusAlert(*calendarEvent, *invite);
-        }
-        else
+        } else
             sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_INVITE); // correct?
-    }
-    else
+    } else
         sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
 }
 
@@ -602,7 +591,9 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recvData)
     uint64 complainGUID;
     uint64 inviteId;
 
-    recvData >> complainGUID >> eventId >> inviteId;
+    recvData >> complainGUID;
+    recvData >> eventId;
+    recvData >> inviteId;
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_COMPLAIN [" UI64FMTD "] EventId [" UI64FMTD "] guid [" UI64FMTD "] InviteId [" UI64FMTD "]",
         guid, eventId, complainGUID, inviteId);
 
@@ -614,11 +605,12 @@ void WorldSession::HandleCalendarGetNumPending(WorldPacket& /*recvData*/)
     uint64 guid = _player->GetGUID();
     uint32 pending = sCalendarMgr->GetPlayerNumPending(guid);
 
-    TC_LOG_DEBUG("network", "CMSG_CALENDAR_GET_NUM_PENDING: [" UI64FMTD
-        "] Pending: %u", guid, pending);
+    TC_LOG_DEBUG("network", "CMSG_CALENDAR_GET_NUM_PENDING: [" UI64FMTD "] Pending: %u", guid, pending);
 
     WorldPacket data(SMSG_CALENDAR_SEND_NUM_PENDING, 4);
+
     data << uint32(pending);
+
     SendPacket(&data);
 }
 
@@ -626,13 +618,16 @@ void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recvData)
 {
     uint32 mapId, difficulty;
     uint8 toggleExtend;
-    recvData >> mapId >> difficulty>> toggleExtend;
+
+    recvData >> mapId;
+    recvData >> difficulty;
+    recvData >> toggleExtend;
     TC_LOG_DEBUG("network", "CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, Difficulty: %u, ToggleExtend: %s", mapId, difficulty, toggleExtend ? "On" : "Off");
 
     /*
     InstancePlayerBind* instanceBind = _player->GetBoundInstance(mapId, Difficulty(difficulty));
     if (!instanceBind || !instanceBind->save)
-        return;
+    return;
 
     InstanceSave* save = instanceBind->save;
     // http://www.wowwiki.com/Instance_Lock_Extension
@@ -648,6 +643,7 @@ void WorldSession::SendCalendarRaidLockout(InstanceSave const* save, bool add)
     time_t currTime = time(NULL);
 
     WorldPacket data(SMSG_CALENDAR_RAID_LOCKOUT_REMOVED, (add ? 4 : 0) + 4 + 4 + 4 + 8);
+
     if (add)
     {
         data.SetOpcode(SMSG_CALENDAR_RAID_LOCKOUT_ADDED);
@@ -658,6 +654,7 @@ void WorldSession::SendCalendarRaidLockout(InstanceSave const* save, bool add)
     data << uint32(save->GetDifficulty());
     data << uint32(save->GetResetTime() - currTime);
     data << uint64(save->GetInstanceId());
+
     SendPacket(&data);
 }
 
@@ -667,16 +664,17 @@ void WorldSession::SendCalendarRaidLockoutUpdated(InstanceSave const* save)
         return;
 
     uint64 guid = _player->GetGUID();
-    TC_LOG_DEBUG("network", "SMSG_CALENDAR_RAID_LOCKOUT_UPDATED [" UI64FMTD
-        "] Map: %u, Difficulty %u", guid, save->GetMapId(), save->GetDifficulty());
+    TC_LOG_DEBUG("network", "SMSG_CALENDAR_RAID_LOCKOUT_UPDATED [" UI64FMTD "] Map: %u, Difficulty %u", guid, save->GetMapId(), save->GetDifficulty());
 
     time_t currTime = time(NULL);
 
     WorldPacket data(SMSG_CALENDAR_RAID_LOCKOUT_UPDATED, 4 + 4 + 4 + 4 + 8);
+
     data.AppendPackedTime(currTime);
     data << uint32(save->GetMapId());
     data << uint32(save->GetDifficulty());
     data << uint32(0); // Amount of seconds that has changed to the reset time
     data << uint32(save->GetResetTime() - currTime);
+
     SendPacket(&data);
 }

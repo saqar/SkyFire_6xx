@@ -1899,7 +1899,7 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    uint64 HealerGuid;
+    ObjectGuid HealerGuid;
     recvData >> HealerGuid;
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(HealerGuid);

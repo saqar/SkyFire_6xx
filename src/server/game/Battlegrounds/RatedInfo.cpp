@@ -32,25 +32,25 @@ RatedInfo::RatedInfo(uint64 guid) : m_guid(guid), m_matchmakerRating(1500)
 {
     for (uint8 i = 0; i < MAX_RATED_SLOT; ++i)
     {
-        RatedType type = GetRatedTypeBySlot(i);        
+        RatedType type = GetRatedTypeBySlot(i);
         StatsBySlot* statsBySlot = new StatsBySlot(type);
 
         statsBySlot->PersonalRating = 0;
 
         m_ratedStats[type] = statsBySlot;
     }
-    
+
     if (guid)
         sRatedMgr->AddRatedInfo(this);
 }
 
 RatedInfo::~RatedInfo()
-{ 
+{
     for (uint8 i = 0; i < MAX_RATED_SLOT; ++i)
     {
         RatedType ratedType = GetRatedTypeBySlot(i);
         delete m_ratedStats[ratedType];
-    }   
+    }
 }
 
 void RatedInfo::UpdateStats(RatedType ratedType, uint32 againstMatchmakerRating, int16 &ratingChange, int16 &matchmakerRatingChange, bool won, bool offline)
@@ -85,7 +85,7 @@ void RatedInfo::SaveToDB(RatedType ratedType)
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_RATED_BATTLEGROUND_STATS);
     StatsBySlot const* stats = GetStatsBySlot(ratedType);
     stmt->setUInt32(0, GUID_LOPART(GetGUID()));
-    stmt->setUInt8 (1, GetRatedSlotByType(ratedType));
+    stmt->setUInt8(1, GetRatedSlotByType(ratedType));
     stmt->setUInt16(2, stats->WeekGames);
     stmt->setUInt16(3, stats->WeekWins);
     stmt->setUInt16(4, stats->WeekBest);
@@ -177,8 +177,7 @@ int32 StatsBySlot::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool wo
             mod = 96.0f * (won_mod - chance);
         else
             mod = (24.0f + (24.0f * (1300.0f - float(ownRating)) / 300.0f)) * (won_mod - chance);
-    }
-    else
+    } else
         mod = 24.0f * (won_mod - chance);
 
     return (int32)ceil(mod);

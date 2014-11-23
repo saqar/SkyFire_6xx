@@ -40,8 +40,7 @@ void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
     TC_LOG_ERROR("guild", "CMSG_GUILD_QUERY [%s]: Guild: %u Target: %u", GetPlayerInfo().c_str(), GUID_LOPART(guildGuid), GUID_LOPART(playerGuid));
 
     if (Guild* guild = sGuildMgr->GetGuildByGuid(guildGuid))
-        if (guild->IsMember(playerGuid))
-            guild->HandleQuery(this);
+        guild->HandleQuery(this);
 }
 
 void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)

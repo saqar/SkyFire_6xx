@@ -37,6 +37,13 @@ class BattlegroundMap;
 struct PvPDifficultyEntry;
 struct WorldSafeLocsEntry;
 
+enum ArenaType
+{
+    ARENA_TYPE_2v2,
+    ARENA_TYPE_3v3,
+    ARENA_TYPE_5v5
+};
+
 enum BattlegroundCriteriaId
 {
     BG_CRITERIA_CHECK_RESILIENT_VICTORY,

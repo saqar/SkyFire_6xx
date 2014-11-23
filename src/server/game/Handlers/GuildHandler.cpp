@@ -644,5 +644,4 @@ void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
         data << uint32(GuildChallengeMaxLevelGoldReward[i]);
 
     SendPacket(&data);
-
 }

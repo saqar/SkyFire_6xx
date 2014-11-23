@@ -132,8 +132,7 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
         mailsCount = receiver->GetMailSize();
         receiverLevel = receiver->getLevel();
         receiverAccountId = receiver->GetSession()->GetAccountId();
-    }
-    else
+    } else
     {
         receiverTeam = sObjectMgr->GetPlayerTeamByGUID(receiverGuid);
 
@@ -401,11 +400,12 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recvData)
 
         if (m->HasItems())
         {
-            for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+            for (auto itemsMap : m->items)
             {
-                if (Item* const item = player->GetMItem(itr2->item_guid))
+                if (Item* const item = player->GetMItem(itemsMap.item_guid))
                     draft.AddItem(item);
-                player->RemoveMItem(itr2->item_guid);
+
+                player->RemoveMItem(itemsMap.item_guid);
             }
         }
         draft.AddMoney(m->money).SendReturnToSender(GetAccountId(), m->receiver, m->sender, trans);
@@ -471,8 +471,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
                 {
                     sender_accId = receiver->GetSession()->GetAccountId();
                     sender_name = receiver->GetName();
-                }
-                else
+                } else
                 {
                     // can be calculated early
                     sender_accId = sObjectMgr->GetPlayerAccountIdByGUID(sender_guid);
@@ -482,8 +481,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
                 }
                 sLog->outCommand(GetAccountId(), "GM %s (Account: %u) receiver mail item: %s (Entry: %u Count: %u) and send COD money: " UI64FMTD " to player: %s (Account: %u)",
                     GetPlayerName().c_str(), GetAccountId(), it->GetTemplate()->Name1.c_str(), it->GetEntry(), it->GetCount(), m->COD, sender_name.c_str(), sender_accId);
-            }
-            else if (!receiver)
+            } else if (!receiver)
                 sender_accId = sObjectMgr->GetPlayerAccountIdByGUID(sender_guid);
 
             // check player existence
@@ -510,8 +508,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
         CharacterDatabase.CommitTransaction(trans);
 
         player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemId, count);
-    }
-    else
+    } else
         player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_EQUIP_ERROR, msg);
 }
 
@@ -740,8 +737,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
         }
 
         bodyItem->SetText(mailTemplateEntry->content);
-    }
-    else
+    } else
         bodyItem->SetText(m->body);
 
     bodyItem->SetUInt32Value(ITEM_FIELD_CREATOR, m->sender);
@@ -759,8 +755,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
 
         player->StoreItem(dest, bodyItem, true);
         player->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_OK);
-    }
-    else
+    } else
     {
         player->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_EQUIP_ERROR, msg);
         delete bodyItem;
@@ -811,8 +806,7 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /*recvData*/)
         }
 
         data.put<uint32>(4, count);
-    }
-    else
+    } else
     {
         data << float(-DAY);
         data << uint32(0);

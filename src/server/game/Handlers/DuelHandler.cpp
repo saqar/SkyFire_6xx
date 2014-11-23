@@ -73,8 +73,7 @@ void WorldSession::HandleDuelResponseOpcode(WorldPacket& recvPacket)
 
         player->SendDuelCountdown(3000);
         plTarget->SendDuelCountdown(3000);
-    }
-    else
+    } else
     {
         // player surrendered in a duel using /forfeit
         if (GetPlayer()->duel->startTime != 0)

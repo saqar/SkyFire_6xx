@@ -84,11 +84,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CMSG_MESSAGECHAT_DND:
             type = CHAT_MSG_DND;
             break;
-        /*
-            case CMSG_MESSAGECHAT_BATTLEGROUND:
-            type = CHAT_MSG_BATTLEGROUND;
-            break;
-        */
+            /*
+                case CMSG_MESSAGECHAT_BATTLEGROUND:
+                type = CHAT_MSG_BATTLEGROUND;
+                break;
+                */
         default:
             TC_LOG_ERROR("network", "HandleMessagechatOpcode : Unknown chat opcode (%u)", recvData.GetOpcode());
             recvData.hexlike();
@@ -124,9 +124,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
             Unit::AuraEffectList const& langAuras = sender->GetAuraEffectsByType(SPELL_AURA_COMPREHEND_LANGUAGE);
             bool foundAura = false;
-            for (Unit::AuraEffectList::const_iterator i = langAuras.begin(); i != langAuras.end(); ++i)
+            for (auto langAurasMap : langAuras)
             {
-                if ((*i)->GetMiscValue() == int32(lang))
+                if ((langAurasMap)->GetMiscValue() == int32(lang))
                 {
                     foundAura = true;
                     break;
@@ -220,8 +220,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 return;
             }
         }
-    }
-    else
+    } else
         lang = LANG_UNIVERSAL;
 
     if (sender->HasAura(1852) && type != CHAT_MSG_WHISPER)
@@ -481,8 +480,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                         _player->ToggleAFK();               // Remove AFK
                     else
                         _player->autoReplyMsg = msg;        // Update message
-                }
-                else                                        // New AFK mode
+                } else                                        // New AFK mode
                 {
                     _player->autoReplyMsg = msg.empty() ? GetTrinityString(LANG_PLAYER_AFK_DEFAULT) : msg;
 
@@ -504,8 +502,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                     _player->ToggleDND();                   // Remove DND
                 else
                     _player->autoReplyMsg = msg;            // Update message
-            }
-            else                                            // New DND mode
+            } else                                            // New DND mode
             {
                 _player->autoReplyMsg = msg.empty() ? GetTrinityString(LANG_PLAYER_DND_DEFAULT) : msg;
 
@@ -643,7 +640,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
             sender->WhisperAddon(message, prefix, receiver);
             break;
         }
-        // Messages sent to "RAID" while in a party will get delivered to "PARTY"
+            // Messages sent to "RAID" while in a party will get delivered to "PARTY"
         case CHAT_MSG_PARTY:
         case CHAT_MSG_RAID:
         {
@@ -676,31 +673,31 @@ void WorldSession::HandleEmoteOpcode(WorldPacket& recvData)
 
 namespace Trinity
 {
-    class EmoteChatBuilder
+class EmoteChatBuilder
+{
+public:
+    EmoteChatBuilder(Player const& player, uint32 text_emote, uint32 emote_num, Unit const* target)
+        : i_player(player), i_text_emote(text_emote), i_emote_num(emote_num), i_target(target) { }
+
+    void operator()(WorldPacket& data, LocaleConstant loc_idx)
     {
-        public:
-            EmoteChatBuilder(Player const& player, uint32 text_emote, uint32 emote_num, Unit const* target)
-                : i_player(player), i_text_emote(text_emote), i_emote_num(emote_num), i_target(target) { }
+        ObjectGuid Guid = i_target ? i_target->GetGUID() : 0;
+        ObjectGuid TargetGuid = i_player.GetGUID();
 
-            void operator()(WorldPacket& data, LocaleConstant loc_idx)
-            {
-                ObjectGuid Guid = i_target ? i_target->GetGUID() : 0;
-                ObjectGuid TargetGuid = i_player.GetGUID();
+        data.Initialize(SMSG_TEXT_EMOTE, 2 * (8 + 1) + 4 + 4);
 
-                data.Initialize(SMSG_TEXT_EMOTE, 2 * (8 + 1) + 4 + 4);
+        data << Guid;
+        data << TargetGuid;
+        data << uint32(i_emote_num);
+        data << uint32(i_text_emote);
+    }
 
-                data << Guid;
-                data << TargetGuid;
-                data << uint32(i_emote_num);
-                data << uint32(i_text_emote);
-            }
-
-        private:
-            Player const& i_player;
-            uint32        i_text_emote;
-            uint32        i_emote_num;
-            Unit const*   i_target;
-    };
+private:
+    Player const& i_player;
+    uint32        i_text_emote;
+    uint32        i_emote_num;
+    Unit const*   i_target;
+};
 }                                                           // namespace Trinity
 
 void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
@@ -721,7 +718,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recvData)
     recvData >> text_emote;
     recvData >> emoteNum;
 
-	recvData >> guid;
+    recvData >> guid;
 
     sScriptMgr->OnPlayerTextEmote(GetPlayer(), text_emote, emoteNum, guid);
 
@@ -772,7 +769,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recvData)
     uint8 unk;
     //TC_LOG_DEBUG("network", "WORLD: Received CMSG_CHAT_IGNORED");
 
-	recvData >> guid;
+    recvData >> guid;
     recvData >> unk;                                       // probably related to spam reporting
 
     Player* player = ObjectAccessor::FindPlayer(guid);
@@ -791,14 +788,14 @@ void WorldSession::HandleChannelDeclineInvite(WorldPacket &recvPacket)
 
 void WorldSession::SendPlayerNotFoundNotice(std::string const& name)
 {
-    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size()+1);
+    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size() + 1);
     data << name;
     SendPacket(&data);
 }
 
 void WorldSession::SendPlayerAmbiguousNotice(std::string const& name)
 {
-    WorldPacket data(SMSG_CHAT_PLAYER_AMBIGUOUS, name.size()+1);
+    WorldPacket data(SMSG_CHAT_PLAYER_AMBIGUOUS, name.size() + 1);
     data << name;
     SendPacket(&data);
 }

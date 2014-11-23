@@ -122,7 +122,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_DEL_FRIEND,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDelFriendOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_DEL_IGNORE,                                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDelIgnoreOpcode              );
     DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CONTROLLED_VEHICLE,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDismissControlledVehicle     );
-    DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CRITTER,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleDismissCritter               );
+    DEFINE_OPCODE_HANDLER(CMSG_DISMISS_CRITTER,                                     0x02F1, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDismissCritter               ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_DUEL_PROPOSED,                                       0x0B25, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDuelProposedOpcode           ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_DUEL_RESPONSE,                                       0x1BD2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleDuelResponseOpcode           ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_EJECT_PASSENGER,                                     0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );

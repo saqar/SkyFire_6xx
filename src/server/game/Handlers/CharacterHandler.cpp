@@ -55,7 +55,9 @@ private:
     uint64 m_guid;
 public:
     LoginQueryHolder(uint32 accountId, uint64 guid)
-        : m_accountId(accountId), m_guid(guid) { }
+        : m_accountId(accountId), m_guid(guid)
+    {
+    }
     uint64 GetGuid() const { return m_guid; }
     uint32 GetAccountId() const { return m_accountId; }
     bool Initialize();
@@ -258,10 +260,8 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
 
             if (!sWorld->HasCharacterNameData(guidLow)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                 sWorld->AddCharacterNameData(guidLow, (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
-        }
-        while (result->NextRow());
-    }
-    else
+        } while (result->NextRow());
+    } else
     {
         dataBuffer.WriteBit(1); // Success
         dataBuffer.WriteBit(0); // IsDeleted
@@ -322,12 +322,12 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
             uint32 team = Player::TeamForRace(race_);
             switch (team)
             {
-            case ALLIANCE:
-                disabled = mask & (1 << 0);
-                break;
-            case HORDE:
-                disabled = mask & (1 << 1);
-                break;
+                case ALLIANCE:
+                    disabled = mask & (1 << 0);
+                    break;
+                case HORDE:
+                    disabled = mask & (1 << 1);
+                    break;
             }
 
             if (disabled)
@@ -458,7 +458,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
     */
     switch (_charCreateCallback.GetStage())
     {
-    case 0:
+        case 0:
         {
             if (result)
             {
@@ -479,8 +479,8 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             _charCreateCallback.SetFutureResult(LoginDatabase.AsyncQuery(stmt));
             _charCreateCallback.NextStage();
         }
-        break;
-    case 1:
+            break;
+        case 1:
         {
             uint16 acctCharCount = 0;
             if (result)
@@ -512,8 +512,8 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             _charCreateCallback.SetFutureResult(CharacterDatabase.AsyncQuery(stmt));
             _charCreateCallback.NextStage();
         }
-        break;
-    case 2:
+            break;
+        case 2:
         {
             if (result)
             {
@@ -549,8 +549,8 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             _charCreateCallback.NextStage();
             HandleCharCreateCallback(PreparedQueryResult(NULL), createInfo);   // Will jump to case 3
         }
-        break;
-    case 3:
+            break;
+        case 3:
         {
             bool haveSameRace = false;
             uint32 heroicReqLevel = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
@@ -565,7 +565,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                 uint32 freeHeroicSlots = sWorld->getIntConfig(CONFIG_HEROIC_CHARACTERS_PER_REALM);
 
                 Field* field = result->Fetch();
-                uint8 accRace  = field[1].GetUInt8();
+                uint8 accRace = field[1].GetUInt8();
 
                 if (checkHeroicReqs)
                 {
@@ -724,7 +724,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             delete createInfo;
             _charCreateCallback.Reset();
         }
-        break;
+            break;
     }
 }
 
@@ -982,8 +982,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         Field* fields = resultGuild->Fetch();
         pCurrChar->SetInGuild(fields[0].GetUInt32());
         pCurrChar->SetRank(fields[1].GetUInt8());
-    }
-    else if (pCurrChar->GetGuildId())                        // clear guild related fields in case wrong data about non existed membership
+    } else if (pCurrChar->GetGuildId())                        // clear guild related fields in case wrong data about non existed membership
     {
         pCurrChar->SetInGuild(0);
         pCurrChar->SetRank(0);
@@ -1250,7 +1249,7 @@ void WorldSession::HandleShowingHelmOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "CMSG_SHOWING_HELM for %s", _player->GetName().c_str());
 
     uint8 ShowHelm;
-   
+
     recvData >> ShowHelm;
 
     _player->ToggleFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
@@ -1272,7 +1271,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     ObjectGuid guid;
     std::string newName;
 
-	recvData >> guid;
+    recvData >> guid;
     recvData >> newName;
 
     // prevent character rename to invalid name
@@ -1287,7 +1286,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     uint8 res = ObjectMgr::CheckPlayerName(newName, true);
     if (res != CHAR_NAME_SUCCESS)
     {
-        WorldPacket data(SMSG_CHAR_RENAME, 1+8+(newName.size()+1));
+        WorldPacket data(SMSG_CHAR_RENAME, 1 + 8 + (newName.size() + 1));
         data << uint8(res);
         data << uint64(guid);
         data << newName;
@@ -1331,7 +1330,7 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult resu
 
     Field* fields = result->Fetch();
 
-    uint32 guidLow      = fields[0].GetUInt32();
+    uint32 guidLow = fields[0].GetUInt32();
     std::string oldName = fields[1].GetString();
 
     uint64 guid = MAKE_NEW_GUID(guidLow, 0, HIGHGUID_PLAYER);
@@ -1354,7 +1353,7 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult resu
 
     TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %s", GetAccountId(), GetRemoteAddress().c_str(), oldName.c_str(), guidLow, newName.c_str());
 
-    WorldPacket data(SMSG_CHAR_RENAME, 1+8+(newName.size()+1));
+    WorldPacket data(SMSG_CHAR_RENAME, 1 + 8 + (newName.size() + 1));
     data << uint8(RESPONSE_SUCCESS);
     data << uint64(guid);
     data << newName;
@@ -1381,13 +1380,13 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
     }
 
     recvData.FlushBits();
-    
+
 
     // not accept declined names for unsupported languages
     std::string name;
     if (!sObjectMgr->GetPlayerNameByGUID(guid, name))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1396,7 +1395,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
     std::wstring wname;
     if (!Utf8toWStr(name, wname))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1404,7 +1403,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     if (!isCyrillicCharacter(wname[0]))                      // name already stored as only single alphabet using
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1417,7 +1416,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     if (name2 != name)                                       // character have different name
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1428,7 +1427,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
         recvData >> declinedname.name[i];
         if (!normalizePlayerName(declinedname.name[i]))
         {
-            WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+            WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
             data << uint32(1);
             SendPacket(&data);
             return;
@@ -1437,7 +1436,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     if (!ObjectMgr::CheckDeclinedNames(wname, declinedname))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
         SendPacket(&data);
         return;
@@ -1456,13 +1455,13 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
     stmt->setUInt32(0, GUID_LOPART(guid));
 
     for (uint8 i = 0; i < 5; i++)
-        stmt->setString(i+1, declinedname.name[i]);
+        stmt->setString(i + 1, declinedname.name[i]);
 
     trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
 
-    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
     data << uint32(0);                                      // OK
     data << uint64(guid);
     SendPacket(&data);
@@ -1519,8 +1518,7 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
         data << uint32(1);                                  // no money
         SendPacket(&data);
         return;
-    }
-    else
+    } else
     {
         WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
         data << uint32(0);                                  // ok
@@ -1676,7 +1674,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 
     sWorld->UpdateCharacterNameData(GUID_LOPART(guid), newName, gender);
 
-    WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1+8+(newName.size()+1)+6);
+    WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1 + 8 + (newName.size() + 1) + 6);
     data << uint8(RESPONSE_SUCCESS);
     data << uint64(guid);
     data << newName;
@@ -1709,10 +1707,10 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket& recvData)
 
     EquipmentSet eqSet;
 
-    eqSet.Guid      = setGuid;
-    eqSet.Name      = name;
-    eqSet.IconName  = iconName;
-    eqSet.state     = EQUIPMENT_SET_NEW;
+    eqSet.Guid = setGuid;
+    eqSet.Name = name;
+    eqSet.IconName = iconName;
+    eqSet.state = EQUIPMENT_SET_NEW;
 
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
@@ -1788,8 +1786,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket& recvData)
             {
                 _player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
                 _player->StoreItem(sDest, uItem, true);
-            }
-            else
+            } else
                 _player->SendEquipError(msg, uItem, NULL);
 
             continue;
@@ -1949,16 +1946,16 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
         // Search each faction is targeted
         switch (race)
         {
-        case RACE_ORC:
-        case RACE_TAUREN:
-        case RACE_UNDEAD_PLAYER:
-        case RACE_TROLL:
-        case RACE_BLOODELF:
-        case RACE_GOBLIN:
-            team = TEAM_HORDE;
-            break;
-        default:
-            break;
+            case RACE_ORC:
+            case RACE_TAUREN:
+            case RACE_UNDEAD_PLAYER:
+            case RACE_TROLL:
+            case RACE_BLOODELF:
+            case RACE_GOBLIN:
+                team = TEAM_HORDE;
+                break;
+            default:
+                break;
         }
 
         // Switch Languages
@@ -1987,39 +1984,39 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
             switch (race)
             {
-            case RACE_DWARF:
-                stmt->setUInt16(1, 111);
-                break;
-            case RACE_DRAENEI:
-                stmt->setUInt16(1, 759);
-                break;
-            case RACE_GNOME:
-                stmt->setUInt16(1, 313);
-                break;
-            case RACE_NIGHTELF:
-                stmt->setUInt16(1, 113);
-                break;
-            case RACE_WORGEN:
-                stmt->setUInt16(1, 791);
-                break;
-            case RACE_UNDEAD_PLAYER:
-                stmt->setUInt16(1, 673);
-                break;
-            case RACE_TAUREN:
-                stmt->setUInt16(1, 115);
-                break;
-            case RACE_TROLL:
-                stmt->setUInt16(1, 315);
-                break;
-            case RACE_BLOODELF:
-                stmt->setUInt16(1, 137);
-                break;
-            case RACE_GOBLIN:
-                stmt->setUInt16(1, 792);
-                break;
-            case RACE_PANDAREN_NEUTRAL:
-                stmt->setUInt16(1, 905);
-                break;
+                case RACE_DWARF:
+                    stmt->setUInt16(1, 111);
+                    break;
+                case RACE_DRAENEI:
+                    stmt->setUInt16(1, 759);
+                    break;
+                case RACE_GNOME:
+                    stmt->setUInt16(1, 313);
+                    break;
+                case RACE_NIGHTELF:
+                    stmt->setUInt16(1, 113);
+                    break;
+                case RACE_WORGEN:
+                    stmt->setUInt16(1, 791);
+                    break;
+                case RACE_UNDEAD_PLAYER:
+                    stmt->setUInt16(1, 673);
+                    break;
+                case RACE_TAUREN:
+                    stmt->setUInt16(1, 115);
+                    break;
+                case RACE_TROLL:
+                    stmt->setUInt16(1, 315);
+                    break;
+                case RACE_BLOODELF:
+                    stmt->setUInt16(1, 137);
+                    break;
+                case RACE_GOBLIN:
+                    stmt->setUInt16(1, 792);
+                    break;
+                case RACE_PANDAREN_NEUTRAL:
+                    stmt->setUInt16(1, 905);
+                    break;
             }
 
             trans->Append(stmt);
@@ -2046,21 +2043,18 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                     {
                         for (uint8 i = 0; i < numFullTaximasks; ++i)
                             taximaskstream << uint32(sAllianceTaxiNodesMask[i]) << ' ';
-                    }
-                    else
+                    } else
                     {
                         for (uint8 i = 0; i < numFullTaximasks; ++i)
                             taximaskstream << uint32(sAllianceTaxiNodesMask[i] | sDeathKnightTaxiNodesMask[i]) << ' ';
                     }
-                }
-                else
+                } else
                 {
                     if (playerClass != CLASS_DEATH_KNIGHT)
                     {
                         for (uint8 i = 0; i < numFullTaximasks; ++i)
                             taximaskstream << uint32(sHordeTaxiNodesMask[i]) << ' ';
-                    }
-                    else
+                    } else
                     {
                         for (uint8 i = 0; i < numFullTaximasks; ++i)
                             taximaskstream << uint32(sHordeTaxiNodesMask[i] | sDeathKnightTaxiNodesMask[i]) << ' ';
@@ -2116,18 +2110,17 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
             {
                 stmt->setUInt16(1, 0);
                 stmt->setUInt16(2, 1519);
-                stmt->setFloat (3, -8867.68f);
-                stmt->setFloat (4, 673.373f);
-                stmt->setFloat (5, 97.9034f);
+                stmt->setFloat(3, -8867.68f);
+                stmt->setFloat(4, 673.373f);
+                stmt->setFloat(5, 97.9034f);
                 Player::SavePositionInDB(0, -8867.68f, 673.373f, 97.9034f, 0.0f, 1519, lowGuid);
-            }
-            else
+            } else
             {
                 stmt->setUInt16(1, 1);
                 stmt->setUInt16(2, 1637);
-                stmt->setFloat (3, 1633.33f);
-                stmt->setFloat (4, -4439.11f);
-                stmt->setFloat (5, 15.7588f);
+                stmt->setFloat(3, 1633.33f);
+                stmt->setFloat(4, -4439.11f);
+                stmt->setFloat(5, 15.7588f);
                 Player::SavePositionInDB(1, 1633.33f, -4439.11f, 15.7588f, 0.0f, 1637, lowGuid);
             }
             trans->Append(stmt);
@@ -2308,8 +2301,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                             // use index of the new title
                             knownTitles[atitleInfo->bit_index / 32] |= new_flag;
                         }
-                    }
-                    else
+                    } else
                     {
                         uint32 bitIndex = atitleInfo->bit_index;
                         uint32 index = bitIndex / 32;
@@ -2347,6 +2339,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     TC_LOG_DEBUG("entities.player", "%s (IP: %s) changed race from %u to %u", GetPlayerInfo().c_str(), IP_str.c_str(), oldRace, race);
 
     WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1 + 8 + (newname.size() + 1) + 1 + 1 + 1 + 1 + 1 + 1 + 1);
+
     data << uint8(RESPONSE_SUCCESS);
     data << uint64(guid);
     data << newname;
@@ -2357,6 +2350,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     data << uint8(hairColor);
     data << uint8(facialHair);
     data << uint8(race);
+
     SendPacket(&data);
 }
 

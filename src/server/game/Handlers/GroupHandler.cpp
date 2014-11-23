@@ -50,12 +50,14 @@ class Aura;
 void WorldSession::SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res, uint32 val /* = 0 */)
 {
     WorldPacket data(SMSG_PARTY_COMMAND_RESULT, 4 + member.size() + 1 + 4 + 4 + 8);
+
     data.WriteBits(member.size(), 9);
     data.WriteBits(operation, 4);
     data.WriteBits(res, 6);
     data << uint32(val);                                // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
     data << uint16(0); // Guid
     data.WriteString(member);
+
     SendPacket(&data);
 }
 
@@ -66,6 +68,7 @@ void WorldSession::SendGroupInviteNotification(const std::string& inviterName, b
     ObjectGuid invitedGuid = GetPlayer()->GetGUID();
 
     WorldPacket data(SMSG_GROUP_INVITE, 6 + 1 + 8 + 8 + 4 + 4 + 4 + inviterName.size());
+
     data.WriteBit(1);
     data.WriteBit(0);
     data.WriteBit(0);
@@ -83,6 +86,7 @@ void WorldSession::SendGroupInviteNotification(const std::string& inviterName, b
     data << uint32(0);
     data << uint32(0);
     data.WriteString(inviterName);
+
     SendPacket(&data);
 }
 
@@ -295,8 +299,10 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
 
         // report
         WorldPacket data(SMSG_GROUP_DECLINE, GetPlayer()->GetName().size());
+
         data.WriteBits(GetPlayer()->GetName().size(), 6);
         data.WriteString(GetPlayer()->GetName());
+
         leader->GetSession()->SendPacket(&data);
     }
 }
@@ -400,6 +406,7 @@ void WorldSession::HandleGroupSetRolesOpcode(WorldPacket& recvData)
     ObjectGuid assignerGuid = GetPlayer()->GetGUID();
 
     WorldPacket data(SMSG_GROUP_SET_ROLE, 1 + 8 + 1 + 8 + 4 + 1 + 4);
+
     data << assignerGuid;
     data << targetGuid;
     data << uint32(group->GetMemberRole(targetGuid));
@@ -510,6 +517,7 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recvData)
 
     // everything's fine, do it
     WorldPacket data(SMSG_MINIMAP_PING, 1 + 8 + 4 + 4);
+
     data << float(y);
     data << float(x);
     data << guid;
@@ -541,6 +549,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recvData)
     ObjectGuid guid = GetPlayer()->GetGUID128();
 
     WorldPacket data(SMSG_RANDOM_ROLL, 4 + 4 + 4 + 1 + 8);
+
     data << uint32(roll);
     data << uint32(minimum);
     data << uint32(maximum);
@@ -737,6 +746,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& /*recvData*/)
 
     // everything's fine, do it
     WorldPacket data(SMSG_RAID_READY_CHECK, 1 + 8 + 1 + 8 + 1 + 4);
+
     data << groupGuid;
     data << playerGuid;
     data << uint32(readyCheckDuration);
@@ -774,6 +784,7 @@ void WorldSession::HandleRaidReadyCheckConfirmOpcode(WorldPacket& recvData)
     ObjectGuid playerGuid = GetPlayer()->GetGUID();
 
     WorldPacket data(SMSG_RAID_READY_CHECK_CONFIRM, 1 + 1 + 8 + 1 + 8);
+
     data << groupGuid;
     data << playerGuid;
     data.WriteBit(status);
@@ -1230,8 +1241,8 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
     {
         data << uint32(phases.empty() ? 8 : 0);
         data << uint32(phases.size());
-        for (std::set<uint32>::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
-            data << uint16(*itr);
+        for (auto phasesMap : phases)
+            data << uint16(phasesMap);
     }
 
     SendPacket(&data);

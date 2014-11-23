@@ -346,9 +346,11 @@ void WorldSession::HandleGetChannelMemberCount(WorldPacket &recvPacket)
                 GetPlayerInfo().c_str(), channelName.c_str(), channel->GetNumPlayers());
 
             WorldPacket data(SMSG_CHANNEL_MEMBER_COUNT, channel->GetName().size() + 1 + 4);
+
             data << channel->GetName();
             data << uint8(channel->GetFlags());
             data << uint32(channel->GetNumPlayers());
+
             SendPacket(&data);
         }
     }

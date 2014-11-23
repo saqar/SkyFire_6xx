@@ -1270,7 +1270,7 @@ bool Guild::SetName(std::string const& name)
     CharacterDatabase.Execute(stmt);
 
     ObjectGuid guid = GetGUID();
-    WorldPacket data(SMSG_GUILD_RENAMED, 24 + 8 + 1);
+    WorldPacket data(SMSG_GUILD_NAME_CHANGED, 24 + 8 + 1);
 
     data << guid;
     data.WriteBits(name.length(), 8);

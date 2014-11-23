@@ -137,14 +137,14 @@ void GuildFinderMgr::AddMembershipRequest(uint32 guildGuid, MembershipRequest co
 
 void GuildFinderMgr::RemoveAllMembershipRequestsFromPlayer(uint32 playerId)
 {
-    for (MembershipRequestStore::iterator itr = _membershipRequests.begin(); itr != _membershipRequests.end(); ++itr)
+    for (auto membershipRequestsMap : _membershipRequests)
     {
-        std::vector<MembershipRequest>::iterator itr2 = itr->second.begin();
-        for (; itr2 != itr->second.end(); ++itr2)
+        std::vector<MembershipRequest>::iterator itr2 = membershipRequestsMap.second.begin();
+        for (; itr2 != membershipRequestsMap.second.end(); ++itr2)
             if (itr2->GetPlayerGUID() == playerId)
                 break;
 
-        if (itr2 == itr->second.end())
+        if (itr2 == membershipRequestsMap.second.end())
             continue;
 
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
@@ -154,10 +154,10 @@ void GuildFinderMgr::RemoveAllMembershipRequestsFromPlayer(uint32 playerId)
         trans->Append(stmt);
 
         CharacterDatabase.CommitTransaction(trans);
-        itr->second.erase(itr2);
+        membershipRequestsMap.second.erase(itr2);
 
         // Notify the guild master and officers the list changed
-        if (Guild* guild = sGuildMgr->GetGuildById(itr->first))
+        if (Guild* guild = sGuildMgr->GetGuildById(membershipRequestsMap.first))
             SendApplicantListUpdate(*guild);
     }
 }
@@ -195,14 +195,14 @@ void GuildFinderMgr::RemoveMembershipRequest(uint32 playerId, uint32 guildId)
 std::list<MembershipRequest> GuildFinderMgr::GetAllMembershipRequestsForPlayer(uint32 playerGuid)
 {
     std::list<MembershipRequest> resultSet;
-    for (MembershipRequestStore::const_iterator itr = _membershipRequests.begin(); itr != _membershipRequests.end(); ++itr)
+    for (auto membershipRequestsMap : _membershipRequests)
     {
-        std::vector<MembershipRequest> const& guildReqs = itr->second;
-        for (std::vector<MembershipRequest>::const_iterator itr2 = guildReqs.begin(); itr2 != guildReqs.end(); ++itr2)
+        std::vector<MembershipRequest> const& guildReqs = membershipRequestsMap.second;
+        for (auto guildReqsMap : guildReqs)
         {
-            if (itr2->GetPlayerGUID() == playerGuid)
+            if (guildReqsMap.GetPlayerGUID() == playerGuid)
             {
-                resultSet.push_back(*itr2);
+                resultSet.push_back(guildReqsMap);
                 break;
             }
         }
@@ -213,11 +213,11 @@ std::list<MembershipRequest> GuildFinderMgr::GetAllMembershipRequestsForPlayer(u
 uint8 GuildFinderMgr::CountRequestsFromPlayer(uint32 playerId)
 {
     uint8 result = 0;
-    for (MembershipRequestStore::const_iterator itr = _membershipRequests.begin(); itr != _membershipRequests.end(); ++itr)
+    for (auto membershipRequestsMap : _membershipRequests)
     {
-        for (std::vector<MembershipRequest>::const_iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+        for (auto membershipRequestsMap2 : membershipRequestsMap.second)
         {
-            if (itr2->GetPlayerGUID() != playerId)
+            if (membershipRequestsMap2.GetPlayerGUID() != playerId)
                 continue;
             ++result;
             break;
@@ -229,9 +229,9 @@ uint8 GuildFinderMgr::CountRequestsFromPlayer(uint32 playerId)
 LFGuildStore GuildFinderMgr::GetGuildsMatchingSetting(LFGuildPlayer& settings, TeamId faction)
 {
     LFGuildStore resultSet;
-    for (LFGuildStore::const_iterator itr = _guildSettings.begin(); itr != _guildSettings.end(); ++itr)
+    for (auto guildSettingsMap : _guildSettings)
     {
-        LFGuildSettings const& guildSettings = itr->second;
+        LFGuildSettings const& guildSettings = guildSettingsMap.second;
 
         if (guildSettings.GetTeam() != faction)
             continue;
@@ -248,7 +248,7 @@ LFGuildStore GuildFinderMgr::GetGuildsMatchingSetting(LFGuildPlayer& settings, T
         if (!(guildSettings.GetLevel() & settings.GetLevel()))
             continue;
 
-        resultSet.insert(std::make_pair(itr->first, guildSettings));
+        resultSet.insert(std::make_pair(guildSettingsMap.first, guildSettings));
     }
 
     return resultSet;
@@ -256,8 +256,8 @@ LFGuildStore GuildFinderMgr::GetGuildsMatchingSetting(LFGuildPlayer& settings, T
 
 bool GuildFinderMgr::HasRequest(uint32 playerId, uint32 guildId)
 {
-    for (std::vector<MembershipRequest>::const_iterator itr = _membershipRequests[guildId].begin(); itr != _membershipRequests[guildId].end(); ++itr)
-        if (itr->GetPlayerGUID() == playerId)
+    for (auto membershipRequestsMap : _membershipRequests[guildId])
+        if (membershipRequestsMap.GetPlayerGUID() == playerId)
             return true;
     return false;
 }

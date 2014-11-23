@@ -1388,7 +1388,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recvData)
     if (guild)
     {
         data << ObjectGuid(guild->GetGUID());
-        data << uint32(guild->GetLevel());
         data << uint32(guild->GetMembersCount());
     }
 
@@ -1845,6 +1844,8 @@ void WorldSession::HandleQueryInspectAchievements(WorldPacket& recvData)
 
 void WorldSession::HandleGuildAchievementProgressQuery(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "WORLD: CMSG_GUILD_ACHIEVEMENT_PROGRESS_QUERY");
+
     uint32 achievementId;
     recvData >> achievementId;
 

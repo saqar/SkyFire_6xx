@@ -746,6 +746,9 @@ CREATE TABLE `character_pet` (
   `modelid` int(10) unsigned DEFAULT '0',
   `CreatedBySpell` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `PetType` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `SpecGroups` int(10) NOT NULL,
+  `SpecCount` int(10) NOT NULL,
+  `ActiveSpecGroup` int(10) NOT NULL,
   `level` smallint(5) unsigned NOT NULL DEFAULT '1',
   `exp` int(10) unsigned NOT NULL DEFAULT '0',
   `Reactstate` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -842,6 +845,21 @@ CREATE TABLE `character_queststatus_monthly` (
 LOCK TABLES `character_queststatus_monthly` WRITE;
 /*!40000 ALTER TABLE `character_queststatus_monthly` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_queststatus_monthly` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `character_queststatus_objective`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `character_queststatus_objective` (
+  `guid` int(10) unsigned NOT NULL DEFAULT '0',
+  `objectiveId` int(10) unsigned NOT NULL DEFAULT '0',
+  `amount` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`objectiveId`,`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `character_queststatus_objective` WRITE;
+/*!40000 ALTER TABLE `character_queststatus_objective` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_queststatus_objective` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `character_queststatus_rewarded`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

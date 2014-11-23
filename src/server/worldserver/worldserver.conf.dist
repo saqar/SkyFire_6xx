@@ -2265,36 +2265,6 @@ Arena.ArenaSeason.ID = 8
 Arena.ArenaSeason.InProgress = 1
 
 #
-#    Arena.ArenaStartRating
-#        Description: Start rating for new arena teams.
-#        Default:     0
-
-Arena.ArenaStartRating = 0
-
-#
-#    Arena.ArenaStartPersonalRating
-#        Description: Start personal rating when joining a team.
-#        Default:     0
-
-Arena.ArenaStartPersonalRating = 0
-
-#
-#    Arena.ArenaStartMatchmakerRating
-#        Description: Start matchmaker rating for players.
-#        Default:     1500
-
-Arena.ArenaStartMatchmakerRating = 1500
-
-#
-#    ArenaLog.ExtendedInfo
-#        Description: Include extended info to ArenaLogFile for each player after rated arena
-#                     matches (guid, name, team, IP, healing/damage done, killing blows).
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-ArenaLog.ExtendedInfo = 0
-
-#
 ###################################################################################################
 
 ###################################################################################################
@@ -2765,15 +2735,6 @@ Log.Async.Enable = 0
 ###################################################################################################
 
 ###################################################################################################
-#  GUILD LEVELING SETTINGS
-#
-#    Guild.LevelingEnabled
-#        Description: Controls whether guild can gain levels
-#        Default:     1
-#
-
-Guild.LevelingEnabled = 1
-
 #
 #    Guild.SaveInterval
 #        Description: Time (in minutes) between guild experience saves
@@ -2782,37 +2743,6 @@ Guild.LevelingEnabled = 1
 
 Guild.SaveInterval = 15
 
-#
-#    Guild.MaxLevel
-#        Description: Defines max level a guild can reach
-#        Default:     30
-#
-
-Guild.MaxLevel = 30
-
-#
-#    Guild.UndeletableLevel
-#        Description: Guild reaching this level (and higher) cannot be disbanded anymore
-#        Default:     4
-#
-
-Guild.UndeletableLevel = 4
-
-#
-#    Guild.XPModifier
-#        Description: Multiplier for guild experience gained from quests
-#        Default:     0.25
-#
-
-Guild.XPModifier = 0.25
-
-#
-#    Guild.DailyXPCap
-#        Description: Maximum experience points a guild can earn each day
-#        Default:     7807500
-#
-
-Guild.DailyXPCap = 7807500
 
 #
 #    Guild.WeeklyReputationCap

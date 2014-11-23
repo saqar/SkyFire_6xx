@@ -630,48 +630,48 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PAY_ACK_FAILED_RESPONSE,                      0x052A, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        ); // 6.0.3 19116
 
     ///< Garrison & Shipment
-    DEFINE_OPCODE_HANDLER(CMSG_COMPLETE_ALL_READY_SHIPMENTS,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCompleteAllReadyShipment     ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_COMPLETE_SHIPMENT,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCompleteShipment             );
+    DEFINE_OPCODE_HANDLER(CMSG_COMPLETE_ALL_READY_SHIPMENTS,                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_COMPLETE_SHIPMENT,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_COMPLETE_SHIPMENT_CHEAT,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_CREATE_SHIPMENT,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleCreateShipment               ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_CREATE_SHIPMENT,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_CREATE_SHIPMENT_CHEAT,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GET_SHIPMENT_INFO,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGetShipmentInfo              ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_GET_SHIPMENTS_OF_TYPE,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGetShipmentOfType            );
+    DEFINE_OPCODE_HANDLER(CMSG_GET_SHIPMENT_INFO,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_GET_SHIPMENTS_OF_TYPE,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GET_SHIPMENTS_OF_TYPE_CHEAT,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_OPEN_SHIPMENT_NPC,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleOpenShipmentNpc              ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_OPEN_SHIPMENT_NPC,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
 
     DEFINE_OPCODE_HANDLER(CMSG_GARR_ADD_FOLLOWER_XP_CHEAT,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_ADD_MISSION_CHEAT,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_ADD_UNIQUE_FOLLOWER_CHEAT,                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_ASSIGN_FOLLOWER_TO_BUILDING,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrAssignFollower           ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_COMPLETE_MISSION,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrCompleteMission          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_ASSIGN_FOLLOWER_TO_BUILDING,                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_COMPLETE_MISSION,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_COMPLETE_MISSION_CHEAT,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_CREATE_CHEAT,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_DELETE_CHEAT,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_FORCE_BUILDING_ACTIVE,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_GENERATE_RECRUITS,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrGenerateRecruits         ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_GENERATE_RECRUITS,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_LEARN_BLUEPRINT_CHEAT,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_LEARN_BUILDING_SPECIALIZATION_CHEAT,            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_LIST_FOLLOWERS_CHEAT,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_MISSION_BONUS_ROLL,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrMissionBonusRoll         ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_MISSION_BONUS_ROLL,                             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_PLACE_BUILDING_CHEAT,                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_PORT_CHEAT,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_PURCHASE_BUILDING,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrPurchaseBuilding         ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_RECRUIT_FOLLOWER,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrRecruitFollower          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_PURCHASE_BUILDING,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_RECRUIT_FOLLOWER,                               0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_REMOVE_BUILDING_CHEAT,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_REMOVE_FOLLOWER_CHEAT,                          0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_REMOVE_FOLLOWER_FROM_BUILDING,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrRemoveFollower           ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_REQUEST_BLUEPRINT_AND_SPECIALIZATION_DATA,      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrRequestBlueprintData     ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_REMOVE_FOLLOWER_FROM_BUILDING,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_REQUEST_BLUEPRINT_AND_SPECIALIZATION_DATA,      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_ACTIVE_BUILDING_SPECIALIZATION,             0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_ACTIVE_BUILDING_SPECIALIZATION_CHEAT,       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_BUILDING_ACTIVE,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrSetBuildingActive        ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_BUILDING_ACTIVE,                            0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_FOLLOWER_ITEM_LEVEL_CHEAT,                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_SET_LEVEL_CHEAT,                                0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_START_MISSION,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrStartMission             ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_GARR_SWAP_BUILDING,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrSwapBuildings            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_START_MISSION,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_GARR_SWAP_BUILDING,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_GARR_UPGRADE_BUILDING_CHEAT,                         0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
-    DEFINE_OPCODE_HANDLER(CMSG_GET_GARR_INFO,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrGetInfo                  ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_UPGRADE_GARR,                                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGarrUpgrade                  ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_GET_GARR_INFO,                                       0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
+    DEFINE_OPCODE_HANDLER(CMSG_UPGRADE_GARR,                                        0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_SHOW_GARR_TRANSFER,                                  0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::Handle_NULL                        );
 
     ///< Movement

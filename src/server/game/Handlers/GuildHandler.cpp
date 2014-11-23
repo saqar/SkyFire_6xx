@@ -629,9 +629,13 @@ void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
 {
-    WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED, 4 * 6 * 5);
-    /*for (int i = 0; i < 6; i++)
-        data << uint32(GuildChallengeWeeklyMaximum[i]);*/
+    WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED, 4 * 6 * 5);  
+
+    for (int i = 0; i < 6; i++)
+        data << uint32(GuildChallengeXPReward[i]);
+
+    for (int i = 0; i < 6; i++)
+        data << uint32(GuildChallengeWeeklyMaximum[i]);
 
     for (int i = 0; i < 6; i++)
         data << uint32(GuildChallengeGoldReward[i]);
@@ -639,11 +643,6 @@ void WorldSession::HandleGuildRequestChallengeUpdate(WorldPacket& recvPacket)
     for (int i = 0; i < 6; i++)
         data << uint32(GuildChallengeMaxLevelGoldReward[i]);
 
-    for (int i = 0; i < 6; i++)
-        data << uint32(GuildChallengeXPReward[i]);
-
-    for (int i = 0; i < 6; i++)
-        data << uint32(0); // Progress - NYI
     SendPacket(&data);
 
 }

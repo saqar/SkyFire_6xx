@@ -41,9 +41,8 @@ void WorldSession::HandleVoidStorageUnlock(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_UNLOCK");
     Player* player = GetPlayer();
-
     ObjectGuid npcGuid;
-    
+
     recvData >> npcGuid;
 
     Creature* unit = player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_VAULTKEEPER);
@@ -94,53 +93,40 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
 
     data.WriteBits(count, 8);
 
-    ByteBuffer itemData((14 + 4 + 4 + 4 + 4) * count);
-
     for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
     {
         VoidStorageItem* item = player->GetVoidStorageItem(i);
         if (!item)
             continue;
 
-        ObjectGuid itemId = item->ItemId;
+        ObjectGuid itemId      = item->ItemId;
         ObjectGuid creatorGuid = item->CreatorGuid;
 
-        data << creatorGuid;
         data << itemId;
-        itemData << uint32(item->ItemSuffixFactor); //= 32
-        itemData << uint32(i); //= 16
-        itemData << uint32(item->ItemRandomPropertyId); //= 24
-        itemData << uint32(item->ItemEntry); //= 28
-        itemData << uint32(0); //= 20
+        data << creatorGuid;
+        data << uint32(i); // Slot
+        data << uint32(item->ItemEntry);
+        data << uint32(item->ItemSuffixFactor);
+        data << uint32(item->ItemRandomPropertyId);
+        data.FlushBits();
+        data.WriteBit(0);
+        data.WriteBit(0);
     }
-
-    data.FlushBits();
-    data.append(itemData);
 
     SendPacket(&data);
 }
 
 void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
 {
-TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
     Player* player = GetPlayer();
-
+    uint32 countWithdraw,countDeposit;
     ObjectGuid npcGuid;
+
     recvData >> npcGuid;
+    recvData >> countDeposit;
+    recvData >> countWithdraw;
 
-    uint32 countWithdraw = recvData.ReadBits(26);
-
-    if (countWithdraw > 9)
-    {
-        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) wants to withdraw more than 9 items (%u).", player->GetGUIDLow(), player->GetName().c_str(), countWithdraw);
-        return;
-    }
-
-    std::vector<ObjectGuid> itemIds(countWithdraw);
-    for (uint32 i = 0; i < countWithdraw; ++i)
-        recvData >> itemIds[i];
-
-    uint32 countDeposit = recvData.ReadBits(26); //40
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER :: Player (GUID: %u, name: %s) Deposit Counts : %u , Withdraw Counts : %u",player->GetGUIDLow(),player->GetName().c_str(),countDeposit,countWithdraw);
 
     if (countDeposit > 9)
     {
@@ -151,6 +137,16 @@ TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
     std::vector<ObjectGuid> itemGuids(countDeposit);
     for (uint32 i = 0; i < countDeposit; ++i)
         recvData >> itemGuids[i];
+
+    if (countWithdraw > 9)
+    {
+        TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) wants to withdraw more than 9 items (%u).", player->GetGUIDLow(), player->GetName().c_str(), countWithdraw);
+        return;
+    }
+
+    std::vector<ObjectGuid> itemIds(countWithdraw);
+    for (uint32 i = 0; i < countWithdraw; ++i)
+        recvData >> itemIds[i];
 
     Creature* unit = player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
@@ -202,7 +198,7 @@ TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
         Item* item = player->GetItemByGuid(*itr);
         if (!item)
         {
-            TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) wants to deposit an invalid item (item guid: " UI64FMTD ").", player->GetGUIDLow(), player->GetName().c_str(), uint64(*itr));
+            TC_LOG_ERROR("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) wants to deposit an invalid item (item guid: " UI64FMTD ").", player->GetGUIDLow(), player->GetName().c_str(), uint64(*itr));
             continue;
         }
 
@@ -224,10 +220,10 @@ TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
     for (std::vector<ObjectGuid>::iterator itr = itemIds.begin(); itr != itemIds.end(); ++itr)
     {
         uint8 slot;
-        VoidStorageItem* itemVS = player->GetVoidStorageItem(*itr, slot);
+        VoidStorageItem* itemVS = player->GetVoidStorageItem(GUID_LOPART(itemIds[withdrawCount]), slot);
         if (!itemVS)
         {
-            TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) tried to withdraw an invalid item (id: " UI64FMTD ")", player->GetGUIDLow(), player->GetName().c_str(), uint64(*itr));
+            TC_LOG_ERROR("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) tried to withdraw an invalid item (id: " UI64FMTD ")", player->GetGUIDLow(), player->GetName().c_str(), uint64(*itr));
             continue;
         }
 
@@ -236,7 +232,7 @@ TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
         if (msg != EQUIP_ERR_OK)
         {
             SendVoidStorageTransferResult(VOID_TRANSFER_ERROR_INVENTORY_FULL);
-            TC_LOG_DEBUG("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) couldn't withdraw item id " UI64FMTD " because inventory was full.", player->GetGUIDLow(), player->GetName().c_str(), uint64(*itr));
+            TC_LOG_ERROR("network", "WORLD: HandleVoidStorageTransfer - Player (GUID: %u, name: %s) couldn't withdraw item id " UI64FMTD " because inventory was full.", player->GetGUIDLow(), player->GetName().c_str(), uint64(*itr));
             return;
         }
 
@@ -253,29 +249,28 @@ TC_LOG_DEBUG("network", "WORLD: Received CMSG_VOID_STORAGE_TRANSFER");
     WorldPacket data(SMSG_VOID_STORAGE_TRANSFER_CHANGES, ((5 + 5 + (7 + 7) * depositCount +
         7 * withdrawCount) / 8) + 7 * withdrawCount + (7 + 7 + 4 * 4) * depositCount);
 
-    data.WriteBits(depositCount, 5);
-    data.WriteBits(withdrawCount, 5);
+    data.WriteBits(depositCount  , 4);
+    data.WriteBits(withdrawCount , 4);
 
     for (uint8 i = 0; i < depositCount; ++i)
     {
-        ObjectGuid itemId = depositItems[i].first.ItemId;
+        ObjectGuid itemId      = depositItems[i].first.ItemId;
         ObjectGuid creatorGuid = depositItems[i].first.CreatorGuid;
-        data << creatorGuid;
         data << itemId;
+        data << creatorGuid;
+        data << uint32(depositItems[i].second); // slot
+        data << uint32(depositItems[i].first.ItemEntry);
+        data << uint32(depositItems[i].first.ItemSuffixFactor);
+        data << uint32(depositItems[i].first.ItemRandomPropertyId);
+        data.FlushBits();
+        data.WriteBit(0);
+        data.WriteBit(0);
     }
 
     for (uint8 i = 0; i < withdrawCount; ++i)
     {
-        ObjectGuid itemId = withdrawItems[i].ItemId;
+        ObjectGuid itemId     =  withdrawItems[i].ItemId;
         data << itemId;
-    }
-
-    for (uint8 i = 0; i < depositCount; ++i)
-    {
-        data << uint32(depositItems[i].first.ItemSuffixFactor);
-        data << uint32(depositItems[i].first.ItemEntry);
-        data << uint32(depositItems[i].second); // slot
-        data << uint32(depositItems[i].first.ItemRandomPropertyId);
     }
 
     SendPacket(&data);
@@ -292,9 +287,9 @@ void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
     ObjectGuid npcGuid;
     ObjectGuid itemId;
 
-    recvData >> newSlot;
     recvData >> npcGuid;
     recvData >> itemId;
+    recvData >> newSlot;
 
     Creature* unit = player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_VAULTKEEPER);
     if (!unit)
@@ -316,11 +311,7 @@ void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
         return;
     }
 
-    bool usedSrcSlot = player->GetVoidStorageItem(oldSlot) != NULL; // should be always true
-    bool usedDestSlot = player->GetVoidStorageItem(newSlot) != NULL;
-    ObjectGuid itemIdDest;
-    if (usedDestSlot)
-        itemIdDest = player->GetVoidStorageItem(newSlot)->ItemId;
+    ObjectGuid itemIdDest = player->GetVoidStorageItem(newSlot)->ItemId;
 
     if (!player->SwapVoidStorageItem(oldSlot, newSlot))
     {
@@ -328,26 +319,11 @@ void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
         return;
     }
 
-    WorldPacket data(SMSG_VOID_ITEM_SWAP_RESPONSE, 1 + (usedSrcSlot + usedDestSlot) * (1 + 7 + 4));
+    WorldPacket data(SMSG_VOID_ITEM_SWAP_RESPONSE, (16 + 4 + 16 + 4));
 
-    data.WriteBit(!usedDestSlot);
-    data.WriteBit(!usedSrcSlot);
-
-    if (usedSrcSlot)
-        data << itemId;
-
-    data.WriteBit(!usedDestSlot); // unk
-
-    if (usedDestSlot)
-        data << itemIdDest;
-
-    data.WriteBit(!usedSrcSlot); // unk
-
-    if (usedDestSlot)
-        data << uint32(oldSlot);
-
-    if (usedSrcSlot)
-        data << uint32(newSlot);
-
+    data << itemId;
+    data << uint32(oldSlot);
+    data << itemIdDest;
+    data << uint32(newSlot);
     SendPacket(&data);
 }

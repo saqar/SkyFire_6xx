@@ -9327,7 +9327,8 @@ int32 Unit::GetDefaultPower(Powers power) const
             return 8;
         case POWER_CHI:
             return 4;
-        case POWER_LIGHT_FORCE:
+        case POWER_COMBO_POINTS:
+            return 5;
         case POWER_ECLIPSE:
         case POWER_DARK_FORCE:
         case POWER_ALTERNATE_POWER:

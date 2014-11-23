@@ -1862,8 +1862,6 @@ class Player : public Unit, public GridObject<Player>
         void SetInGuild(uint32 guildId);
         void SetRank(uint8 rankId) { SetUInt32Value(PLAYER_FIELD_GUILD_RANK_ID, rankId); }
         uint8 GetRank() const { return uint8(GetUInt32Value(PLAYER_FIELD_GUILD_RANK_ID)); }
-        void SetGuildLevel(uint32 level) { SetUInt32Value(PLAYER_FIELD_GUILD_LEVEL, level); }
-        uint32 GetGuildLevel() { return GetUInt32Value(PLAYER_FIELD_GUILD_LEVEL); }
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
         uint32 GetGuildId() const { return GetUInt32Value(OBJECT_FIELD_DATA); /* return only lower part */ }
         Guild* GetGuild();

@@ -1027,7 +1027,6 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     SetUInt64Value(OBJECT_FIELD_DATA, 0);
     SetUInt32Value(PLAYER_FIELD_GUILD_RANK_ID, 0);
-    SetGuildLevel(0);
     SetUInt32Value(PLAYER_FIELD_GUILD_DELETE_DATE, 0);
     SetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM, realmID);
 
@@ -7643,7 +7642,6 @@ void Player::SetInGuild(uint32 guildId)
     else
         SetUInt64Value(OBJECT_FIELD_DATA, 0);
 
-    ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_GUILD_LEVEL_ENABLED, guildId != 0 && sWorld->getBoolConfig(CONFIG_GUILD_LEVELING_ENABLED));
     SetUInt16Value(OBJECT_FIELD_TYPE, 1, guildId != 0);
 }
 
@@ -15596,9 +15594,6 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     else
         moneyRew = uint32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
 
-    if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
-        guild->GiveXP(uint32(quest->XPValue(this) * sWorld->getRate(RATE_XP_QUEST) * sWorld->getRate(RATE_XP_GUILD_MODIFIER)), this);
-
     moneyRew += quest->GetRewMoney();
     ModifyMoney(moneyRew);
 
@@ -22056,11 +22051,11 @@ bool Player::BuyCurrencyFromVendorSlot(uint64 vendorGuid, uint32 vendorSlot, uin
             return false;
         }
 
-        if (iece->RequiredGuildLevel && iece->RequiredGuildLevel < GetGuildLevel())
-        {
-            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
-            return false;
-        }
+        //if (iece->RequiredGuildLevel && iece->RequiredGuildLevel < GetGuildLevel())
+        //{
+        //    SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+        //    return false;
+        //}
 
         //if (iece->RequiredAchievement && !HasAchieved(iece->RequiredAchievement))
         //{
@@ -22239,11 +22234,11 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             return false;
         }
 
-        if (iece->RequiredGuildLevel && iece->RequiredGuildLevel < GetGuildLevel())
-        {
-            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
-            return false;
-        }
+        //if (iece->RequiredGuildLevel && iece->RequiredGuildLevel < GetGuildLevel())
+        //{
+        //    SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL); // Find correct error
+        //    return false;
+        //}
 
         //if (iece->RequiredAchievement && !HasAchieved(iece->RequiredAchievement))
         //{

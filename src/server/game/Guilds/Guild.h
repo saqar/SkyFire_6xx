@@ -41,7 +41,6 @@ enum GuildMisc
     GUILD_WITHDRAW_MONEY_UNLIMITED      = 0xFFFFFFFF,
     GUILD_WITHDRAW_SLOT_UNLIMITED       = 0xFFFFFFFF,
     GUILD_EVENT_LOG_GUID_UNDEFINED      = 0xFFFFFFFF,
-    GUILD_EXPERIENCE_UNCAPPED_LEVEL     = 20,                   ///> Hardcoded in client, starting from this level, guild daily experience gain is unlimited.
     TAB_UNDEFINED                       = 0xFF,
 };
 
@@ -140,7 +139,6 @@ enum GuildCommandError
     ERR_RANK_REQUIRES_AUTHENTICATOR     = 34,
     ERR_GUILD_BANK_VOUCHER_FAILED       = 35,
     ERR_GUILD_TRIAL_ACCOUNT             = 36,
-    ERR_GUILD_UNDELETABLE_DUE_TO_LEVEL  = 37,
     ERR_GUILD_MOVE_STARTING             = 38,
     ERR_GUILD_REP_TOO_LOW               = 39
 };
@@ -257,7 +255,6 @@ enum GuildNews
     GUILD_NEWS_ITEM_LOOTED              = 3,
     GUILD_NEWS_ITEM_CRAFTED             = 4,
     GUILD_NEWS_ITEM_PURCHASED           = 5,
-    GUILD_NEWS_LEVEL_UP                 = 6,
 };
 
 struct GuildReward
@@ -352,8 +349,6 @@ private:
             m_accountId(0),
             m_rankId(rankId),
             m_achievementPoints(0),
-            m_totalActivity(0),
-            m_weekActivity(0),
             m_totalReputation(0),
             m_weekReputation(0)
         {
@@ -391,8 +386,6 @@ private:
         uint8 GetFlags() const { return m_flags; }
         uint32 GetZoneId() const { return m_zoneId; }
         uint32 GetAchievementPoints() const { return m_achievementPoints; }
-        uint64 GetTotalActivity() const { return m_totalActivity; }
-        uint64 GetWeekActivity() const { return m_weekActivity; }
         uint32 GetTotalReputation() const { return m_totalReputation; }
         uint32 GetWeekReputation() const { return m_weekReputation; }
 
@@ -429,8 +422,6 @@ private:
 
         int32 m_bankWithdraw[GUILD_BANK_MAX_TABS + 1];
         uint32 m_achievementPoints;
-        uint64 m_totalActivity;
-        uint64 m_weekActivity;
         uint32 m_totalReputation;
         uint32 m_weekReputation;
     };
@@ -766,8 +757,6 @@ public:
     bool Create(Player* pLeader, std::string const& name);
     void Disband();
 
-    void SaveToDB();
-
     // Getters
     uint32 GetId() const { return m_id; }
     uint64 GetGUID() const { return MAKE_NEW_GUID(m_id, 0, HIGHGUID_GUILD); }
@@ -813,7 +802,6 @@ public:
     void SendEventLog(WorldSession* session) const;
     void SendBankLog(WorldSession* session, uint8 tabId) const;
     void SendBankList(WorldSession* session, uint8 tabId, bool withContent, bool withTabInfo) const;
-    void SendGuildXP(WorldSession* session = NULL) const;
     void SendBankTabText(WorldSession* session, uint8 tabId) const;
     void SendPermissions(WorldSession* session) const;
     void SendMoneyInfo(WorldSession* session) const;
@@ -843,8 +831,8 @@ public:
     template<class Do>
     void BroadcastWorker(Do& _do, Player* except = NULL)
     {
-        for (Members::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-            if (Player* player = itr->second->FindPlayer())
+        for (auto membersMap : m_members)
+            if (Player* player = membersMap.second->FindPlayer())
                 if (player != except)
                     _do(player);
     }
@@ -866,12 +854,6 @@ public:
 
     AchievementMgr<Guild>& GetAchievementMgr() { return m_achievementMgr; }
     AchievementMgr<Guild> const& GetAchievementMgr() const { return m_achievementMgr; }
-
-    // Guild leveling
-    uint8 GetLevel() const { return _level; }
-    void GiveXP(uint32 xp, Player* source);
-    uint64 GetExperience() const { return _experience; }
-    uint64 GetTodayExperience() const { return _todayExperience; }
 
     void AddGuildNews(uint8 type, uint64 guid, uint32 flags, uint32 value);
 
@@ -902,10 +884,6 @@ protected:
     LogHolder* m_bankEventLog[GUILD_BANK_MAX_TABS + 1];
     LogHolder* m_newsLog;
     AchievementMgr<Guild> m_achievementMgr;
-
-    uint8 _level;
-    uint64 _experience;
-    uint64 _todayExperience;
 
 private:
     inline uint8 _GetRanksSize() const { return uint8(m_ranks.size()); }
@@ -939,9 +917,9 @@ private:
 
     inline Member* GetMember(std::string const& name)
     {
-        for (Members::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-            if (itr->second->GetName() == name)
-                return itr->second;
+        for (auto membersMap : m_members)
+            if (membersMap.second->GetName() == name)
+                return membersMap.second;
 
         return NULL;
     }

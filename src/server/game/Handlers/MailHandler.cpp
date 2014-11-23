@@ -298,9 +298,9 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
     uint32 deliver_delay = needItemDelay ? sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
     // Mail sent between guild members arrives instantly if they have the guild perk "Guild Mail"
-    if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
-        if (guild->GetLevel() >= 17 && guild->IsMember(receiverGuid))
-            deliver_delay = 0;
+    //if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
+    //    if (guild->GetLevel() >= 17 && guild->IsMember(receiverGuid))
+    //        deliver_delay = 0;
 
     // will delete item or place to receiver mail list
     draft

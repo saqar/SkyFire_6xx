@@ -354,10 +354,10 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_GMTICKET_UPDATETEXT,                                 0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketUpdateOpcode         );
 
     ///< Void Storage
-    DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_QUERY,                                  0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleVoidStorageQuery             );
-    DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_TRANSFER,                               0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleVoidStorageTransfer          );
-    DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_UNLOCK,                                 0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleVoidStorageUnlock            );
-    DEFINE_OPCODE_HANDLER(CMSG_VOID_SWAP_ITEM,                                      0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::HandleVoidSwapItem                 );
+    DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_QUERY,                                  0x019E, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleVoidStorageQuery             ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_TRANSFER,                               0x0463, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleVoidStorageTransfer          ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_VOID_STORAGE_UNLOCK,                                 0x13BB, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleVoidStorageUnlock            ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_VOID_SWAP_ITEM,                                      0x0619, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleVoidSwapItem                 ); // 6.0.3 19116
 
     ///< Battlefield & Battlegroud & Battlemaster
     DEFINE_OPCODE_HANDLER(CMSG_BATTLEFIELD_LEAVE,                                   0x06F1, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleBattlefieldLeaveOpcode       ); // 6.0.3 19116
@@ -1157,11 +1157,11 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_GM_TICKET_STATUS_UPDATE,                         0x0000, STATUS_UNHANDLED);
 
     ///< Void Storage
-    DEFINE_OPCODE_HANDLER(SMSG_VOID_ITEM_SWAP_RESPONSE,                         0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_VOID_STORAGE_CONTENTS,                           0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_VOID_STORAGE_FAILED,                             0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_VOID_STORAGE_TRANSFER_CHANGES,                   0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_VOID_TRANSFER_RESULT,                            0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_VOID_ITEM_SWAP_RESPONSE,                         0x1131, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_VOID_STORAGE_CONTENTS,                           0x0108, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_VOID_STORAGE_FAILED,                             0x0B01, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_VOID_STORAGE_TRANSFER_CHANGES,                   0x0321, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_VOID_TRANSFER_RESULT,                            0x0539, STATUS_NEVER    ); // 6.0.3 19116
 
     ///< Battlefield & Battlegroud
     DEFINE_OPCODE_HANDLER(SMSG_BATTLEFIELD_LIST,                                0x11A1, STATUS_NEVER    ); // 6.0.3 19116

@@ -784,6 +784,7 @@ class WorldSession
         void HandleCharRenameOpcode(WorldPacket& recvData);
         void HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult result, std::string const& newName);
         void HandleSetPlayerDeclinedNames(WorldPacket& recvData);
+        void HandleSetPlayerDeclinedNames(uint32 ResultCode, ObjectGuid Player = 0,  bool guid = false);
         void HandeSetTalentSpecialization(WorldPacket& recvData);
 
         void HandleTotemDestroyed(WorldPacket& recvData);
@@ -943,8 +944,10 @@ class WorldSession
         void HandleSpellClick(WorldPacket& recvData);
         void HandleMirrorImageDataRequest(WorldPacket& recvData);
         void HandleAlterAppearance(WorldPacket& recvData);
+        void HandleBarberShopResult(uint32 Result);
         void HandleRemoveGlyph(WorldPacket& recvData);
         void HandleCharCustomize(WorldPacket& recvData);
+        void HandleCharCustomizeResult(uint8 Result);
         void HandleQueryInspectAchievements(WorldPacket& recvData);
         void HandleGuildAchievementProgressQuery(WorldPacket& recvData);
         void HandleEquipmentSetSave(WorldPacket& recvData);

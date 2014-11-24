@@ -1899,7 +1899,8 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    uint64 HealerGuid;
+    ObjectGuid HealerGuid;
+
     recvData >> HealerGuid;
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(HealerGuid);
@@ -1961,6 +1962,8 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
 {
+    TC_LOG_DEBUG("network", "WORLD: CMSG_INSTANCE_LOCK_WARNING_RESPONSE");
+
     uint8 accept;
     recvPacket >> accept;
 

@@ -305,10 +305,8 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
-    ObjectGuid guid(_player->GetGUID());
+    WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
 
-    WorldPacket data(SMSG_ACTIVATETAXIREPLY, 8);
-    data << guid;
     data << uint32(reply);
 
     SendPacket(&data);

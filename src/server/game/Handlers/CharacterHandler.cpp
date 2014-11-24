@@ -1362,6 +1362,17 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult resu
     sWorld->UpdateCharacterNameData(guidLow, newName);
 }
 
+void WorldSession::HandleSetPlayerDeclinedNames(uint32 ResultCode, ObjectGuid Player,  bool guid)
+{
+    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + guid ? 18 : 0);
+
+    data << ResultCode;
+    if (guid)
+        data << Player;
+
+    SendPacket(&data);
+}
+
 void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 {
     ObjectGuid guid;
@@ -1386,26 +1397,20 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
     std::string name;
     if (!sObjectMgr->GetPlayerNameByGUID(guid, name))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
-        data << uint32(1);
-        SendPacket(&data);
+        HandleSetPlayerDeclinedNames(1);
         return;
     }
 
     std::wstring wname;
     if (!Utf8toWStr(name, wname))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
-        data << uint32(1);
-        SendPacket(&data);
+        HandleSetPlayerDeclinedNames(1);
         return;
     }
 
     if (!isCyrillicCharacter(wname[0]))                      // name already stored as only single alphabet using
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
-        data << uint32(1);
-        SendPacket(&data);
+        HandleSetPlayerDeclinedNames(1);
         return;
     }
 
@@ -1416,9 +1421,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     if (name2 != name)                                       // character have different name
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
-        data << uint32(1);
-        SendPacket(&data);
+        HandleSetPlayerDeclinedNames(1);
         return;
     }
 
@@ -1427,18 +1430,14 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
         recvData >> declinedname.name[i];
         if (!normalizePlayerName(declinedname.name[i]))
         {
-            WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
-            data << uint32(1);
-            SendPacket(&data);
+            HandleSetPlayerDeclinedNames(1);
             return;
         }
     }
 
     if (!ObjectMgr::CheckDeclinedNames(wname, declinedname))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
-        data << uint32(1);
-        SendPacket(&data);
+        HandleSetPlayerDeclinedNames(1);
         return;
     }
 
@@ -1461,12 +1460,17 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
     CharacterDatabase.CommitTransaction(trans);
 
-    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
-    data << uint32(0);                                      // OK
-    data << uint64(guid);
-    SendPacket(&data);
+    HandleSetPlayerDeclinedNames(0, guid, true);
 }
 
+void WorldSession::HandleBarberShopResult(uint32 Result)
+{
+    WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
+
+    data << Result;
+
+    SendPacket(&data);
+}
 
 void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
 {
@@ -1493,17 +1497,13 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     GameObject* go = _player->FindNearestGameObjectOfType(GAMEOBJECT_TYPE_BARBER_CHAIR, 5.0f);
     if (!go)
     {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(2);
-        SendPacket(&data);
+        HandleBarberShopResult(2);
         return;
     }
 
     if (_player->getStandState() != UNIT_STAND_STATE_SIT_LOW_CHAIR + go->GetGOInfo()->barberChair.chairheight)
     {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(2);
-        SendPacket(&data);
+        HandleBarberShopResult(2);
         return;
     }
 
@@ -1514,15 +1514,11 @@ void WorldSession::HandleAlterAppearance(WorldPacket& recvData)
     // 2 - you have to sit on barber chair
     if (!_player->HasEnoughMoney((uint64)cost))
     {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(1);                                  // no money
-        SendPacket(&data);
+        HandleBarberShopResult(1); // no money
         return;
     } else
     {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(0);                                  // ok
-        SendPacket(&data);
+        HandleBarberShopResult(1);// ok
     }
 
     _player->ModifyMoney(-int64(cost));                     // it isn't free
@@ -1561,17 +1557,29 @@ void WorldSession::HandleRemoveGlyph(WorldPacket& recvData)
     }
 }
 
+void WorldSession::HandleCharCustomizeResult(uint8 Result)
+{
+    WorldPacket data(SMSG_CHAR_CUSTOMIZE_RESULT, 2);
+
+    data << Result;
+
+    SendPacket(&data);
+}
+
 void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 {
     ObjectGuid guid;
     std::string newName;
     uint8 gender, skin, face, hairStyle, hairColor, facialHair;
 
-    recvData >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
-
     recvData >> guid;
+    recvData >> gender;
+    recvData >> skin;
+    recvData >> hairColor;
+    recvData >> hairStyle;
+    recvData >> facialHair;
+    recvData >> face;
     recvData >> newName;
-
 
     if (!IsLegitCharacterForAccount(GUID_LOPART(guid)))
     {
@@ -1582,17 +1590,13 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
         return;
     }
 
-
-
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_AT_LOGIN);
     stmt->setUInt32(0, GUID_LOPART(guid));
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
     if (!result)
     {
-        WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
-        data << uint8(CHAR_CREATE_ERROR);
-        SendPacket(&data);
+        HandleCharCustomizeResult(CHAR_CREATE_ERROR);
         return;
     }
 
@@ -1601,36 +1605,28 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 
     if (!(at_loginFlags & AT_LOGIN_CUSTOMIZE))
     {
-        WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
-        data << uint8(CHAR_CREATE_ERROR);
-        SendPacket(&data);
+        HandleCharCustomizeResult(CHAR_CREATE_ERROR);
         return;
     }
 
     // prevent character rename to invalid name
     if (!normalizePlayerName(newName))
     {
-        WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
-        data << uint8(CHAR_NAME_NO_NAME);
-        SendPacket(&data);
+        HandleCharCustomizeResult(CHAR_NAME_NO_NAME);
         return;
     }
 
     uint8 res = ObjectMgr::CheckPlayerName(newName, true);
     if (res != CHAR_NAME_SUCCESS)
     {
-        WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
-        data << uint8(res);
-        SendPacket(&data);
+        HandleCharCustomizeResult(res);
         return;
     }
 
     // check name limitations
     if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) && sObjectMgr->IsReservedName(newName))
     {
-        WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
-        data << uint8(CHAR_NAME_RESERVED);
-        SendPacket(&data);
+        HandleCharCustomizeResult(CHAR_NAME_RESERVED);
         return;
     }
 
@@ -1639,9 +1635,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     {
         if (newguid != guid)
         {
-            WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
-            data << uint8(CHAR_CREATE_NAME_IN_USE);
-            SendPacket(&data);
+            HandleCharCustomizeResult(CHAR_CREATE_NAME_IN_USE);
             return;
         }
     }
@@ -1674,17 +1668,21 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 
     sWorld->UpdateCharacterNameData(GUID_LOPART(guid), newName, gender);
 
-    WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1 + 8 + (newName.size() + 1) + 6);
-    data << uint8(RESPONSE_SUCCESS);
-    data << uint64(guid);
+    WorldPacket data(SMSG_CHAR_CUSTOMIZE, 18 + newName.size() + 2 * 6);
+
+    data << guid;
+    data.WriteBits(newName.size, 6);
+    data << gender;
+    data << skin;
+    data << hairColor;
+    data << hairStyle;
+    data << facialHair;
+    data << face;
     data << newName;
-    data << uint8(gender);
-    data << uint8(skin);
-    data << uint8(face);
-    data << uint8(hairStyle);
-    data << uint8(hairColor);
-    data << uint8(facialHair);
+
     SendPacket(&data);
+
+    HandleCharCustomizeResult(RESPONSE_SUCCESS);
 }
 
 void WorldSession::HandleEquipmentSetSave(WorldPacket& recvData)

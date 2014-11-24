@@ -977,15 +977,15 @@ void BattlegroundMgr::SendToBattleground(Player* player, uint32 instanceId, Batt
 
 void BattlegroundMgr::SendAreaSpiritHealerQueryOpcode(Player* player, Battleground* bg, ObjectGuid guid)
 {
-    uint32 time_ = 30000 - bg->GetLastResurrectTime();
+    uint32 TimeLeft = 30000 - bg->GetLastResurrectTime();
 
-    if (time_ == uint32(-1))
-        time_ = 0;
+    if (TimeLeft == uint32(-1))
+        TimeLeft = 0;
 
-    WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 12);
+    WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 18 + 4);
 
     data << guid;
-    data << time_;
+    data << TimeLeft;
 
     player->GetSession()->SendPacket(&data);
 }

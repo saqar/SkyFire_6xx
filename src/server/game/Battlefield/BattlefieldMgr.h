@@ -29,16 +29,24 @@ class Creature;
 class ZoneScript;
 struct GossipMenuItems;
 
+// class to handle player enter / leave / areatrigger / GO use events
 class BattlefieldMgr
 {
-public:
+  public:
+    // ctor
     BattlefieldMgr();
+    // dtor
     ~BattlefieldMgr();
 
+    // create battlefield events
     void InitBattlefield();
+    // called when a player enters an battlefield area
     void HandlePlayerEnterZone(Player* player, uint32 areaflag);
+    // called when player leaves an battlefield area
     void HandlePlayerLeaveZone(Player* player, uint32 areaflag);
+    // called when player resurrects
     void HandlePlayerResurrects(Player* player, uint32 areaflag);
+    // return assigned battlefield
     Battlefield* GetBattlefieldToZoneId(uint32 zoneid);
     Battlefield* GetBattlefieldByBattleId(uint32 battleid);
     Battlefield *GetBattlefieldByGUID(uint64 guid);
@@ -57,9 +65,14 @@ public:
 
     typedef std::vector < Battlefield * >BattlefieldSet;
     typedef std::map < uint32 /* zoneid */, Battlefield * >BattlefieldMap;
-private:
-    BattlefieldSet m_BattlefieldSet;
+  private:
+    // contains all initiated battlefield events
+    // used when initing / cleaning up
+      BattlefieldSet m_BattlefieldSet;
+    // maps the zone ids to an battlefield event
+    // used in player event handling
     BattlefieldMap m_BattlefieldMap;
+    // update interval
     uint32 m_UpdateTimer;
 };
 

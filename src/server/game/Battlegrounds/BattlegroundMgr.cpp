@@ -982,7 +982,7 @@ void BattlegroundMgr::SendAreaSpiritHealerQueryOpcode(Player* player, Battlegrou
     if (time_ == uint32(-1))
         time_ = 0;
 
-    WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 18 + 4);
+    WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 12);
 
     data << guid;
     data << time_;

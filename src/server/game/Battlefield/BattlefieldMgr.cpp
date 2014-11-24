@@ -31,8 +31,8 @@ BattlefieldMgr::BattlefieldMgr()
 BattlefieldMgr::~BattlefieldMgr()
 {
     //TC_LOG_DEBUG("bg.battlefield", "Deleting BattlefieldMgr");
-    for (auto bactivePlayersMap : m_BattlefieldSet)
-        delete bactivePlayersMap;
+    for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
+        delete *itr;
 }
 
 void BattlefieldMgr::InitBattlefield()
@@ -43,7 +43,8 @@ void BattlefieldMgr::InitBattlefield()
     {
         TC_LOG_INFO("misc", "Battlefield : Wintergrasp init failed.");
         delete pBf;
-    } else
+    }
+    else
     {
         m_BattlefieldSet.push_back(pBf);
         TC_LOG_INFO("misc", "Battlefield : Wintergrasp successfully initiated.");
@@ -111,19 +112,19 @@ Battlefield *BattlefieldMgr::GetBattlefieldToZoneId(uint32 zoneid)
 
 Battlefield *BattlefieldMgr::GetBattlefieldByBattleId(uint32 battleid)
 {
-    for (auto battlefieldSetMap : m_BattlefieldSet)
+    for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
     {
-        if ((battlefieldSetMap)->GetBattleId() == battleid)
-            return (battlefieldSetMap);
+        if ((*itr)->GetBattleId() == battleid)
+            return (*itr);
     }
     return NULL;
 }
 
 Battlefield* BattlefieldMgr::GetBattlefieldByGUID(uint64 guid)
 {
-    for (auto battlefieldSetMap : m_BattlefieldSet)
-        if ((battlefieldSetMap)->GetGUID() == guid)
-            return (battlefieldSetMap);
+    for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
+        if ((*itr)->GetGUID() == guid)
+            return (*itr);
 
     return NULL;
 }
@@ -133,9 +134,9 @@ void BattlefieldMgr::Update(uint32 diff)
     m_UpdateTimer += diff;
     if (m_UpdateTimer > BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL)
     {
-        for (auto battlefieldSetMap : m_BattlefieldSet)
-            if ((battlefieldSetMap)->IsEnabled())
-                (battlefieldSetMap)->Update(m_UpdateTimer);
+        for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
+            if ((*itr)->IsEnabled())
+                (*itr)->Update(m_UpdateTimer);
         m_UpdateTimer = 0;
     }
 }

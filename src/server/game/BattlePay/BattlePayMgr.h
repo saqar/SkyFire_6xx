@@ -110,7 +110,8 @@ class BattlePayMgr
     friend class ACE_Singleton<BattlePayMgr, ACE_Null_Mutex>;
 
 public:
-    BattlePayMgr() : m_enabled(false), m_currency(BATTLE_PAY_CURRENCY_DOLLAR) { }
+    BattlePayMgr()
+        : m_enabled(false), m_currency(BATTLE_PAY_CURRENCY_DOLLAR) { }
 
     ~BattlePayMgr();
 

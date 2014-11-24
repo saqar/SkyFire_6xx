@@ -669,6 +669,16 @@ void AddSC_boss_ordos();
 //void AddSC_vale_of_eternal_blossoms();
 //void AddSC_valley_of_the_four_winds();
 
+// Draenor
+//void AddSC_ashran();
+//void AddSC_faralohn();
+//void AddSC_frostfire_ridge();
+//void AddSC_gorgrond();
+//void AddSC_nagrand();
+//void AddSC_shadowmoon_valley();
+//void AddSC_spires_of_arak();
+//void AddSC_talador();
+
 // Pets
 void AddSC_deathknight_pet_scripts();
 void AddSC_generic_pet_scripts();
@@ -705,6 +715,7 @@ void AddScripts()
     AddMaelstromScripts();
     AddEventScripts();
     //AddPandariaScripts();
+	//AddDraenorScripts();
     AddPetScripts();
     AddBattlegroundScripts();
     AddOutdoorPvPScripts();
@@ -1395,6 +1406,20 @@ void AddPandariaScripts()
     //AddSC_townlong_steppes();
     //AddSC_vale_of_eternal_blossoms();
     //AddSC_valley_of_the_four_winds();
+#endif
+}
+
+void AddDraenorScripts()
+{
+#ifdef SCRIPTS
+    //AddSC_ashran();
+    //AddSC_faralohn();
+    //AddSC_frostfire_ridge();
+    //AddSC_gorgrond();
+    //AddSC_nagrand();
+    //AddSC_shadowmoon_valley();
+    //AddSC_spires_of_arak();
+    //AddSC_talador();
 #endif
 }
 

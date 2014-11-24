@@ -257,7 +257,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SHOWING_HELM,                                        0x11E1, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleShowingHelmOpcode            ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_SOCKET_GEMS,                                         0x1BE1, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSocketOpcode                 ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_SORT_BAGS,                                           0x1399, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSortBagsOpcode               ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(CMSG_SORT_BANK_BAGS,                                      0x13BB, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSortBankBagsOpcode           ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_SORT_BANK_BAGS,                                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSortBankBagsOpcode           );
     DEFINE_OPCODE_HANDLER(CMSG_SPELLCLICK,                                          0x0BC2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleSpellClick                   ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_SPIRIT_HEALER_ACTIVATE,                              0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleSpiritHealerActivateOpcode   );
     DEFINE_OPCODE_HANDLER(CMSG_STANDSTATECHANGE,                                    0x0ABD, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleStandStateChangeOpcode       ); // 6.0.3 19116

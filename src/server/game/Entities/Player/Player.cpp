@@ -9097,15 +9097,10 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             return;
         }
 
-        for (BattlePetItemXSpeciesStore::iterator itr = sBattlePetItemXSpeciesStore.begin(); itr != sBattlePetItemXSpeciesStore.end(); itr++)
+        if (const ItemToBattlePetEntry* entry = sItemToBattlePetStore.LookupEntry(item->GetEntry()))
         {
-            if (itr->first != item->GetEntry())
-                continue;
-
-            m_battlePetMgr->Create(itr->second);
+            m_battlePetMgr->Create(entry->SpeciesId);
             learning_spell_id = 0;
-
-            break;
         }
 
         Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);

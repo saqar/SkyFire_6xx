@@ -100,8 +100,6 @@ struct BattlePetStateEntry
     uint32 Flags;                                           // 3 - flags
 };
 
-typedef std::map<uint32, uint16> BattlePetItemXSpeciesStore;
-
 struct ItemToBattlePetEntry
 {
     uint32 ItemId;                                          // 0 - item id

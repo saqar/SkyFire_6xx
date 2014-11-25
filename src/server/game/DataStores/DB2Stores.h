@@ -34,7 +34,6 @@ extern DB2Storage<BattlePetStateEntry> sBattlePetStateStore;
 extern DB2Storage<ItemToBattlePetEntry> sItemToBattlePetStore;
 
 extern BattlePetBreedSet sBattlePetBreedSet;
-extern BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
 extern DB2Storage<AreaPOIEntry>                 sAreaPOIStore;
 extern DB2Storage<BroadcastTextEntry> sBroadcastTextStore;

@@ -486,7 +486,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_LOOT_ROLL,                                           0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleLootRoll                     );
 
     ///< Battle Pet & Pet
-    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_DELETE_PET,                               0x07B9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetDelete              ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_DELETE_PET,                               0x0928, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetDelete              ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_MODIFY_NAME,                              0x03A9, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetModifyName          ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_QUERY_NAME,                               0x041C, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetQueryName           ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_BATTLE_PET_SET_BATTLE_SLOT,                          0x120B, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleBattlePetSetBattleSlot       ); // 6.0.3 19116
@@ -1285,11 +1285,11 @@ void OpcodeTable::InitializeServerTable()
 
     ///< Battle Pet & Pet
     DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_DELETED,                              0x0138, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL,                              0x19A2, STATUS_UNHANDLED); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL,                              0x19A2, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL_LOCK_ACQUIRED,                0x01A3, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_JOURNAL_LOCK_DENINED,                 0x1BEC, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_QUERY_NAME_RESPONSE,                  0x09EC, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_SLOT_UPDATE,                          0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_SLOT_UPDATE,                          0x0000, STATUS_NEVER    );
     DEFINE_OPCODE_HANDLER(SMSG_BATTLE_PET_UPDATE,                               0x0354, STATUS_NEVER    ); // 6.0.3 19116
 
     DEFINE_OPCODE_HANDLER(SMSG_PET_ACTION_FEEDBACK,                             0x0D9E, STATUS_UNHANDLED); // 6.0.3 19116

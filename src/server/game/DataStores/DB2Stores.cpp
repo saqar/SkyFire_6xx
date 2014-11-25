@@ -37,7 +37,6 @@ DB2Storage<BattlePetStateEntry> sBattlePetStateStore(BattlePetStatefmt);
 DB2Storage<ItemToBattlePetEntry> sItemToBattlePetStore(ItemToBattlePetfmt);
 
 BattlePetBreedSet sBattlePetBreedSet;
-BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
 
 DB2Storage<BroadcastTextEntry> sBroadcastTextStore(BroadcastTextfmt, &DB2Utilities::HasBroadcastTextEntry, &DB2Utilities::WriteBroadcastTextDbReply);
 DB2Storage<GarrAbilityEntry> sGarrAbilityStore(GarrAbilityEntryfmt);
@@ -166,11 +165,7 @@ void LoadDB2Stores(std::string const& dataPath)
     LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesStateStore, db2Path, "BattlePetSpeciesState.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesXAbilityStore, db2Path, "BattlePetSpeciesXAbility.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetStateStore, db2Path, "BattlePetState.db2");
-    //LoadDB2(availableDb2Locales, bad_db2_files, sItemToBattlePetStore, db2Path, "ItemToBattlePet.db2");
-
-    for (uint32 i = 0; i < sItemToBattlePetStore.GetNumRows(); i++)
-        if (ItemToBattlePetEntry const* itemEntry = sItemToBattlePetStore.LookupEntry(i))
-            sBattlePetItemXSpeciesStore.insert(std::make_pair(itemEntry->ItemId, itemEntry->SpeciesId));
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemToBattlePetStore, db2Path, "ItemToBattlePetSpecies.db2");
 
     LoadDB2(availableDb2Locales, bad_db2_files, sBroadcastTextStore, db2Path, "BroadcastText.db2");
     LoadDB2(availableDb2Locales, bad_db2_files, sItemStore, db2Path, "Item.db2");
@@ -354,7 +349,7 @@ float BattlePetBreedMainStatModifier(uint16 stateId, uint8 breedId)
     if (stateId != BATTLE_PET_STATE_STAT_POWER
         && stateId != BATTLE_PET_STATE_STAT_STAMINA
         && stateId != BATTLE_PET_STATE_STAT_SPEED)
-        return 0;
+        return 0.0f;
 
     for (uint32 i = 0; i < sBattlePetBreedStateStore.GetNumRows(); i++)
     {
@@ -366,14 +361,14 @@ float BattlePetBreedMainStatModifier(uint16 stateId, uint8 breedId)
             return ((float)stateEntry->Value - BATTLE_PET_MAIN_STAT_OFFSET) / BATTLE_PET_MAIN_STAT_DIV;
     }
 
-    return 0;
+    return 0.0f;
 }
 
 uint32 BattlePetGetSummonSpell(uint16 speciesId)
 {
     BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
     if (!speciesEntry)
-        return 0;
+        return 0u;
 
     return speciesEntry->SpellId;
 }

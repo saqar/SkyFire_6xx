@@ -9055,7 +9055,7 @@ void ObjectMgr::LoadBattlePetQualityData()
         return;
     }
 
-    uint32 count = 0;
+    uint32 count = 0u;
     do
     {
         Field* fields = result->Fetch();
@@ -9093,35 +9093,37 @@ uint64 ObjectMgr::BattlePetGetNewId()
     return m_battlePetId++;
 }
 
-uint8 ObjectMgr::BattlePetGetRandomBreed(uint32 speciesId) const
+uint8 ObjectMgr::BattlePetGetRandomBreed(uint16 speciesId) const
 {
-    for (BattlePetBreedXSpeciesMap::const_iterator mapCitr = sBattlePetBreedXSpeciesStore.begin(); mapCitr != sBattlePetBreedXSpeciesStore.end(); mapCitr++)
+    for (const auto &breedXSpecies : sBattlePetBreedXSpeciesStore)
     {
-        if (mapCitr->first == speciesId)
+        if (breedXSpecies.first == speciesId)
         {
-            BattleBetBreedSet::iterator setItr(mapCitr->second.begin());
-            std::advance(setItr, urand(0, mapCitr->second.size() - 1));
+            auto itr(breedXSpecies.second.begin());
+            std::advance(itr, urand(0, breedXSpecies.second.size() - 1));
 
-            return *setItr;
+            return *itr;
         }
     }
 
-    return 0;
+    // fall back to breed 3 (even stat spred 5/5/5) so stats can still be calculated
+    return 3;
 }
 
-uint8 ObjectMgr::BattlePetGetRandomQuality(uint32 speciesId) const
+uint8 ObjectMgr::BattlePetGetRandomQuality(uint16 speciesId) const
 {
-    for (BattlePetQualityXSpeciesMap::const_iterator mapCitr = sBattlePetQualityXSpeciesStore.begin(); mapCitr != sBattlePetQualityXSpeciesStore.end(); mapCitr++)
+    for (const auto &qualityXSpecies : sBattlePetQualityXSpeciesStore)
     {
-        if (mapCitr->first == speciesId)
+        if (qualityXSpecies.first == speciesId)
         {
-            BattlePetQualitySet::iterator setItr(mapCitr->second.begin());
-            std::advance(setItr, urand(0, mapCitr->second.size() - 1));
+            auto itr(qualityXSpecies.second.begin());
+            std::advance(itr, urand(0, qualityXSpecies.second.size() - 1));
 
-            return *setItr;
+            return *itr;
         }
     }
 
+    // fall back to normal quality so stats can still be calculated
     return ITEM_QUALITY_NORMAL;
 }
 

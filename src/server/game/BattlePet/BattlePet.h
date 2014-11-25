@@ -21,6 +21,7 @@
 #define BATTLE_PET_H
 
 #include "Common.h"
+#include "Object.h"
 #include "SharedDefines.h"
 
 #define BATTLE_PET_MAX_LEVEL       25
@@ -44,19 +45,20 @@ enum BattlePetDbState
 class BattlePet
 {
 public:
-    BattlePet(uint64 id, uint16 speciesId, std::string nickname, uint32 timestamp, uint8 level, uint16 xp, uint16 curHealth,
+    BattlePet(uint64 id, ObjectGuid guid, uint16 speciesId, std::string nickname, uint32 timestamp, uint8 level, uint16 xp, uint16 curHealth,
         uint16 maxHealth, uint16 power, uint16 speed, uint8 quality, uint8 breedId, uint16 flags)
-        : m_id(id), m_species(speciesId), m_nickname(nickname), m_timestamp(timestamp), m_level(level), m_xp(xp), m_curHealth(curHealth), m_maxHealth(maxHealth),
+        : m_id(id), m_guid(guid), m_species(speciesId), m_nickname(nickname), m_timestamp(timestamp), m_level(level), m_xp(xp), m_curHealth(curHealth), m_maxHealth(maxHealth),
         m_power(power), m_speed(speed), m_quality(quality), m_breed(breedId), m_flags(flags), m_dbState(BATTLE_PET_DB_STATE_NONE) { }
 
-    BattlePet(uint64 id, uint16 speciesId, uint8 level, uint8 quality, uint8 breedId)
-        : m_id(id), m_species(speciesId), m_breed(breedId), m_nickname(""), m_timestamp(0),m_level(level), m_xp(0), m_curHealth(0),
+    BattlePet(uint64 id, ObjectGuid guid, uint16 speciesId, uint8 level, uint8 quality, uint8 breedId)
+        : m_id(id), m_guid(guid), m_species(speciesId), m_breed(breedId), m_nickname(""), m_timestamp(0), m_level(level), m_xp(0), m_curHealth(0),
         m_maxHealth(0), m_power(0), m_speed(0), m_quality(quality), m_flags(0), m_dbState(BATTLE_PET_DB_STATE_NONE)
     {
         CalculateStats(true);
     }
 
     uint64 GetId() const { return m_id; }
+    ObjectGuid GetGuid() const { return m_guid; }
     uint16 GetSpecies() const { return m_species; }
     std::string GetNickname() const { return m_nickname; }
     uint32 GetTimestamp() const { return m_timestamp; }
@@ -85,6 +87,7 @@ public:
 
 private:
     uint64 m_id;
+    ObjectGuid m_guid;
     uint16 m_species;
     std::string m_nickname;
     uint32 m_timestamp;

@@ -291,7 +291,7 @@ class WorldSession
         void SendAuthWaitQue(uint32 position);
 
         //void SendTestCreatureQueryOpcode(uint32 entry, uint64 guid, uint32 testvalue);
-        void SendNameQueryOpcode(ObjectGuid guid);
+        void SendNameQueryOpcode(ObjectGuid guid, uint32 VirtualRealmAddress = 0);
 
         void SendRealmNameQueryOpcode(uint32 realmId);
 

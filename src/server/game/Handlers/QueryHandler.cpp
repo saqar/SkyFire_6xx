@@ -17,6 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AccountMgr.h"
+#include "BattlenetAccountMgr.h"
 #include "Common.h"
 #include "Language.h"
 #include "DatabaseEnv.h"
@@ -33,10 +35,10 @@
 #include "MapManager.h"
 #include "Config.h"
 
-void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
+void WorldSession::SendNameQueryOpcode(ObjectGuid guid, uint32 VirtualRealmAddress)
 {
-    ObjectGuid guid2 = 0;
-    ObjectGuid guid3 = guid;
+    uint32 AccountID = sObjectMgr->GetPlayerAccountIdByGUID(guid);
+    uint32 BnetAccountID = Battlenet::AccountMgr::GetIdByGameAccount(AccountID);
 
     Player* player = ObjectAccessor::FindPlayer(guid);
     CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
@@ -62,11 +64,11 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
         for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
             data.WriteString(names->name[i]);
 
-    data << guid2;
-    data << guid2;
-    data << guid3;
+    data << BnetAccountID;
+    data << AccountID;
+    data << guid;
 
-    data << uint32(realmID); // realmIdSecond
+    data << uint32(VirtualRealmAddress);
     data << uint8(nameData->m_race);
     data << uint8(nameData->m_gender);
     data << uint8(nameData->m_class);
@@ -79,17 +81,22 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 void WorldSession::HandleNameQueryOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
-
-    //uint8 bit14, bit1C;
-    //uint32 unk, unk1;
+    bool HasVirtualRealmAddress, HasNativeRealmAddress;
+    uint32 VirtualRealmAddress, NativeRealmAddress;
 
     recvData >> guid;
-    recvData.rfinish();
 
-    // This is disable by default to prevent lots of console spam
-    // TC_LOG_INFO("network", "HandleNameQueryOpcode %u", guid);
+    HasVirtualRealmAddress = recvData.ReadBit();
+    if (HasVirtualRealmAddress)
+        recvData >> VirtualRealmAddress;
+    
+    HasNativeRealmAddress = recvData.ReadBit();
+    if (HasNativeRealmAddress)
+        recvData >> NativeRealmAddress;
 
-    SendNameQueryOpcode(guid);
+    // TC_LOG_INFO("network", "CMSG_NAME_QUERY %u", guid);
+
+    SendNameQueryOpcode(guid, VirtualRealmAddress);
 }
 
 void WorldSession::SendRealmNameQueryOpcode(uint32 realmId)

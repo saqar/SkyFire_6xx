@@ -99,14 +99,15 @@ void WorldSession::SendRealmNameQueryOpcode(uint32 realmId)
     bool found = iter != realmNameStore.end();
     std::string realmName = found ? iter->second : "";
 
-    WorldPacket data(SMSG_REALM_NAME_QUERY_RESPONSE);
-    data << uint8(!found);
-    data << uint32(realmId);
+    WorldPacket data(SMSG_REALM_NAME_QUERY_RESPONSE, 50);
 
+    data << uint32(realmId);
+    data << uint8(!found);
     if (found)
     {
-        data.WriteBits(realmName.length(), 8);
         data.WriteBit(realmId == realmID);
+        data.WriteBit(realmId == realmID);
+        data.WriteBits(realmName.length(), 8);
         data.WriteBits(realmName.length(), 8);
         data.FlushBits();
 

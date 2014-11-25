@@ -1267,14 +1267,18 @@ void WorldSession::HandleSetActionBarToggles(WorldPacket& recvData)
 
 void WorldSession::HandlePlayedTime(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "WORLD: CMSG_PLAYED_TIME");
+
     uint8 TriggerScriptEvent;
 
-    recvData >> TriggerScriptEvent;                                      // 0 or 1 expected
+    TriggerScriptEvent = recvData.ReadBit();                                      // 0 or 1 expected
 
     WorldPacket data(SMSG_PLAYED_TIME, 4 + 4 + 1);
+
     data << uint32(_player->GetTotalPlayedTime());
     data << uint32(_player->GetLevelPlayedTime());
-    data << uint8(TriggerScriptEvent);                                    // 0 - will not show in chat frame
+    data.WriteBit(TriggerScriptEvent);                                    // 0 - will not show in chat frame
+
     SendPacket(&data);
 }
 
@@ -1577,6 +1581,7 @@ void WorldSession::HandleFarSightOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: CMSG_FAR_SIGHT");
 
     bool apply;
+
     recvData >> apply;
 
     if (apply)

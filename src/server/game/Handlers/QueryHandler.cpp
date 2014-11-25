@@ -37,8 +37,8 @@
 
 void WorldSession::SendNameQueryOpcode(ObjectGuid guid, uint32 VirtualRealmAddress)
 {
-    uint32 AccountID = sObjectMgr->GetPlayerAccountIdByGUID(guid);
-    uint32 BnetAccountID = Battlenet::AccountMgr::GetIdByGameAccount(AccountID);
+    ObjectGuid AccountID = sObjectMgr->GetPlayerAccountIdByGUID(guid);
+    ObjectGuid BnetAccountID = Battlenet::AccountMgr::GetIdByGameAccount(AccountID);
 
     Player* player = ObjectAccessor::FindPlayer(guid);
     CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));

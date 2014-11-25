@@ -111,7 +111,7 @@ void LFGPlayerScript::OnMapChanged(Player* player)
 
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             if (Player* member = itr->GetSource())
-                player->GetSession()->SendNameQueryOpcode(member->GetGUID());
+                player->GetSession()->SendNameQueryOpcode(member->GetGUID(), 0);
 
         if (sLFGMgr->selectedRandomLfgDungeon(player->GetGUID()))
             player->CastSpell(player, LFG_SPELL_LUCK_OF_THE_DRAW, true);

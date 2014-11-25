@@ -1053,54 +1053,64 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
 
-    uint32 timestamp, type, decompressedSize;
-    recvData >> timestamp >> decompressedSize;
-    type = recvData.ReadBits(3);
+    uint32 timestamp, size;
+    uint8 DataType;
+    ObjectGuid PlayerGuid;
 
-    TC_LOG_DEBUG("network", "UAD: type %u, time %u, decompressedSize %u", type, timestamp, decompressedSize);
+    recvData >> PlayerGuid;
+    recvData >> timestamp;
+    recvData >> size;
+    DataType = recvData.ReadBits(3);
 
-    if (type > NUM_ACCOUNT_DATA_TYPES)
+    TC_LOG_DEBUG("network", "UAD: DataType %u, time %u, size %u", DataType, timestamp, size);
+
+    if (DataType > NUM_ACCOUNT_DATA_TYPES)
         return;
 
-    if (decompressedSize > 0xFFFF)
+    if (size == 0)                               // erase
+    {
+        SetAccountData(AccountDataType(DataType), 0, "");
+    }
+
+    if (size > 0xFFFF)
     {
         recvData.rfinish();                   // unnneded warning spam in this case
-        TC_LOG_ERROR("network", "UAD: Account data packet too big, size %u", decompressedSize);
+        TC_LOG_ERROR("network", "UAD: Account data packet too big, size %u", size);
         return;
     }
 
     ByteBuffer dest;
-    dest.resize(decompressedSize);
+    dest.resize(size);
 
-    uLongf realSize = decompressedSize;
+    uLongf realSize = size;
     if (uncompress(dest.contents(), &realSize, recvData.contents() + recvData.rpos(), recvData.size() - recvData.rpos()) != Z_OK)
     {
-        recvData.rfinish();                   // unnneded warning spam in this case
         TC_LOG_ERROR("network", "UAD: Failed to decompress account data");
         return;
     }
 
-    recvData.rfinish();                       // uncompress read (recvData.size() - recvData.rpos())
-
     std::string adata;
     dest >> adata;
 
-    SetAccountData(AccountDataType(type), timestamp, adata);
+    SetAccountData(AccountDataType(DataType), timestamp, adata);
 }
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
 
-    uint32 type;
-    recvData >> type;
+    uint8 DataType;
+    ObjectGuid PlayerGuid;
 
-    TC_LOG_DEBUG("network", "RAD: type %u", type);
+    recvData >> PlayerGuid;
+    DataType = recvData.ReadBits(3);
 
-    if (type > NUM_ACCOUNT_DATA_TYPES)
+    TC_LOG_DEBUG("network", "RAD: DataType %u", DataType);
+
+    if (DataType > NUM_ACCOUNT_DATA_TYPES)
         return;
 
-    AccountData* adata = GetAccountData(AccountDataType(type));
+    AccountData* adata = GetAccountData(AccountDataType(DataType));
 
     uint32 size = adata->Data.size();
     uLongf destSize = compressBound(size);
@@ -1117,12 +1127,12 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     dest.resize(destSize);
     ObjectGuid guid;
 
-    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8 + 4 + 4 + 4 + destSize);
+    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA);
 
     data << guid;
     data << uint32(adata->Time);
     data << uint32(size);
-    data.WriteBits(type, 3);
+    data.WriteBits(DataType, 3);
     data << uint32(destSize);
     data.append(dest);
 

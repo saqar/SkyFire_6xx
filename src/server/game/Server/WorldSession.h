@@ -89,6 +89,13 @@ enum AccountDataType
 
 #define REGISTERED_ADDON_PREFIX_SOFTCAP 64
 
+enum TutorialAction
+{
+    TUTORIAL_ACTION_UPDATE = 0,
+    TUTORIAL_ACTION_CLEAR  = 1,
+    TUTORIAL_ACTION_RESET  = 2
+};
+
 struct AccountData
 {
     AccountData() : Time(0), Data("") { }
@@ -763,8 +770,6 @@ class WorldSession
         void HandlePageTextQueryOpcode(WorldPacket& recvPacket);
 
         void HandleTutorialFlag (WorldPacket& recvData);
-        void HandleTutorialClear(WorldPacket& recvData);
-        void HandleTutorialReset(WorldPacket& recvData);
 
         //Pet
         void HandlePetAction(WorldPacket& recvData);

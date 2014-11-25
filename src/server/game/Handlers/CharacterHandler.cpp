@@ -853,6 +853,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         return;
     }
 
+    SendTutorialsData();
+
     pCurrChar->GetMotionMaster()->Initialize();
     pCurrChar->SendDungeonDifficulty(false);
 
@@ -1200,45 +1202,63 @@ void WorldSession::HandleSetFactionCheat(WorldPacket & /*recvData*/)
 
 void WorldSession::HandleTutorialFlag(WorldPacket& recvData)
 {
-    uint32 data;
-    recvData >> data;
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_TUTORIAL_FLAG");
 
-    uint8 index = uint8(data / 32);
-    if (index >= MAX_ACCOUNT_TUTORIAL_VALUES)
-        return;
+    uint32 TutorialBit;
+    uint8 Action;
 
-    uint32 value = (data % 32);
+    Action = recvData.ReadBits(2);
+    recvData >> TutorialBit;
 
-    uint32 flag = GetTutorialInt(index);
-    flag |= (1 << value);
-    SetTutorialInt(index, flag);
-}
+    switch (TutorialBit)
+    {
+        case TUTORIAL_ACTION_UPDATE:
+        {
+            uint8 index = uint8(TutorialBit >> 5);
+            if (index >= MAX_ACCOUNT_TUTORIAL_VALUES)
+            {
+                TC_LOG_ERROR("network", "CMSG_TUTORIAL_FLAG received bad TutorialBit %u.", TutorialBit);
+                return;
+            }
+            uint32 flag = GetTutorialInt(index);
+            flag |= (1 << (TutorialBit & 0x1F));
+            SetTutorialInt(index, flag);
+            break;
+        }
 
-void WorldSession::HandleTutorialClear(WorldPacket& /*recvData*/)
-{
-    for (uint8 i = 0; i < MAX_ACCOUNT_TUTORIAL_VALUES; ++i)
-        SetTutorialInt(i, 0xFFFFFFFF);
-}
+        case TUTORIAL_ACTION_CLEAR:
+            for (uint8 i = 0; i < MAX_ACCOUNT_TUTORIAL_VALUES; ++i)
+                SetTutorialInt(i, 0xFFFFFFFF);
+            break;
 
-void WorldSession::HandleTutorialReset(WorldPacket& /*recvData*/)
-{
-    for (uint8 i = 0; i < MAX_ACCOUNT_TUTORIAL_VALUES; ++i)
-        SetTutorialInt(i, 0x00000000);
+        case TUTORIAL_ACTION_RESET:
+            for (uint8 i = 0; i < MAX_ACCOUNT_TUTORIAL_VALUES; ++i)
+                SetTutorialInt(i, 0x00000000);
+            break;
+
+        default:
+            TC_LOG_ERROR("network", "CMSG_TUTORIAL_FLAG received unknown TutorialAction %u.", Action);
+            return;
+    }
 }
 
 void WorldSession::HandleSetWatchedFactionOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_SET_WATCHED_FACTION");
+
     uint32 fact;
     recvData >> fact;
+
     GetPlayer()->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fact);
 }
 
 void WorldSession::HandleSetFactionInactiveOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_SET_FACTION_INACTIVE");
+
     uint32 replistid;
     uint8 inactive;
+
     recvData >> replistid >> inactive;
 
     _player->GetReputationMgr().SetInactive(replistid, inactive);

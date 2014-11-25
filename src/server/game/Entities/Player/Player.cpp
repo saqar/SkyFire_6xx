@@ -2303,9 +2303,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (!GetSession()->PlayerLogout())
             {
                 // send transfer packets
-                WorldPacket data(SMSG_TRANSFER_PENDING, 4 + 4 + 4);
+                WorldPacket data(SMSG_TRANSFER_PENDING, 16);
 
-                data << uint32(mapid);
+                data << mapid;
                 data.WriteBit(m_transport != NULL);
                 data.WriteBit(0);       // spellId
 
@@ -6609,7 +6609,7 @@ int16 Player::GetSkillTempBonusValue(uint32 skill) const
 
 void Player::SendActionButtons(uint32 state) const
 {
-    WorldPacket data(SMSG_ACTION_BUTTONS, 1+(MAX_ACTION_BUTTONS*8));
+    WorldPacket data(SMSG_ACTION_BUTTONS, 1 + MAX_ACTION_BUTTONS * 8);
 
     uint64 buttons[MAX_ACTION_BUTTONS];
     ActionButtonPACKET* buttonsTab = (ActionButtonPACKET*)buttons;
@@ -6633,6 +6633,7 @@ void Player::SendActionButtons(uint32 state) const
             data << uint64(buttons[i]);
 
     data << uint8(state);
+
     GetSession()->SendPacket(&data);
     TC_LOG_INFO("network", "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
 }
@@ -23466,13 +23467,16 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg)
 {
-    WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
-    data << uint32(mapid);
-    data << uint8(arg);
-    data.WriteBits(reason, 5); // transfer abort reason
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 1 + 4);
+
+    data << mapid;
+    data << arg;
+    data.WriteBits(reason, 5);
     data.FlushBits();
-    TC_LOG_ERROR("network", "Sending transfer reason %i", reason);
+
     GetSession()->SendPacket(&data);
+
+    TC_LOG_ERROR("network", "Sending transfer reason %i", reason);
 }
 
 void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time)

@@ -754,11 +754,13 @@ void AchievementMgr<T>::Reset()
 template<>
 void AchievementMgr<Player>::Reset()
 {
-    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+    for (auto completedAchievementsMap : m_completedAchievements)
     {
-        WorldPacket data(SMSG_ACHIEVEMENT_DELETED, 4);
-        data << uint32(iter->first);
-        data << uint32(0); // Unk
+        WorldPacket data(SMSG_ACHIEVEMENT_DELETED, 4 + 4);
+
+        data << uint32(completedAchievementsMap.first);
+        data << uint32(0); // Immunities 
+
         SendPacket(&data);
     }
 
@@ -826,6 +828,7 @@ void AchievementMgr<T>::SendAchievementEarned(AchievementEntry const* achievemen
         data << uint64(GetOwner()->GetGUID());
         data << uint32(achievement->ID);
         data << uint32(0);                                  // 1=link supplied string as player name, 0=display plain string
+
         sWorld->SendGlobalMessage(&data);
     }
     // if player is in world he can tell his friends about new achievement
@@ -882,9 +885,9 @@ void AchievementMgr<T>::SendCriteriaUpdate(CriteriaEntry const* /*entry*/, Crite
 template<>
 void AchievementMgr<Player>::SendCriteriaUpdate(CriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted) const
 {
-    ObjectGuid guid = GetOwner()->GetGUID();
+    ObjectGuid guid = GetOwner()->GetGUID128();
 
-    WorldPacket data(SMSG_CRITERIA_UPDATE, 32);
+    WorldPacket data(SMSG_CRITERIA_UPDATE, 4 + 4 + 16 + 4 + 18);
    
     data << uint32(entry->ID);
     data << uint64(progress->counter);
@@ -1650,7 +1653,7 @@ void AchievementMgr<T>::SetCriteriaProgress(CriteriaEntry const* entry, uint64 c
         }
 
         if (criteriaComplete && achievement->flags & ACHIEVEMENT_FLAG_SHOW_CRITERIA_MEMBERS && !progress->CompletedGUID)
-            progress->CompletedGUID = referencePlayer->GetGUID();
+            progress->CompletedGUID = referencePlayer->GetGUID128();
 
     }
 

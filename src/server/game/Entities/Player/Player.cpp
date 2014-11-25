@@ -6794,14 +6794,18 @@ void Player::SendDirectMessage(WorldPacket* data)
 void Player::SendCinematicStart(uint32 CinematicSequenceId)
 {
     WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);
-    data << uint32(CinematicSequenceId);
+
+    data << CinematicSequenceId;
+
     SendDirectMessage(&data);
 }
 
 void Player::SendMovieStart(uint32 MovieId)
 {
     WorldPacket data(SMSG_TRIGGER_MOVIE, 4);
-    data << uint32(MovieId);
+
+    data << MovieId;
+
     SendDirectMessage(&data);
 }
 
@@ -7136,7 +7140,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
     if (HasAura(SPELL_AURA_PLAYER_INACTIVE))
         return false;
 
-    uint64 victim_guid = 0;
+    ObjectGuid victim_guid = 0;
     uint32 victim_rank = 0;
 
     // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
@@ -7154,7 +7158,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
         if (!victim || victim == this || victim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
             return false;
 
-        victim_guid = victim->GetGUID();
+        victim_guid = victim->GetGUID128();
 
         if (Player* plrVictim = victim->ToPlayer())
         {
@@ -7228,9 +7232,10 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
     // victim_rank [1..4]  HK: <dishonored rank>
     // victim_rank [5..19] HK: <alliance\horde rank>
     // victim_rank [0, 20+] HK: <>
-    WorldPacket data(SMSG_PVP_CREDIT, 4+8+4);
+    WorldPacket data(SMSG_PVP_CREDIT, 4 + 18 + 4);
+
     data << uint32(honor);
-    data << uint64(victim_guid);
+    data << ObjectGuid(victim_guid);
     data << uint32(victim_rank);
 
     GetSession()->SendPacket(&data);
@@ -10314,23 +10319,25 @@ uint32 Player::GetXPRestBonus(uint32 xp)
     return rested_bonus;
 }
 
-void Player::SetBindPoint(uint64 guid)
+void Player::SetBindPoint(ObjectGuid guid)
 {
-    ObjectGuid ikGuid = guid;
-
-    WorldPacket data(SMSG_BINDER_CONFIRM, 9);
+    WorldPacket data(SMSG_BINDER_CONFIRM, 18);
 
     data << guid;
     
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendTalentWipeConfirm(uint64 guid)
+void Player::SendTalentWipeConfirm(ObjectGuid guid, uint8 RespecType)
 {
-    WorldPacket data(MSG_TALENT_WIPE_CONFIRM, (8+4));
-    data << uint64(guid);
     uint32 cost = sWorld->getBoolConfig(CONFIG_NO_RESET_TALENT_COST) ? 0 : GetNextResetTalentsCost();
+
+    WorldPacket data(SMSG_RESPEC_WIPE_CONFIRM, 2 + 4 + 18);
+
+    data << RespecType;
     data << cost;
+    data << guid; 
+
     GetSession()->SendPacket(&data);
 }
 
@@ -14794,7 +14801,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
         return;
 
     uint32 gossipOptionId = item->OptionType;
-    uint64 guid = source->GetGUID();
+    ObjectGuid guid = source->GetGUID128();
 
     if (source->GetTypeId() == TYPEID_GAMEOBJECT)
     {
@@ -14867,7 +14874,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             break;
         case GOSSIP_OPTION_UNLEARNTALENTS:
             PlayerTalkClass->SendCloseGossip();
-            SendTalentWipeConfirm(guid);
+            SendTalentWipeConfirm(guid, 0);
             break;
         case GOSSIP_OPTION_TAXIVENDOR:
             GetSession()->SendTaxiMenu(source->ToCreature());
@@ -22580,9 +22587,11 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
         m_spellCooldowns.erase(itr);
 
     WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-    data << uint32(spellId);            // Spell ID
-    data << uint64(GetGUID());          // Player GUID
-    data << int32(cooldown);            // Cooldown mod in milliseconds
+
+    data << spellId;
+    data << ObjectGuid(GetGUID128());
+    data << cooldown;
+
     GetSession()->SendPacket(&data);
 
     TC_LOG_DEBUG("misc", "ModifySpellCooldown:: Player: %s (GUID: %u) Spell: %u cooldown: %u", GetName().c_str(), GetGUIDLow(), spellId, GetSpellCooldownDelay(spellId));
@@ -25252,12 +25261,14 @@ void Player::ConvertRune(uint8 index, RuneType newType)
 void Player::ResyncRunes(uint8 count)
 {
     WorldPacket data(SMSG_RESYNC_RUNES, 4 + count * 2);
+
     data << uint32(count);
     for (uint32 i = 0; i < count; ++i)
     {
         data << uint8(GetCurrentRune(i));                   // rune type
         data << uint8(255 - (GetRuneCooldown(i) * 51));     // passed cooldown time (0-255)
     }
+
     GetSession()->SendPacket(&data);
 }
 

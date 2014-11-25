@@ -1099,7 +1099,7 @@ class TradeData
 
 struct ResurrectionData
 {
-    uint64 GUID;
+    ObjectGuid GUID;
     WorldLocation Location;
     uint32 Health;
     uint32 Mana;
@@ -1621,8 +1621,8 @@ class Player : public Unit, public GridObject<Player>
         bool m_mailsLoaded;
         bool m_mailsUpdated;
 
-        void SetBindPoint(uint64 guid);
-        void SendTalentWipeConfirm(uint64 guid);
+        void SetBindPoint(ObjectGuid guid);
+        void SendTalentWipeConfirm(ObjectGuid guid, uint8 RespecType);
         void CalcRage(uint32 damage, bool attacker);
         void RegenerateAll();
         void Regenerate(Powers power);
@@ -1807,7 +1807,7 @@ class Player : public Unit, public GridObject<Player>
             _resurrectionData = NULL;
         }
 
-        bool IsRessurectRequestedBy(uint64 guid) const
+        bool IsRessurectRequestedBy(ObjectGuid guid) const
         {
             if (!IsRessurectRequested())
                 return false;

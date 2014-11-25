@@ -877,8 +877,9 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_RESURRECT_RESPONSE");
 
-    uint64 guid;
+    ObjectGuid guid;
     uint8 status;
+
     recvData >> guid;
     recvData >> status;
 
@@ -1061,18 +1062,6 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
     if (type > NUM_ACCOUNT_DATA_TYPES)
         return;
 
-    if (decompressedSize == 0)                               // erase
-    {
-        SetAccountData(AccountDataType(type), 0, "");
-
-        WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4+4);
-        data << uint32(type);
-        data << uint32(0);
-        SendPacket(&data);
-
-        return;
-    }
-
     if (decompressedSize > 0xFFFF)
     {
         recvData.rfinish();                   // unnneded warning spam in this case
@@ -1097,11 +1086,6 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
     dest >> adata;
 
     SetAccountData(AccountDataType(type), timestamp, adata);
-
-    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4+4);
-    data << uint32(type);
-    data << uint32(0);
-    SendPacket(&data);
 }
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
@@ -1408,32 +1392,34 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
         return;
     }
 
-    ObjectGuid playerGuid = player->GetGUID();
-    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 8+1+4+4);
+    ObjectGuid PlayerGUID = player->GetGUID();
 
-    data << playerGuid;
-    data << uint8(0);                                               // rank
-    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));  // yesterday kills
-    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));  // today kills
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
+    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 18 + 2 + 2 + 4);
+
+    data << PlayerGUID;
+    data << uint8(player->GetUInt16Value(PLAYER_FIELD_LIFETIME_MAX_RANK, 1));           // LifetimeMaxRank
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));  // YesterdayHK
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));  // TodayHK
+    data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));      // LifetimeHK
+
     SendPacket(&data);
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recvData)
 {
-    uint32 time;
+    ObjectGuid Transport;
     uint32 mapid;
     float PositionX;
     float PositionY;
     float PositionZ;
     float Orientation;
 
-    recvData >> time;                                      // time in m.sec.
     recvData >> mapid;
+    recvData >> Transport;
     recvData >> PositionX;
     recvData >> PositionY;
     recvData >> PositionZ;
-    recvData >> Orientation;                               // o (3.141593 = 180 degrees)
+    recvData >> Orientation;
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_WORLD_TELEPORT");
 
@@ -1444,8 +1430,8 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recvData)
         return;
     }
 
-    TC_LOG_DEBUG("network", "CMSG_WORLD_TELEPORT: Player = %s, Time = %u, map = %u, x = %f, y = %f, z = %f, o = %f",
-        GetPlayer()->GetName().c_str(), time, mapid, PositionX, PositionY, PositionZ, Orientation);
+    TC_LOG_DEBUG("network", "CMSG_WORLD_TELEPORT: Player = %s, map = %u, x = %f, y = %f, z = %f, o = %f",
+        GetPlayer()->GetName().c_str(), mapid, PositionX, PositionY, PositionZ, Orientation);
 
     if (HasPermission(rbac::RBAC_PERM_OPCODE_WORLD_TELEPORT))
         GetPlayer()->TeleportTo(mapid, PositionX, PositionY, PositionZ, Orientation);
@@ -1818,12 +1804,12 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_SET_TAXI_BENCHMARK_MODE");
 
-    uint8 mode;
-    recvData >> mode;
+    bool Enable;
+    Enable = recvData.ReadBit();
 
-    mode ? _player->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK) : _player->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
+    Enable ? _player->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK) : _player->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
 
-    TC_LOG_DEBUG("network", "Client used \"/timetest %d\" command", mode);
+    TC_LOG_DEBUG("network", "Client used \"/timetest %d\" command", Enable);
 }
 
 void WorldSession::HandleQueryInspectAchievements(WorldPacket& recvData)
@@ -1942,6 +1928,8 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)
 {
+    TC_LOG_DEBUG("network", "WORLD: CMSG_HEARTH_AND_RESURRECT");
+
     if (_player->IsInFlight())
         return;
 
@@ -2314,4 +2302,13 @@ void WorldSession::HotFixHandler()
     }
 
     SendPacket(&data);
+}
+
+void WorldSession::HandleSetPreferedCemetery(WorldPacket& recvData)
+{
+    TC_LOG_DEBUG("network", "World: Received CMSG_SET_PREFERED_CEMETERY");
+
+    uint32 CemeteryId;
+
+    recvData >> CemeteryId;
 }

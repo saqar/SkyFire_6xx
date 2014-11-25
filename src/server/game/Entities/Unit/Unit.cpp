@@ -7550,8 +7550,10 @@ void Unit::Dismount()
     if (Player* thisPlayer = ToPlayer())
         thisPlayer->SendMovementSetCollisionHeight(thisPlayer->GetCollisionHeight(false));
 
-    WorldPacket data(SMSG_DISMOUNT, 8);
-    data.appendPackGUID(GetGUID());
+    WorldPacket data(SMSG_DISMOUNT, 18);
+
+    data << GetGUID128();
+
     SendMessageToSet(&data, true);
 
     // dismount as a vehicle
@@ -11232,15 +11234,19 @@ bool Unit::HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura)
 void Unit::SendDurabilityLoss(Player* receiver, uint32 percent)
 {
     WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 4);
-    data << uint32(percent);
+
+    data << percent;
+
     receiver->GetSession()->SendPacket(&data);
 }
 
 void Unit::PlayOneShotAnimKit(uint32 id)
 {
-    WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7+2);
-    data.appendPackGUID(GetGUID());
+    WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 18 + 2);
+
+    data << ObjectGuid(GetGUID128());
     data << uint16(id);
+
     SendMessageToSet(&data, true);
 }
 
@@ -13606,8 +13612,10 @@ uint32 Unit::GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType 
 
 void Unit::SendClearTarget()
 {
-    WorldPacket data(SMSG_BREAK_TARGET, GetPackGUID().size());
-    data.append(GetPackGUID());
+    WorldPacket data(SMSG_BREAK_TARGET, 18);
+
+    data << ObjectGuid(GetGUID128());
+
     SendMessageToSet(&data, false);
 }
 

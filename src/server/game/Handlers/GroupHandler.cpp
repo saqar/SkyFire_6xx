@@ -504,11 +504,13 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recvData)
         return;
 
     float x, y;
+    uint8 PartyIndex;
+
     recvData >> y;
     recvData >> x;
-    recvData.read_skip<uint8>();
+    recvData >> PartyIndex;
 
-    //TC_LOG_DEBUG("misc", "Received opcode MSG_MINIMAP_PING X: %f, Y: %f", x, y);
+    TC_LOG_DEBUG("misc", "Received opcode MSG_MINIMAP_PING X: %f, Y: %f, PartyIndex: %s", x, y, PartyIndex);
 
     /** error handling **/
     /********************/
@@ -1258,16 +1260,17 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_OPT_OUT_OF_LOOT");
 
-    bool passOnLoot;
-    recvData >> passOnLoot; // 1 always pass, 0 do not pass
+    bool OptOutOfLoot; // 1 always pass, 0 do not pass
+
+    recvData >> OptOutOfLoot;
 
     // ignore if player not loaded
     if (!GetPlayer())                                        // needed because STATUS_AUTHED
     {
-        if (passOnLoot)
+        if (OptOutOfLoot)
             TC_LOG_ERROR("network", "CMSG_OPT_OUT_OF_LOOT value<>0 for not-loaded character!");
         return;
     }
 
-    GetPlayer()->SetPassOnGroupLoot(passOnLoot);
+    GetPlayer()->SetPassOnGroupLoot(OptOutOfLoot);
 }

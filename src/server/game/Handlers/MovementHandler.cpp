@@ -493,7 +493,7 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvData*/)
 {
     ObjectGuid guid = GetPlayer()->GetGUID128();
 
-    WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 1 + 8);
+    WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 18);
     
 	data >> guid;
 

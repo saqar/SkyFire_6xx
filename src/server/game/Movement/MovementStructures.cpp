@@ -270,7 +270,6 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         case SMSG_MOVE_UNROOT:
             return MoveRootUnroot;
 
-        //case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
         //case CMSG_DISMISS_CONTROLLED_VEHICLE:
         //case CMSG_FORCE_MOVE_ROOT_ACK:
         //case CMSG_FORCE_MOVE_UNROOT_ACK:

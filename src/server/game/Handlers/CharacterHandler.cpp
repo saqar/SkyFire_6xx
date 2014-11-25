@@ -1671,7 +1671,6 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     WorldPacket data(SMSG_CHAR_CUSTOMIZE, 18 + newName.size() + 2 * 6);
 
     data << guid;
-    data.WriteBits(newName.size, 6);
     data << gender;
     data << skin;
     data << hairColor;
@@ -2391,18 +2390,18 @@ void WorldSession::SendRandomCharacterNameResult(std::string const* name)
 
 void WorldSession::HandleReorderCharacters(WorldPacket& recvData)
 {
-    uint32 charactersCount = recvData.ReadBits(9);
+    bool unkbit;
+    uint32 charactersCount = recvData.ReadBits(8);
+    unkbit = recvData.ReadBit();
 
     std::vector<ObjectGuid> guids(charactersCount);
     uint8 position;
-
-    for (uint8 i = 0; i < charactersCount; ++i)
-        recvData >> guids[i];
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     for (uint8 i = 0; i < charactersCount; ++i)
     {
         recvData >> position;
+        recvData >> guids[i];
 
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_LIST_SLOT);
         stmt->setUInt8(0, position);

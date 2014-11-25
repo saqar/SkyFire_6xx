@@ -292,7 +292,7 @@ class WorldSession
         void SendTrainerList(uint64 guid, std::string const& strTitle);
         void SendListInventory(uint64 guid);
         void SendShowBank(ObjectGuid guid);
-        void SendTabardVendorActivate(uint64 guid);
+        void SendTabardVendorActivate(ObjectGuid guid);
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
 
@@ -804,6 +804,9 @@ class WorldSession
         void HandleRequestPvpOptions(WorldPacket& recvData);
         void HandleRequestPvpReward(WorldPacket& recvData);
         void HandleWargameRequest(WorldPacket& recvData);
+
+        // Cemetry
+        void HandleSetPreferedCemetery(WorldPacket& recvData);
 
         void HandleWardenDataOpcode(WorldPacket& recvData);
         void HandleWorldTeleportOpcode(WorldPacket& recvData);

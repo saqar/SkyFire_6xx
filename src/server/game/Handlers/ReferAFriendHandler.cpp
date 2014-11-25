@@ -27,8 +27,9 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_GRANT_LEVEL");
 
-    uint64 guid;
-    recvData.readPackGUID(guid);
+    ObjectGuid guid;
+
+    recvData << guid;
 
     Player* target = ObjectAccessor::GetObjectInWorld(guid, _player);
 
@@ -61,8 +62,12 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
         return;
     }
 
-    WorldPacket data2(SMSG_PROPOSE_LEVEL_GRANT, 8);
-    data2.append(_player->GetPackGUID());
+    ObjectGuid guid2 = _player->GetGUID128();
+
+    WorldPacket data2(SMSG_PROPOSE_LEVEL_GRANT, 18);
+
+    data2 << guid2;
+
     target->GetSession()->SendPacket(&data2);
 }
 

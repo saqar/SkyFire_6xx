@@ -2077,8 +2077,8 @@ void Spell::EffectUntrainTalents(SpellEffIndex /*effIndex*/)
     if (!unitTarget || m_caster->GetTypeId() == TYPEID_PLAYER)
         return;
 
-    if (uint64 guid = m_caster->GetGUID()) // the trainer is the caster
-        unitTarget->ToPlayer()->SendTalentWipeConfirm(guid);
+    if (ObjectGuid guid = m_caster->GetGUID128()) // the trainer is the caster
+        unitTarget->ToPlayer()->SendTalentWipeConfirm(guid, 0);
 }
 
 void Spell::EffectTeleUnitsFaceCaster(SpellEffIndex effIndex)
@@ -4447,8 +4447,9 @@ void Spell::EffectPlayMusic(SpellEffIndex effIndex)
     }
 
     WorldPacket data(SMSG_PLAY_MUSIC, 4);
-    data << uint32(soundid);
-    data << uint64(unitTarget->GetGUID());
+
+    data << soundid;
+
     unitTarget->ToPlayer()->GetSession()->SendPacket(&data);
 }
 

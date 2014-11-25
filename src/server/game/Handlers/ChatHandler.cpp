@@ -683,13 +683,15 @@ public:
     {
         ObjectGuid Guid = i_target ? i_target->GetGUID() : 0;
         ObjectGuid TargetGuid = i_player.GetGUID();
+        ObjectGuid AccountGuid;
 
-        data.Initialize(SMSG_TEXT_EMOTE, 2 * (8 + 1) + 4 + 4);
+        data.Initialize(SMSG_TEXT_EMOTE, 3 * 18 + 4 + 4);
 
         data << Guid;
-        data << TargetGuid;
-        data << uint32(i_emote_num);
+        data << AccountGuid;
         data << uint32(i_text_emote);
+        data << uint32(i_emote_num);
+        data << TargetGuid;
     }
 
 private:

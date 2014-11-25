@@ -1027,8 +1027,8 @@ class ObjectMgr
         void LoadBattlePetQualityData();
 
         uint64 BattlePetGetNewId();
-        uint8 BattlePetGetRandomBreed(uint32 speciesId) const;
-        uint8 BattlePetGetRandomQuality(uint32 speciesId) const;
+        uint8 BattlePetGetRandomBreed(uint16 speciesId) const;
+        uint8 BattlePetGetRandomQuality(uint16 speciesId) const;
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint8 level);

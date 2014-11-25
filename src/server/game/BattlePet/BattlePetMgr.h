@@ -27,7 +27,7 @@
 typedef std::set<BattlePet*> BattlePetSet;
 
 #define BATTLE_PET_MAX_JOURNAL_SPECIES 3   // client modifications required to increase
-#define BATTLE_PET_MAX_JOURNAL_PETS    500 // sent to client as 25 bits (theoretical max 33,554,431)
+#define BATTLE_PET_MAX_JOURNAL_PETS    500
 #define BATTLE_PET_MAX_LOADOUT_SLOTS   3
 
 enum BattlePetLoadoutSlots
@@ -71,18 +71,19 @@ class BattlePetMgr
 {
 public:
     BattlePetMgr(Player* owner)
-        : m_owner(owner), m_summon(NULL), m_summonId(0), m_summonLastId(0), m_loadoutFlags(0), m_loadoutSave(false) { }
+        : m_owner(owner), m_summon(nullptr), m_summonGuid(ObjectGuid(0)), m_summonLastGuid(ObjectGuid(0)), m_loadoutFlags(0), m_loadoutSave(false) { }
 
     ~BattlePetMgr();
 
     Player* GetOwner() const { return m_owner; }
-    BattlePet* GetBattlePet(uint64 id) const;
+    BattlePet* GetBattlePet(ObjectGuid guid) const;
     uint8 GetBattlePetCount(uint16 speciesId) const;
-    uint8 GetLoadoutSlotForBattlePet(uint64 id);
+    uint8 GetLoadoutSlotForBattlePet(ObjectGuid guid) const;
+    bool HasBattlePet(uint64 id) const;
 
-    uint64 GetCurrentSummonId() const { return m_summonId; }
+    ObjectGuid GetCurrentSummonGuid() const { return m_summonGuid; }
     TempSummon* GetCurrentSummon() const { return m_summon; }
-    void SetCurrentSummonId(uint64 summonId) { m_summonId = summonId; }
+    void SetCurrentSummonGuid(ObjectGuid guid) { m_summonGuid = guid; }
     void SetCurrentSummon(TempSummon* summon) { m_summon = summon; }
 
     void UnSummonCurrentBattlePet(bool temporary);
@@ -95,8 +96,8 @@ public:
 
     void UnlockLoadoutSlot(uint8 slot);
     bool HasLoadoutSlot(uint8 slot) const;
-    uint64 GetLoadoutSlot(uint8 slot) const;
-    void SetLoadoutSlot(uint8 slot, uint64 id, bool save = false);
+    ObjectGuid GetLoadoutSlot(uint8 slot) const;
+    void SetLoadoutSlot(uint8 slot, ObjectGuid guid, bool save = false);
 
     bool HasLoadoutFlag(uint8 flag) const { return (m_loadoutFlags & flag) != 0; };
     uint8 GetLoadoutFlags() const { return m_loadoutFlags; };
@@ -105,23 +106,26 @@ public:
     void Create(uint16 speciesId);
     void Delete(BattlePet* battlePet);
 
-    void SendBattlePetDeleted(uint64 id);
+    void SendBattlePetDeleted(ObjectGuid guid);
     void SendBattlePetJournalLock();
     void SendBattlePetJournal();
-    void SendBattlePetSlotUpdate(uint8 slot, bool notification, uint64 id = 0);
+    void SendBattlePetSlotUpdate(uint8 slot, bool notification);
     void SendBattlePetUpdate(BattlePet* battlePet, bool notification);
+
+    void AppendBattlePetData(ByteBuffer &data, BattlePet* battlePet);
+    void AppendBattlePetSlotData(ByteBuffer &data, uint8 slot);
 
 private:
     Player* m_owner;
     BattlePetSet m_battlePetSet;
 
     TempSummon* m_summon;
-    uint64 m_summonId;
-    uint64 m_summonLastId;
+    ObjectGuid m_summonGuid;
+    ObjectGuid m_summonLastGuid;
 
     bool m_loadoutSave;
     uint8 m_loadoutFlags;
-    uint64 m_loadout[BATTLE_PET_MAX_LOADOUT_SLOTS];
+    ObjectGuid m_loadout[BATTLE_PET_MAX_LOADOUT_SLOTS];
 };
 
 #endif

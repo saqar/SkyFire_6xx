@@ -50,7 +50,6 @@ void BattlePet::CalculateStats(bool currentHealth)
             break;
     }
 
-    // No round in older cpp, just for compatibility
     m_maxHealth = floor(((baseHealth * 5.0f * m_level * qualityMod) + 100.0f) + 0.5f);
 
     if (currentHealth)

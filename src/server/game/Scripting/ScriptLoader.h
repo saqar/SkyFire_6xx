@@ -32,6 +32,7 @@ void AddNorthrendScripts();
 void AddMaelstromScripts();
 void AddEventScripts();
 void AddPandariaScripts();
+void AddDraenorScripts();
 void AddPetScripts();
 void AddBattlegroundScripts();
 void AddOutdoorPvPScripts();

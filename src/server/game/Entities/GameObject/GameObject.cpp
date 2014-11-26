@@ -1760,11 +1760,16 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
     }
 }
 
-void GameObject::SendCustomAnim(uint32 anim)
+void GameObject::SendCustomAnim(uint32 anim, bool playAsDespawn)
 {
-    WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8+4);
-    data << GetGUID();
-    data << uint32(anim);
+    ObjectGuid guid = GetGUID128();
+
+    WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 18 + 4 + 1);
+
+    data << guid;
+    data << anim;
+    data.WriteBit(playAsDespawn);
+
     SendMessageToSet(&data, true);
 }
 

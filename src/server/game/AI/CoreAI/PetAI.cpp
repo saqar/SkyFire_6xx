@@ -465,7 +465,7 @@ void PetAI::DoAttack(Unit* target, bool chase)
 
         // Play sound to let the player know the pet is attacking something it picked on its own
         if (me->HasReactState(REACT_AGGRESSIVE) && !me->GetCharmInfo()->IsCommandAttack())
-            me->SendPetAIReaction(me->GetGUID());
+            me->SendPetAIReaction(me->GetGUID128());
 
         if (chase)
         {

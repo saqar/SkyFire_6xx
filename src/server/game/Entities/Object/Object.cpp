@@ -3423,7 +3423,6 @@ uint64 WorldObject::GetTransGUID() const
     return 0;
 }
 
-
 ByteBuffer &operator>>(ByteBuffer& buffer, ObjectGuid& value)
 {
     uint8 loMask = buffer.read<uint8>();

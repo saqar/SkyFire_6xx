@@ -4669,27 +4669,29 @@ void Unit::RemoveAllGameObjects()
 
 void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
 {
-    ObjectGuid attackerGuid = log->attacker->GetGUID();
-    ObjectGuid targetGuid = log->target->GetGUID();
+    ObjectGuid attackerGuid = log->attacker->GetGUID128();
+    ObjectGuid targetGuid = log->target->GetGUID128();
     int32 overkill = log->damage - log->target->GetHealth();
 
-    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+4+4+4+1+4+4+1+1+4+4+1)); // we guess size
+    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, 18 + 18 + 4 * 6 + 2 + 4);
+
     data << targetGuid;
     data << attackerGuid;
 
-    data << uint32(log->SpellID);
-    data << uint32(log->damage);
+    data << log->SpellID;
+    data << log->damage;
     data << uint32(overkill > 0 ? overkill : 0);
     data << uint8(log->schoolMask);
-    data << uint32(log->absorb);
-    data << uint32(log->resist);
     data << uint32(log->blocked);
+    data << log->resist;
+    data << log->absorb;
 
     data.WriteBit(0); // IsPeriodic
     data.WriteBits(log->HitInfo, 9);
-    data.WriteBit(0);
-    data.WriteBit(0);
+    data.WriteBit(0); // ClientSpellNonMeleeDamageLogDebugInfo
+    data.WriteBit(0); // HasLogData
     data.FlushBits();
+
     SendMessageToSet(&data, true);
 }
 
@@ -4721,20 +4723,21 @@ void Unit::ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVict
 void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
 {
     AuraEffect const* aura = pInfo->auraEff;
-    ObjectGuid casterGuid = aura->GetCasterGUID();
-    ObjectGuid victimGuid = GetGUID();
+    ObjectGuid CasterGUID = aura->GetCasterGUID();
+    ObjectGuid TargetGUID = GetGUID128();
 
-    WorldPacket data(SMSG_PERIODICAURALOG, 30);
-    data << victimGuid;
-    data << casterGuid;
+    WorldPacket data(SMSG_PERIODICAURALOG, 150);
+
+    data << CasterGUID;
+    data << TargetGUID;
+    
     data << uint32(aura->GetId());
-    data << uint32(1);
+    data << uint32(1); // PeriodicAuraLogEffectCount
 
     // Switch Loop
     data << uint32(aura->GetAuraType());                    // auraId
     switch (aura->GetAuraType())
     {
-
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
             data << uint32(pInfo->damage);                  // damage
@@ -4778,8 +4781,9 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
 
     data.WriteBit(pInfo->critical);
     data.WriteBit(0); // Multistrike
-    data.WriteBit(0);
-    data.WriteBit(0); //HasLogData
+    data.WriteBit(0); // HasPeriodicAuraLogEffectDebugInfo
+    data.WriteBit(0); // HasLogData
+
     SendMessageToSet(&data, true);
 }
 
@@ -4807,13 +4811,18 @@ void Unit::SendSpellDamageResist(Unit* target, uint32 spellId)
     SendMessageToSet(&data, true);
 }
 
-void Unit::SendSpellDamageImmune(Unit* target, uint32 spellId)
+void Unit::SendSpellDamageImmune(Unit* target, uint32 spellId, bool isPeriodic)
 {
-    WorldPacket data(SMSG_SPELLORDAMAGE_IMMUNE, 8+8+4+1);
-    data << uint64(GetGUID());
-    data << uint64(target->GetGUID());
-    data << uint32(spellId);
-    data << uint8(0); // bool - log format: 0-default, 1-debug
+    ObjectGuid CasterGUID = GetGUID128();
+    ObjectGuid TargetGUID = target->GetGUID128();
+
+    WorldPacket data(SMSG_SPELLORDAMAGE_IMMUNE, 18 + 18 + 4 + 1);
+
+    data << CasterGUID;
+    data << TargetGUID;
+    data << spellId;
+    data.WriteBit(isPeriodic);
+
     SendMessageToSet(&data, true);
 }
 
@@ -6291,27 +6300,28 @@ void Unit::UnsummonAllTotems()
     }
 }
 
-void Unit::SendHealSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical)
+void Unit::SendHealSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical, bool multistrike)
 {
-    ObjectGuid victimGuid = victim->GetGUID();
-    ObjectGuid casterGuid = GetGUID();
+    ObjectGuid TargetGUID = victim->GetGUID128();
+    ObjectGuid CasterGUID = GetGUID128();
 
     // we guess size
-    WorldPacket data(SMSG_SPELLHEALLOG, 16 + 16 + 4 + 4 + 4 + 4 + 1);
+    WorldPacket data(SMSG_SPELLHEALLOG, 18 + 18 + 4 + 4 + 4 + 4 + 1 + 1 + 1 + 1);
 
-    data << victimGuid;
-    data << casterGuid;
-    data << uint32(SpellID);
-    data << uint32(Damage);
-    data << uint32(OverHeal);
-    data << uint32(Absorb);
+    data << CasterGUID;
+    data << TargetGUID;
+    data << SpellID;
+    data << Damage;
+    data << OverHeal;
+    data << Absorb;
 
     data.WriteBit(critical);
-    data.WriteBit(0); // Multistrike
-    data.WriteBit(0);
-    data.WriteBit(0);
-    data.WriteBit(0); // PowerData
+    data.WriteBit(multistrike);
+    data.WriteBit(0); // HasCritRollMade
+    data.WriteBit(0); // HasLogData
+
     data.FlushBits();
+
     SendMessageToSet(&data, true);
 }
 
@@ -6326,38 +6336,19 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
     return gain;
 }
 
-void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powers powerType)
+void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powers powerType, bool hasLogData)
 {
-    //bool hasPower = false;
-    ObjectGuid victimGuid = victim->GetGUID();
-    ObjectGuid casterGuid = GetGUID();
+    ObjectGuid TargetGUID = victim->GetGUID128();
+    ObjectGuid CasterGUID = GetGUID128();
 
-    WorldPacket data(SMSG_SPELLENERGIZELOG, (8+8+4+4+4+1));
+    WorldPacket data(SMSG_SPELLENERGIZELOG, 18 + 18 + 4 + 4 + 4 + 1);
 
-    data << victimGuid;
-    data << casterGuid;
-
-    data.WriteBit(0); // hasPower
-
-    //if (hasPower)
-    //    data.WriteBits(count, 21);
-
-    /*if (hasPower)
-    {
-        data << UInt32();
-
-        for (var i = 0; i < count; ++i)
-        {
-            data << Int32();
-            data << Int32();
-        }
-        data << Int32();
-        data << Int32();
-    }*/
- 
-    data << int32(damage);
-    data << uint32(spellId);
+    data << CasterGUID;
+    data << TargetGUID;
+    data << spellId;
     data << uint32(powerType);
+    data << int32(damage);
+    data.WriteBit(hasLogData);
 
     SendMessageToSet(&data, true);
 }
@@ -9366,14 +9357,15 @@ void Unit::SetPower(Powers power, int32 val)
 
     if (IsInWorld())
     {
-        ObjectGuid guid = GetGUID();
+        ObjectGuid guid = GetGUID128();
 
-        WorldPacket data(SMSG_POWER_UPDATE, 8 + 4 + 1 + 4);
+        WorldPacket data(SMSG_POWER_UPDATE, 18 + 4 + 4 + 2);
         data << guid;
-        data << uint32(1);
 
+        data << uint32(1);
         data << int32(val);
         data << uint8(power);
+
         SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER);
     }
 
@@ -10433,14 +10425,17 @@ Player* Unit::GetSpellModOwner() const
 }
 
 ///----------Pet responses methods-----------------
-void Unit::SendPetActionFeedback(uint8 msg)
+void Unit::SendPetActionFeedback(uint8 response, uint32 spellID)
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data(SMSG_PET_ACTION_FEEDBACK, 1);
-    data << uint8(msg);
+    WorldPacket data(SMSG_PET_ACTION_FEEDBACK, 4 + 2);
+
+    data << spellID;
+    data << response;
+
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
@@ -10450,21 +10445,27 @@ void Unit::SendPetTalk(uint32 pettalk)
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data(SMSG_PET_ACTION_SOUND, 8 + 4);
-    data << uint64(GetGUID());
-    data << uint32(pettalk);
+    ObjectGuid UnitGUID = GetGUID128();
+
+    WorldPacket data(SMSG_PET_ACTION_SOUND, 18 + 4);
+
+    data << UnitGUID;
+    data << pettalk;
+
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
-void Unit::SendPetAIReaction(uint64 guid)
+void Unit::SendPetAIReaction(ObjectGuid guid)
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data(SMSG_AI_REACTION, 8 + 4);
-    data << uint64(guid);
+    WorldPacket data(SMSG_AI_REACTION, 18 + 4);
+
+    data << guid;
     data << uint32(AI_REACTION_HOSTILE);
+
     owner->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
@@ -10507,7 +10508,9 @@ void Unit::SetStandState(uint8 state)
     if (GetTypeId() == TYPEID_PLAYER)
     {
         WorldPacket data(SMSG_STANDSTATE_UPDATE, 1);
-        data << (uint8)state;
+
+        data << state;
+
         ToPlayer()->GetSession()->SendPacket(&data);
     }
 }
@@ -12066,12 +12069,12 @@ Creature* Unit::GetVehicleCreatureBase() const
     return NULL;
 }
 
-ObjectGuid Unit::GetTransGUID()
+uint64 Unit::GetTransGUID() const
 {
     if (GetVehicle())
-        return GetVehicleBase()->GetGUID128();
+        return GetVehicleBase()->GetGUID();
     if (GetTransport())
-        return GetTransport()->GetGUID128();
+        return GetTransport()->GetGUID();
 
     return 0;
 }

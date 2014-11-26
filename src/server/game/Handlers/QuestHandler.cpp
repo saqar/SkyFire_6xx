@@ -674,21 +674,28 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
 
 void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 {
-    uint64 guid;
+    ObjectGuid guid;
     uint32 questId;
     uint8 msg;
-    recvPacket >> guid >> questId >> msg;
 
-    TC_LOG_DEBUG("network", "WORLD: Received MSG_QUEST_PUSH_RESULT");
+    recvPacket >> guid;
+    recvPacket >> questId;
+    recvPacket >> msg;
+
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_PUSH_RESULT");
 
     if (_player->GetDivider() && _player->GetDivider() == guid)
     {
         Player* player = ObjectAccessor::FindPlayer(_player->GetDivider());
         if (player)
         {
-            WorldPacket data(MSG_QUEST_PUSH_RESULT, 8 + 4 + 1);
-            data << uint64(_player->GetGUID());
-            data << uint8(msg);                             // valid values: 0-8
+            ObjectGuid Guid = _player->GetGUID128();
+
+            WorldPacket data(SMSG_QUEST_PUSH_RESULT, 18 + 2);
+
+            data << Guid;
+            data << msg;                             // valid values: 0-8
+
             player->SendDirectMessage(&data);
             _player->SetDivider(0);
         }

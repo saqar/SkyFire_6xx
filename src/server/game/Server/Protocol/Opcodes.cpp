@@ -520,7 +520,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY,                    0x0131, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleQuestgiverStatusMultipleQuery); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_QUESTGIVER_STATUS_QUERY,                             0x01E2, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleQuestgiverStatusQueryOpcode  ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_QUESTLOG_REMOVE_QUEST,                               0x0139, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleQuestLogRemoveQuest          ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(MSG_QUEST_PUSH_RESULT,                                    0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPushResult              );   
+    DEFINE_OPCODE_HANDLER(CMSG_QUEST_PUSH_RESULT,                                   0x03D2, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPushResult              ); // 6.0.3 19116  
 
     ///< Guild
     DEFINE_OPCODE_HANDLER(CMSG_AUTO_DECLINE_GUILD_INVITES,                          0x148A, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAutoDeclineGuildInvites      ); // 6.0.3 19116
@@ -750,7 +750,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_ATTACKERSTATEUPDATE,                             0x1204, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_ATTACKSTART,                                     0x1D3E, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_ATTACKSTOP,                                      0x1382, STATUS_NEVER    ); // 6.0.3 19116
-    DEFINE_OPCODE_HANDLER(SMSG_ATTACK_SWING_ERROR,                               0x0509, STATUS_NEVER    ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(SMSG_ATTACK_SWING_ERROR,                              0x0509, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_AURA_POINTS_DEPLETED,                            0x093B, STATUS_UNHANDLED); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_AURA_UPDATE,                                     0x091C, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_AUTH_CHALLENGE,                                  0x1759, STATUS_NEVER    ); // 6.0.3 19116
@@ -1332,7 +1332,8 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_QUESTUPDATE_COMPLETE,                            0x1787, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_QUESTUPDATE_FAILED,                              0x1542, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_QUESTUPDATE_FAILEDTIMER,                         0x1D01, STATUS_NEVER    ); // 6.0.3 19116
-
+    DEFINE_OPCODE_HANDLER(SMSG_QUEST_PUSH_RESULT,                               0x1797, STATUS_NEVER    ); // 6.0.3 19116
+    
     ///< Guild
     DEFINE_OPCODE_HANDLER(SMSG_GUILD_ACHIEVEMENT_DATA,                          0x1866, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_GUILD_ACHIEVEMENT_DELETED,                       0x1058, STATUS_NEVER    ); // 6.0.3 19116

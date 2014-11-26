@@ -17003,11 +17003,14 @@ void Player::SendPushToPartyResponse(Player* player, uint8 msg)
 {
     if (player)
     {
-        WorldPacket data(MSG_QUEST_PUSH_RESULT, 8 + 1);
+        TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUEST_PUSH_RESULT");
+
+        WorldPacket data(SMSG_QUEST_PUSH_RESULT, 8 + 1);
+
         data << uint64(player->GetGUID());
         data << uint8(msg);                                 // valid values: 0-8
-        GetSession()->SendPacket(&data);
-        TC_LOG_DEBUG("network", "WORLD: Sent MSG_QUEST_PUSH_RESULT");
+
+        GetSession()->SendPacket(&data);   
     }
 }
 
@@ -20491,8 +20494,10 @@ void Player::SendAutoRepeatCancel(Unit* player)
 void Player::SendExplorationExperience(uint32 area, uint32 experience)
 {
     WorldPacket data(SMSG_EXPLORATION_EXPERIENCE, 4 + 4);
-    data << uint32(area);
-    data << uint32(experience);
+
+    data << area;
+    data << experience;
+
     GetSession()->SendPacket(&data);
 }
 

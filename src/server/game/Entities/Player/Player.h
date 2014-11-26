@@ -1960,11 +1960,8 @@ class Player : public Unit, public GridObject<Player>
         void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend = false, float group_rate=1.0f);
 
         // notifiers
-        void SendAttackSwingCantAttack();
-        void SendAttackSwingCancelAttack();
-        void SendAttackSwingDeadTarget();
-        void SendAttackSwingNotInRange();
-        void SendAttackSwingBadFacingAttack();
+        void SendAttackSwingError(uint32 error);
+        void SendCancelCombat();
         void SendAutoRepeatCancel(Unit* player);
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 

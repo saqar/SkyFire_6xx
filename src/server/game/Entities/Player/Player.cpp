@@ -17005,10 +17005,12 @@ void Player::SendPushToPartyResponse(Player* player, uint8 msg)
     {
         TC_LOG_DEBUG("network", "WORLD: Sent SMSG_QUEST_PUSH_RESULT");
 
-        WorldPacket data(SMSG_QUEST_PUSH_RESULT, 8 + 1);
+        ObjectGuid Guid = player->GetGUID128();
 
-        data << uint64(player->GetGUID());
-        data << uint8(msg);                                 // valid values: 0-8
+        WorldPacket data(SMSG_QUEST_PUSH_RESULT, 18 + 2);
+
+        data << Guid;
+        data << msg;                                 // valid values: 0-8
 
         GetSession()->SendPacket(&data);   
     }

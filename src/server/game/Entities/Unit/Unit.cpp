@@ -12066,12 +12066,12 @@ Creature* Unit::GetVehicleCreatureBase() const
     return NULL;
 }
 
-uint64 Unit::GetTransGUID() const
+ObjectGuid Unit::GetTransGUID()
 {
     if (GetVehicle())
-        return GetVehicleBase()->GetGUID();
+        return GetVehicleBase()->GetGUID128();
     if (GetTransport())
-        return GetTransport()->GetGUID();
+        return GetTransport()->GetGUID128();
 
     return 0;
 }
@@ -12369,16 +12369,17 @@ void Unit::UpdateObjectVisibility(bool forced)
 
 void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin)
 {
-    ObjectGuid guid = GetGUID();
-    WorldPacket data(SMSG_MOVE_KNOCK_BACK, (1+8+4+4+4+4+4));
+    ObjectGuid guid = GetGUID128();
+
+    WorldPacket data(SMSG_MOVE_KNOCK_BACK, 18 + 4 + 4 + 4 + 4 + 4);
    
     data << guid;
-    data << float(vsin);
-    data << uint32(0);
-    data << float(speedXY);
-    data << float(speedZ);
-    data << float(vcos);
-
+    data << uint32(m_movementCounter++);
+    data << vsin;
+    data << vcos;
+    data << speedXY;
+    data << speedZ;
+    
     player->GetSession()->SendPacket(&data);
 }
 
@@ -13337,27 +13338,37 @@ void Unit::SendTeleportPacket(Position& pos)
     if (GetTypeId() == TYPEID_UNIT)
         Relocate(&pos); // Relocate the unit to its new position in order to build the packets correctly.
 
-    ObjectGuid guid = GetGUID();
-    ObjectGuid transGuid = GetTransGUID();
+    ObjectGuid MoverGUID = GetGUID128();
+    ObjectGuid TransportGUID = GetTransGUID();
+    ObjectGuid HasVehicleTeleport = 0;
+    Unit const* unit = ToUnit();
 
     WorldPacket data(SMSG_MOVE_UPDATE_TELEPORT, 38);
     WriteMovementInfo(data);
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data2(SMSG_MOVE_TELEPORT, 1 + 8 + 1 + 8 + 1 + 4 + 4 + 4 + 4);
-        data2 << guid;
-        data2 << uint32(0); // counter
+        WorldPacket data2(SMSG_MOVE_TELEPORT, 62);
+
+        data2 << MoverGUID;
+        data2 << uint32(m_movementCounter++);
         data2 << float(GetPositionX());
         data2 << float(GetPositionY());
         data2 << float(GetPositionZMinusOffset());
         data2 << float(GetOrientation());
 
-        data2.WriteBit(uint64(transGuid));
-        data2.WriteBit(0);
+        data2.WriteBit(TransportGUID ? 1 : 0);
+        data2.WriteBit(HasVehicleTeleport ? 1 : 0);
 
-        if (transGuid)
-            data2 << transGuid;
+        if (TransportGUID)
+            data2 << TransportGUID;
+
+        if (HasVehicleTeleport)
+        {
+            data2 << uint8(unit->m_movementInfo.transport.seat);
+            data2.WriteBit(0); // VehicleExitVoluntary
+            data2.WriteBit(0); // VehicleExitTeleport
+        }
 
         ToPlayer()->SendDirectMessage(&data2); // Send the SMSG_MOVE_TELEPORT packet to self.
     }
@@ -13435,15 +13446,15 @@ void Unit::SendThreatListUpdate()
 
         TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_UPDATE Message");
 
-        WorldPacket data(SMSG_THREAT_UPDATE, 16 + 4 + count * (16 + 4));
+        WorldPacket data(SMSG_THREAT_UPDATE, 18 + 4 + count * (18 + 4));
         data << GetGUID128();
-        data << uint32(count);
+        data << count;
 
         ThreatContainer::StorageType const &tlist = getThreatManager().getThreatList();
-        for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
+        for (auto threatMap : tlist)
         {
-            data << ObjectGuid((*itr)->getUnitGuid());
-            data << uint32((*itr)->getThreat() * 100);
+            data << ObjectGuid((threatMap)->getUnitGuid());
+            data << uint32((threatMap)->getThreat() * 100);
         }
 
         SendMessageToSet(&data, false);
@@ -13458,16 +13469,17 @@ void Unit::SendChangeCurrentVictimOpcode(HostileReference* pHostileReference)
 
         TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_HIGHEST_THREAT_UPDATE Message");
 
-        WorldPacket data(SMSG_HIGHEST_THREAT_UPDATE, 16 + 16 + 4 + count * (16 + 4));
+        WorldPacket data(SMSG_HIGHEST_THREAT_UPDATE, 18 + 18 + 4 + count * (18 + 4));
+
         data << GetGUID128();
         data << ObjectGuid(pHostileReference->getUnitGuid());
-        data << uint32(count);
+        data << count;
 
         ThreatContainer::StorageType const &tlist = getThreatManager().getThreatList();
-        for (ThreatContainer::StorageType::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
+        for (auto threatMap : tlist)
         {
-            data << ObjectGuid((*itr)->getUnitGuid());
-            data << uint32((*itr)->getThreat());
+            data << ObjectGuid((threatMap)->getUnitGuid());
+            data << uint32((threatMap)->getThreat());
         }
 
         SendMessageToSet(&data, false);
@@ -13478,8 +13490,10 @@ void Unit::SendClearThreatListOpcode()
 {
     TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_CLEAR Message");
 
-    WorldPacket data(SMSG_THREAT_CLEAR, 16);
+    WorldPacket data(SMSG_THREAT_CLEAR, 18);
+
     data << GetGUID128();
+
     SendMessageToSet(&data, false);
 }
 
@@ -13487,9 +13501,11 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
 {
     TC_LOG_DEBUG("entities.unit", "WORLD: Send SMSG_THREAT_REMOVE Message");
 
-    WorldPacket data(SMSG_THREAT_REMOVE, 16 + 16);
+    WorldPacket data(SMSG_THREAT_REMOVE, 18 + 18);
+
     data << GetGUID128();
     data << ObjectGuid(pHostileReference->getUnitGuid());
+
     SendMessageToSet(&data, false);
 }
 
@@ -13911,10 +13927,10 @@ bool Unit::SetHover(bool enable, bool packetOnly /*= false*/)
 
 void Unit::SendSetPlayHoverAnim(bool enable)
 {
-    ObjectGuid guid = GetGUID();
+    ObjectGuid UnitGUID = GetGUID128();
     WorldPacket data(SMSG_SET_PLAY_HOVER_ANIM, 10);
 
-    data << guid;
+    data << UnitGUID;
     data.WriteBit(enable);
 
     SendMessageToSet(&data, true);
@@ -13932,7 +13948,6 @@ bool Unit::IsSplineEnabled() const
 {
     return movespline->Initialized() && !movespline->Finalized();
 }
-
 
 void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const
 {

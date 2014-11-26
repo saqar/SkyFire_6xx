@@ -26123,26 +26123,31 @@ void Player::RemoveAtLoginFlag(AtLoginFlags flags, bool persist /*= false*/)
     }
 }
 
-void Player::SendClearCooldown(uint32 spell_id, Unit* target)
+void Player::SendClearCooldown(uint32 spell_id, Unit* target, bool ClearOnHold)
 {
-    WorldPacket data(SMSG_CLEAR_COOLDOWN, 4+8);
-    data << target->GetGUID128();
-    data << uint32(spell_id);
-    data.WriteBit(0); // ClearOnHold
+    ObjectGuid CasterGUID = target ? target->GetGUID128() : 0;
+
+    WorldPacket data(SMSG_CLEAR_COOLDOWN, 18 + 4 + 1);
+
+    data << CasterGUID;
+    data << spell_id;
+    data.WriteBit(ClearOnHold);
+
     SendDirectMessage(&data);
 }
 
 void Player::SendClearAllCooldowns(Unit* target)
 {
     uint32 spellCount = m_spellCooldowns.size();
-    ObjectGuid guid = target ? target->GetGUID() : 0;
+    ObjectGuid guid = target ? target->GetGUID128() : 0;
 
-    WorldPacket data(SMSG_CLEAR_COOLDOWNS, 4+16+spellCount*4);
+    WorldPacket data(SMSG_CLEAR_COOLDOWNS, 18 + spellCount + spellCount * 4);
+
     data << guid;
-    data << uint32(spellCount); // Spell Count
+    data << spellCount;
 
-    for (SpellCooldowns::const_iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end(); ++itr)
-        data << uint32(itr->first); // Spell ID
+    for (auto SpellID : m_spellCooldowns)
+        data << uint32(SpellID.first);
 
     SendDirectMessage(&data);
 }
@@ -26340,56 +26345,7 @@ void Player::ActivateSpec(uint8 spec)
     // Let client clear his current Actions
     SendActionButtons(2);
     // m_actionButtons.clear() is called in the next _LoadActionButtons
-    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
-    {
-        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
 
-        if (!talentInfo)
-            continue;
-
-        /*TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
-
-        if (!talentTabInfo)
-            continue;
-
-        // unlearn only talents for character class
-        // some spell learned by one class as normal spells or know at creation but another class learn it as talent,
-        // to prevent unexpected lost normal learned spell skip another class talents
-        if ((getClassMask() & talentTabInfo->ClassMask) == 0)
-            continue;
-
-        for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
-        {
-            // skip non-existant talent ranks
-            if (talentInfo->RankID[rank] == 0)
-                continue;
-            removeSpell(talentInfo->RankID[rank], true); // removes the talent, and all dependant, learned, and chained spells..
-            if (const SpellInfo* _spellEntry = sSpellMgr->GetSpellInfo(talentInfo->RankID[rank]))
-                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)                  // search through the SpellInfo for valid trigger spells
-                    if (_spellEntry->Effects[i].TriggerSpell > 0 && _spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
-                        removeSpell(_spellEntry->Effects[i].TriggerSpell, true); // and remove any spells that the talent teaches
-            // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
-            //PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec]->find(talentInfo->RankID[rank]);
-            //if (plrTalent != m_talents[m_activeSpec]->end())
-            //    plrTalent->second->state = PLAYERSPELL_REMOVED;
-        }*/
-    }
-    /*
-    // Remove spec specific spells
-    for (uint32 i = 0; i < MAX_TALENT_TABS; ++i)
-    {
-        uint32 const* talentTabs = GetClassSpecializations(getClass());
-        std::vector<uint32> const* specSpells = GetTalentTreePrimarySpells(talentTabs[i]);
-        if (specSpells)
-            for (size_t i = 0; i < specSpells->size(); ++i)
-                removeSpell(specSpells->at(i), true);
-
-        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentTabs[i]);
-        for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
-            if (uint32 mastery = talentTabInfo->MasterySpellId[i])
-                removeSpell(mastery, true);
-    }
-    */
     // set glyphs
     for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
         // remove secondary glyph
@@ -26416,18 +26372,7 @@ void Player::ActivateSpec(uint8 spec)
         learnSpell(talentInfo->SpellId, false); // add the talent to the PlayerSpellMap
 
     }
-/*
-    std::vector<uint32> const* specSpells = GetTalentTreePrimarySpells(GetTalentSpecialization(GetActiveSpec()));
-    if (specSpells)
-        for (size_t i = 0; i < specSpells->size(); ++i)
-            learnSpell(specSpells->at(i), false);
 
-    if (CanUseMastery())
-        if (TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(GetTalentSpecialization(GetActiveSpec())))
-            for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
-                if (uint32 mastery = talentTabInfo->MasterySpellId[i])
-                    learnSpell(mastery, false);
-*/
     // set glyphs
     for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
     {
@@ -26504,7 +26449,9 @@ std::string Player::GetGuildName()
 void Player::SendDuelCountdown(uint32 counter)
 {
     WorldPacket data(SMSG_DUEL_COUNTDOWN, 4);
-    data << uint32(counter);                                // seconds
+
+    data << counter; // seconds
+
     GetSession()->SendPacket(&data);
 }
 
@@ -26547,19 +26494,20 @@ void Player::SendRefundInfo(Item* item)
         return;
     }
 
-    ObjectGuid guid = item->GetGUID();
-    WorldPacket data(SMSG_ITEM_REFUND_INFO_RESPONSE, 8+4+4+4+4*4+4*4+4+4);
+    ObjectGuid guid = item->GetGUID128();
+
+    WorldPacket data(SMSG_ITEM_REFUND_INFO_RESPONSE, 18 + 4 + 4 * 2 * MAX_ITEM_EXT_COST_ITEMS + 4 * 2 * MAX_ITEM_EXT_COST_CURRENCIES + 4 + 4);
+
     data << guid;
     data.FlushBits();
-
     data << uint32(GetTotalPlayedTime() - item->GetPlayedTime());
-    for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)                             // item cost data
+    for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
     {
         data << uint32(iece->RequiredItemCount[i]);
         data << uint32(iece->RequiredItem[i]);
     }
 
-    for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)                       // currency cost data
+    for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
     {
         if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
         {
@@ -26576,7 +26524,8 @@ void Player::SendRefundInfo(Item* item)
     }
 
     data << uint32(0);
-    data << uint32(item->GetPaidMoney());               // money cost
+    data << uint32(item->GetPaidMoney()); 
+
     GetSession()->SendPacket(&data);
 }
 
@@ -26606,13 +26555,17 @@ bool Player::AddItem(uint32 itemId, uint32 count)
 void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece, uint8 error)
 {
     ObjectGuid guid = item->GetGUID();
-    WorldPacket data(SMSG_ITEM_REFUND_RESULT, 1 + 1 + 8 + 4*8 + 4 + 4*8 + 1);
+
+    WorldPacket data(SMSG_ITEM_REFUND_RESULT, 18 + 2 + 1 + error ? (4 * 2 * MAX_ITEM_EXT_COST_CURRENCIES + 4 * 2 * MAX_ITEM_EXT_COST_ITEMS) : 0);
+
     data << guid;
+    data << error;
     data.WriteBit(!error);
-    data.WriteBit(item->GetPaidMoney() > 0);
     data.FlushBits();
     if (!error)
     {
+        data << uint32(item->GetPaidMoney());
+
         for (uint8 i = 0; i < MAX_ITEM_EXT_COST_CURRENCIES; ++i)
         {
             if (iece->RequirementFlags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
@@ -26629,16 +26582,13 @@ void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece,
             data << uint32(iece->RequiredCurrency[i]);
         }
 
-        data << uint32(item->GetPaidMoney());               // money cost
-
-        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i) // item cost data
+        for (uint8 i = 0; i < MAX_ITEM_EXT_COST_ITEMS; ++i)
         {
             data << uint32(iece->RequiredItemCount[i]);
             data << uint32(iece->RequiredItem[i]);
         }
     }
 
-    data << uint8(error);                              // error code
     GetSession()->SendPacket(&data);
 }
 
@@ -27496,7 +27446,6 @@ void Player::OnLeavePvPCombat()
                 _ApplyItemScale(item->GetTemplate(), item->GetSlot(), item->GetScaleIlvl(), false);
                 item->SetScaleIlvl(item->GetTemplate()->ItemLevel);
             }
-
         }
     }
     SetHealth(GetMaxHealth() * hpPct / 100.f);

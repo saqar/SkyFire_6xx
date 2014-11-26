@@ -1307,7 +1307,7 @@ void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_ITEM_REFUND_INFO");
 
-    uint64 guid;
+    ObjectGuid guid;
     recvData >> guid;                                      // item guid
 
     Item* item = _player->GetItemByGuid(guid);
@@ -1323,7 +1323,8 @@ void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
 void WorldSession::HandleItemRefund(WorldPacket &recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_ITEM_REFUND");
-    uint64 guid;
+
+    ObjectGuid guid;
     recvData >> guid;                                      // item guid
 
     Item* item = _player->GetItemByGuid(guid);

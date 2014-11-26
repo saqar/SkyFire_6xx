@@ -36,9 +36,8 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
     // check cheating
     uint8 levels = _player->GetGrantableLevels();
     uint8 error = 0;
-    if (!target)
-        error = ERR_REFER_A_FRIEND_NO_TARGET;
-    else if (levels == 0)
+    
+    if (levels == 0)
         error = ERR_REFER_A_FRIEND_INSUFFICIENT_GRANTABLE_LEVELS;
     else if (GetRecruiterId() != target->GetSession()->GetAccountId())
         error = ERR_REFER_A_FRIEND_NOT_REFERRED_BY;
@@ -49,13 +48,14 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
     else if (target->getLevel() >= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
         error = ERR_REFER_A_FRIEND_GRANT_LEVEL_MAX_I;
     else if (target->GetGroup() != _player->GetGroup())
-        error = ERR_REFER_A_FRIEND_NOT_IN_GROUP;
+        error = ERR_REFER_A_FRIEND_NOT_IN_LFG;
 
     if (error)
     {
         WorldPacket data(SMSG_REFER_A_FRIEND_FAILURE, 24);
+
         data << uint32(error);
-        if (error == ERR_REFER_A_FRIEND_NOT_IN_GROUP)
+        if (error == ERR_REFER_A_FRIEND_NOT_IN_LFG)
             data << target->GetName();
 
         SendPacket(&data);

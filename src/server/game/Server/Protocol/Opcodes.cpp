@@ -176,7 +176,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_OBJECT_UPDATE_FAILED,                                0x14E2, STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleObjectUpdateFailedOpcode     ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_OBJECT_UPDATE_RESCUED,                               0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
     DEFINE_OPCODE_HANDLER(CMSG_OFFER_PETITION,                                      0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleOfferPetitionOpcode          );
-    DEFINE_OPCODE_HANDLER(CMSG_OPENING_CINEMATIC,                                   0x0104, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOpeningCinematic             ); // 6.0.3 19116
+    DEFINE_OPCODE_HANDLER(CMSG_OPENING_CINEMATIC,                                   0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleOpeningCinematic             );
     DEFINE_OPCODE_HANDLER(CMSG_OPT_OUT_OF_LOOT,                                     0x0810, STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleOptOutOfLootOpcode           ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(CMSG_PAGE_TEXT_QUERY,                                     0x0000, STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePageTextQueryOpcode          );
     DEFINE_OPCODE_HANDLER(CMSG_PARTY_SILENCE,                                       0x0000, STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                        );
@@ -964,7 +964,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_PVP_OPTIONS_ENABLED,                             0x0320, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_PVP_SEASON,                                      0x09E3, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_RAID_GROUP_ONLY,                                 0x0000, STATUS_UNHANDLED);
-    DEFINE_OPCODE_HANDLER(SMSG_RAID_INSTANCE_INFO,                              0x0000, STATUS_UNHANDLED);
+    DEFINE_OPCODE_HANDLER(SMSG_RAID_INSTANCE_INFO,                              0x0DA0, STATUS_NEVER    ); // 6.0.3 19116
     DEFINE_OPCODE_HANDLER(SMSG_RAID_INSTANCE_MESSAGE,                           0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_RAID_MARKERS_CHANGED,                            0x0000, STATUS_UNHANDLED);
     DEFINE_OPCODE_HANDLER(SMSG_RAID_READY_CHECK,                                0x0000, STATUS_UNHANDLED);

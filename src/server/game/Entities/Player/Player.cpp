@@ -19047,34 +19047,35 @@ void Player::SendRaidInfo()
 {
     uint32 counter = 0;
 
-    WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
+    WorldPacket data(SMSG_RAID_INSTANCE_INFO, 300);
 
     size_t p_counter = data.wpos();
-    data << uint32(counter);                                // placeholder
+    data << uint32(counter);
 
     time_t now = time(NULL);
 
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
     {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+        for (auto boundInstancesMap : m_boundInstances[i])
         {
-            if (itr->second.perm)
+            if (boundInstancesMap.second.perm)
             {
-                InstanceSave* save = itr->second.save;
+                InstanceSave* save = boundInstancesMap.second.save;
                 bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_HEROIC;
                 uint32 completedEncounters = 0;
+
                 if (Map* map = sMapMgr->FindMap(save->GetMapId(), save->GetInstanceId()))
                     if (InstanceScript* instanceScript = ((InstanceMap*)map)->GetInstanceScript())
                         completedEncounters = instanceScript->GetCompletedEncounterMask();
 
                 data << uint32(save->GetMapId());           // map id
                 data << uint32(save->GetDifficulty());      // difficulty
-                data << uint32(isHeroic);                   // heroic
                 data << uint64(save->GetInstanceId());      // instance id
-                data << uint8(1);                           // expired = 0
-                data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
                 data << uint32(completedEncounters);        // completed encounters mask
+                data.WriteBit(0);                           // expired = 0
+                data.WriteBit(0);                           // extended = 1
+
                 ++counter;
             }
         }

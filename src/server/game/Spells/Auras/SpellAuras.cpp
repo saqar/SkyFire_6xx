@@ -1193,6 +1193,71 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         triggeredAura->ModStackAmount(GetStackAmount() - triggeredAura->GetStackAmount());
         }
     }
+
+    // mods at aura apply
+    if (apply)
+    {
+        switch (GetSpellInfo()->SpellFamilyName)
+        {
+            case SPELLFAMILY_GENERIC:
+                switch (GetId())
+                {
+                    case 32474: // Buffeting Winds of Susurrus
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->ToPlayer()->ActivateTaxiPathTo(506, GetId());
+                        break;
+                    case 33572: // Gronn Lord's Grasp, becomes stoned
+                        if (GetStackAmount() >= 5 && !target->HasAura(33652))
+                            target->CastSpell(target, 33652, true);
+                        break;
+                    case 50836: //Petrifying Grip, becomes stoned
+                        if (GetStackAmount() >= 5 && !target->HasAura(50812))
+                            target->CastSpell(target, 50812, true);
+                        break;
+                    case 60970: // Heroic Fury (remove Intercept cooldown)
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->ToPlayer()->RemoveSpellCooldown(20252, true);
+                        break;
+                }
+                break;
+        }
+    }
+    // mods at aura remove
+    else
+    {
+        switch (GetSpellInfo()->SpellFamilyName)
+        {
+            case SPELLFAMILY_GENERIC:
+                switch (GetId())
+                {
+                    case 61987: // Avenging Wrath
+                        // Remove the immunity shield marker on Avenging Wrath removal if Forbearance is not present
+                        if (target->HasAura(61988) && !target->HasAura(25771))
+                            target->RemoveAura(61988);
+                        break;
+                    case 72368: // Shared Suffering
+                    case 72369:
+                        if (caster)
+                        {
+                            if (AuraEffect* aurEff = GetEffect(0))
+                            {
+                                int32 remainingDamage = aurEff->GetAmount() * (aurEff->GetTotalTicks() - aurEff->GetTickNumber());
+                                if (remainingDamage > 0)
+                                    caster->CastCustomSpell(caster, 72373, NULL, &remainingDamage, NULL, true);
+                            }
+                        }
+                        break;
+                }
+                break;
+        }
+    }
+
+    // mods at aura apply or remove
+    switch (GetSpellInfo()->SpellFamilyName)
+    {
+        default:
+            break;
+    }
 }
 
 bool Aura::CanBeAppliedOn(Unit* target)

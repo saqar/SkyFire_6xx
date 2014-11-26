@@ -2157,6 +2157,101 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
             }
             break;
         }
+        case SPELLFAMILY_MAGE:
+        {
+            // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
+            if (SpellFamilyFlags[0] & 0x12040000)
+                return SPELL_SPECIFIC_MAGE_ARMOR;
+
+            // Arcane brillance and Arcane intelect (normal check fails because of flags difference)
+            if (SpellFamilyFlags[0] & 0x400)
+                return SPELL_SPECIFIC_MAGE_ARCANE_BRILLANCE;
+
+            if ((SpellFamilyFlags[0] & 0x1000000) && Effects[0].ApplyAuraName == SPELL_AURA_MOD_CONFUSE)
+                return SPELL_SPECIFIC_MAGE_POLYMORPH;
+
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            if (Id == 12292) // Death Wish
+                return SPELL_SPECIFIC_WARRIOR_ENRAGE;
+
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Warlock (Bane of Doom | Bane of Agony | Bane of Havoc)
+            if (Id == 603 || Id ==  980 || Id == 80240)
+                return SPELL_SPECIFIC_BANE;
+
+            // only warlock curses have this
+            if (Dispel == DISPEL_CURSE)
+                return SPELL_SPECIFIC_CURSE;
+
+            // Warlock (Demon Armor | Demon Skin | Fel Armor)
+            if (SpellFamilyFlags[1] & 0x20000020 || SpellFamilyFlags[2] & 0x00000010)
+                return SPELL_SPECIFIC_WARLOCK_ARMOR;
+
+            //seed of corruption and corruption
+            if (SpellFamilyFlags[1] & 0x10 || SpellFamilyFlags[0] & 0x2)
+                return SPELL_SPECIFIC_WARLOCK_CORRUPTION;
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Divine Spirit and Prayer of Spirit
+            if (SpellFamilyFlags[0] & 0x20)
+                return SPELL_SPECIFIC_PRIEST_DIVINE_SPIRIT;
+
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // only hunter stings have this
+            if (Dispel == DISPEL_POISON)
+                return SPELL_SPECIFIC_STING;
+
+            // only hunter aspects have this (but not all aspects in hunter family)
+            if (SpellFamilyFlags.HasFlag(0x00380000, 0x00440000, 0x00001010))
+                return SPELL_SPECIFIC_ASPECT;
+
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Collection of all the seal family flags. No other paladin spell has any of those.
+            if (SpellFamilyFlags[1] & 0x26000C00
+                || SpellFamilyFlags[0] & 0x0A000000)
+                return SPELL_SPECIFIC_SEAL;
+
+            if (SpellFamilyFlags[0] & 0x00002190)
+                return SPELL_SPECIFIC_HAND;
+
+            // Judgement of Wisdom, Judgement of Light, Judgement of Justice
+            if (Id == 20184 || Id == 20185 || Id == 20186)
+                return SPELL_SPECIFIC_JUDGEMENT;
+
+            // only paladin auras have this (for palaldin class family)
+            if (SpellFamilyFlags[2] & 0x00000020)
+                return SPELL_SPECIFIC_AURA;
+
+            break;
+        }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
+            if (SpellFamilyFlags[1] & 0x420
+                || SpellFamilyFlags[0] & 0x00000400
+                || Id == 23552)
+                return SPELL_SPECIFIC_ELEMENTAL_SHIELD;
+
+            break;
+        }
+        case SPELLFAMILY_DEATHKNIGHT:
+            if (Id == 48266 || Id == 48263 || Id == 48265)
+                return SPELL_SPECIFIC_PRESENCE;
+            break;
     }
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -2519,6 +2614,54 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
     // not found a single positive spell with this attribute
     if (Attributes & SPELL_ATTR0_NEGATIVE_1)
         return false;
+
+    switch (SpellFamilyName)
+    {
+        case SPELLFAMILY_GENERIC:
+            switch (Id)
+            {
+                case 29214: // Wrath of the Plaguebringer
+                case 34700: // Allergic Reaction
+                case 54836: // Wrath of the Plaguebringer
+                    return false;
+                case 30877: // Tag Murloc
+                case 61716: // Rabbit Costume
+                case 61734: // Noblegarden Bunny
+                case 62344: // Fists of Stone
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        case SPELLFAMILY_MAGE:
+            // Ignite
+            if (SpellIconID == 45)
+                return true;
+            break;
+        case SPELLFAMILY_PRIEST:
+            switch (Id)
+            {
+                case 64844: // Divine Hymn
+                case 64904: // Hymn of Hope
+                case 47585: // Dispersion
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        case SPELLFAMILY_ROGUE:
+            switch (Id)
+            {
+                // Envenom must be considered as a positive effect even though it deals damage
+                case 32645: // Envenom
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
 
     switch (Mechanic)
     {

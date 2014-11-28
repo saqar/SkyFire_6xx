@@ -9089,6 +9089,25 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
 void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex)
 {
     ItemTemplate const* proto = item->GetTemplate();
+    if (proto->Class == ITEM_CLASS_MISCELLANEOUS && proto->SubClass == ITEM_SUBCLASS_JUNK_PET)
+    {
+        const ItemToBattlePetEntry* itemToBattlePetEntry = sItemToBattlePetStore.LookupEntry(item->GetEntry());
+        if (!itemToBattlePetEntry)
+            return;
+
+        const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(55884);
+        if (!spellInfo)
+            return;
+
+        m_battlePetMgr->Create(itemToBattlePetEntry->SpeciesId);
+
+        Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
+        spell->m_CastItem = item;
+        spell->m_cast_count = cast_count;
+        spell->prepare(&targets);
+        return;
+    }
+
     // special learning case
     if (proto->Spells[0].SpellId == 483 || proto->Spells[0].SpellId == 55884)
     {
@@ -9101,12 +9120,6 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: %u) in have wrong spell id %u, ignoring ", proto->ItemId, learn_spell_id);
             SendEquipError(EQUIP_ERR_INTERNAL_BAG_ERROR, item, NULL);
             return;
-        }
-
-        if (const ItemToBattlePetEntry* entry = sItemToBattlePetStore.LookupEntry(item->GetEntry()))
-        {
-            m_battlePetMgr->Create(entry->SpeciesId);
-            learning_spell_id = 0;
         }
 
         Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);

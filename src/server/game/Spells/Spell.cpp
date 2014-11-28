@@ -4304,6 +4304,13 @@ void Spell::TakeCastItem()
         return;
     }
 
+    if (proto->Class == ITEM_CLASS_MISCELLANEOUS && proto->SubClass == ITEM_SUBCLASS_JUNK_PET)
+    {
+        m_caster->ToPlayer()->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), true);
+        m_CastItem = NULL;
+        return;
+    }
+
     bool expendable = false;
     bool withoutCharges = false;
 

@@ -89,6 +89,13 @@ enum AccountDataType
 
 #define REGISTERED_ADDON_PREFIX_SOFTCAP 64
 
+enum TutorialAction
+{
+    TUTORIAL_ACTION_UPDATE = 0,
+    TUTORIAL_ACTION_CLEAR  = 1,
+    TUTORIAL_ACTION_RESET  = 2
+};
+
 struct AccountData
 {
     AccountData() : Time(0), Data("") { }
@@ -284,7 +291,7 @@ class WorldSession
         void SendAuthWaitQue(uint32 position);
 
         //void SendTestCreatureQueryOpcode(uint32 entry, uint64 guid, uint32 testvalue);
-        void SendNameQueryOpcode(ObjectGuid guid);
+        void SendNameQueryOpcode(ObjectGuid guid, uint32 VirtualRealmAddress);
 
         void SendRealmNameQueryOpcode(uint32 realmId);
 
@@ -292,7 +299,7 @@ class WorldSession
         void SendTrainerList(uint64 guid, std::string const& strTitle);
         void SendListInventory(uint64 guid);
         void SendShowBank(ObjectGuid guid);
-        void SendTabardVendorActivate(uint64 guid);
+        void SendTabardVendorActivate(ObjectGuid guid);
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
 
@@ -763,13 +770,11 @@ class WorldSession
         void HandlePageTextQueryOpcode(WorldPacket& recvPacket);
 
         void HandleTutorialFlag (WorldPacket& recvData);
-        void HandleTutorialClear(WorldPacket& recvData);
-        void HandleTutorialReset(WorldPacket& recvData);
 
         //Pet
         void HandlePetAction(WorldPacket& recvData);
         void HandlePetStopAttack(WorldPacket& recvData);
-        void HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid, uint16 flag, uint64 guid2, float x, float y, float z);
+        void HandlePetActionHelper(Unit* pet, ObjectGuid PetGUID, uint32 spellid, uint16 flag, ObjectGuid TargetGUID, float x, float y, float z);
         void HandlePetNameQuery(WorldPacket& recvData);
         void HandlePetSetAction(WorldPacket& recvData);
         void HandlePetAbandon(WorldPacket& recvData);
@@ -784,6 +789,7 @@ class WorldSession
         void HandleCharRenameOpcode(WorldPacket& recvData);
         void HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult result, std::string const& newName);
         void HandleSetPlayerDeclinedNames(WorldPacket& recvData);
+        void HandleSetPlayerDeclinedNames(uint32 ResultCode, ObjectGuid Player = 0,  bool guid = false);
         void HandeSetTalentSpecialization(WorldPacket& recvData);
 
         void HandleTotemDestroyed(WorldPacket& recvData);
@@ -803,6 +809,9 @@ class WorldSession
         void HandleRequestPvpOptions(WorldPacket& recvData);
         void HandleRequestPvpReward(WorldPacket& recvData);
         void HandleWargameRequest(WorldPacket& recvData);
+
+        // Cemetry
+        void HandleSetPreferedCemetery(WorldPacket& recvData);
 
         void HandleWardenDataOpcode(WorldPacket& recvData);
         void HandleWorldTeleportOpcode(WorldPacket& recvData);
@@ -943,8 +952,10 @@ class WorldSession
         void HandleSpellClick(WorldPacket& recvData);
         void HandleMirrorImageDataRequest(WorldPacket& recvData);
         void HandleAlterAppearance(WorldPacket& recvData);
+        void HandleBarberShopResult(uint32 Result);
         void HandleRemoveGlyph(WorldPacket& recvData);
         void HandleCharCustomize(WorldPacket& recvData);
+        void HandleCharCustomizeResult(uint8 Result);
         void HandleQueryInspectAchievements(WorldPacket& recvData);
         void HandleGuildAchievementProgressQuery(WorldPacket& recvData);
         void HandleEquipmentSetSave(WorldPacket& recvData);

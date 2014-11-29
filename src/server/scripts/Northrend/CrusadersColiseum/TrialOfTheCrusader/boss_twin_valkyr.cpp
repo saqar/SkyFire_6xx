@@ -471,7 +471,6 @@ class boss_eydis : public CreatureScript
                 SetEquipmentSlots(false, EQUIP_MAIN_2, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
                 Stage = 1;
                 Weapon = EQUIP_MAIN_2;
-                AuraState = AURA_STATE_UNKNOWN19;
                 VortexEmote = EMOTE_VORTEX;
                 SisterNpcId = NPC_LIGHTBANE;
                 MyEmphatySpellId = SPELL_TWIN_EMPATHY_LIGHT;

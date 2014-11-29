@@ -36,7 +36,7 @@ enum HighGuid
     HIGHGUID_CORPSE = 0xF101,                      // blizz F100
     HIGHGUID_AREATRIGGER = 0xF102,                      // blizz F100
     HIGHGUID_BATTLEGROUND = 0x1F1,                       // new 4.x
-    HIGHGUID_MO_TRANSPORT = 0x1FC,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
+    HIGHGUID_MO_TRANSPORT = 0x1FC,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT)
     HIGHGUID_GROUP = 0x1F5,
     HIGHGUID_GUILD = 0x1FF                        // new 4.x
 };
@@ -123,7 +123,7 @@ inline bool IS_GROUP_GUID(uint64 guid);
 inline bool IS_AREATRIGGER_GUID(uint64 guid);
 
 // l - OBJECT_FIELD_GUID
-// e - OBJECT_FIELD_ENTRY_ID for GO (except GAMEOBJECT_TYPE_MO_TRANSPORT) and creatures or UNIT_FIELD_PET_NUMBER for pets
+// e - OBJECT_FIELD_ENTRY_ID for GO (except GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT) and creatures or UNIT_FIELD_PET_NUMBER for pets
 // h - OBJECT_FIELD_GUID + 1
 inline uint64 MAKE_NEW_GUID(uint32 l, uint32 e, uint32 h);
 

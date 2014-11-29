@@ -14,14 +14,12 @@
 
 -- From here on, no particular order of importance --
 * Scenarios
-* Implement PvP Power / Update resil
 * Mail
 * Rated BGs
 * Guild Finder
 * Character Boost
 * RaF
 * Calendar
-* Void Storage
 * Archaeology
 
 ## Things that aren't done, but are close:
@@ -36,6 +34,7 @@
 * In Game Shop
 
 ## Finished Stuff:
+* Void Storage
 * Auth
 * Char Enum
 * World Login

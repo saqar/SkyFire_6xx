@@ -366,7 +366,7 @@ void Item::SaveToDB(SQLTransaction& trans)
             stmt->setString(++index, ssEnchants.str());
 
             stmt->setInt16 (++index, GetItemRandomPropertyId());
-            index++; // Removed reforge
+            stmt->setInt16 (++index, 0);    // Removed reforge
             stmt->setUInt32(++index, GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1)); // Transmogrification Id
             stmt->setUInt16(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));

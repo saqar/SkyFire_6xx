@@ -394,9 +394,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
     bool ScenePendingInstances = false;
     
     uint32 PauseTimesCount = 0;
-    if (GameObject const* go = ToGameObject())
-        if (go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
-            PauseTimesCount = go->GetGOValue()->Transport.StopFrames->size();
+    //if (GameObject const* go = ToGameObject())
+    //    if (go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT)
+    //        PauseTimesCount = go->GetGOValue()->Transport.StopFrames->size();
 
     bool hasFallData;
     bool hasFallDirection;
@@ -3422,7 +3422,6 @@ uint64 WorldObject::GetTransGUID() const
         return GetTransport()->GetGUID();
     return 0;
 }
-
 
 ByteBuffer &operator>>(ByteBuffer& buffer, ObjectGuid& value)
 {

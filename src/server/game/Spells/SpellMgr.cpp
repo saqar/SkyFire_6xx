@@ -66,6 +66,156 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             return DIMINISHING_TAUNT;
     }
 
+    // Explicit Diminishing Groups
+    switch (spellproto->SpellFamilyName)
+    {
+        case SPELLFAMILY_GENERIC:
+        {
+            // Pet charge effects (Infernal Awakening, Demon Charge)
+            if (spellproto->SpellVisual[0] == 2816 && spellproto->SpellIconID == 15)
+                return DIMINISHING_CONTROLLED_STUN;
+            // Frost Tomb
+            else if (spellproto->Id == 48400)
+                return DIMINISHING_NONE;
+            // Gnaw
+            else if (spellproto->Id == 47481)
+                return DIMINISHING_CONTROLLED_STUN;
+            // ToC Icehowl Arctic Breath
+            else if (spellproto->SpellVisual[0] == 14153)
+                return DIMINISHING_NONE;
+            // Black Plague
+            else if (spellproto->Id == 64155)
+                return DIMINISHING_NONE;
+            break;
+        }
+        // Event spells
+        case SPELLFAMILY_EVENTS:
+            return DIMINISHING_NONE;
+        case SPELLFAMILY_MAGE:
+        {
+            // Frostbite
+            if (spellproto->SpellFamilyFlags[1] & 0x80000000)
+                return DIMINISHING_ROOT;
+            // Shattered Barrier
+            else if (spellproto->SpellVisual[0] == 12297)
+                return DIMINISHING_ROOT;
+            // Deep Freeze
+            else if (spellproto->SpellIconID == 2939 && spellproto->SpellVisual[0] == 9963)
+                return DIMINISHING_CONTROLLED_STUN;
+            // Frost Nova / Freeze (Water Elemental)
+            else if (spellproto->SpellIconID == 193)
+                return DIMINISHING_CONTROLLED_ROOT;
+            // Dragon's Breath
+            else if (spellproto->SpellFamilyFlags[0] & 0x800000)
+                return DIMINISHING_DRAGONS_BREATH;
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Hamstring - limit duration to 10s in PvP
+            if (spellproto->SpellFamilyFlags[0] & 0x2)
+                return DIMINISHING_LIMITONLY;
+            // Charge Stun (own diminishing)
+            else if (spellproto->SpellFamilyFlags[0] & 0x01000000)
+                return DIMINISHING_CHARGE;
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Curses/etc
+            if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || (spellproto->SpellFamilyFlags[1] & 0x200))
+                return DIMINISHING_LIMITONLY;
+            // Seduction
+            else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
+                return DIMINISHING_FEAR;
+            // Sin and Punishment (Priest spell, don't ask)
+            else if (spellproto->SpellIconID == 1869)
+                return DIMINISHING_NONE;
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            // Pounce
+            if (spellproto->SpellFamilyFlags[0] & 0x20000)
+                return DIMINISHING_OPENING_STUN;
+            // Cyclone
+            else if (spellproto->SpellFamilyFlags[1] & 0x20)
+                return DIMINISHING_CYCLONE;
+            // Entangling Roots
+            // Nature's Grasp
+            else if (spellproto->SpellFamilyFlags[0] & 0x00000200)
+                return DIMINISHING_CONTROLLED_ROOT;
+            // Faerie Fire
+            else if (spellproto->SpellFamilyFlags[0] & 0x400)
+                return DIMINISHING_LIMITONLY;
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Gouge
+            if (spellproto->SpellFamilyFlags[0] & 0x8)
+                return DIMINISHING_DISORIENT;
+            // Blind
+            else if (spellproto->SpellFamilyFlags[0] & 0x1000000)
+                return DIMINISHING_FEAR;
+            // Cheap Shot
+            else if (spellproto->SpellFamilyFlags[0] & 0x400)
+                return DIMINISHING_OPENING_STUN;
+            // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
+            else if (spellproto->SpellIconID == 163)
+                return DIMINISHING_LIMITONLY;
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Hunter's Mark
+            if ((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538)
+                return DIMINISHING_LIMITONLY;
+            // Scatter Shot (own diminishing)
+            else if ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
+                return DIMINISHING_SCATTER_SHOT;
+            // Entrapment (own diminishing)
+            else if (spellproto->SpellVisual[0] == 7484 && spellproto->SpellIconID == 20)
+                return DIMINISHING_ENTRAPMENT;
+            // Wyvern Sting mechanic is MECHANIC_SLEEP but the diminishing is DIMINISHING_DISORIENT
+            else if ((spellproto->SpellFamilyFlags[1] & 0x1000) && spellproto->SpellIconID == 1721)
+                return DIMINISHING_DISORIENT;
+            // Freezing Arrow
+            else if (spellproto->SpellFamilyFlags[0] & 0x8)
+                return DIMINISHING_DISORIENT;
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Judgement of Justice - limit duration to 10s in PvP
+            if (spellproto->SpellFamilyFlags[0] & 0x100000)
+                return DIMINISHING_LIMITONLY;
+            // Turn Evil
+            else if ((spellproto->SpellFamilyFlags[1] & 0x804000) && spellproto->SpellIconID == 309)
+                return DIMINISHING_FEAR;
+            break;
+        }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Storm, Earth and Fire - Earthgrab
+            if (spellproto->SpellFamilyFlags[2] & 0x4000)
+                return DIMINISHING_NONE;
+            break;
+        }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            // Hungering Cold (no flags)
+            if (spellproto->SpellIconID == 2797)
+                return DIMINISHING_DISORIENT;
+            // Mark of Blood
+            else if ((spellproto->SpellFamilyFlags[0] & 0x10000000) && spellproto->SpellIconID == 2285)
+                return DIMINISHING_LIMITONLY;
+            break;
+        }
+        default:
+            break;
+    }
+
     // Lastly - Set diminishing depending on mechanic
     uint32 mechanic = spellproto->GetAllEffectsMechanicMask();
     if (mechanic & (1 << MECHANIC_CHARM))
@@ -129,6 +279,50 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
 {
     if (!IsDiminishingReturnsGroupDurationLimited(group))
         return 0;
+
+    // Explicit diminishing duration
+    switch (spellproto->SpellFamilyName)
+    {
+        case SPELLFAMILY_DRUID:
+        {
+            // Faerie Fire - limit to 40 seconds in PvP (3.1)
+            if (spellproto->SpellFamilyFlags[0] & 0x400)
+                return 40 * IN_MILLISECONDS;
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Wyvern Sting
+            if (spellproto->SpellFamilyFlags[1] & 0x1000)
+                return 6 * IN_MILLISECONDS;
+            // Hunter's Mark
+            if (spellproto->SpellFamilyFlags[0] & 0x400)
+                return 30 * IN_MILLISECONDS;
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Repentance - limit to 6 seconds in PvP
+            if (spellproto->SpellFamilyFlags[0] & 0x4)
+                return 6 * IN_MILLISECONDS;
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Banish - limit to 6 seconds in PvP
+            if (spellproto->SpellFamilyFlags[1] & 0x8000000)
+                return 6 * IN_MILLISECONDS;
+            // Curse of Tongues - limit to 12 seconds in PvP
+            else if (spellproto->SpellFamilyFlags[2] & 0x800)
+                return 12 * IN_MILLISECONDS;
+            // Curse of Elements - limit to 120 seconds in PvP
+            else if (spellproto->SpellFamilyFlags[1] & 0x200)
+               return 120 * IN_MILLISECONDS;
+            break;
+        }
+        default:
+            break;
+    }
 
     return 8 * IN_MILLISECONDS;
 }
@@ -1306,68 +1500,7 @@ void SpellMgr::LoadSpellLearnSpells()
             }
         }
     }
-    /*
-    uint32 mastery_count = 0;
-    for (uint32 i = 0; i < sTalentTabStore.GetNumRows(); ++i)
-    {
-        TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(i);
-        if (!talentTab)
-            continue;
 
-        for (uint32 c = CLASS_WARRIOR; c < MAX_CLASSES; ++c)
-        {
-            if (!(talentTab->ClassMask & (1 << (c - 1))))
-                continue;
-
-            uint32 masteryMainSpell = MasterySpells[c];
-
-            for (uint32 m = 0; m < MAX_MASTERY_SPELLS; ++m)
-            {
-                uint32 mastery = talentTab->MasterySpellId[m];
-                if (!mastery)
-                    continue;
-
-                SpellLearnSpellMapBounds db_node_bounds = dbSpellLearnSpells.equal_range(masteryMainSpell);
-                bool found = false;
-                for (SpellLearnSpellMap::const_iterator itr = db_node_bounds.first; itr != db_node_bounds.second; ++itr)
-                {
-                    if (itr->second.spell == mastery)
-                    {
-                        TC_LOG_ERROR("sql.sql", "Found redundant record (entry: %u, SpellID: %u) in `spell_learn_spell`, spell added automatically as mastery learned spell from TalentTab.dbc", masteryMainSpell, mastery);
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found)
-                    continue;
-
-                // Check if it is already found in Spell.dbc, ignore silently if yes
-                SpellLearnSpellMapBounds dbc_node_bounds = GetSpellLearnSpellMapBounds(masteryMainSpell);
-                found = false;
-                for (SpellLearnSpellMap::const_iterator itr = dbc_node_bounds.first; itr != dbc_node_bounds.second; ++itr)
-                {
-                    if (itr->second.spell == mastery)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found)
-                    continue;
-
-                SpellLearnSpellNode masteryNode;
-                masteryNode.spell       = mastery;
-                masteryNode.active      = true;
-                masteryNode.autoLearned = false;
-
-                mSpellLearnSpells.insert(SpellLearnSpellMap::value_type(masteryMainSpell, masteryNode));
-                ++mastery_count;
-            }
-        }
-    }
-    */
     TC_LOG_INFO("server.loading", ">> Loaded %u spell learn spells, %u found in Spell.dbc and %u from TalentTab.dbc in %u ms", count, dbc_count, 0, GetMSTimeDiffToNow(oldMSTime));
 }
 
@@ -2655,6 +2788,18 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
         if (spellInfo->SpellVisual[0] == 3879)
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
+        switch (spellInfo->Id)
+        {
+            default:
+                break;
+        }
+
+        switch (spellInfo->SpellFamilyName)
+        {
+            default:
+                break;
+        }
+
         spellInfo->_InitializeExplicitTargetMask();
     }
 
@@ -2689,6 +2834,19 @@ void SpellMgr::LoadSpellInfoCorrections()
 
         if (spellInfo->ActiveIconID == 2158)  // flight
             spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
+
+        switch (spellInfo->Id)
+        {
+            // ISLE OF CONQUEST SPELLS
+            //
+            case 66551: // Teleport
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13); // 50000yd
+                break;
+            // ENDOF ISLE OF CONQUEST SPELLS
+            //
+            default:
+                break;
+        }
     }
 
     if (SummonPropertiesEntry* properties = const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(121)))

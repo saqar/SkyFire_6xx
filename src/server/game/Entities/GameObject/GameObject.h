@@ -221,7 +221,7 @@ struct GameObjectTemplate
             uint32 openTextID;                              //3 can be used to replace castBarCaption?
         } camera;
         //14 GAMEOBJECT_TYPE_MAPOBJECT - empty
-        //15 GAMEOBJECT_TYPE_MO_TRANSPORT
+        //15 GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT
         struct
         {
             uint32 taxiPathId;                              //0
@@ -236,7 +236,7 @@ struct GameObjectTemplate
         } moTransport;
         //16 GAMEOBJECT_TYPE_DUELFLAG - empty
         //17 GAMEOBJECT_TYPE_FISHINGNODE - empty
-        //18 GAMEOBJECT_TYPE_SUMMONING_RITUAL
+        //18 GAMEOBJECT_TYPE_RITUAL
         struct
         {
             uint32 reqParticipants;                         //0
@@ -794,7 +794,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         GameObject* LookupFishingHoleAround(float range);
 
         void CastSpell(Unit* target, uint32 spell);
-        void SendCustomAnim(uint32 anim);
+        void SendCustomAnim(uint32 anim, bool playAsDespawn = false);
         bool IsInRange(float x, float y, float z, float radius) const;
 
         void ModifyHealth(int32 change, Unit* attackerOrHealer = NULL, uint32 spellId = 0);
@@ -822,13 +822,13 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
         GameObjectModel* m_model;
         void GetRespawnPosition(float &x, float &y, float &z, float* ori = NULL) const;
 
-        Transport* ToTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport*>(this); else return NULL; }
-        Transport const* ToTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport const*>(this); else return NULL; }
+        Transport* ToTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT) return reinterpret_cast<Transport*>(this); else return NULL; }
+        Transport const* ToTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT) return reinterpret_cast<Transport const*>(this); else return NULL; }
 
-        float GetStationaryX() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
-        float GetStationaryY() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }
-        float GetStationaryZ() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return GetPositionZ(); }
-        float GetStationaryO() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
+        float GetStationaryX() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
+        float GetStationaryY() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }
+        float GetStationaryZ() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT) return m_stationaryPosition.GetPositionZ(); return GetPositionZ(); }
+        float GetStationaryO() const { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT) return m_stationaryPosition.GetOrientation(); return GetOrientation(); }
 
     protected:
         bool AIM_Initialize();
@@ -842,7 +842,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Map
                                                             // For traps this: spell casting cooldown, for doors/buttons: reset time.
         std::list<uint32> m_SkillupList;
 
-        Player* m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
+        Player* m_ritualOwner;                              // used for GAMEOBJECT_TYPE_RITUAL where GO is not summoned (no owner)
         std::set<uint64> m_unique_users;
         uint32 m_usetimes;
 

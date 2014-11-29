@@ -877,8 +877,9 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_RESURRECT_RESPONSE");
 
-    uint64 guid;
+    ObjectGuid guid;
     uint8 status;
+
     recvData >> guid;
     recvData >> status;
 
@@ -1052,71 +1053,64 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
 
-    uint32 timestamp, type, decompressedSize;
-    recvData >> timestamp >> decompressedSize;
-    type = recvData.ReadBits(3);
+    uint32 timestamp, size;
+    uint8 DataType;
+    ObjectGuid PlayerGuid;
 
-    TC_LOG_DEBUG("network", "UAD: type %u, time %u, decompressedSize %u", type, timestamp, decompressedSize);
+    recvData >> PlayerGuid;
+    recvData >> timestamp;
+    recvData >> size;
+    DataType = recvData.ReadBits(3);
 
-    if (type > NUM_ACCOUNT_DATA_TYPES)
+    TC_LOG_DEBUG("network", "UAD: DataType %u, time %u, size %u", DataType, timestamp, size);
+
+    if (DataType > NUM_ACCOUNT_DATA_TYPES)
         return;
 
-    if (decompressedSize == 0)                               // erase
+    if (size == 0)                               // erase
     {
-        SetAccountData(AccountDataType(type), 0, "");
-
-        WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4+4);
-        data << uint32(type);
-        data << uint32(0);
-        SendPacket(&data);
-
-        return;
+        SetAccountData(AccountDataType(DataType), 0, "");
     }
 
-    if (decompressedSize > 0xFFFF)
+    if (size > 0xFFFF)
     {
         recvData.rfinish();                   // unnneded warning spam in this case
-        TC_LOG_ERROR("network", "UAD: Account data packet too big, size %u", decompressedSize);
+        TC_LOG_ERROR("network", "UAD: Account data packet too big, size %u", size);
         return;
     }
 
     ByteBuffer dest;
-    dest.resize(decompressedSize);
+    dest.resize(size);
 
-    uLongf realSize = decompressedSize;
+    uLongf realSize = size;
     if (uncompress(dest.contents(), &realSize, recvData.contents() + recvData.rpos(), recvData.size() - recvData.rpos()) != Z_OK)
     {
-        recvData.rfinish();                   // unnneded warning spam in this case
         TC_LOG_ERROR("network", "UAD: Failed to decompress account data");
         return;
     }
 
-    recvData.rfinish();                       // uncompress read (recvData.size() - recvData.rpos())
-
     std::string adata;
     dest >> adata;
 
-    SetAccountData(AccountDataType(type), timestamp, adata);
-
-    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4+4);
-    data << uint32(type);
-    data << uint32(0);
-    SendPacket(&data);
+    SetAccountData(AccountDataType(DataType), timestamp, adata);
 }
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
 
-    uint32 type;
-    recvData >> type;
+    uint8 DataType;
+    ObjectGuid PlayerGuid;
 
-    TC_LOG_DEBUG("network", "RAD: type %u", type);
+    recvData >> PlayerGuid;
+    DataType = recvData.ReadBits(3);
 
-    if (type > NUM_ACCOUNT_DATA_TYPES)
+    TC_LOG_DEBUG("network", "RAD: DataType %u", DataType);
+
+    if (DataType > NUM_ACCOUNT_DATA_TYPES)
         return;
 
-    AccountData* adata = GetAccountData(AccountDataType(type));
+    AccountData* adata = GetAccountData(AccountDataType(DataType));
 
     uint32 size = adata->Data.size();
     uLongf destSize = compressBound(size);
@@ -1133,12 +1127,12 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     dest.resize(destSize);
     ObjectGuid guid;
 
-    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8 + 4 + 4 + 4 + destSize);
+    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA);
 
     data << guid;
     data << uint32(adata->Time);
     data << uint32(size);
-    data.WriteBits(type, 3);
+    data.WriteBits(DataType, 3);
     data << uint32(destSize);
     data.append(dest);
 
@@ -1273,14 +1267,18 @@ void WorldSession::HandleSetActionBarToggles(WorldPacket& recvData)
 
 void WorldSession::HandlePlayedTime(WorldPacket& recvData)
 {
+    TC_LOG_DEBUG("network", "WORLD: CMSG_PLAYED_TIME");
+
     uint8 TriggerScriptEvent;
 
-    recvData >> TriggerScriptEvent;                                      // 0 or 1 expected
+    TriggerScriptEvent = recvData.ReadBit();                                      // 0 or 1 expected
 
     WorldPacket data(SMSG_PLAYED_TIME, 4 + 4 + 1);
+
     data << uint32(_player->GetTotalPlayedTime());
     data << uint32(_player->GetLevelPlayedTime());
-    data << uint8(TriggerScriptEvent);                                    // 0 - will not show in chat frame
+    data.WriteBit(TriggerScriptEvent);                                    // 0 - will not show in chat frame
+
     SendPacket(&data);
 }
 
@@ -1408,32 +1406,34 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recvData)
         return;
     }
 
-    ObjectGuid playerGuid = player->GetGUID();
-    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 8+1+4+4);
+    ObjectGuid PlayerGUID = player->GetGUID();
 
-    data << playerGuid;
-    data << uint8(0);                                               // rank
-    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));  // yesterday kills
-    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));  // today kills
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
+    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 18 + 2 + 2 + 4);
+
+    data << PlayerGUID;
+    data << uint8(player->GetUInt16Value(PLAYER_FIELD_LIFETIME_MAX_RANK, 1));           // LifetimeMaxRank
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));  // YesterdayHK
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));  // TodayHK
+    data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));      // LifetimeHK
+
     SendPacket(&data);
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recvData)
 {
-    uint32 time;
+    ObjectGuid Transport;
     uint32 mapid;
     float PositionX;
     float PositionY;
     float PositionZ;
     float Orientation;
 
-    recvData >> time;                                      // time in m.sec.
     recvData >> mapid;
+    recvData >> Transport;
     recvData >> PositionX;
     recvData >> PositionY;
     recvData >> PositionZ;
-    recvData >> Orientation;                               // o (3.141593 = 180 degrees)
+    recvData >> Orientation;
 
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_WORLD_TELEPORT");
 
@@ -1444,8 +1444,8 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recvData)
         return;
     }
 
-    TC_LOG_DEBUG("network", "CMSG_WORLD_TELEPORT: Player = %s, Time = %u, map = %u, x = %f, y = %f, z = %f, o = %f",
-        GetPlayer()->GetName().c_str(), time, mapid, PositionX, PositionY, PositionZ, Orientation);
+    TC_LOG_DEBUG("network", "CMSG_WORLD_TELEPORT: Player = %s, map = %u, x = %f, y = %f, z = %f, o = %f",
+        GetPlayer()->GetName().c_str(), mapid, PositionX, PositionY, PositionZ, Orientation);
 
     if (HasPermission(rbac::RBAC_PERM_OPCODE_WORLD_TELEPORT))
         GetPlayer()->TeleportTo(mapid, PositionX, PositionY, PositionZ, Orientation);
@@ -1581,6 +1581,7 @@ void WorldSession::HandleFarSightOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "WORLD: CMSG_FAR_SIGHT");
 
     bool apply;
+
     recvData >> apply;
 
     if (apply)
@@ -1818,12 +1819,12 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_SET_TAXI_BENCHMARK_MODE");
 
-    uint8 mode;
-    recvData >> mode;
+    bool Enable;
+    Enable = recvData.ReadBit();
 
-    mode ? _player->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK) : _player->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
+    Enable ? _player->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK) : _player->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
 
-    TC_LOG_DEBUG("network", "Client used \"/timetest %d\" command", mode);
+    TC_LOG_DEBUG("network", "Client used \"/timetest %d\" command", Enable);
 }
 
 void WorldSession::HandleQueryInspectAchievements(WorldPacket& recvData)
@@ -1899,7 +1900,8 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recvData)
 
     Battleground* bg = _player->GetBattleground();
 
-    uint64 HealerGuid;
+    ObjectGuid HealerGuid;
+
     recvData >> HealerGuid;
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(HealerGuid);
@@ -1941,6 +1943,8 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)
 {
+    TC_LOG_DEBUG("network", "WORLD: CMSG_HEARTH_AND_RESURRECT");
+
     if (_player->IsInFlight())
         return;
 
@@ -1961,6 +1965,8 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
 {
+    TC_LOG_DEBUG("network", "WORLD: CMSG_INSTANCE_LOCK_WARNING_RESPONSE");
+
     uint8 accept;
     recvPacket >> accept;
 
@@ -2311,4 +2317,13 @@ void WorldSession::HotFixHandler()
     }
 
     SendPacket(&data);
+}
+
+void WorldSession::HandleSetPreferedCemetery(WorldPacket& recvData)
+{
+    TC_LOG_DEBUG("network", "World: Received CMSG_SET_PREFERED_CEMETERY");
+
+    uint32 CemeteryId;
+
+    recvData >> CemeteryId;
 }

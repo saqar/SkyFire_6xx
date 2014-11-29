@@ -121,8 +121,6 @@ struct PlayerTalent
     uint8 spec             : 8;
 };
 
-extern uint32 const MasterySpells[MAX_CLASSES];
-
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
@@ -291,15 +289,15 @@ enum ReputationSource
     REPUTATION_SOURCE_SPELL
 };
 
-#define ACTION_BUTTON_ACTION(X) (uint32(X) & 0x00FFFFFF)
-#define ACTION_BUTTON_TYPE(X)   ((uint32(X) & 0xFF000000) >> 24)
-#define MAX_ACTION_BUTTON_ACTION_VALUE (0x00FFFFFF+1)
+#define ACTION_BUTTON_ACTION(X) (uint64(X) & 0x00000000FFFFFFFF)
+#define ACTION_BUTTON_TYPE(X)   ((uint64(X) & 0xFFFFFFFF00000000) >> 32)
+#define MAX_ACTION_BUTTON_ACTION_VALUE (0xFFFFFFFF)
 
 struct ActionButton
 {
     ActionButton() : packedData(0), uState(ACTIONBUTTON_NEW) { }
 
-    uint32 packedData;
+    uint64 packedData;
     ActionButtonUpdateState uState;
 
     // helpers
@@ -307,7 +305,8 @@ struct ActionButton
     uint32 GetAction() const { return ACTION_BUTTON_ACTION(packedData); }
     void SetActionAndType(uint32 action, ActionButtonType type)
     {
-        uint32 newData = action | (uint32(type) << 24);
+        uint64 newData = uint64(action) | (uint64(type) << 32);
+
         if (newData != packedData || uState == ACTIONBUTTON_DELETED)
         {
             packedData = newData;
@@ -317,7 +316,7 @@ struct ActionButton
     }
 };
 
-#define  MAX_ACTION_BUTTONS 132                             //checked in 3.2.0
+#define MAX_ACTION_BUTTONS 132
 
 typedef std::map<uint8, ActionButton> ActionButtonList;
 
@@ -913,12 +912,12 @@ enum ReferAFriendError
     ERR_REFER_A_FRIEND_DIFFERENT_FACTION             = 0x05,
     ERR_REFER_A_FRIEND_NOT_NOW                       = 0x06,
     ERR_REFER_A_FRIEND_GRANT_LEVEL_MAX_I             = 0x07,
-    ERR_REFER_A_FRIEND_NO_TARGET                     = 0x08,
-    ERR_REFER_A_FRIEND_NOT_IN_GROUP                  = 0x09,
-    ERR_REFER_A_FRIEND_SUMMON_LEVEL_MAX_I            = 0x0A,
-    ERR_REFER_A_FRIEND_SUMMON_COOLDOWN               = 0x0B,
-    ERR_REFER_A_FRIEND_INSUF_EXPAN_LVL               = 0x0C,
-    ERR_REFER_A_FRIEND_SUMMON_OFFLINE_S              = 0x0D
+    ERR_REFER_A_FRIEND_SUMMON_LEVEL_MAX_I            = 0x08,
+    ERR_REFER_A_FRIEND_SUMMON_COOLDOWN               = 0x09,
+    ERR_REFER_A_FRIEND_SUMMON_OFFLINE_S              = 0x0A,
+    ERR_REFER_A_FRIEND_INSUF_EXPAN_LVL               = 0x0B,
+    ERR_REFER_A_FRIEND_NOT_IN_LFG                    = 0x0C,
+    ERR_REFER_A_FRIEND_NO_XREALM                     = 0x0D
 };
 
 enum PlayerRestState
@@ -1099,7 +1098,7 @@ class TradeData
 
 struct ResurrectionData
 {
-    uint64 GUID;
+    ObjectGuid GUID;
     WorldLocation Location;
     uint32 Health;
     uint32 Mana;
@@ -1621,8 +1620,8 @@ class Player : public Unit, public GridObject<Player>
         bool m_mailsLoaded;
         bool m_mailsUpdated;
 
-        void SetBindPoint(uint64 guid);
-        void SendTalentWipeConfirm(uint64 guid);
+        void SetBindPoint(ObjectGuid guid);
+        void SendTalentWipeConfirm(ObjectGuid guid, uint8 RespecType);
         void CalcRage(uint32 damage, bool attacker);
         void RegenerateAll();
         void Regenerate(Powers power);
@@ -1787,7 +1786,7 @@ class Player : public Unit, public GridObject<Player>
         void RemoveSpellCooldown(uint32 spell_id, bool update = false);
         void RemoveSpellCooldownsByClassMask(uint32 SpellFamilyName, flag128 SpellClassMask, bool update = false);
         void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
-        void SendClearCooldown(uint32 spell_id, Unit* target);
+        void SendClearCooldown(uint32 spell_id, Unit* target, bool ClearOnHold = false);
         void SendClearAllCooldowns(Unit* target);
 
         GlobalCooldownMgr& GetGlobalCooldownMgr() { return m_GlobalCooldownMgr; }
@@ -1807,7 +1806,7 @@ class Player : public Unit, public GridObject<Player>
             _resurrectionData = NULL;
         }
 
-        bool IsRessurectRequestedBy(uint64 guid) const
+        bool IsRessurectRequestedBy(ObjectGuid guid) const
         {
             if (!IsRessurectRequested())
                 return false;
@@ -1914,7 +1913,6 @@ class Player : public Unit, public GridObject<Player>
         void UpdateLeech();
         void UpdateVesatillity();
         void UpdateAvoidance();
-        bool CanUseMastery() const;
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
 
@@ -1959,11 +1957,8 @@ class Player : public Unit, public GridObject<Player>
         void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend = false, float group_rate=1.0f);
 
         // notifiers
-        void SendAttackSwingCantAttack();
-        void SendAttackSwingCancelAttack();
-        void SendAttackSwingDeadTarget();
-        void SendAttackSwingNotInRange();
-        void SendAttackSwingBadFacingAttack();
+        void SendAttackSwingError(uint32 error);
+        void SendCancelCombat();
         void SendAutoRepeatCancel(Unit* player);
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 

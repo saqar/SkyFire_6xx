@@ -116,7 +116,7 @@ void AuraApplication::_Remove()
 void AuraApplication::_InitFlags(Unit* caster, uint32 effMask)
 {
     // mark as selfcasted if needed
-    _flags |= (GetBase()->GetCasterGUID() == GetTarget()->GetGUID()) ? AFLAG_CASTER : AFLAG_NONE;
+    _flags |= (GetBase()->GetCasterGUID() == GetTarget()->GetGUID()) ? AFLAG_NOCASTER : AFLAG_NONE;
 
     // aura is casted by self or an enemy
     // one negative effect and we know aura is negative
@@ -150,7 +150,7 @@ void AuraApplication::_InitFlags(Unit* caster, uint32 effMask)
     }
 
     if (GetBase()->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
-        _flags |= AFLAG_ANY_EFFECT_AMOUNT_SENT;
+        _flags |= AFLAG_SCALABLE;
 }
 
 void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
@@ -207,7 +207,7 @@ void AuraApplication::ClientUpdate(bool remove)
 
         uint8 effCount = 0;
 
-        if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+        if (flags & AFLAG_SCALABLE)
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 if (HasEffect(i))
                     effCount++;
@@ -215,7 +215,7 @@ void AuraApplication::ClientUpdate(bool remove)
         data << uint32(effCount);
         data << uint32(0);
 
-        if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+        if (flags & AFLAG_SCALABLE)
         {
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
@@ -229,11 +229,11 @@ void AuraApplication::ClientUpdate(bool remove)
             }
         }
 
-        data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
+        data.WriteBit(!(flags & AFLAG_NOCASTER));         // HasCasterGuid
         data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
         data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
 
-        if (!(flags & AFLAG_CASTER))
+        if (!(flags & AFLAG_NOCASTER))
         {
             ObjectGuid casterGuid = aura->GetCasterGUID();
             data << casterGuid;
@@ -1192,6 +1192,71 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (Aura* triggeredAura = target->GetAura(*itr, GetCasterGUID()))
                         triggeredAura->ModStackAmount(GetStackAmount() - triggeredAura->GetStackAmount());
         }
+    }
+
+    // mods at aura apply
+    if (apply)
+    {
+        switch (GetSpellInfo()->SpellFamilyName)
+        {
+            case SPELLFAMILY_GENERIC:
+                switch (GetId())
+                {
+                    case 32474: // Buffeting Winds of Susurrus
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->ToPlayer()->ActivateTaxiPathTo(506, GetId());
+                        break;
+                    case 33572: // Gronn Lord's Grasp, becomes stoned
+                        if (GetStackAmount() >= 5 && !target->HasAura(33652))
+                            target->CastSpell(target, 33652, true);
+                        break;
+                    case 50836: //Petrifying Grip, becomes stoned
+                        if (GetStackAmount() >= 5 && !target->HasAura(50812))
+                            target->CastSpell(target, 50812, true);
+                        break;
+                    case 60970: // Heroic Fury (remove Intercept cooldown)
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->ToPlayer()->RemoveSpellCooldown(20252, true);
+                        break;
+                }
+                break;
+        }
+    }
+    // mods at aura remove
+    else
+    {
+        switch (GetSpellInfo()->SpellFamilyName)
+        {
+            case SPELLFAMILY_GENERIC:
+                switch (GetId())
+                {
+                    case 61987: // Avenging Wrath
+                        // Remove the immunity shield marker on Avenging Wrath removal if Forbearance is not present
+                        if (target->HasAura(61988) && !target->HasAura(25771))
+                            target->RemoveAura(61988);
+                        break;
+                    case 72368: // Shared Suffering
+                    case 72369:
+                        if (caster)
+                        {
+                            if (AuraEffect* aurEff = GetEffect(0))
+                            {
+                                int32 remainingDamage = aurEff->GetAmount() * (aurEff->GetTotalTicks() - aurEff->GetTickNumber());
+                                if (remainingDamage > 0)
+                                    caster->CastCustomSpell(caster, 72373, NULL, &remainingDamage, NULL, true);
+                            }
+                        }
+                        break;
+                }
+                break;
+        }
+    }
+
+    // mods at aura apply or remove
+    switch (GetSpellInfo()->SpellFamilyName)
+    {
+        default:
+            break;
     }
 }
 

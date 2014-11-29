@@ -704,9 +704,9 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
     ObjectGuid mailbox;
     uint32 mailId;
 
-    recvData >> mailId;
     recvData >> mailbox;
-
+    recvData >> mailId;
+    
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
         return;
 

@@ -60,8 +60,8 @@ void WorldSession::HandleDismissCritter(WorldPacket& recvData)
 
 void WorldSession::HandlePetAction(WorldPacket& recvData)
 {
-    ObjectGuid guid1;
-    ObjectGuid guid2;
+    ObjectGuid PetGUID;
+    ObjectGuid TargetGUID;
     uint32 data; // action
     float x, y, z;
 
@@ -73,25 +73,25 @@ void WorldSession::HandlePetAction(WorldPacket& recvData)
     recvData >> z;
     recvData >> x;
 
-    recvData >> guid1;
-    recvData >> guid2;
+    recvData >> PetGUID;
+    recvData >> TargetGUID;
 
     uint32 spellid = UNIT_ACTION_BUTTON_ACTION(data);
     uint8 flag = UNIT_ACTION_BUTTON_TYPE(data);             //delete = 0x07 CastSpell = C1
 
     // used also for charmed creature
-    Unit* pet = ObjectAccessor::GetUnit(*_player, guid1);
-    TC_LOG_INFO("network", "HandlePetAction: Pet %u - flag: %u, spellid: %u, target: %u.", uint32(GUID_LOPART(guid1)), uint32(flag), spellid, uint32(GUID_LOPART(guid2)));
+    Unit* pet = ObjectAccessor::GetUnit(*_player, PetGUID);
+    TC_LOG_INFO("network", "HandlePetAction: Pet %u - flag: %u, spellid: %u, target: %u.", uint32(GUID_LOPART(PetGUID)), uint32(flag), spellid, uint32(GUID_LOPART(TargetGUID)));
 
     if (!pet)
     {
-        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) doesn't exist for player %s (GUID: %u)", uint32(GUID_LOPART(guid1)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
+        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) doesn't exist for player %s (GUID: %u)", uint32(GUID_LOPART(PetGUID)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
         return;
     }
 
     if (pet != GetPlayer()->GetFirstControlled())
     {
-        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) does not belong to player %s (GUID: %u)", uint32(GUID_LOPART(guid1)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
+        TC_LOG_ERROR("network", "HandlePetAction: Pet (GUID: %u) does not belong to player %s (GUID: %u)", uint32(GUID_LOPART(PetGUID)), GetPlayer()->GetName().c_str(), GUID_LOPART(GetPlayer()->GetGUID()));
         return;
     }
 
@@ -109,7 +109,7 @@ void WorldSession::HandlePetAction(WorldPacket& recvData)
         return;
 
     if (GetPlayer()->m_Controlled.size() == 1)
-        HandlePetActionHelper(pet, guid1, spellid, flag, guid2, x, y, z);
+        HandlePetActionHelper(pet, PetGUID, spellid, flag, TargetGUID, x, y, z);
     else
     {
         //If a pet is dismissed, m_Controlled will change
@@ -119,7 +119,7 @@ void WorldSession::HandlePetAction(WorldPacket& recvData)
                 controlled.push_back(itr);
 
         for (auto itr : controlled)
-            HandlePetActionHelper(itr, guid1, spellid, flag, guid2, x, y, z);
+            HandlePetActionHelper(itr, PetGUID, spellid, flag, TargetGUID, x, y, z);
     }
 }
 
@@ -152,13 +152,13 @@ void WorldSession::HandlePetStopAttack(WorldPacket &recvData)
     pet->AttackStop();
 }
 
-void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid, uint16 flag, uint64 guid2, float x, float y, float z)
+void WorldSession::HandlePetActionHelper(Unit* pet, ObjectGuid PetGUID, uint32 spellid, uint16 flag, ObjectGuid TargetGUID, float x, float y, float z)
 {
     CharmInfo* charmInfo = pet->GetCharmInfo();
     if (!charmInfo)
     {
         TC_LOG_ERROR("network", "WorldSession::HandlePetAction(petGuid: " UI64FMTD ", tagGuid: " UI64FMTD ", spellId: %u, flag: %u): object (entry: %u TypeId: %u) is considered pet-like but doesn't have a charminfo!",
-            guid1, guid2, spellid, flag, pet->GetGUIDLow(), pet->GetTypeId());
+            PetGUID, TargetGUID, spellid, flag, pet->GetGUIDLow(), pet->GetTypeId());
         return;
     }
 
@@ -203,7 +203,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     }
 
                     // only place where pet can be player
-                    Unit* TargetUnit = ObjectAccessor::GetUnit(*_player, guid2);
+                    Unit* TargetUnit = ObjectAccessor::GetUnit(*_player, TargetGUID);
                     if (!TargetUnit)
                         return;
 
@@ -234,7 +234,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                             else
                             {
                                 // 90% chance for pet and 100% chance for charmed creature
-                                pet->SendPetAIReaction(guid1);
+                                pet->SendPetAIReaction(PetGUID);
                             }
                         } else                                // charmed player
                         {
@@ -248,7 +248,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                             charmInfo->SetIsReturning(false);
 
                             pet->Attack(TargetUnit, true);
-                            pet->SendPetAIReaction(guid1);
+                            pet->SendPetAIReaction(PetGUID);
                         }
                     }
                     break;
@@ -307,8 +307,8 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
         {
             Unit* unit_target = NULL;
 
-            if (guid2)
-                unit_target = ObjectAccessor::GetUnit(*_player, guid2);
+            if (TargetGUID)
+                unit_target = ObjectAccessor::GetUnit(*_player, TargetGUID);
 
             // do not cast unknown spells
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellid);
@@ -376,7 +376,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     pet->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
                 else
                 {
-                    pet->SendPetAIReaction(guid1);
+                    pet->SendPetAIReaction(PetGUID);
                 }
 
                 if (unit_target && !GetPlayer()->IsFriendlyTo(unit_target) && !pet->isPossessed() && !pet->IsVehicle())

@@ -52,7 +52,7 @@ enum StableResultCode
 
 void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket& recvData)
 {
-    uint64 guid;
+    ObjectGuid guid;
     recvData >> guid;
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TABARDDESIGNER);
@@ -69,10 +69,12 @@ void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket& recvData)
     SendTabardVendorActivate(guid);
 }
 
-void WorldSession::SendTabardVendorActivate(uint64 guid)
+void WorldSession::SendTabardVendorActivate(ObjectGuid guid)
 {
-    WorldPacket data(MSG_TABARDVENDOR_ACTIVATE, 8);
+    WorldPacket data(SMSG_TABARDVENDOR_ACTIVATE, 18);
+
     data << guid;
+
     SendPacket(&data);
 }
 
@@ -341,7 +343,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)
         if (bg)
         {
             bg->AddPlayerToResurrectQueue(unit->GetGUID(), _player->GetGUID());
-            sBattlegroundMgr->SendAreaSpiritHealerQueryOpcode(_player, bg, unit->GetGUID());
+            sBattlegroundMgr->SendAreaSpiritHealerQueryOpcode(_player, bg, unit->GetGUID128());
             return;
         }
     }
@@ -400,7 +402,7 @@ void WorldSession::HandleSpiritHealerActivateOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_SPIRIT_HEALER_ACTIVATE");
 
-    uint64 guid;
+    ObjectGuid guid;
 
     recvData >> guid;
 

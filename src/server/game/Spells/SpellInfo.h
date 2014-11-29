@@ -240,7 +240,7 @@ public:
     int32     DieSides;
     float     RealPointsPerLevel;
     int32     BasePoints;
-    float     PointsPerComboPoint;
+    float     PointsPerResource;
     float     ValueMultiplier;
     float     DamageMultiplier;
     float     BonusMultiplier;

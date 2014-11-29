@@ -30,7 +30,7 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket &recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_DISMISS_CONTROLLED_VEHICLE");
 
-    uint64 vehicleGUID = _player->GetCharmGUID();
+    ObjectGuid vehicleGUID = _player->GetCharmGUID();
 
     if (!vehicleGUID)                                       // something wrong here...
     {
@@ -76,21 +76,59 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
             break;
         case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
         {
-            static MovementStatusElements const accessoryGuid[] =
+            static MovementStatusElements const MoveChangeVehicleSeats[] =
             {
                 MSEGuid128,
+                MSETimestamp,
+                MSEPositionX,
+                MSEPositionY,
+                MSEPositionZ,
+                MSEOrientation,
+                MSEPitch,
+                MSESplineElevation,
+                MSEForcesCount,
+                MSECounter,
+                MSEForces,
+                MSEMovementFlags,
+                MSEMovementFlags2,
+                MSEHasTransportData,
+                MSEHasFallData,
+                MSEHasSpline,
+                MSEZeroBit,
+                MSEOneBit,
+                MSETransportGuid128,
+                MSETransportPositionX,
+                MSETransportPositionY,
+                MSETransportPositionZ,
+                MSETransportOrientation,
+                MSETransportSeat,
+                MSETransportTime,
+                MSEHasTransportPrevTime,
+                MSEHasTransportVehicleId,
+                MSETransportPrevTime,
+                MSETransportVehicleId,
+                MSEFallTime,
+                MSEFallVerticalSpeed,
+                MSEHasFallDirection,
+                MSEFallCosAngle,
+                MSEFallSinAngle,
+                MSEFallHorizontalSpeed,
+                // veh
+                MSETransportGuid128,
+                MSEExtraInt8,
                 MSEEnd
             };
 
-            Movement::ExtraMovementStatusElement extra(accessoryGuid);
+            Movement::ExtraMovementStatusElement extra(MoveChangeVehicleSeats);
             MovementInfo movementInfo;
+
             GetPlayer()->ReadMovementInfo(recvData, &movementInfo, &extra);
             vehicle_base->m_movementInfo = movementInfo;
 
-            uint64 accessory = extra.Data.guid;
-            int8 seatId = extra.Data.byteData;
+            ObjectGuid accessory = extra.Data.guid;
+            uint8 seatId = extra.Data.byteData;
 
-            if (vehicle_base->GetGUID() != movementInfo.guid)
+            if (vehicle_base->GetGUID128() != movementInfo.guid)
                 return;
 
             if (!accessory)
@@ -105,13 +143,13 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
         }
         case CMSG_REQUEST_VEHICLE_SWITCH_SEAT:
         {
-            uint64 guid;        // current vehicle guid
-            recvData.readPackGUID(guid);
+            ObjectGuid guid;
+            uint8 seatId;
 
-            int8 seatId;
+            recvData << guid;
             recvData >> seatId;
 
-            if (vehicle_base->GetGUID() == guid)
+            if (vehicle_base->GetGUID128() == guid)
                 GetPlayer()->ChangeSeat(seatId);
             else if (Unit* vehUnit = Unit::GetUnit(*GetPlayer(), guid))
                 if (Vehicle* vehicle = vehUnit->GetVehicleKit())
@@ -126,8 +164,8 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
 
 void WorldSession::HandleEnterPlayerVehicle(WorldPacket& data)
 {
-    // Read guid
-    uint64 guid;
+    ObjectGuid guid;
+
     data >> guid;
 
     if (Player* player = ObjectAccessor::FindPlayer(guid))

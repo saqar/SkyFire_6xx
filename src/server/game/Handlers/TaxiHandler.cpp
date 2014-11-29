@@ -178,10 +178,11 @@ void WorldSession::HandleActivateTaxiExpressOpcode (WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_ACTIVATETAXIEXPRESS");
 
-    uint64 guid;
+    ObjectGuid guid;
     uint32 node_count;
 
-    recvData >> guid >> node_count;
+    recvData >> guid;
+    recvData >> node_count;
 
     Creature* npc = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_FLIGHTMASTER);
     if (!npc)
@@ -305,10 +306,8 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recvData)
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
-    ObjectGuid guid(_player->GetGUID());
+    WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
 
-    WorldPacket data(SMSG_ACTIVATETAXIREPLY, 8);
-    data << guid;
     data << uint32(reply);
 
     SendPacket(&data);

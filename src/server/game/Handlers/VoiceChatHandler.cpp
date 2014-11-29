@@ -26,9 +26,10 @@
 void WorldSession::HandleVoiceSessionEnableOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: CMSG_VOICE_SESSION_ENABLE");
-    // uint8 isVoiceEnabled, uint8 isMicrophoneEnabled
-    recvData.read_skip<uint8>();
-    recvData.read_skip<uint8>();
+    uint8 isVoiceEnabled, isMicrophoneEnabled;
+
+    isVoiceEnabled = recvData.ReadBit();
+    isMicrophoneEnabled = recvData.ReadBit();
 }
 
 void WorldSession::HandleChannelVoiceOnOpcode(WorldPacket& recvData)

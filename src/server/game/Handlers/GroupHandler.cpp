@@ -54,8 +54,8 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
     data.WriteBits(member.size(), 9);
     data.WriteBits(operation, 4);
     data.WriteBits(res, 6);
-    data << uint32(val);                                // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
-    data << uint16(0); // Guid
+    data << val;                                // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
+    data << ObjectGuid(0); // ResultGUID
     data.WriteString(member);
 
     SendPacket(&data);
@@ -230,13 +230,17 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
 void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_GROUP_INVITE_RESPONSE");
+   
+    uint8 partyIndex;
+    uint32 rolesDesired;
+    bool hasRolesDesired, accept;
 
-    recvData.read_skip<uint8>();
-    bool accept = recvData.ReadBit();
-    recvData.rfinish();
+    recvData >> partyIndex; 
+    accept = recvData.ReadBit();
+    hasRolesDesired = recvData.ReadBit();
 
-    /*if (unknown)
-        recvData.read_skip<uint32>();*/
+    if (hasRolesDesired)
+        recvData >> rolesDesired;
 
     Group* group = GetPlayer()->GetGroupInvite();
 
@@ -504,11 +508,13 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recvData)
         return;
 
     float x, y;
+    uint8 PartyIndex;
+
     recvData >> y;
     recvData >> x;
-    recvData.read_skip<uint8>();
+    recvData >> PartyIndex;
 
-    //TC_LOG_DEBUG("misc", "Received opcode MSG_MINIMAP_PING X: %f, Y: %f", x, y);
+    TC_LOG_DEBUG("misc", "Received opcode MSG_MINIMAP_PING X: %f, Y: %f, PartyIndex: %s", x, y, PartyIndex);
 
     /** error handling **/
     /********************/
@@ -564,29 +570,31 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received MSG_RAID_TARGET_UPDATE");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_RAID_TARGET_UPDATE");
 
     Group* group = GetPlayer()->GetGroup();
     if (!group)
         return;
 
-    uint8 x;
-    recvData >> x;
+    ObjectGuid targetGuid;
 
-    /** error handling **/
-    /********************/
+    uint8 partyIndex, symbol;
+
+    recvData >> partyIndex;
+    recvData >> targetGuid;
+    recvData >> symbol;
 
     // everything's fine, do it
-    if (x == 0xFF)                                           // target icon request
+    if (symbol == 0xFF)                                           // target icon request
         group->SendTargetIconList(this);
     else                                                    // target icon update
     {
-        if (!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
+        if (!group->IsLeader(GetPlayer()->GetGUID128()) && !group->IsAssistant(GetPlayer()->GetGUID128()))
             return;
 
-        uint64 guid;
-        recvData >> guid;
-        group->SetTargetIcon(x, _player->GetGUID(), guid);
+        recvData >> targetGuid;
+
+        group->SetTargetIcon(symbol, partyIndex, _player->GetGUID128(), targetGuid);
     }
 }
 
@@ -730,7 +738,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& /*recvData*/)
     if (!group)
         return;
 
-    ObjectGuid playerGuid = GetPlayer()->GetGUID();
+    ObjectGuid playerGuid = GetPlayer()->GetGUID128();
 
     /** error handling **/
     if (!group->IsLeader(playerGuid) && !group->IsAssistant(playerGuid))
@@ -922,7 +930,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                 *data << uint32(aurApp->GetBase()->GetId());
                 *data << uint16(aurApp->GetFlags());
 
-                if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+                if (aurApp->GetFlags() & AFLAG_SCALABLE)
                 {
                     for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                     {
@@ -1024,7 +1032,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                     *data << uint32(aurApp->GetBase()->GetId());
                     *data << uint16(aurApp->GetFlags());
 
-                    if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+                    if (aurApp->GetFlags() & AFLAG_SCALABLE)
                     {
                         for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                         {
@@ -1165,7 +1173,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
             data << uint32(aurApp->GetBase()->GetId());
             data << uint16(aurApp->GetFlags());
 
-            if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+            if (aurApp->GetFlags() & AFLAG_SCALABLE)
             {
                 for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 {
@@ -1218,7 +1226,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
                 data << uint32(aurApp->GetBase()->GetId());
                 data << uint16(aurApp->GetFlags());
 
-                if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+                if (aurApp->GetFlags() & AFLAG_SCALABLE)
                 {
                     for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                     {
@@ -1258,16 +1266,17 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_OPT_OUT_OF_LOOT");
 
-    bool passOnLoot;
-    recvData >> passOnLoot; // 1 always pass, 0 do not pass
+    bool OptOutOfLoot; // 1 always pass, 0 do not pass
+
+    recvData >> OptOutOfLoot;
 
     // ignore if player not loaded
     if (!GetPlayer())                                        // needed because STATUS_AUTHED
     {
-        if (passOnLoot)
+        if (OptOutOfLoot)
             TC_LOG_ERROR("network", "CMSG_OPT_OUT_OF_LOOT value<>0 for not-loaded character!");
         return;
     }
 
-    GetPlayer()->SetPassOnGroupLoot(passOnLoot);
+    GetPlayer()->SetPassOnGroupLoot(OptOutOfLoot);
 }

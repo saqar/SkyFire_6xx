@@ -84,11 +84,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CMSG_MESSAGECHAT_DND:
             type = CHAT_MSG_DND;
             break;
-            /*
-                case CMSG_MESSAGECHAT_BATTLEGROUND:
-                type = CHAT_MSG_BATTLEGROUND;
-                break;
-                */
         default:
             TC_LOG_ERROR("network", "HandleMessagechatOpcode : Unknown chat opcode (%u)", recvData.GetOpcode());
             recvData.hexlike();
@@ -148,7 +143,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 case CHAT_MSG_PARTY:
                 case CHAT_MSG_RAID:
                 case CHAT_MSG_GUILD:
-                case CHAT_MSG_BATTLEGROUND:
                 case CHAT_MSG_WHISPER:
                     if (sWorld->getBoolConfig(CONFIG_CHATLOG_ADDON))
                     {
@@ -244,7 +238,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CHAT_MSG_OFFICER:
         case CHAT_MSG_RAID:
         case CHAT_MSG_RAID_WARNING:
-        case CHAT_MSG_BATTLEGROUND:
             textLength = recvData.ReadBits(8);
             msg = recvData.ReadString(textLength);
             break;
@@ -433,23 +426,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_WARNING, Language(lang), _player, NULL, msg);
             group->BroadcastPacket(&data, false);
         } break;
-        case CHAT_MSG_BATTLEGROUND:
-        case CHAT_MSG_BATTLEGROUND_LEADER:
-        {
-            // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
-            Group* group = GetPlayer()->GetGroup();
-            if (!group || !group->isBGGroup())
-                return;
-
-            if (group->IsLeader(GetPlayer()->GetGUID()))
-                type = CHAT_MSG_BATTLEGROUND_LEADER;
-
-            sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, group);
-
-            WorldPacket data;
-            ChatHandler::BuildChatPacket(data, (ChatMsg)type, Language(lang), _player, NULL, msg);
-            group->BroadcastPacket(&data, false);
-        } break;
         case CHAT_MSG_CHANNEL:
         {
             if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHAT_CHANNEL_REQ))
@@ -528,9 +504,6 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
 
     switch (recvData.GetOpcode())
     {
-        case CMSG_MESSAGECHAT_ADDON_BATTLEGROUND:
-            type = CHAT_MSG_BATTLEGROUND;
-            break;
         case CMSG_MESSAGECHAT_ADDON_GUILD:
             type = CHAT_MSG_GUILD;
             break;
@@ -579,7 +552,6 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
             break;
         }
         case CHAT_MSG_GUILD:
-        case CHAT_MSG_BATTLEGROUND:
         {
             uint32 msgLen = recvData.ReadBits(9);
             uint32 prefixLen = recvData.ReadBits(5);
@@ -610,17 +582,6 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
 
     switch (type)
     {
-        case CHAT_MSG_BATTLEGROUND:
-        {
-            Group* group = sender->GetGroup();
-            if (!group || !group->isBGGroup())
-                return;
-
-            WorldPacket data;
-            ChatHandler::BuildChatPacket(data, type, LANG_ADDON, sender, NULL, message, 0U, "", DEFAULT_LOCALE, prefix);
-            group->BroadcastAddonMessagePacket(&data, prefix, false);
-            break;
-        }
         case CHAT_MSG_GUILD:
         case CHAT_MSG_OFFICER:
         {
@@ -683,13 +644,15 @@ public:
     {
         ObjectGuid Guid = i_target ? i_target->GetGUID() : 0;
         ObjectGuid TargetGuid = i_player.GetGUID();
+        ObjectGuid AccountGuid;
 
-        data.Initialize(SMSG_TEXT_EMOTE, 2 * (8 + 1) + 4 + 4);
+        data.Initialize(SMSG_TEXT_EMOTE, 3 * 18 + 4 + 4);
 
         data << Guid;
-        data << TargetGuid;
-        data << uint32(i_emote_num);
+        data << AccountGuid;
         data << uint32(i_text_emote);
+        data << uint32(i_emote_num);
+        data << TargetGuid;
     }
 
 private:

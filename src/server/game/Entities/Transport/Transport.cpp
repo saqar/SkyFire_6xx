@@ -92,7 +92,7 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, floa
     SetDisplayId(goinfo->displayId);
     SetGoState(GO_STATE_READY);
     _pendingStop = goinfo->moTransport.canBeStopped != 0;
-    SetGoType(GAMEOBJECT_TYPE_MO_TRANSPORT);
+    SetGoType(GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT);
     SetGoAnimProgress(animprogress);
     SetName(goinfo->name);
     UpdateRotationFields(0.0f, 1.0f);

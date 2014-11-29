@@ -1293,7 +1293,7 @@ public:
                 break;
             case GOSSIP_OPTION_UNLEARNTALENTS:
                 player->CLOSE_GOSSIP_MENU();
-                player->SendTalentWipeConfirm(creature->GetGUID());
+                player->SendTalentWipeConfirm(creature->GetGUID128(), 0);
                 break;
             case GOSSIP_OPTION_LEARNDUALSPEC:
                 if (player->GetSpecsCount() == 1 && !(player->getLevel() < sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL)))

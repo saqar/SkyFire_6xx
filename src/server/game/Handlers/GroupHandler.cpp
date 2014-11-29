@@ -566,29 +566,31 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: Received MSG_RAID_TARGET_UPDATE");
+    TC_LOG_DEBUG("network", "WORLD: Received CMSG_RAID_TARGET_UPDATE");
 
     Group* group = GetPlayer()->GetGroup();
     if (!group)
         return;
 
-    uint8 x;
-    recvData >> x;
+    ObjectGuid targetGuid;
 
-    /** error handling **/
-    /********************/
+    uint8 partyIndex, symbol;
+
+    recvData >> partyIndex;
+    recvData >> targetGuid;
+    recvData >> symbol;
 
     // everything's fine, do it
-    if (x == 0xFF)                                           // target icon request
+    if (symbol == 0xFF)                                           // target icon request
         group->SendTargetIconList(this);
     else                                                    // target icon update
     {
-        if (!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
+        if (!group->IsLeader(GetPlayer()->GetGUID128()) && !group->IsAssistant(GetPlayer()->GetGUID128()))
             return;
 
-        uint64 guid;
-        recvData >> guid;
-        group->SetTargetIcon(x, _player->GetGUID(), guid);
+        recvData >> targetGuid;
+
+        group->SetTargetIcon(symbol, partyIndex, _player->GetGUID128(), targetGuid);
     }
 }
 

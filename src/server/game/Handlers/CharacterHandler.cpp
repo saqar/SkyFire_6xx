@@ -1210,7 +1210,7 @@ void WorldSession::HandleTutorialFlag(WorldPacket& recvData)
     Action = recvData.ReadBits(2);
     recvData >> TutorialBit;
 
-    switch (TutorialBit)
+    switch (Action)
     {
         case TUTORIAL_ACTION_UPDATE:
         {

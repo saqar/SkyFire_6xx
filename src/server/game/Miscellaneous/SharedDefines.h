@@ -619,7 +619,7 @@ enum SpellAttr8
     SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER        = 0x00000200, //  9 Periodic auras with this flag keep old periodic timer when refreshing at close to one tick remaining (kind of anti DoT clipping)
     SPELL_ATTR8_NAME_CHANGED_DURING_TRANSFORM    = 0x00000400, // 10 according to wowhead comments, name changes, title remains
     SPELL_ATTR8_UNK11                            = 0x00000800, // 11
-    SPELL_ATTR8_AURA_SEND_AMOUNT                 = 0x00001000, // 12 Aura must have flag AFLAG_ANY_EFFECT_AMOUNT_SENT to send amount
+    SPELL_ATTR8_AURA_SEND_AMOUNT                 = 0x00001000, // 12 Aura must have flag AFLAG_SCALABLE to send amount
     SPELL_ATTR8_UNK13                            = 0x00002000, // 13
     SPELL_ATTR8_UNK14                            = 0x00004000, // 14
     SPELL_ATTR8_WATER_MOUNT                      = 0x00008000, // 15 only one River Boat used in Thousand Needles
@@ -1651,37 +1651,28 @@ enum GhostVisibilityType
 
 // Spell aura states
 enum AuraStateType
-{   // (C) used in caster aura state     (T) used in target aura state
-    // (c) used in caster aura state-not (t) used in target aura state-not
-    AURA_STATE_NONE                         = 0,            // C   |
-    AURA_STATE_DEFENSE                      = 1,            // C   |
-    AURA_STATE_HEALTHLESS_20_PERCENT        = 2,            // CcT |
-    AURA_STATE_BERSERKING                   = 3,            // C T |
-    AURA_STATE_FROZEN                       = 4,            //  c t| frozen target
-    AURA_STATE_JUDGEMENT                    = 5,            // C   |
-    //AURA_STATE_UNKNOWN6                   = 6,            //     | not used
-    AURA_STATE_HUNTER_PARRY                 = 7,            // C   |
-    //AURA_STATE_UNKNOWN7                   = 7,            //  c  | creature cheap shot / focused bursts spells
-    //AURA_STATE_UNKNOWN8                   = 8,            //    t| test spells
-    //AURA_STATE_UNKNOWN9                   = 9,            //     |
-    AURA_STATE_WARRIOR_VICTORY_RUSH         = 10,           // C   | warrior victory rush
-    //AURA_STATE_UNKNOWN11                  = 11,           // C  t| 60348 - Maelstrom Ready!, test spells
-    AURA_STATE_FAERIE_FIRE                  = 12,           //  c t|
-    AURA_STATE_HEALTHLESS_35_PERCENT        = 13,           // C T |
-    AURA_STATE_CONFLAGRATE                  = 14,           //   T |
-    AURA_STATE_SWIFTMEND                    = 15,           //   T |
-    AURA_STATE_DEADLY_POISON                = 16,           //   T |
-    AURA_STATE_ENRAGE                       = 17,           // C   |
-    AURA_STATE_BLEEDING                     = 18,           //    T|
-    AURA_STATE_UNKNOWN19                    = 19,           //     |
-    //AURA_STATE_UNKNOWN20                  = 20,           //  c  | only (45317 Suicide)
-    //AURA_STATE_UNKNOWN21                  = 21,           //     | not used
-    AURA_STATE_UNKNOWN22                    = 22,           // C  t| varius spells (63884, 50240)
-    AURA_STATE_HEALTH_ABOVE_75_PERCENT      = 23            // C   |
+{
+    AURA_STATE_NONE                         = 0,
+    AURA_STATE_DEFENSE                      = 1,
+    AURA_STATE_HEALTHLESS_20_PERCENT        = 2,
+    AURA_STATE_FROZEN                       = 4,
+    AURA_STATE_JUDGEMENT                    = 5,
+    AURA_STATE_HUNTER_PARRY                 = 7,
+    AURA_STATE_UNKNOWN8                     = 8,
+    AURA_STATE_WARRIOR_VICTORY_RUSH         = 10,
+    AURA_STATE_UNKNOWN11                    = 11,
+    AURA_STATE_FAERIE_FIRE                  = 12,
+    AURA_STATE_HEALTHLESS_35_PERCENT        = 13,
+    AURA_STATE_CONFLAGRATE                  = 14,
+    AURA_STATE_SWIFTMEND                    = 15,
+    AURA_STATE_ENRAGE                       = 17,
+    AURA_STATE_BLEEDING                     = 18,
+    AURA_STATE_UNKNOWN20                    = 20,
+    AURA_STATE_UNKNOWN22                    = 22,
+    AURA_STATE_HEALTH_ABOVE_75_PERCENT      = 23
 };
 
-#define PER_CASTER_AURA_STATE_MASK (\
-    (1<<(AURA_STATE_CONFLAGRATE-1))|(1<<(AURA_STATE_DEADLY_POISON-1)))
+#define PER_CASTER_AURA_STATE_MASK ((1 << (AURA_STATE_CONFLAGRATE - 1)))
 
 // Spell mechanics
 enum Mechanics
@@ -1780,11 +1771,16 @@ enum Targets
     TARGET_UNIT_SRC_AREA_ENTRY         = 7,
     TARGET_UNIT_DEST_AREA_ENTRY        = 8,
     TARGET_DEST_HOME                   = 9,
+    TARGET_UNK_10                      = 10,
     TARGET_UNIT_SRC_AREA_UNK_11        = 11,
+    TARGET_UNK_12                      = 12,
+    TARGET_UNK_13                      = 13,
+    TARGET_UNK_14                      = 14,
     TARGET_UNIT_SRC_AREA_ENEMY         = 15,
     TARGET_UNIT_DEST_AREA_ENEMY        = 16,
     TARGET_DEST_DB                     = 17,
     TARGET_DEST_CASTER                 = 18,
+    TARGET_UNK_19                      = 19,
     TARGET_UNIT_CASTER_AREA_PARTY      = 20,
     TARGET_UNIT_TARGET_ALLY            = 21,
     TARGET_SRC_CASTER                  = 22,
@@ -1892,6 +1888,26 @@ enum Targets
     TARGET_UNK_125                     = 125,
     TARGET_UNK_126                     = 126,
     TARGET_UNK_127                     = 127,
+    TARGET_UNK_128                     = 128,
+    TARGET_UNK_129                     = 129,
+    TARGET_UNK_130                     = 130,
+    TARGET_UNK_131                     = 131,
+    TARGET_UNK_132                     = 132,
+    TARGET_UNK_133                     = 133,
+    TARGET_UNK_134                     = 134,
+    TARGET_UNK_135                     = 135,
+    TARGET_UNK_136                     = 136,
+    TARGET_UNK_137                     = 137,
+    TARGET_UNK_138                     = 138,
+    TARGET_UNK_139                     = 139,
+    TARGET_UNK_140                     = 140,
+    TARGET_UNK_141                     = 141,
+    TARGET_UNK_142                     = 142,
+    TARGET_UNK_143                     = 143,
+    TARGET_UNK_144                     = 144,
+    TARGET_UNK_145                     = 145,
+    TARGET_UNK_146                     = 146,
+    TARGET_UNK_147                     = 147,
     TOTAL_SPELL_TARGETS
 };
 

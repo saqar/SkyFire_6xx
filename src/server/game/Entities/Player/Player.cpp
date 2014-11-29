@@ -140,22 +140,6 @@ enum CharacterCustomizeFlags
 
 static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
 
-uint32 const MasterySpells[MAX_CLASSES] =
-{
-        0,
-    87500,  // Warrior
-    87494,  // Paladin
-    87493,  // Hunter
-    87496,  // Rogue
-    87495,  // Priest
-    87492,  // Death Knight
-    87497,  // Shaman
-    86467,  // Mage
-    87498,  // Warlock
-        0,
-    87491,  // Druid
-};
-
 // == PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -23538,7 +23522,7 @@ void Player::ApplyEquipCooldown(Item* pItem)
 
         WorldPacket data(SMSG_ITEM_COOLDOWN, 20);
 
-        data << pItem->GetGUID();
+        data << ObjectGuid(pItem->GetGUID128());
         data << uint32(spellData.SpellId);
 
         GetSession()->SendPacket(&data);
@@ -23781,7 +23765,7 @@ void Player::SendAurasForTarget(Unit* target)
 
         uint8 effCount = 0;
 
-        if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+        if (flags & AFLAG_SCALABLE)
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 if (auraApp->HasEffect(i))
                     effCount++;
@@ -23789,7 +23773,7 @@ void Player::SendAurasForTarget(Unit* target)
         data << uint32(effCount);
         data << uint32(0);
 
-        if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+        if (flags & AFLAG_SCALABLE)
         {
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
@@ -23803,11 +23787,11 @@ void Player::SendAurasForTarget(Unit* target)
             }
         }
 
-        data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
+        data.WriteBit(!(flags & AFLAG_NOCASTER));         // HasCasterGuid
         data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
         data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
 
-        if (!(flags & AFLAG_CASTER))
+        if (!(flags & AFLAG_NOCASTER))
         {
             ObjectGuid casterGuid = aura->GetCasterGUID();
             data << casterGuid;
@@ -24553,7 +24537,7 @@ void Player::ResurectUsingRequestData()
 
 void Player::SetClientControl(Unit* target, uint8 allowMove)
 {
-    ObjectGuid guid = target->GetGUID();
+    ObjectGuid guid = target->GetGUID128();
 
     WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 1 + 16);
     
@@ -24572,7 +24556,7 @@ void Player::SetMover(Unit* target)
     m_mover = target;
     m_mover->m_movedPlayer = this;
 
-    ObjectGuid guid = target->GetGUID();
+    ObjectGuid guid = target->GetGUID128();
 
     WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 16);
 
@@ -25123,7 +25107,7 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
         SetFlag(PLAYER_FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
     }
 
-    WorldPacket data(SMSG_TITLE_EARNED, 4 + 4);
+    WorldPacket data(SMSG_TITLE_EARNED, 4);
     data << uint32(title->bit_index);
     GetSession()->SendPacket(&data);
 }
@@ -26332,7 +26316,6 @@ void Player::UpdateSpecCount(uint8 count)
 
 void Player::ActivateSpec(uint8 spec)
 {
-
     if (GetActiveSpec() == spec)
         return;
 
@@ -26574,7 +26557,7 @@ bool Player::AddItem(uint32 itemId, uint32 count)
 
 void Player::SendItemRefundResult(Item* item, ItemExtendedCostEntry const* iece, uint8 error)
 {
-    ObjectGuid guid = item->GetGUID();
+    ObjectGuid guid = item->GetGUID128();
 
     WorldPacket data(SMSG_ITEM_REFUND_RESULT, 18 + 2 + 1 + error ? (4 * 2 * MAX_ITEM_EXT_COST_CURRENCIES + 4 * 2 * MAX_ITEM_EXT_COST_ITEMS) : 0);
 
@@ -27084,11 +27067,6 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     //ObjectAccessor::UpdateObjectVisibility(pet);
 
     return pet;
-}
-
-bool Player::CanUseMastery() const
-{
-    return HasSpell(MasterySpells[getClass()]);
 }
 
 void Player::ReadyCheckComplete()

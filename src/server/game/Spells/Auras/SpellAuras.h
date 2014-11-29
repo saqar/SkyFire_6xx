@@ -72,7 +72,7 @@ class AuraApplication
         uint32 GetEffectMask() const { return _effMask;}
         bool HasEffect(uint32 effect) const { ASSERT(effect < MAX_SPELL_EFFECTS);  return _effMask & (1 << effect); }
         bool IsPositive() const { return _flags & AFLAG_POSITIVE; }
-        bool IsSelfcasted() const { return _flags & AFLAG_CASTER; }
+        bool IsSelfcasted() const { return _flags & AFLAG_NOCASTER; }
         uint32 GetEffectsToApply() const { return _effectsToApply; }
 
         void SetRemoveMode(AuraRemoveMode mode) { _removeMode = mode; }

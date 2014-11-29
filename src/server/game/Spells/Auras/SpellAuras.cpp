@@ -116,7 +116,7 @@ void AuraApplication::_Remove()
 void AuraApplication::_InitFlags(Unit* caster, uint32 effMask)
 {
     // mark as selfcasted if needed
-    _flags |= (GetBase()->GetCasterGUID() == GetTarget()->GetGUID()) ? AFLAG_CASTER : AFLAG_NONE;
+    _flags |= (GetBase()->GetCasterGUID() == GetTarget()->GetGUID()) ? AFLAG_NOCASTER : AFLAG_NONE;
 
     // aura is casted by self or an enemy
     // one negative effect and we know aura is negative
@@ -150,7 +150,7 @@ void AuraApplication::_InitFlags(Unit* caster, uint32 effMask)
     }
 
     if (GetBase()->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
-        _flags |= AFLAG_ANY_EFFECT_AMOUNT_SENT;
+        _flags |= AFLAG_SCALABLE;
 }
 
 void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
@@ -207,7 +207,7 @@ void AuraApplication::ClientUpdate(bool remove)
 
         uint8 effCount = 0;
 
-        if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+        if (flags & AFLAG_SCALABLE)
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 if (HasEffect(i))
                     effCount++;
@@ -215,7 +215,7 @@ void AuraApplication::ClientUpdate(bool remove)
         data << uint32(effCount);
         data << uint32(0);
 
-        if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+        if (flags & AFLAG_SCALABLE)
         {
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
@@ -229,11 +229,11 @@ void AuraApplication::ClientUpdate(bool remove)
             }
         }
 
-        data.WriteBit(!(flags & AFLAG_CASTER));         // HasCasterGuid
+        data.WriteBit(!(flags & AFLAG_NOCASTER));         // HasCasterGuid
         data.WriteBit(flags & AFLAG_DURATION);          // HasDuration
         data.WriteBit(flags & AFLAG_DURATION);          // HasMaxDuration
 
-        if (!(flags & AFLAG_CASTER))
+        if (!(flags & AFLAG_NOCASTER))
         {
             ObjectGuid casterGuid = aura->GetCasterGUID();
             data << casterGuid;

@@ -121,8 +121,6 @@ struct PlayerTalent
     uint8 spec             : 8;
 };
 
-extern uint32 const MasterySpells[MAX_CLASSES];
-
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
@@ -1915,7 +1913,6 @@ class Player : public Unit, public GridObject<Player>
         void UpdateLeech();
         void UpdateVesatillity();
         void UpdateAvoidance();
-        bool CanUseMastery() const;
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
 

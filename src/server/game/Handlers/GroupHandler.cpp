@@ -54,8 +54,8 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
     data.WriteBits(member.size(), 9);
     data.WriteBits(operation, 4);
     data.WriteBits(res, 6);
-    data << uint32(val);                                // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
-    data << uint16(0); // Guid
+    data << val;                                // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
+    data << ObjectGuid(0); // ResultGUID
     data.WriteString(member);
 
     SendPacket(&data);
@@ -230,13 +230,17 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
 void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_GROUP_INVITE_RESPONSE");
+   
+    uint8 partyIndex;
+    uint32 rolesDesired;
+    bool hasRolesDesired, accept;
 
-    recvData.read_skip<uint8>();
-    bool accept = recvData.ReadBit();
-    recvData.rfinish();
+    recvData >> partyIndex; 
+    accept = recvData.ReadBit();
+    hasRolesDesired = recvData.ReadBit();
 
-    /*if (unknown)
-        recvData.read_skip<uint32>();*/
+    if (hasRolesDesired)
+        recvData >> rolesDesired;
 
     Group* group = GetPlayer()->GetGroupInvite();
 
@@ -734,7 +738,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& /*recvData*/)
     if (!group)
         return;
 
-    ObjectGuid playerGuid = GetPlayer()->GetGUID();
+    ObjectGuid playerGuid = GetPlayer()->GetGUID128();
 
     /** error handling **/
     if (!group->IsLeader(playerGuid) && !group->IsAssistant(playerGuid))
@@ -926,7 +930,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                 *data << uint32(aurApp->GetBase()->GetId());
                 *data << uint16(aurApp->GetFlags());
 
-                if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+                if (aurApp->GetFlags() & AFLAG_SCALABLE)
                 {
                     for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                     {
@@ -1028,7 +1032,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                     *data << uint32(aurApp->GetBase()->GetId());
                     *data << uint16(aurApp->GetFlags());
 
-                    if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+                    if (aurApp->GetFlags() & AFLAG_SCALABLE)
                     {
                         for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                         {
@@ -1169,7 +1173,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
             data << uint32(aurApp->GetBase()->GetId());
             data << uint16(aurApp->GetFlags());
 
-            if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+            if (aurApp->GetFlags() & AFLAG_SCALABLE)
             {
                 for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 {
@@ -1222,7 +1226,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
                 data << uint32(aurApp->GetBase()->GetId());
                 data << uint16(aurApp->GetFlags());
 
-                if (aurApp->GetFlags() & AFLAG_ANY_EFFECT_AMOUNT_SENT)
+                if (aurApp->GetFlags() & AFLAG_SCALABLE)
                 {
                     for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                     {

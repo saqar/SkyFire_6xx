@@ -89,7 +89,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             break;
         }
         // Event spells
-        case SPELLFAMILY_UNK1:
+        case SPELLFAMILY_EVENTS:
             return DIMINISHING_NONE;
         case SPELLFAMILY_MAGE:
         {
